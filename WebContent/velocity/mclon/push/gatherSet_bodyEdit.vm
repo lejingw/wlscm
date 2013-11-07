@@ -1,0 +1,434 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/GatherSetDwr.js",
+	"$StringUtil.getContextPath()/js/push/gatherSet_bodyEdit.js?t=201211271826.js"])
+#set($modelCode='08090103')
+<form id="frm" method="post">
+	<input type='hidden' id='headid' value="$!{form.head.headid}">
+	<input type='hidden' id='isLoveStyle' value="$!{form.head.isLoveStyle}">
+    <table class="title">
+    	<tr><td>推式订单</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='增行' id='btnAddRow' class='btn' onclick="addNumberRow()">
+				<input type='button' value='生成总单' id='btnCreateGatherOrder' class='btn'  onclick="createGatherOrder()"  $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='重置' class='btn' onclick="resetBill()">
+				<input type='button' value='返回列表' class='btn' onclick="backToList()">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+		<tr>
+            <td class='body1'>总单编号</td>
+			<td class='body2'>$!{form.head.billNo}</td>
+    		<td class='body1'>区域</td>
+            <td class='body2'>$!{form.head.regionName}</td>
+    		<td class='body1'>情侣款</td>
+            <td class='body2'>$!DictUtil.getValue("yesorno", $!{form.head.isLoveStyle})</td>
+			<td class='body1'>购物结束日期</td>
+			<td class='body2'>$!{form.head.purDateEnd}</td>
+		</tr>
+		<tr>
+            <td class='body1'>畅销款铺货比例(%)</td>
+			<td class='body2'><input type='text' id='saleDisRate' value="$!StringUtil.formatDouble($!{form.head.saleDisRate},3)" style="width:60px;"></td>
+            <td class='body1'>畅销款周转比例(%)</td>
+			<td class='body2'><input type='text' id='saleTurnRate' value="$!StringUtil.formatDouble($!{form.head.saleTurnRate},3)" style="width:60px;"></td>
+            <td class='body1'><input type='button' value='保存' id='btnSaveSalableRate' class='btn' onclick="updateSalableRate()"></td>
+        </tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'></th>
+                <th width='120px'>大类</th>
+        		<th width='120px'>小类</th>
+                <th width='120px'>款式大类</th>
+				<th width='120px'>分析范围</th>
+        		<th width='120px'>数量</th>
+        		<th width='60px'>状态</th>
+        		<th width='180px'>操作</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.lineList)
+			<tr>
+				<td>$velocityCounter</td>
+				<td>$!{BdCommon.getItemClassDesc($!item.itemClassId)}</td>
+				<td>$!{BdCommon.getOrnaClassDesc($!item.ornaClassId)}</td>
+                <td>$!{BdCommon.getStyleItemClassNames($!item.styleItemClassId)}</td>
+				<td>$!item.analysisName</td>
+				<td><a href="javascript:showOrderNumWin(this,$item.lineid)"><font color='blue'><div id="divLineOrderNum${item.lineid}">$!item.orderNum</div></font></a></td>
+				<td>#if('1'=="$!item.finishFlag") 配置完成#else 保存#end</td>
+				<td>
+					<input type='button' class='btn' value='配置' #if("$!{form.head.isLoveStyle}" =="1") style="display: none;" #end onclick="showItemsRateWin(this, $item.lineid, '$!{item.salableNum}', '$!{item.unsalableNum}', '$!{item.realSalableOrderNum}')">
+					<input type='button' class='btn' value='删除' #if("1" != "$!{form.head.status}") disabled #end onclick="deleteGatherSetLine($item.lineid)">
+				</td>
+			</tr>
+		#end
+        </tbody>
+    </table>
+</form>
+<div id='addItemDiv' title="添加类别" style="display:none;">
+	<form id='addItemFrm'>
+		<table class="control">
+			<tr>
+				<td>
+					<input type='button' value='保存' class='btn' onclick="saveGatherSetLine()">
+					<input type='button' value='保存并复制' onclick="saveGatherSetLine2()">
+					<input type='button' value='取消' class='btn' onclick="jQuery('#addItemDiv').dialog('close');">
+				</td>
+			</tr>
+        </table>
+		<table class='content'>
+			<tr>
+				<td class="body1">大类</td>
+				<td class="body2"><select id="itemClassId" style="width:120px;" onchange="changeItemClassId()" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+				<td class="body1">小类</td>
+				<td class="body2"><select id="ornaClassId" style="width:120px;" onchange="changeOrnaClassId()" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+			</tr>
+			<tr>
+                <td class="body1">款式大类</td>
+                <td class="body2"><select id="styleItemClassId" style="width:120px;" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+				<td class="body1">分析范围</td>
+				<td class="body2"><select id="analysisId" style="width:120px;" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+			</tr>
+			<tr>
+				<td class="body1">数量</td>
+				<td class="body2"><input type='text' id="orderNum" style="width:120px;" value="" dataType="Require" msg="不能为空"></td>
+			</tr>
+        </table>
+	</form>
+</div>
+<div id="orderNumDiv" title="修改下单数量" style="display:none;">
+	<input type='hidden' id='editLineId' value=''/>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id="btnSaveNewOrderNum" onclick="updateLineOrderNum()"/>
+				<input type='button' value='取消' class='btn' onclick="jQuery('#orderNumDiv').dialog('close');"/>
+			</td>
+		 </tr>
+	</table>
+    <table class="content">
+    	<tr>
+			<td class="body1">新下单数量</td>
+			<td class="body2"><input type='text' id='newOrderNum' value=''/></td>
+		</tr>
+    </table>
+</div>
+<div id="configDiv" title="参数设置" style="display:none;">
+	<input type='hidden' id='configLineId'/>
+	<table class='control'>
+		<tr><td><input type='button' class='btn' value='生成明细' id='btnGenerateDetail' onclick="generateDetail()"></td></tr>
+    </table>
+	<div id="tabs">
+		<ul>
+    		<li><a href="#tabs-1">畅销款比例</a></li>
+    		<li><a href="#tabs-2">非畅销款比例</a></li>
+    		<li><a href="#tabs-3">品质比例</a></li>
+    		<li><a href="#tabs-4">尺寸比例</a></li>
+    	</ul>
+		<div id="tabs-1">
+			<table class="control">
+				<tr>
+					<td>
+						<input type='button' value='增行' class='btn' id='btnAddSalableStyle' onclick="selectStyle(true)">
+                        <input type='button' value='保存' class='btn' id='btnSaveSalableStyle' onclick="saveStyle(true)">
+						<input type='button' value='查看分配明细' class='btn' onclick="viewDispatchDetail(true)">
+                        <font color='blue'>畅销款共<input type='text' readonly class='none' size='3' id='salableNumHtml'>件,
+                            实际需<input type='text' readonly class='none' size='3' id='realSalableOrderNumHtml'>件,
+                            比例合计(%)<input type='text' readonly class='none' size='3' id='realSalableStyleRateSumHtml' value="0">,
+                            数量合计<input type='text' readonly class='none' size='3' id='realSalableOrderNumSumHtml' value="0">
+                        </font>
+					</td>
+				</tr>
+            </table>
+            <table class='list'>
+            	<thead>
+        			<tr>
+                        <th width='30px'></th>
+                		<th width='120px'>款式</th>
+                		<th width='90px'>材质</th>
+                		<th width='70px'>材质颜色</th>
+                		<th width='60px'>比例(%)</th>
+                		<th width='45px'>库存</th>
+                		<th width='80px'>上月销售</th>
+                		<th width='90px'>上半年销售</th>
+                		<th width='90px'>上一年销售</th>
+                		<th width='130px'>创建时间</th>
+                		<th width='45px'>数量</th>
+						<th width='45px'></th>
+    				</tr>
+                </thead>
+    			<tbody id="tbl1">
+                </tbody>
+            </table>
+    	</div>
+    	<div id="tabs-2">
+			<table class="control">
+				<tr>
+					<td>
+						<input type='button' value='增行' class='btn' id='btnAddUnsalableStyle' onclick="selectStyle(false)">
+						<input type='button' value='保存' class='btn' id='btnSaveUnsalableStyle' onclick="saveStyle(false)">
+						<input type='button' value='查看分配明细' class='btn'  onclick="viewDispatchDetail(false)">
+                        <font color='blue'>非畅销款共<input type='text' readonly class='none' size='3' id='unsalableNumHtml'>件,
+                            比例合计(%)<input type='text' readonly class='none' size='3' id='realUnSalableStyleRateSumHtml' value="0">,
+                            数量合计<input type='text' readonly class='none' size='3' id='realUnSalableOrderNumSumHtml' value="0">
+                        </font>
+					</td>
+				</tr>
+            </table>
+            <table class='list'>
+            	<thead>
+        			<tr>
+                        <th width='30px'></th>
+                		<th width='120px'>款式</th>
+                		<th width='90px'>材质</th>
+                		<th width='70px'>材质颜色</th>
+                		<th width='60px'>比例(%)</th>
+                		<th width='45px'>库存</th>
+                		<th width='80px'>上月销售</th>
+                		<th width='90px'>上半年销售</th>
+                		<th width='90px'>上一年销售</th>
+                		<th width='130px'>创建时间</th>
+                		<th width='45px'>数量</th>
+						<th width='45px'></th>
+    				</tr>
+                </thead>
+    			<tbody id="tbl2">
+                </tbody>
+            </table>
+    	</div>
+    	<div id="tabs-3">
+			<table class="control">
+				<tr>
+					<td>
+						<input type='button' value='增行' class='btn' id='btnAddGrade' onclick="selectGrade()">
+						<input type='button' value='保存' class='btn' id='btnSaveGrade' onclick="saveGrade()">
+					</td>
+				</tr>
+            </table>
+            <table class='list'>
+            	<thead>
+        			<tr>
+                        <th width='60px'></th>
+                        <th width='120px'>色级</th>
+                        <th width='120px'>净度</th>
+                        <th width='120px'>品质</th>
+                		<th width='120px'>比例(%)</th>
+                		<th width='120px'>数量</th>
+						<th width='60px'></th>
+    				</tr>
+                </thead>
+    			<tbody id="tbl3"></tbody>
+            </table>
+    	</div>
+    	<div id="tabs-4">
+			<table class="control">
+				<tr>
+					<td>
+						<input type='button' value='增行' class='btn' id='btnAddSize' onclick="selectSize()">
+						<input type='button' value='保存' class='btn' id='btnSaveSize' onclick="saveSize()">
+					</td>
+				</tr>
+            </table>
+            <table class='list'>
+            	<thead>
+        			<tr>
+                        <th width='60px'></th>
+                        <th width='120px'>尺寸名称</th>
+                        <th width='120px'>尺寸起</th>
+                        <th width='120px'>尺寸止</th>
+                		<th width='120px'>比例(%)</th>
+                		<th width='120px'>数量</th>
+						<th width='60px'></th>
+        			</tr>
+                </thead>
+        		<tbody id="tbl4"></tbody>
+            </table>
+    	</div>
+    </div>
+</div>
+<div id='selectStyleDiv' title="选择款式" style="display:none;">
+	<table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='selectStyleChkAll'></th>
+                <th width='120px'>款式中类</th>
+                <th width='120px'>款式小类</th>
+                <th width='120px'>款式名称</th>
+                <th width='60px'>款式比例</th>
+                <th width='130px'>创建时间</th>
+                <th width='90px'>库存</th>
+                <th width='90px'>上月销量</th>
+                <th width='100px'>上半年销量</th>
+                <th width='100px'>上一年销量</th>
+			</tr>
+        </thead>
+		<tbody id='selectStyleTbl'></tbody>
+    </table>
+	<table style='width:100%;'><tr><td style='BACKGROUND-COLOR: #D2E0F1;height:20px;' valign='center' id='selectStylePagingTd'>
+	</td></tr></table>
+</div>
+<div id='selectGradeDiv' title="选择品质" style="display:none;">
+	<table class='list'>
+    	<thead>
+			<tr>
+                <th width='60px'><input type='checkbox' id='selectGradeChkAll'></th>
+				<th width='120px'>色级</th>
+				<th width='120px'>净度</th>
+				<th width='120px'>品质</th>
+                <th width='120px'>比例(%)</th>
+			</tr>
+        </thead>
+        <tbody id="selectGradeTbl"></tbody>
+    </table>
+</div>
+<div id='selectSizeDiv' title="选择尺寸" style="display:none;">
+	<table class='list'>
+    	<thead>
+			<tr>
+                <th width='60px'><input type='checkbox' id='selectSizeChkAll'></th>
+				<th width='120px'>尺寸名称</th>
+				<th width='120px'>尺寸起</th>
+				<th width='120px'>尺寸止</th>
+                <th width='120px'>比例(%)</th>
+			</tr>
+        </thead>
+        <tbody id="selectSizeTbl"></tbody>
+    </table>
+</div>
+<div id='viewDetailsDiv' title="查看分配明细" style="display:none;">
+	<table class='content'>
+		<tr>
+			<td>
+				<iframe src='' marginwidth="0" frameborder="0" width='100%' height='550px;' id="dispatchingChangeFrame" style=""></iframe>
+			</td>
+		</tr>
+    </table>
+</div>
+<script>
+function backToList(){
+	window.location = "gatherSet.vm?user_action=setList";
+}
+function resetBill(){
+	window.location = "gatherSet.vm?user_action=bodyEdit&billId=" + jQuery("#headid").val();
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, null);
+	altRowCSS("tbl1");
+	altRowCSS("tbl2");
+	altRowCSS("tbl3");
+	altRowCSS("tbl4");
+	
+	jQuery("#tabs").tabs();
+	checkAll('selectStyleChkAll','selectStyleChk',true);
+	checkAll('selectGradeChkAll','selectGradeChk',true);
+	checkAll('selectSizeChkAll','selectSizeChk',true);
+	
+	if("1" != "$!{form.head.status}"){
+		jQuery('#btnAddRow').attr('disabled', true);
+		jQuery('#btnCreateGatherOrder').attr('disabled', true);
+		jQuery('#btnSaveSalableRate').attr('disabled', true);
+		jQuery('#btnAddSalableStyle').attr('disabled', true);
+		jQuery('#btnSaveSalableStyle').attr('disabled', true);
+		jQuery('#btnAddUnsalableStyle').attr('disabled', true);
+		jQuery('#btnSaveUnsalableStyle').attr('disabled', true);
+		jQuery('#btnAddGrade').attr('disabled', true);
+		jQuery('#btnSaveGrade').attr('disabled', true);
+		jQuery('#btnAddSize').attr('disabled', true);
+		jQuery('#btnSaveSize').attr('disabled', true);
+		jQuery('#btnGenerateDetail').attr('disabled', true);
+		jQuery('#btnSaveNewOrderNum').attr('disabled', true);
+	}
+});
+function createPagingToolbar2(callbackFunc, start, limit, totalCount){
+	var html = "<input type='hidden' id='start' name='start' value=''/>";
+	html += "<input type='hidden' id='limit' name='limit' value=''/>";
+	html += "<input type='hidden' id='_totalCount' value=''/>";
+	html += "<input type='image' id='_btnFirst'   src='" + ctxPath + "/css/mclon/img/page-first.gif' style='vertical-align:text-bottom;' title='第一页'>&nbsp;";
+	html += "<input type='image' id='_btnPre'     src='" + ctxPath + "/css/mclon/img/page-prev.gif'  style='vertical-align:text-bottom;' title='上一页'>&nbsp;";
+	html += "当前第<input type='text' id='_pageindex' style='width:25px;height:12px;text-align:center;' value=''>页&nbsp;";
+	html += "共<input type='text' id='_totalPageCount' style='width:40px;height:12px;text-align:center;background-color:#EBEBEB;' value='' readonly>页&nbsp;";
+	html += "<input type='image' id='_btnNext'    src='" + ctxPath + "/css/mclon/img/page-next.gif'  style='vertical-align:text-bottom;' title='下一页'>&nbsp;";
+	html += "<input type='image' id='_btnLast'    src='" + ctxPath + "/css/mclon/img/page-last.gif'  style='vertical-align:text-bottom;' title='最后页'>&nbsp;";
+	html += "<input type='image' id='_btnRefresh' src='" + ctxPath + "/css/mclon/img/refresh.gif'    style='vertical-align:text-bottom;' title='刷新'>&nbsp;";
+	
+	html += "每页<input type='text' id='_pageCount' style='width:25px;height:12px;text-align:center;' value=''>条&nbsp;";
+	html += "显示第 "+start+" 条到 "+(start + limit - 1)+" 条记录，一共 "+totalCount+" 条";
+	jQuery("#selectStylePagingTd").html(html);
+	
+	jQuery("#start").val(start);
+	jQuery("#limit").val(limit);
+	jQuery("#_pageindex").val(Math.ceil(start / limit));
+	jQuery("#_totalPageCount").val(Math.ceil(totalCount / limit));
+	jQuery("#_pageCount").val(limit);
+	jQuery("#_totalCount").val(totalCount);
+	
+	if(parseInt(jQuery("#_pageindex").val())<=1){
+		jQuery("#_btnPre").attr('src', "" + ctxPath + "/css/mclon/img/page-prev-disabled.gif");
+		jQuery("#_btnFirst").attr("src", "" + ctxPath + "/css/mclon/img/page-first-disabled.gif");
+		
+		jQuery("#_btnPre").attr('disabled', true);
+		jQuery("#_btnFirst").attr("disabled", true);
+	}
+	if(parseInt(jQuery("#_pageindex").val())>=parseInt(jQuery("#_totalPageCount").val())){
+		jQuery("#_btnNext").attr('src', ctxPath + "/css/mclon/img/page-next-disabled.gif");
+		jQuery("#_btnLast").attr("src", ctxPath + "/css/mclon/img/page-last-disabled.gif");
+		
+		jQuery("#_btnNext").attr('disabled', true);
+		jQuery("#_btnLast").attr("disabled", true);
+	}
+	/**
+	* 改变页数
+	*/
+	jQuery("#_pageindex").change(function(){
+		if(isNumeric(jQuery("#_pageindex").val())){
+	       	jQuery("#start").val((parseInt(jQuery("#_pageindex").val()) - 1) * parseInt(jQuery("#_pageCount").val()) + 1);
+			callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+		}else{
+			jQuery("#_pageindex").val("");
+		}
+		
+	});
+	/**
+	* 改变每页显示条数
+	*/
+	jQuery("#_pageCount").change(function(){
+		if(isNumeric(jQuery("#_pageCount").val())){
+	    	jQuery("#start").val("1");
+	    	jQuery("#limit").val(jQuery("#_pageCount").val());
+			callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+		}else{
+			jQuery("#_pageCount").val("");
+		}
+	});
+	jQuery("#_totalPageCount").focus(function(){
+		jQuery(this).blur();
+	});
+	jQuery("#_btnFirst").click(function(){
+		jQuery("#start").val("1");
+		callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+	});
+	jQuery("#_btnPre").click(function(){
+		if(parseInt(jQuery("#start").val()) - parseInt(jQuery("#limit").val()) - 1 >= 0){
+			jQuery("#start").val(parseInt(jQuery("#start").val()) - parseInt(jQuery("#limit").val()));
+			callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+		}
+	});
+	jQuery("#_btnLast").click(function(){
+		jQuery("#start").val((Math.ceil(totalCount / limit)-1)*parseInt(jQuery("#_pageCount").val()) + 1);
+		callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+	});
+	jQuery("#_btnNext").click(function(){
+		if(parseInt(jQuery("#start").val()) + parseInt(jQuery("#limit").val()) - 1 <= totalCount){
+	    	//jQuery("#_pageindex").val(parseInt(jQuery("#_pageindex").val()) + 1);
+	    	jQuery("#start").val(parseInt(jQuery("#start").val()) + parseInt(jQuery("#limit").val()));
+			callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+		}
+	});
+	jQuery("#_btnRefresh").click(function(){
+		callbackFunc(jQuery("#start").val(), jQuery("#limit").val());
+	});
+}
+</script>

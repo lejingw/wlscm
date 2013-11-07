@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="FashionGoldPrice">
+	<typeAlias alias="FashionGoldPrice" type="com.jatools.vo.basic.FashionGoldPrice" />
+
+	<sql id="FashionGoldPrice_columns_1">
+		id as "id", item_class_id as "itemClassId", gold_price as "goldPrice",
+		status as "status", memo as "memo", create_date as "createDate",
+        create_id as "createId", update_date as "updateDate", update_id as "updateId"
+    </sql>
+
+    <!-- 获取分页数据 -->
+	<select id="FashionGoldPrice.getFashionGoldPricePageData" resultClass="FashionGoldPrice" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="FashionGoldPrice_columns_1"/>
+            from JAT_BASIC_FASHION_GOLD_PRICE a where 1=1
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+        order by a.id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+
+	<!-- 获取总条数 -->
+    <select id="FashionGoldPrice.getFashionGoldPriceTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from JAT_BASIC_FASHION_GOLD_PRICE a
+		where 1 = 1
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+
+    <!-- 保存数据 -->
+    <insert id="FashionGoldPrice.saveFashionGoldPrice" parameterClass="FashionGoldPrice">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select JAT_BASIC_FASH_GOLD_PRICE_SEQ.nextval as id from dual
+		</selectKey>
+		insert into JAT_BASIC_FASHION_GOLD_PRICE(
+            id, item_class_id, gold_price, status, memo, create_date, create_id, update_date, update_id
+        ) values(
+            #id#, #itemClassId#, #goldPrice#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+        )
+    </insert>
+
+    <!-- 根据id获取记录对象 -->
+    <select id="FashionGoldPrice.getFashionGoldPrice" resultClass="FashionGoldPrice" parameterClass="string">
+    	select <include refid="FashionGoldPrice_columns_1"/> from JAT_BASIC_FASHION_GOLD_PRICE a
+        where a.id = #value#
+    </select>
+
+    <!-- 修改信息 -->
+    <update id="FashionGoldPrice.updateFashionGoldPrice" parameterClass="FashionGoldPrice">
+		update JAT_BASIC_FASHION_GOLD_PRICE a set
+			a.gold_price = #goldPrice#,
+			a.memo = #memo#, 
+			a.update_date = #updateDate#,
+            a.update_id = #updateId#
+		where a.id = #id#
+	</update>
+
+	<delete id="FashionGoldPrice.deleteFashionGoldPrice" parameterClass="string">
+		delete JAT_BASIC_FASHION_GOLD_PRICE a where a.id = #value#
+	</delete>
+	
+	<select id="FashionGoldPrice.checkWeightStr" parameterClass="FashionGoldPrice" resultClass="int">
+		select  count(*) from JAT_BASIC_FASHION_GOLD_PRICE a
+		where a.item_class_id = #itemClassId#
+		<isNotEmpty prepend="and" property="id">
+			<![CDATA[a.id <> #id#]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Salable">
+	<sql id="Salable.getSalablePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="Salable.getSalablePageData" parameterClass="map" resultClass="com.jatools.vo.push.Salable">
+		select * from (select rownum rownum_ , AA.* from (
+                select
+                        a.id as "id",
+                        a.item_class_id as "itemClassId",
+                        a.orna_class_id as "ornaClassid",
+                        a.analysis_id as "analysisId",
+                        a.style_item_class_id as "styleItemClassId",
+                        a.style_id as "styleId",
+                        a.style_rate as "styleRate",
+                        a.create_id        as "createId",
+                        a.create_date      as "createDate",
+                        a.update_id        as "updateId",
+                        a.update_date      as "updateDate",
+                        a.status           as "status",
+                        b.SUMMARYDESCRIPTION as "analysisName",
+                        c.STYLENAME as "styleName",
+                        c.ISBIGGRAPH as "bigGraph"
+                from jat_pl_basic_salable a
+                left join jas_bd_analysis_arange b on a.analysis_id = b.ANALYSIS_ARANGE_ID
+                left join jas_bd_style c on a.style_id = c.STYLEID
+			  <include refid="Salable.getSalablePageDataCD"/>
+			 order by a.id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="Salable.getSalableTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_salable a
+			  <include refid="Salable.getSalablePageDataCD"/>
+	</select>
+	<select id="Salable.getSalableById" parameterClass="string" resultClass="com.jatools.vo.push.Salable">
+            select a.id as "id",
+                    a.item_class_id as "itemClassId",
+                    a.orna_class_id as "ornaClassid",
+                    a.analysis_id as "analysisId",
+                    a.style_item_class_id as "styleItemClassId",
+                    a.style_id as "styleId",
+                    a.style_rate as "styleRate",
+                    a.create_id        as "createId",
+                    a.create_date      as "createDate",
+                    a.update_id        as "updateId",
+                    a.update_date      as "updateDate",
+                    a.status           as "status",
+                    b.SUMMARYDESCRIPTION as "analysisName",
+                    c.STYLENAME as "styleName",
+                    c.ISBIGGRAPH as "bigGraph"
+			 from jat_pl_basic_salable a
+            left join jas_bd_analysis_arange b on a.analysis_id = b.ANALYSIS_ARANGE_ID
+            left join jas_bd_style c on a.style_id = c.STYLEID
+			where a.id = #value#
+	</select>
+	<insert id="Salable.saveSalable" parameterClass="com.jatools.vo.push.Salable">
+        <selectKey keyProperty="id" type="pre"> select JAT_PL_BASIC_SALABLE_SEQ.nextval as "id" from dual </selectKey>
+		insert into jat_pl_basic_salable (
+            id, item_class_id, orna_class_id, analysis_id, style_item_class_id, style_id, style_rate,
+			create_id, create_date, update_id, update_date, status
+        ) values (
+            #id#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#, #styleId#, #styleRate#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#
+        )
+	</insert>
+	<update id="Salable.updateSalable" parameterClass="com.jatools.vo.push.Salable">
+		update jat_pl_basic_salable a
+		set
+                a.item_class_id = #itemClassId#,
+                a.orna_class_id = #ornaClassId#,
+                a.analysis_id = #analysisId#,
+                a.style_item_class_id = #styleItemClassId#,
+                a.style_id = #styleId#,
+                a.style_rate = #styleRate#,
+                a.update_id = #updateId#,
+                a.update_date = #updateDate#
+		where a.id = #id#
+	</update>
+
+	<select id="Salable.checkSalableExists" parameterClass="com.jatools.vo.push.Salable" resultClass="int">
+		select count(1)
+		  from jat_pl_basic_salable a
+        where 1=1
+            and a.item_class_id = #itemClassId#
+            and a.orna_class_id = #ornaClassId#
+            and a.analysis_id = #analysisId#
+            and a.style_item_class_id = #styleItemClassId#
+            and a.style_id = #styleId#
+		<isNotEmpty property="id"> <![CDATA[ and a.id <> #id# ]]></isNotEmpty>
+	</select>
+
+	<delete id="Salable.deleteSalable" parameterClass="string">
+		delete jat_pl_basic_salable a where a.id = #value#
+	</delete>
+</sqlMap>

@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans default-autowire="byName">
+	<bean id="paraMethodResolver" class="org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver">
+		<property name="paramName" value="user_action" />
+		<property name="defaultMethodName" value="doPerform" />
+	</bean>
+	<!--  ***********************************************系统管理sys******************************************* -->
+	<bean name="errorController" class="com.jatools.web.view.sys.ErrorController"><!-- 错误页面控制器 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="loginController" class="com.jatools.web.view.sys.LoginController"><!-- 登录页面控制器 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="userManager" ref="userManager"></property>
+	</bean>
+	<bean name="homeController" class="com.jatools.web.view.sys.HomeController"><!-- 主页页面控制器 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="logOffController" class="com.jatools.web.view.sys.LogOffController"><!-- 退出 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="helpController" class="com.jatools.web.view.sys.HelpController"><!-- 帮助页面 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="dictController" class="com.jatools.web.view.sys.DictController"><!-- 数据字典 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="dictManager" ref="dictManager" />
+	</bean>
+	<bean name="dictEntryController" class="com.jatools.web.view.sys.DictEntryController"><!-- 数据字典 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="dictManager" ref="dictManager" />
+	</bean>
+	<bean name="cacheController" class="com.jatools.web.view.sys.CacheController"><!-- 缓存刷新 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="billReviewController" class="com.jatools.web.view.sys.BillReviewController"><!-- 缓存刷新 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="parameterController" class="com.jatools.web.view.sys.ParameterController"><!-- 配置参数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="queryConditionController" class="com.jatools.web.view.sys.QueryConditionController"><!-- 查询条件配置 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	
+	
+	<!--  **********************************************基础单据basic****************************************** -->
+	<bean name="labelTypeController" class="com.jatools.web.view.basic.LabelTypeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="vendorCoefController" class="com.jatools.web.view.basic.VendorCoefController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="commonController" class="com.jatools.web.view.util.CommonController"><!--  -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="billnoRuleController" class="com.jatools.web.view.basic.BillnoRuleController"><!-- 单号编码规则 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="billnoRuleManager" ref="billnoRuleManager"/>
+	</bean>
+	<bean name="orgGroupController" class="com.jatools.web.view.basic.OrgGroupController"><!-- 单位柜组 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="chargeController" class="com.jatools.web.view.basic.ChargeController"><!-- 工费核算标准 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="ptChargeController" class="com.jatools.web.view.basic.PtChargeController"><!-- 工费核算标准 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="orgItemController" class="com.jatools.web.view.basic.OrgItemController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="orgItemManager" ref="orgItemManager"></property>
+	</bean>
+	<bean name="expressReceuserController" class="com.jatools.web.view.basic.ExpressReceuserController"><!-- 快递人员组织 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="priceLockController" class="com.jatools.web.view.basic.PriceLockController"><!-- 价格锁定 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="materialItemController" class="com.jatools.web.view.basic.MaterialItemController"><!-- 价格锁定 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="stoneMainCoefficientController" class="com.jatools.web.view.basic.StoneMainCoefficientController"><!-- 价格锁定 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="colorGradeGradeController" class="com.jatools.web.view.basic.ColorGradeGradeController"><!-- 价格锁定 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="colorGradeGradeManager" ref="colorGradeGradeManager" />
+	</bean>
+	<bean name="cleanGradeController" class="com.jatools.web.view.basic.CleanGradeController"><!-- 价格锁定 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="cleanGradeManager" ref="cleanGradeManager" />
+	</bean>
+	<bean name="createOldbarCodeController" class="com.jatools.web.view.basic.CreateOldbarCodeController"><!-- 生成旧品、维修件条码 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="purEmpArticleTypeController" class="com.jatools.web.view.basic.PurEmpArticleTypeController"><!-- 生成旧品、维修件条码 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="safeStockController" class="com.jatools.web.view.basic.SafeStockController"><!-- 总部安全库存 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="ornaDescController" class="com.jatools.web.view.basic.OrnaDescController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="saleChangeLabelController" class="com.jatools.web.view.basic.SaleChangeLabelController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="unsaleOrnaController" class="com.jatools.web.view.basic.UnsaleOrnaController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="verdorChargeController" class="com.jatools.web.view.basic.VerdorChargeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="goldSpecialChargeController" class="com.jatools.web.view.basic.GoldSpecialChargeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="fashionGoldPriceController" class="com.jatools.web.view.basic.FashionGoldPriceController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	
+	
+	<!--  **********************************************采购管理pur****************************************** -->
+	<bean name="purGatherController" class="com.jatools.web.view.pur.PurGatherController"><!-- 采购总单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="purGatherManager" ref="purGatherManager"/>
+	</bean>
+	<bean name="purchaseController" class="com.jatools.web.view.pur.PurchaseController"><!-- 采购单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="purchaseManager" ref="purchaseManager"/>
+	</bean>
+	<bean name="purchaseArriveController" class="com.jatools.web.view.pur.PurchaseArriveController"><!-- 采购单到货登记 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="purchaseManager" ref="purchaseManager"/>
+	</bean>
+	<bean name="purchaseCustController" class="com.jatools.web.view.pur.PurchaseCustController"><!-- 定做单生成采购单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="purchaseCustManager" ref="purchaseCustManager"/>
+	</bean>
+	<bean name="handoverController" class="com.jatools.web.view.pur.HandoverController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="cashPayMoneyController" class="com.jatools.web.view.pur.cash.PayMoneyController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="moneyAccountController" class="com.jatools.web.view.pur.cash.MoneyAccountController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="prodAccountController" class="com.jatools.web.view.pur.cash.ProdAccountController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="cashHeadController" class="com.jatools.web.view.pur.cash.CashHeadController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="prodProdController" class="com.jatools.web.view.pur.cash.ProdProdController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="prodChangeController" class="com.jatools.web.view.pur.cash.ProdChangeController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="payChangeController" class="com.jatools.web.view.pur.cash.PayChangeController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	
+	
+	<!--  **********************************************调拨管理move******************************************* -->
+	<bean name="moveCostcoefController" class="com.jatools.web.view.move.MoveCostcoefController"><!-- 调拨成本系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="moveCostcoefManager" ref="moveCostcoefManager"/>
+	</bean>
+	<bean name="moveSalecoefController" class="com.jatools.web.view.move.MoveSalecoefController"><!-- 调拨销价系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="moveSalecoefManager" ref="moveSalecoefManager"/>
+	</bean>
+	<bean name="moveNetController" class="com.jatools.web.view.move.MoveNetController"><!-- 调拨网络 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="moveNetManager" ref="moveNetManager"/>
+	</bean>
+	<bean name="moveBillController" class="com.jatools.web.view.move.MoveBillController"><!-- 调拨单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="movePackController" class="com.jatools.web.view.move.MovePackController"><!-- 调拨单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="movePackManager" ref="movePackManager"/>
+	</bean>
+	<bean name="moveReceiveController" class="com.jatools.web.view.move.MoveReceiveController"><!-- 调拨单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="moveReceiveManager" ref="moveReceiveManager"/>
+	</bean>
+	<bean name="moveCmdController" class="com.jatools.web.view.move.MoveCmdController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="specialDiamController" class="com.jatools.web.view.move.SpecialDiamController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="dispatchWayController" class="com.jatools.web.view.move.DispatchWayController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="standardDispatchController" class="com.jatools.web.view.move.StandardDispatchController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="moveDeleteApplyController" class="com.jatools.web.view.move.MoveDeleteApplyController">
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	
+	
+	<!-- ***********************************************库存管理stock***************************************** -->
+	<bean name="dispatchOrnaController" class="com.jatools.web.view.stock.DispatchOrnaController"><!-- 订单配货 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="dispatchOrnaManager" ref="dispatchOrnaManager"/>
+	</bean>
+	<bean name="procPackageController" class="com.jatools.web.view.stock.ProcPackageController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procExitController" class="com.jatools.web.view.stock.ProcExitController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procExitConditionController" class="com.jatools.web.view.stock.ProcExitConditionController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procChangeController" class="com.jatools.web.view.stock.ProcChangeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procPurifyController" class="com.jatools.web.view.stock.ProcPurifyController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procDismantleController" class="com.jatools.web.view.stock.ProcDismantleController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="cargoManagerController" class="com.jatools.web.view.stock.CargoManagerController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="procInventoryController" class="com.jatools.web.view.stock.ProcInventoryController">
+		<property name="methodNameResolver" ref="paraMethodResolver"></property>
+	</bean>
+	<bean name="otherHandoverController" class="com.jatools.web.view.stock.HandoverController"><!-- 采购单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="materInivController" class="com.jatools.web.view.stock.MaterInivController"><!-- 入库单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="materInivManager" ref="materInivManager" />
+	</bean>
+	<bean name="plSaleController" class="com.jatools.web.view.stock.PlSaleController"><!-- 采购单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="jmSaleController" class="com.jatools.web.view.stock.JmSaleController"><!-- 采购单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	
+	
+	<!--  **********************************************核价模块calc******************************************* -->
+	<bean name="coefficientController" class="com.jatools.web.view.calc.CoefficientController"><!-- 总系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="coefficientManager" ref="coefficientManager"></property>
+	</bean>
+	<bean name="coefficientWWController" class="com.jatools.web.view.calc.CoefficientWWController"><!-- 总系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="coefficientWWManager" ref="coefficientWWManager"></property>
+	</bean>
+	<bean name="sbraCoefficientController" class="com.jatools.web.view.calc.SbraCoefficientController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="sbraCoefficientManager" ref="sbraCoefficientManager"></property>
+	</bean>
+	<bean name="accessoryController" class="com.jatools.web.view.calc.AccessoryController"><!-- 辅料系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="accessoryManager" ref="accessoryManager"></property>
+	</bean>
+	<bean name="stoneCoefficientController" class="com.jatools.web.view.calc.StoneCoefficientController"><!-- 石头系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="stoneCoefficientManager" ref="stoneCoefficientManager"></property>
+	</bean>
+	<bean name="sbraPriceController" class="com.jatools.web.view.calc.SbraPriceController"><!-- 托架市场价 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="sbraPriceManager" ref="sbraPriceManager"></property>
+	</bean>
+	<bean name="stonePriceController" class="com.jatools.web.view.calc.StonePriceController"><!-- 主石市场价 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="stonePriceManager" ref="stonePriceManager"></property>
+	</bean>
+	<bean name="sbraTypeController" class="com.jatools.web.view.calc.SbraTypeController"><!-- 配件类型 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="sbraTypeManager" ref="sbraTypeManager"></property>
+	</bean>
+	<bean name="priceHeadController" class="com.jatools.web.view.calc.PriceHeadController"><!-- 核价单 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="priceHeadManager" ref="priceHeadManager"></property>
+	</bean>
+	<bean name="fashionCoefficientController" class="com.jatools.web.view.calc.FashionCoefficientController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="fashionCoefficientManager" ref="fashionCoefficientManager"></property>
+	</bean>
+	<bean name="materAttrUpdateController" class="com.jatools.web.view.calc.MaterAttrUpdateController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="materAttrUpdateManager" ref="materAttrUpdateManager"></property>
+	</bean>
+	<bean name="basicPriceJadeController" class="com.jatools.web.view.calc.BasicPriceJadeController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="basicPriceJadeManager" ref="basicPriceJadeManager"></property>
+	</bean>
+	<bean name="basicPriceOneController" class="com.jatools.web.view.calc.BasicPriceOneController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="basicPriceOneManager" ref="basicPriceOneManager"></property>
+	</bean>
+	<bean name="basicPriceTwoController" class="com.jatools.web.view.calc.BasicPriceTwoController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="basicPriceTwoManager" ref="basicPriceTwoManager"></property>
+	</bean>
+	<bean name="specialChargeController" class="com.jatools.web.view.calc.SpecialChargeController"><!-- 托架系数 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+		<property name="specialChargeManager" ref="specialChargeManager"></property>
+	</bean>
+	
+	<!--  **********************************************公用页面common******************************************* -->
+	<bean name="selectCommonController" class="com.jatools.web.view.common.SelectCommonController"><!-- 选择供应商 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="selectOrgController" class="com.jatools.web.view.common.SelectOrgController"><!-- 选择组织 -->
+		<property name="methodNameResolver" ref="paraMethodResolver" />
+	</bean>
+	<bean name="selectStyleClassController" class="com.jatools.web.view.common.SelectStyleClassController"><!-- 选择款式大类、中类、小类 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="selectEmpController" class="com.jatools.web.view.common.SelectEmpController"><!-- 选择采购员 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="selectStyleController" class="com.jatools.web.view.common.SelectStyleController"><!-- 选择款式 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	
+	
+	<!--  **********************************************出库管理out******************************************* -->
+	<bean name="outVendorController" class="com.jatools.web.view.out.OutVendorController"><!-- 报表管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outVendorManager" ref="outVendorManager"/>
+	</bean>
+	<bean name="outBackController" class="com.jatools.web.view.out.OutBackController"><!-- 报表管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outBackManager" ref="outBackManager"/>
+	</bean>
+	<bean name="loseOutStockController" class="com.jatools.web.view.out.LoseOutStockController"><!-- 丢失出库管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outStockManager" ref="outStockManager"/>
+	</bean>
+	<bean name="scrapOutStockController" class="com.jatools.web.view.out.ScrapOutStockController"><!-- 报销出库管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outStockManager" ref="outStockManager"/>
+	</bean>
+	<bean name="giftOutStockController" class="com.jatools.web.view.out.GiftOutStockController"><!-- 礼品出库管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outStockManager" ref="outStockManager"/>
+	</bean>
+	<bean name="marketOutStockController" class="com.jatools.web.view.out.MarketOutStockController"><!-- 营销出库管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outStockManager" ref="outStockManager"/>
+	</bean>
+	<bean name="leftGoldOutStockController" class="com.jatools.web.view.out.LeftGoldOutStockController"><!-- 余金领用管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="outStockManager" ref="outStockManager"/>
+	</bean>
+	<bean name="consumeController" class="com.jatools.web.view.out.ConsumeController"><!-- 余金领用管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="consumeManager" ref="consumeManager"/>
+	</bean>
+	
+	
+	<!--  **********************************************报表管理report******************************************* -->
+	<bean name="reportController" class="com.jatools.web.view.report.ReportController"><!-- 报表管理 -->
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="reportManager" ref="reportManager"/>
+	</bean>
+	<bean name="unsaleReportController" class="com.jatools.web.view.report.UnsaleReportController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+		<property name="unsaleReportManager" ref="unsaleReportManager"/>
+	</bean>
+	
+	
+	<!--  **********************************************收票出票inout******************************************* -->
+	<bean name="receiveController" class="com.jatools.web.view.inout.ReceiverController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="sendController" class="com.jatools.web.view.inout.SendController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	
+	
+	<!--  **********************************************标签相关 tag******************************************* -->
+	<bean name="labelTagApplyController" class="com.jatools.web.view.tag.LabelTagApplyController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="labelTagApplyPrintController" class="com.jatools.web.view.tag.LabelTagApplyPrintController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="labelTagApplyReceiveController" class="com.jatools.web.view.tag.LabelTagApplyReceiveController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="labelTagImportController" class="com.jatools.web.view.tag.LabelTagImportController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	
+	
+	<!--  **********************************************推式下单push******************************************* -->
+	<bean name="excludeOrnaController" class="com.jatools.web.view.push.ExcludeOrnaController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="pushGradeController" class="com.jatools.web.view.push.PushGradeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="pushSizeController" class="com.jatools.web.view.push.PushSizeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="distributeNumController" class="com.jatools.web.view.push.DistributeNumController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="turnoverNumController" class="com.jatools.web.view.push.TurnoverNumController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="salableRateController" class="com.jatools.web.view.push.SalableRateController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="gatherSetController" class="com.jatools.web.view.push.GatherSetController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="gatherOrderController" class="com.jatools.web.view.push.GatherOrderController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="pushDispatchController" class="com.jatools.web.view.push.PushDispatchController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="displayStandardController" class="com.jatools.web.view.push.DisplayStandardController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="wearSizeController" class="com.jatools.web.view.push.WearSizeController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="salableController" class="com.jatools.web.view.push.SalableController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	<bean name="pushStyleController" class="com.jatools.web.view.push.PushStyleController">
+		<property name="methodNameResolver" ref="paraMethodResolver"/>
+	</bean>
+	
+</beans>

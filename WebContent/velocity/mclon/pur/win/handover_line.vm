@@ -1,0 +1,239 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/HandoverDwr.js?201203201723.js",
+	             "$StringUtil.getContextPath()/js/pur/handover_child.js?t=201203061723.js"])
+<style >
+	input.analyz{
+        cursor:pointer;
+        background-image:url($!StringUtil.getContextPath()/image/mclon/sel.png);
+        background-repeat:no-repeat; 
+		border-style: solid;
+		color: white;
+		background-color: white;
+		border:0px;
+    }
+	input.delrow{
+        cursor:pointer;
+        background-image:url($!StringUtil.getContextPath()/image/mclon/minus-btn.png);
+        background-repeat:no-repeat; 
+		border-style: solid;
+		color: white;
+		background-color: white;
+		border:0px;
+    }
+</style>
+<form id='frm' action="handover.vm" method="post">
+	#set($handoverHead = $form.handoverHead)
+	#set($lines = $form.lines)
+	<input type="button" id="btnAddLine" value="增行" onclick="addRow()"/>
+	<input type="hidden" id="billid" name="billid" value="$!{handoverHead.billid}"/>
+	<table class='list'>
+    	<thead>
+			<tr>
+    			<th colspan="8" rowspan="1">&nbsp;</th>
+    			<th colspan="2">
+    				<div align="center">不合格数量/重量</div>
+    			</th>
+				<th colspan="2">
+    				<div align="center">合格</div>
+    			</th>
+				<th colspan="2">
+    				<div align="center">磅差</div>
+    			</th>
+                
+    		</tr>
+    		<tr>
+				<th style="width:25px;"></th>
+    			<th>大类</th>
+    			<th>计量单位</th>
+    			<th>交接数<br>量/重量</th>
+    			<th>金价</th>
+                <th>单价</th>
+    			<th>交接工费</th>
+    			<th>交接金额</th>
+    			<th>前次</th>
+    			<th>本次</th>
+    			<th>数量<br>/重量</th>	
+    			<th>金额</th>
+    			<th>数量<br>/重量</th>
+        		<th>金额</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+    	#foreach($line in $lines)
+    		<tr>
+                <td><input type='button' value='' class='delrow' onclick='deleteHandoverRow(this,"tbl")'/></td>
+    			<td><select name='itemClassId' dataType='Require'  onchange='checkitemClass(this)' msg='不能为空'></select>
+					<input type="button" name="itemBtn" value="" class="analyz" style="display:none;" onclick="showLineChild(this)"/>
+				</td>
+    			<td><select name='unitNo' dataType='Require'  value='' msg='不能为空'></select></td>
+    			<td><input type='text' name='hangNum' style='width:50px;' value="$!line.hangNum" onblur='checkField()' dataType='Require' msg='不能为空'></td>
+    			
+				<td><input type='text' name='goldPrice'  style='width:60px;' value="$!line.goldPrice" onblur='checkField()' dataType='Require' msg='不能为空'></td>
+                <td><input type='text' name='hangPrice'  style='width:60px;' value="$!line.hangPrice" onblur='checkField()' dataType='Require'  msg='不能为空'></td>
+    			<td><input type='text' name='handCharge'  style='width:60px;' value="$!line.handCharge" onblur='checkField()' dataType='Require'  msg='不能为空'></td>
+    			<td><input type='text' name='handMoney' disabled style='width:60px;' readonly value="$!line.handMoney" dataType='Require'  msg='不能为空'></td>
+    			<td><input type='text' name='noNumLast'  style='width:50px;' disabled value="$!line.noNumLast" onblur='checkField()' ></td>
+    			<td><input type='text' name='noNumNow'  style='width:50px;' disabled value="$!line.noNumNow" onblur='checkField()' ></td>
+    			<td><input type='text' name='yesNum'   value="$!line.yesNum" disabled readonly style='width:50px;'></td>
+    			<td><input type='text' name='yesMoney'  style='width:60px;' disabled value="$!line.yesMoney" readonly ></td>
+    			<td><input type='text' name='diffNum' disabled style='width:50px;' value="$!line.diffNum" readonly ></td>
+    			<td><input type='text' name='diffMoney' disabled style='width:60px;' value="$!line.diffMoney" readonly />
+    				<input type='hidden' name='oldItemClassId' value="$!line.itemClassId" />
+    				<input type='hidden' name='oldUnitNo' value="$!line.unitNo" />
+    				<input type='hidden' name='oldIsGifts' value="$!line.isGifts" />
+    				<input type='hidden' name='noNumLastOld' readonly value="$!line.noNumLast">
+    				<input type='hidden' name='noNumNowOld' readonly value="$!line.noNumNow">
+    				<input type='hidden' name='lineid' value="$!line.lineid" />
+    				<input type="hidden" name="child_list" value=$!BdCommon.resetLineChild($!line.childList) />
+    				<input type="hidden" name="delete_child_ids" value=''/>
+    			</td>
+    		</tr>
+    	#end
+    	</tbody>
+    </table>
+	
+	<input type="hidden" id="deleteChildIds"/>
+	<input type="hidden" id="deleteLineIds"/>
+	<div id="line_children_head" style="display:none;">
+		<table>
+        	<tr>
+        		<td>　总数：</td><td><input type="text" id="analysCount" readonly style="width:80px;"/></td>
+        	</tr>
+        </table>
+    	<table class='list' style="width:390px;">
+    		<thead>
+        		<tr>
+        			<th>分析范围</th>
+        			<th>数量</th>
+					<th>单价</th>
+					<th width="25px;"><a href="javascript:addChildRow()"><img src='$!StringUtil.getContextPath()/image/mclon/add-btn.png' /></a></th>
+    			</tr>
+    		</thead>	
+    		<tbody id="line_children">
+    			
+            </tbody>
+    	</table>
+	</div>
+</form>
+	
+<script >
+	var rowsLen = $("tbl").rows.length;
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		for(var k=0; k<rowsLen; k++) {
+			addOptions2("itemClassId", k,  data, null, null, true, true, $n("oldItemClassId")[k].value);
+			if($n("oldItemClassId")[k].value == "156"){
+				$n("itemBtn")[k].style.display = "";
+				$n("itemBtn")[k].disabled = false;
+			}
+		}
+	});
+	DictDwr.getDictsForSlt('purunit', function(data){
+		for(var m=0; m<rowsLen; m++) {
+			addOptions2("unitNo", m,  data, null, null, true, true, $n("oldUnitNo")[m].value);
+		}
+	});
+	
+	function checkField(){
+    	var oLen = $("tbl").rows.length;
+    	for(var i=0; i<oLen;i++){
+    		var hangNum = $n("hangNum")[i].value,
+    			goldPrice = $n("goldPrice")[i].value,
+    			hangPrice = $n("hangPrice")[i].value,
+    			handCharge = $n("handCharge")[i].value,
+    			noNumNow = $n("noNumNow")[i].value;
+    		
+    		if(hangNum) {
+    			if(!isDecimal(hangNum) ){
+    				alert("第["+(i+1)+"]行，交接数量不合法");
+    				return false;
+    			} else if (floatSub(hangNum, 0) <=0){
+    				alert("第["+(i+1)+"]行，交接数量必须是>0的数");
+    				return false;
+    			}
+    		} else {
+    			alert("第["+(i+1)+"]行，交接数量不允许为空");
+    			return false;
+    		}
+    		if(floatSub(hangNum, noNumNow)<0){
+    			alert("第"+(i+1)+"行，交接数量不能小于本次不合格数量");
+    			return false;
+    		}
+    		if(goldPrice) {
+    			if(!isDecimal(goldPrice) ){
+    				alert("第["+(i+1)+"]行，金价不合法");
+    				return false;
+    			} else if (floatSub(goldPrice, 0) <0){
+    				alert("第["+(i+1)+"]行，金价必须是>=0的数");
+    				return false;
+    			}
+    		}
+    		if(hangPrice) {
+    			if(!isDecimal(hangPrice) ){
+    				alert("第["+(i+1)+"]行，单价不合法");
+    				return false;
+    			} else if (floatSub(hangPrice, 0) <0){
+    				alert("第["+(i+1)+"]行，单价必须是>=0的数");
+    				return false;
+    			} 
+    		} else {
+    			hangPrice = "0";
+    		}
+    		if(handCharge) {
+    			if(!isDecimal(handCharge) ){
+    				alert("第["+(i+1)+"]行，交接工费不合法");
+    				return false;
+    			} else if (floatSub(goldPrice, 0) <0){
+    				alert("第["+(i+1)+"]行，交接工费必须是>=0的数");
+    				return false;
+    			}
+    		}
+    		if(hangNum && hangPrice) {
+        		var result = floatMul(hangNum, hangPrice);
+        		$n("handMoney")[i].value=result;
+        	}
+    		var yesNum = floatSub(hangNum, noNumNow),
+    			yesMoney = floatMul(yesNum, hangPrice);
+    		$n("yesNum")[i].value=yesNum;
+    		$n("yesMoney")[i].value=yesMoney;
+    	}
+    	return true;
+    }
+	
+	function getValues(){
+		if(checkField() && checkForm()){
+			var len = $("tbl").rows.length,
+				lines = [];
+			for(var i=0;i<len;i++){
+				var itemClassId = $n("itemClassId")[i].value;
+				var line = {
+					lineid		:$n("lineid")[i].value,
+					itemClassId	:itemClassId,
+					oldItemClassId	:$n("oldItemClassId")[i].value,
+					unitNo		:$n("unitNo")[i].value,
+					hangNum		:$n("hangNum")[i].value,
+					handMoney	:$n("handMoney")[i].value,
+					yesMoney	:$n("yesMoney")[i].value,
+					yesNum		:$n("yesNum")[i].value,
+					handMoney	:$n("handMoney")[i].value,
+					handCharge	:$n("handCharge")[i].value,
+					hangPrice	:$n("hangPrice")[i].value,
+					goldPrice	:$n("goldPrice")[i].value,
+					noNumNow	:$n("noNumNow")[i].value,
+					noNumLast	:$n("noNumLast")[i].value,
+					child_list	:itemClassId=="156"?$n("child_list")[i].value:"[]",
+					delete_child_ids:$n("delete_child_ids")[i].value
+				};
+				lines.push(line);
+			}
+			if(lines.length <=0){
+				alert("尚未增加行信息");
+				return false
+			}
+			var result = {
+				lines: lines,
+				deleteLineIds:jQuery("#deleteLineIds").val()
+			}; 
+			return result;
+		}
+		return false;
+	}
+</script>

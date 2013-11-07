@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Common">
+	<select id="Common.querySingleString" resultClass="string" parameterClass="string">
+		$value$
+	</select>
+	<!-- 获取当前特定单据编号的下标 -->
+	<select id="Common.getCurrentBillnoIndex" resultClass="java.util.HashMap" parameterClass="map">
+		select (select a.billno_rule from jat_basic_billno_rule a where a.bill_code = #billCode#) as "billnoRule",
+			(select to_char(c.biz_index) from jat_biz_index c where c.biz_type = #bizType# and c.biz_code = #bizCode# and c.biz_date = #bizDate#) as "bizIndex"
+		from dual
+	</select>
+	<!-- 获取当前饰品编码的下标 -->
+	<select id="Common.getCurrentOrnaCodeIndex" resultClass="java.util.HashMap" parameterClass="map">
+		select (select a.item_class_code from jas_bd_item_class a where a.item_class_id = #itemClassId#) as "itemClassCode",
+	       (select b.orna_class_code from jas_bd_orna_class b where b.orna_class_id = #ornaClassId#) as "ornaClassCode",
+	       (select to_char(c.biz_index) from jat_biz_index c where c.biz_type = #bizType# and c.biz_code = #bizCode# and c.biz_date = #bizDate#) as "bizIndex"
+		from dual
+	</select>
+	<!-- 获取当前饰品条码的下标 -->
+	<select id="Common.getCurrentBarCodeIndex" resultClass="java.util.HashMap" parameterClass="map">
+		select (select to_char(c.biz_index) from jat_biz_index c where c.biz_type = #bizType# and c.biz_code = #bizCode# and c.biz_date = #bizDate#) as "bizIndex" from dual
+	</select>
+	<insert id="Common.createIndex" parameterClass="map">
+		insert into jat_biz_index(biz_type, biz_code, biz_date, biz_index)values(#bizType#, #bizCode#, #bizDate#, #bizIndex#)
+	</insert>
+	<update id="Common.increaseIndex" parameterClass="map">
+		update jat_biz_index a set a.biz_index = a.biz_index + 1 where a.biz_type = #bizType# and a.biz_code = #bizCode# and a.biz_date = #bizDate#
+	</update>
+	<!-- 获取财务对应关系 -->
+	<select id="Common.getBillFinance" resultClass="string" parameterClass="string">
+		select a.finance from jat_basic_billno_rule a where a.bill_code = #value#
+	</select>
+	<!-- 获取分析范围 -->
+	<select id="Common.getAnalysis" resultClass="com.jatools.vo.bd.Analysis" parameterClass="map">
+		<![CDATA[
+		select b.analysis_arange_id "analysisId", b.summarydescription "analysisDesc", b.startanalysis "analysisStart", b.endanalysis "analysisEnd" 
+		from jas_bd_analysis_arange b where b.archiveflag = 0 and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId#
+		and b.analysis_unit_id = (select max(a.analysis_unit_id) from jas_bd_analysis_unit a where a.archiveflag = 0
+		and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+		and b.startanalysis <= (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then #allQty# when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then #basicPrice# when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then #mainWeight# end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+		and b.endanalysis    > (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then #allQty# when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then #basicPrice# when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then #mainWeight# end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+		]]>
+	</select>
+	<select id="Common.getToolbarRight" parameterClass="map" resultClass="com.jatools.vo.sys.RightMapping">
+		select aa.toolbar_code as "toolbarCode", aa.item_code as "itemCode", bb.hasright as "hasRight"
+		  from jat_sys_right_mapping aa,
+		       (select c.code as modelcode,
+		               a.id as func_id,
+		               decode(g.module_func, null, 0, 1) as hasright
+		          from jas_sm_function a
+		         inner join jas_sm_module_func b
+		            on a.id = b.func_id
+		         inner join jas_sm_module c
+		            on b.module_id = c.id
+		          left join (select distinct d.module_func
+		                      from jas_sm_role_func d
+		                     inner join jas_sm_role e
+		                        on d.role = e.role_id
+		                       and e.org = #orgId#
+		                     inner join jas_bd_emp_role f
+		                        on f.role_id = e.role_id
+		                     where f.role_id = e.role_id
+		                       and f.emp_id = #userid#) g
+		            on g.module_func = b.id) bb
+		 where aa.toolbar_code = #toolbarCode#
+		   and aa.model_code = bb.modelcode
+		   and aa.func_id = bb.func_id
+	</select>
+	
+	<select id="Common.getCurrentUserOrgList" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+		select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       decode((select count(1)
+		                from jas_bd_emp_org b
+		               where b.empid = #value#
+		                 and b.orgid = a.org_id),
+		              0,
+		              1,
+		              0) as "nocheck"
+		  from jas_sm_org a
+		 start with a.parent_id = 0
+		        and a.org_type = 1
+		        and a.archiveflag = '0'
+		connect by prior a.org_id = a.parent_id
+		       and a.org_type = 1
+		       and a.archiveflag = '0'
+		 order by level, a.sort
+	</select>
+
+    <select id="Common.getCurrentUserJmOrgList" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+        select a.org_id as "orgId",
+            a.parent_id as "parentId",
+            a.org_name as "orgName",
+            a.isfranchise as "jmFlag",
+            decode(a.isfranchise,
+                0,
+                1,
+                decode((select count(1)
+                    from jas_bd_emp_org t
+                    left join jas_sm_org b on t.orgid = b.org_id
+                    where b.org_type = 1 and t.empid = #value#
+                    and b.ORG_ID = a.ORG_ID),
+                    0, 1, 0)
+            ) as "nocheck"
+        from jas_sm_org a
+            start with a.parent_id = 0
+            and a.org_type = 1
+            and a.archiveflag = '0'
+            connect by prior a.org_id = a.parent_id
+            and a.org_type = 1
+            and a.archiveflag = '0'
+            order by level, a.sort
+    </select>
+</sqlMap>

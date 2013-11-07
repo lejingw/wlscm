@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CreateOldbarCode">
+	<select id="CreateOldbarCode.getStartIndex" parameterClass="map" resultClass="long">
+		select a.serial from jat_basic_strip a where a.type = #codeType#
+		and a.year = #year# and a.month = #month#
+	</select>
+	<insert id="CreateOldbarCode.insertStrip" parameterClass="map">
+		<selectKey keyProperty="stripId" resultClass="string" type="pre">select jat_basic_strip_seq.nextval from dual</selectKey>
+		insert into jat_basic_strip(id, type, year, month, serial, createuserid, createdate)
+		values(#stripId#, #codeType#, #year#, #month#, 1, #userid#, #date#)
+	</insert>
+	<update id="CreateOldbarCode.updateStartIndex" parameterClass="map">
+		update jat_basic_strip a set a.serial = #serial#
+		where a.type = #codeType# and a.year = #year# and a.month = #month#
+	</update>
+</sqlMap>

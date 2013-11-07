@@ -1,0 +1,96 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/push/salable.js?t=201211281204.js",
+	"$StringUtil.getContextPath()/dwr/interface/SalableDwr.js"])
+	
+#set($salable = $form.salable)
+<form id='frm' action="salable.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="id" name="id" value="$!{salable.id}"/>
+    <table class="title">
+    	<tr><td>畅销款基础表</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08091302','1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require"  msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require"  msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+            <td class='body1'>分析范围</td>
+            <td class='body2'>
+                <select id="analysisId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+                $StringUtil.star()
+            </td>
+            <td class='body1'>款式大类</td>
+            <td class='body2'>
+                <select id="styleItemClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+                $StringUtil.star()
+            </td>
+		</tr>
+		<tr>
+            <td class='body1'>款式</td>
+            <td class='body2'>
+                <select id="styleId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+                $StringUtil.star()
+            </td>
+            <td class='body1'>款式比例</td>
+            <td class='body2'>
+                <input type='text' id='styleRate'  value="$!{salable.styleRate}" msg="不能为空">$StringUtil.star()
+            </td>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' name='status' readonly value="保存">
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+
+jQuery(function(){
+    var valueDict = {
+            itemClassId : "$!salable.itemClassId",
+            ornaClassId : "$!salable.ornaClassId",
+            analysisId : "$!salable.analysisId",
+            styleItemClassId : "$!salable.styleItemClassId",
+            styleId : "$!salable.styleId"
+    };
+    initItenmClass(valueDict);
+
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnToList").click(function(){
+		window.location = "salable.vm";
+	});
+
+    jQuery("#itemClassId").change(function(){
+        changeItemClass({
+            itemClassId:jQuery("#itemClassId").val()
+        });
+    });
+    jQuery("#ornaClassId").change(function(){
+        changeOrnaClass({
+            itemClassId:jQuery("#itemClassId").val(),
+            ornaClassId:jQuery("#ornaClassId").val()
+        });
+    });
+    jQuery("#styleItemClassId").change(function(){
+        changeStyleItemClass({
+            itemClassId:jQuery("#itemClassId").val(),
+            ornaClassId:jQuery("#ornaClassId").val(),
+            styleItemClassId:jQuery("#styleItemClassId").val()
+        });
+    });
+})
+
+</script>

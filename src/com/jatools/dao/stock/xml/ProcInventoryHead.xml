@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcInventoryHead">
+	<typeAlias alias="ProcInventoryHead" type="com.jatools.vo.stock.ProcInventoryHead" />
+	
+	<resultMap id="result" class="ProcInventoryHead">
+		<result property = "billid" column = "billid" />
+		<result property = "billno" column = "billno" />
+		<result property = "dodate" column = "dodate" />
+		<result property = "orgId" column = "org_id" />
+		<result property = "stockId" column = "stock_id" />
+		<result property = "groups" column = "groups" />
+		<result property = "sumCount" column = "sum_count" />
+		<result property = "sumWeight" column = "sum_weight" />
+		<result property = "sumGrains" column = "sum_grains" />
+		<result property = "sumCost" column = "sum_cost" />
+		<result property = "sumMoney" column = "sum_money" />
+		<result property = "dotype" column = "dotype" />
+		<result property = "douser" column = "douser" />
+		<result property = "ismain" column = "ismain" />
+		<result property = "isstock" column = "isstock" />
+		<result property = "status" column = "status" />
+		<result property = "memo" column = "memo" />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId" column = "create_id" />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId" column = "update_id" />
+	</resultMap>
+	<sql id="ProcInventoryHead_columns_all">
+		billid, billno, dodate, org_id, stock_id, groups, sum_count, sum_weight, sum_grains, 
+		sum_cost, sum_money, dotype, douser, ismain, isstock, status, memo, create_date, 
+		create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="ProcInventoryHead.getProcInventoryHeadPageData" resultMap="result" parameterClass="map">
+		select <include refid="ProcInventoryHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="ProcInventoryHead_columns_all"/>  from jat_proc_inventory_head a 
+			where 1 = 1
+			<isNotEmpty property="billno" prepend="and">  a.billno = #billno# </isNotEmpty>
+			<!-- <isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty> -->
+			<isNotEmpty property="userId" prepend="and">
+				exists (
+					select 1 
+					from jas_bd_emp_org t 
+					left join jas_sm_org b on t.orgid = b.org_id 
+					where a.org_id = t.orgid and b.org_type = 1 and t.empid = #userId#
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.create_date DESC
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcInventoryHead.getProcInventoryHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_inventory_head a
+		where 1 = 1
+		<isNotEmpty property="billno" prepend="and">  a.billno = #billno# </isNotEmpty>
+		<!-- <isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty> -->
+		<isNotEmpty property="userId" prepend="and">
+			exists (
+				select 1 
+				from jas_bd_emp_org t 
+				left join jas_sm_org b on t.orgid = b.org_id 
+				where a.org_id = t.orgid and b.org_type = 1 and t.empid = #userId#
+			) 
+		</isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="ProcInventoryHead.saveProcInventoryHead" parameterClass="ProcInventoryHead">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PROC_INVENTORY_HEAD_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into jat_proc_inventory_head (<include refid="ProcInventoryHead_columns_all"/>)
+		 values(
+		 	#billid#, #billno#, to_date(#dodate#, 'yyyy-mm-dd'), #orgId#, #stockId#, #groups#, #sumCount#, #sumWeight#, 
+		 	#sumGrains#, #sumCost#, #sumMoney#, #dotype#, #douser#, #ismain#, #isstock#, #status#, 
+		 	#memo#, #createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcInventoryHead.getProcInventoryHead" resultClass="ProcInventoryHead" resultMap="result" parameterClass="string">
+    	select <include refid="ProcInventoryHead_columns_all"/> from jat_proc_inventory_head a where a.billid = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="ProcInventoryHead.updateProcInventoryHead" parameterClass="ProcInventoryHead">
+		update jat_proc_inventory_head a set 
+			a.dodate      = to_date(#dodate#, 'yyyy-mm-dd'), 
+			a.org_id      = #orgId#, 
+			a.stock_id    = #stockId#, 
+			a.groups      = #groups#, 
+			a.sum_count   = #sumCount#, 
+			a.sum_weight  = #sumWeight#, 
+			a.sum_grains  = #sumGrains#, 
+			a.sum_cost    = #sumCost#, 
+			a.sum_money   = #sumMoney#, 
+			a.dotype      = #dotype#, 
+			a.douser      = #douser#, 
+			a.isstock     = #isstock#, 
+			a.status      = #status#, 
+			a.memo        = #memo#, 
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#
+		where a.billid = #billid#
+	</update>
+	
+	<update id="ProcInventoryHead.updateProcInventoryHeadStatus" parameterClass="map">
+		update jat_proc_inventory_head a set 
+		a.status = #status#
+		where a.billid = #billid#
+	</update>
+	
+	<delete id="ProcInventoryHead.deleteProcInventoryHead" parameterClass="string">
+		delete from jat_proc_inventory_head a where a.billid = #value#
+	</delete>
+	
+	
+	<select id="ProcInventoryHead.getMainBillCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_inventory_head a
+		where a.org_id = #orgId# and a.ismain = 1 and status = 1
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+	</select>
+	
+	<update id="ProcInventoryHead.modifyBillIsMain" parameterClass="map">
+		update jat_proc_inventory_head a set 
+		a.ismain = #isMain#
+		where a.billid = #billid#
+	</update>
+	
+	<update id="ProcInventoryHead.updateInventorySumCount" parameterClass="map" >
+		update jat_proc_inventory_head a
+		set a.sum_count = (
+			select count(*) from jat_proc_inventory_line b where a.billid = b.billid or a.billid = b.old_billid
+		),
+		a.update_date=#updateDate#, a.update_id=#updateId#
+		where a.billid = #billid#
+	</update>
+	
+	<!-- 合并盘点单 -->
+	<update id="ProcInventoryHead.mergeInventory" parameterClass="map">
+		update jat_proc_inventory_line a
+		set 
+		  	a.old_billid = a.billid, a.billid = #mainBillId#,
+		  	a.update_date = #updateDate#, a.update_id = #userId#
+		where 1 = 1
+		  and exists
+		(select 1
+		         from (select max(b.lineid), b.orna_code
+		                 from jat_proc_inventory_line b
+		                where b.billid = #oldBillId#
+		                group by b.orna_code) aa
+		        where 1 = 1
+		          and a.orna_code = aa.orna_code
+		          and not exists (select 1
+		                 from jat_proc_inventory_line c
+		                where aa.orna_code = c.orna_code
+		                  and c.billid = #mainBillId#))
+		  and a.billid = #oldBillId#
+	</update>
+	
+	<select id="ProcInventory.asertIsMerge" parameterClass="string" resultClass="int">
+		select count(*) from jat_proc_inventory_line a where a.old_billid = #value#
+	</select>
+</sqlMap>

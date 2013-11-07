@@ -1,0 +1,152 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/SaleChangeLabelDwr.js"])
+
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>换标签原因#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08012301','1')/>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08012301','2')/>
+				<input type='button' value='查询' class='btn' id='btnSearch' style="display:none;"/>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08012301','3')/>
+			</td>
+		</tr>
+    </table>
+		#set($cond = $form.condition)
+		#set($changelabelReason = $!cond.get('changelabelReason'))
+		
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+				<td class="body1">原因</td>
+    			<td class="body2">
+    				<input type='text' id="changelabelReason" name='changelabelReason' value="" >
+    			</td>
+				<td class="body1"></td>
+    			<td class="body2"></td>
+    		</tr>
+        </table>
+	</div>
+	
+	<div class='scroll'>
+    <table class='list' style="width:1300px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+                <th style='width:180px;'>换标签原因</th>
+        		<th style='width:90px;'>标签种类</th>
+        		<th style='width:60px;'>新增金额</th>
+				<th style='width:90px;'>新增基础价</th>
+        		<th style='width:90px;'>新增特殊工费</th>
+        		<th style='width:60px;'>更新原因</th>
+        		<th style='width:90px;'>创建人</th>
+        		<th style='width:120px;'>创建时间</th>
+        		<th style='width:90px;'>修改人</th>
+				<th style='width:120px;'>修改时间</th>
+				<th style='width:60px;'>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl" >
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td><a href='javascript:toEditPage($!{map.changelabelId});'>$!map.changelabelReason</a></td>
+				<td>#if("$!map.labelKind"=="010")物流标签#elseif("$!map.labelKind"=="001")价格标签#else物流价格标签#end</td>
+				<td style="color:blue;">#if("$!map.isincreaseamount"=="1")允许#end</td>
+				<td style="color:blue;">#if("$!map.isbasicPrice"=="1")允许#end</td>
+				<td style="color:blue;">#if("$!map.specialWorkPrice"=="1")允许#end</td>
+				<td style="color:blue;">#if("$!map.isupdatecauses"=="1")允许#end</td>
+				<td>$!BdCommon.getUserName($!map.createuserid)</td>
+				<td>$!map.createdate
+					<input type="hidden" name="changelabelId" value="$!map.changelabelId"/>
+				</td>
+				<td>$!BdCommon.getUserName($!map.updateuserid)</td>
+				<td>$!map.updatedate</td>
+				<td>#if("$!map.status"=="0")<font style='color:red'>封存</font>#else$!DictUtil.getValue('status', $!map.status)#end</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+	
+<script>
+
+function setValues(){
+	
+}
+
+
+jQuery(function(){
+	setValues();
+	
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+    	window.location = "saleChangeLabel.vm?user_action=toEdit&changelabelId=" + $n("changelabelId")[index].value;
+    });
+	initQuery("btnSearch", "btnQueryCancel");
+	jQuery("#btnAdd").click(function(){
+		window.location = "saleChangeLabel.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deleteSaleChangeLabel);
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#ornaClassId").val("");
+		jQuery("#itemClassId").val("");
+		jQuery("#orgName").val("");
+		jQuery("#orgId").val("");
+	});
+});
+
+function toEditPage(changelabelId){
+	window.location = "saleChangeLabel.vm?user_action=toEdit&changelabelId=" + changelabelId;
+}
+function deleteSaleChangeLabel(){
+	var idxs = getSelectIndexs("chk");
+	if(idxs <= 0){
+		alert("请选择要删除的数据");
+	} else {
+		confirm("确定删除?", function(){
+			showLayer(true);
+			var itemids = "";
+			for(var i=0; i<idxs.length;i++){
+				var itemid = $n("changelabelId")[idxs[i]].value;
+				if(itemids) itemids = itemids + ";" + itemid;
+				else itemids = itemid;
+			}
+			SaleChangeLabelDwr.deleteSaleChangeLabel(itemids, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	})
+	}
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

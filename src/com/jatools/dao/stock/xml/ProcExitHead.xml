@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcExitHead">
+	<typeAlias alias="ProcExitHead" type="com.jatools.vo.stock.ProcExitHead" />
+
+	<resultMap id="result" class="ProcExitHead">
+		<result property="billid" column="billid" />
+		<result property="billno"  column="billno" />
+		<result property="dodate"  column="dodate" />
+		<result property="orgId"  column="org_id" />
+		<result property="stockId"  column="stock_id" />
+		<result property="vendorId"  column="vendor_id" />
+		<result property="invalid"  column="invalid" />
+		<result property="sumCount"  column="sum_count" />
+		<result property="sumWeight"  column="sum_weight" />
+		<result property="sumGrains"  column="sum_grains" />
+		<result property="sumCost"  column="sum_cost" />
+		<result property="sumMoney"  column="sum_money" />
+		<result property="status"  column="status" />
+		<result property="isCheck"  column="is_check" />
+		<result property="isFlag"  column="is_flag" />
+		<result property="memo"  column="memo" />
+		<result property="createDate"  column="create_date" />
+		<result property="createId"  column="create_id" />
+		<result property="updateDate"  column="update_date" />
+		<result property="updateId"  column="update_id" />
+		<result property="checkDate"  column="check_date" />
+		<result property="checkId"  column="check_id" />
+		<result property="cancelDate"  column="cancel_date" />
+		<result property="cancelId"  column="cancel_id" />
+		<result property="charge"  column="charge" />
+	</resultMap>
+
+	<sql id="ProcExitHead_columns_all">
+		billid, billno, dodate, org_id, stock_id, vendor_id, invalid, sum_count, sum_weight, 
+		sum_grains, sum_cost, sum_money, status, is_check, is_flag, memo, create_date, 
+		create_id, update_date, update_id, check_date, check_id, cancel_date, cancel_id, charge
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="ProcExitHead.getProcExitHeadPageData" resultMap="result" parameterClass="map">
+	
+		select <include refid="ProcExitHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="ProcExitHead_columns_all" /> from jat_proc_exit_head a
+			where 1 = 1
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno#</isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and"> a.stock_id = #stockId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.dodate DESC
+			                                                               
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取分页数据 -->
+	<select id="ProcExitHead.getReportProcExitHeadData" resultMap="result" parameterClass="map">
+		select <include refid="ProcExitHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="ProcExitHead_columns_all" /> from jat_proc_exit_head a where a.status = 8 and nvl(a.is_check, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+	<select id="ProcExitHead.getProcExitHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_exit_head a where 1 = 1
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno#</isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and"> a.stock_id = #stockId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	<!-- 获取总条数 -->
+	<select id="ProcExitHead.getReportProcExitHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_exit_head a where a.status = 8 and nvl(a.is_check, 0) = 0
+	</select>
+	<!-- 保存数据 -->
+	<insert id="ProcExitHead.saveProcExitHead" parameterClass="ProcExitHead">
+		<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PROC_EXIT_HEAD_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into jat_proc_exit_head(
+			<include refid="ProcExitHead_columns_all" />
+		)
+		values(
+			#billid#, #billno#, #dodate#, #orgId#, #stockId#, #vendorId#, #invalid#, #sumCount#, #sumWeight#, 
+			#sumGrains#, #sumCost#, #sumMoney#, #status#, #isCheck#, #isFlag#, #memo#, #createDate#, 
+			#createId#, #updateDate#, #updateId#, #checkDate#, #checkId#, #cancelDate#, #cancelId#, #charge#
+		)
+	</insert>
+	
+	<!-- 根据id获取记录对象 -->
+	<select id="ProcExitHead.getProcExitHead" resultClass="ProcExitHead" resultMap="result" parameterClass="string">
+		select <include refid="ProcExitHead_columns_all" />
+		from jat_proc_exit_head a where a.billid = #value#
+	</select>
+
+	<!-- 根据id获取记录对象 -->
+	<select id="ProcExitHead.getProcExitHeadByBillno" resultClass="ProcExitHead" resultMap="result" parameterClass="string">
+		select <include refid="ProcExitHead_columns_all" />
+		from jat_proc_exit_head a where a.billno = #value#
+	</select>
+	
+	<!-- 修改信息 -->
+	<update id="ProcExitHead.updateProcExitHead" parameterClass="ProcExitHead">
+		update jat_proc_exit_head a set
+			a.billid      = #billid#, 
+			a.billno      = #billno#,
+			a.dodate      = #dodate#,
+			a.org_id      = #orgId#,
+			a.stock_id    = #stockId#,
+			a.vendor_id   = #vendorId#,
+			a.invalid     = #invalid#,
+			a.sum_count   = #sumCount#,
+			a.sum_weight  = #sumWeight#,
+			a.sum_grains  = #sumGrains#,
+			a.sum_cost    = #sumCost#,
+			a.sum_money   = #sumMoney#,
+			a.status      = #status#,
+			a.is_check    = #isCheck#,
+			a.is_flag     = #isFlag#,
+			a.memo        = #memo#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#,
+			a.check_date  = #checkDate#,
+			a.check_id    = #checkId#,
+			a.cancel_date = #cancelDate#,
+			a.cancel_id   = #cancelId#,
+			a.charge	  = #charge#
+		where a.billid = #billid#
+	</update>
+
+	<!-- 修改状态 -->
+	<update id="ProcExitHead.updateProcExitHeadStatus" parameterClass="map">
+		update jat_proc_exit_head a set
+		a.status = #status#
+		where a.billid = #billid#
+	</update>
+
+	<!-- 物理删除 -->
+	<delete id="ProcExitHead.deleteProcExitHead" 	parameterClass="string">
+		delete from jat_proc_exit_head a where a.billid = #value#
+	</delete>
+
+	<insert id="proExitHead.insertProdccountByExit" parameterClass="map">
+		insert into jat_cash_prod_account(
+		    pr_id, 
+		    bill_type, bill_no, bill_date, org_id, dotype, voder_id, material_type, 
+		    item_class_id, cash_unit, bill_nums, cash_nums, no_nums, is_checked, status, memo, 
+		    create_date, create_id, update_date, update_id
+		 ) select 
+		   jat_cash_prod_account_seq.nextval,
+		   'TL', h.billno as bill_no, h.dodate as bill_date, h.org_id, '-1',h.vendor_id as voder_id, a.material_type,
+		   a.item_class_id, a.cash_unit, a.exit_nums as bill_nums, 0, a.exit_nums as no_nums, 1, 2, a.orna_no,
+		   #createDate#, #userId#, #updateDate#, #userId#
+		 from jat_proc_exit_line a 
+		 	left join jat_proc_exit_head h on a.billid = h.billid
+		 where a.billid = #billid#
+	</insert>
+	
+	<update id="proExitHead.modifyProdAccountStatus" parameterClass="map">
+		update jat_cash_prod_account a
+		set 
+			a.status = #status#, a.update_id = #userId#, a.update_date = #updateDate#
+		where 1=1 
+			and a.BILL_NO = #billno#
+			and a.MEMO = #ornaCode#
+			and a.status = 2
+			and a.is_checked = 0
+	</update>
+	
+	<update id="proExitHead.modifyProdAccountStatusValid" parameterClass="map">
+		update jat_cash_prod_account a
+		set a.status = 2 , 
+		    a.update_date = #updateDate#,
+		    a.update_id = #updateId#
+		where exists (
+		      select 1 from jat_proc_exit_line b 
+		      where a.bill_no = b.billno
+		      and a.memo = b.orna_no
+		      and b.lineid = #lineId#
+		)
+		and a.status = 12
+	</update>
+	
+	
+	<insert id="ProcExitHead.cashCharge" parameterClass="map">
+		insert into jat_cash_money_account
+	    (
+	         mr_id, 
+	         bill_no, bill_type, bill_date, org_id, dotype, voder_id, moneys, 
+	         status, memo, create_date, create_id, update_date, update_id,
+	         loss_money
+	    )
+	    select 
+	         JAT_CASH_MONEY_ACCOUNT_SEQ.nextval,
+	         a.billno, 'TL', a.dodate, a.org_id, #billType#, a.vendor_id, #money#,
+	         2, null, #createDate#, #userId#, #updateDate#, #userId#,
+	         (
+	          select nvl(max(LOSS_MONEY), 0) + #money#
+	                from jat_cash_money_account t
+	              where t.voder_id = a.vendor_id
+	                  and exists (select voder_id
+	                      from (select voder_id, max(mr_id) mr_id
+	                              from jat_cash_money_account
+	                             group by voder_id) tt
+	                     where t.mr_id = tt.mr_id and t.voder_id=tt.voder_id)
+	           ) as LOSS_MONEY
+	    from jat_proc_exit_head a 
+	    where 
+	      a.billid = #billid#
+	</insert>
+	
+	<select id="ProcExitHead.getProdAccountByOut" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="map">
+		select 
+			c.pr_id            as "prId",
+			c.bill_no          as "billNo",
+			c.bill_type        as "billType",
+			c.dotype		   as "dotype",
+			c.voder_id         as "voderId",
+			c.item_class_id    as "itemClassId",
+			f.item_class_dsc   as "itemClassName",
+			g.article_type_id  as "articleTypeId",
+			g.article_type_dsc as "articleTypeName",
+			c.no_nums          as "noNums",
+			c.bill_nums        as "billNums",
+			c.cash_nums        as "cashNums",
+			c.user_nums        as "userNums"
+		from jat_cash_prod_account c
+			left join jas_bd_item_class f  on c.item_class_id = f.item_class_id
+			left join jas_bd_articletype g   on f.article_type_id = g.article_type_id
+		where 1 = 1
+			and c.BILL_NO = #billno#
+			and c.MEMO = #ornaCode#
+			and c.status = 2
+			and c.is_checked = 0
+	</select>
+	
+	<update id="ProcExitHead.subProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+		   set a.user_nums = a.user_nums -
+	       (
+	       		select t.exit_nums from jat_proc_exit_line t where a.bill_no=t.billno and a.memo=t.orna_no and t.billid = #billid#
+	       ) , update_date = #updateDate#, update_id = #updateId#
+		 where exists (
+		 	select 1 from jat_proc_exit_line b where a.bill_no=b.billno and a.memo=b.orna_no and b.billid = #billid#
+		  )
+	</update>
+</sqlMap>

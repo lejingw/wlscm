@@ -1,0 +1,158 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" name="frm" method="post" action="prodProd.vm">
+	<input type="hidden" name="user_action" value="showWin"/>
+    <table class="title">
+    	<tr><td>货品台账#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='筛选' class='btn' id='btnSearch'>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		#set($cond = $form.condition)
+    		#set($billno = $!cond.get('billno'))
+    		#set($orgId = $!cond.get('orgId'))
+    		#set($startDate = $!cond.get('startDate'))
+    		#set($endDate = $!cond.get('endDate'))
+			#set($verdorId = $!cond.get('verdorId'))
+			#set($status = $!cond.get('status'))
+			#set($dotype = $!cond.get('dotype'))
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+    			<td class="body1">业务类型</td>
+    			<td class='body2'>
+					<select id="dotype" name='dotype'  value="$!{dotype}" >
+						<option value="">全部</option>
+						<option value="-1">交接单</option>
+						<option value="1">委外发料</option>
+					</select>
+    				<input type='hidden' id="verdorId" name='verdorId' value="$!{verdorId}">
+    				<input type='hidden' id="orgName" name='orgName' value="$!BdCommon.getOrgName($!orgId)" readonly class="target" onclick="showSelectOrgWin()">
+					<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+    			</td>
+    		</tr>
+			<tr>
+    			<td class="body1">创建时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">创建时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+    <table class='list'>
+    	<thead>
+			<tr>
+				<td width='20px'><input type='checkbox' name='chkall' /></td>
+                <th>来源单据编号</th>
+        		<th>来源业务类型</th>
+				<th>原料类型</th>
+				<th>商品类别</th>
+				<th>大类</th>
+				<th>单据时间</th>
+				<th>重量</th>
+				<th>锁定数量</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>$!map.billNo</td>
+				<td>#if($!map.dotype==-1)交接单#else委外发料#end</td>
+				<td>$!map.materialTypeName</td>
+				<td>$!map.articleTypeDsc</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!map.billDate</td>
+				<td>$!map.noNums</td>
+				<td>$!map.userNums
+					<input type='hidden' name='prId' value="$!map.prId"/>
+					<input type='hidden' name='billNo' value="$!map.billNo"/>
+					<input type='hidden' name='materialTypeName' value="$!map.materialTypeName"/>
+					<input type='hidden' name='materialType' value="$!map.materialType"/>
+					<input type='hidden' name='itemClassId' value="$!map.itemClassId"/>
+					<input type='hidden' name='itemClassName' value="$!BdCommon.getItemClassDesc($!map.itemClassId)"/>
+					<input type='hidden' name='noNums' value="$!map.noNums"/>
+					<input type='hidden' name='userNums' value="$!map.userNums"/>
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#orgName").val("$!BdCommon.getOrgName($!orgId)");
+	jQuery("#dotype").val("$!dotype");
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', false);
+	initQuery("btnSearch", "btnQueryCancel");
+
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#orgId").val("");
+		jQuery("#orgName").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+		jQuery("#status").val("");
+	});
+});
+
+
+function getValues(){
+	var idx = getSelectIndex("chk");
+	if(idx == -1){
+		alert("请选择单据");
+		return false;
+	} else {
+		var noNums = $n("noNums")[idx].value;
+		if(floatSub(noNums, 0) <=0){
+			alert("请选择重量大于0 的单据");
+			return false;
+		}
+        var result = {
+         	prId:$n("prId")[idx].value,
+        	billNo:$n("billNo")[idx].value,
+        	materialTypeName:$n("materialTypeName")[idx].value,
+        	materialType:$n("materialType")[idx].value,
+        	itemClassId:$n("itemClassId")[idx].value,
+        	itemClassName:$n("itemClassName")[idx].value,
+        	noNums:noNums
+        };
+	 	return result;
+   }
+}
+</script>

@@ -1,0 +1,146 @@
+<form id="frm" action="refreshCache.vm" method="post">
+	<input type="hidden" name="user_action" value="refresh"/>
+	<input type="hidden" id="items" name="items"/>
+    <table class="title">
+    	<tr><td>刷新缓存#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='刷新' class='btn' id='btnRefresh'>
+			</td>
+		</tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>项目编码</th>
+        		<th>项目名称</th>
+        		<th>刷新时间</th>
+				<th style='width:60px;'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>user</td>
+				<td>用户数据</td>
+				<td>$form.map.user</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>dict</td>
+				<td>数据字典</td>
+				<td>$form.map.dict</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>parameter</td>
+				<td>参数配置</td>
+				<td>$form.map.parameter</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>org</td>
+				<td>组织</td>
+				<td>$form.map.org</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>articletype</td>
+				<td>款式类别</td>
+				<td>$form.map.articletype</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>itemClass</td>
+				<td>大类</td>
+				<td>$form.map.itemClass</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>ornaClass</td>
+				<td>小类</td>
+				<td>$form.map.ornaClass</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>itemOrnaClass</td>
+				<td>大类小类对应关系</td>
+				<td>$form.map.itemOrnaClass</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>styleClass</td>
+				<td>款式大类、款式中类、款式小类</td>
+				<td>$form.map.styleClass</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>unit</td>
+				<td>计量单位</td>
+				<td>$form.map.unit</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>quality</td>
+				<td>商品材质</td>
+				<td>$form.map.quality</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>vendor</td>
+				<td>供应商</td>
+				<td>$form.map.vendor</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>styleTheme</td>
+				<td>主题款</td>
+				<td>$form.map.styleTheme</td>
+				<td><input type="button" class="btn" value="刷新" onclick="btnRefreshItem(this)"/></td>
+			</tr>
+    	</tbody>
+    </table>
+</form>
+<script>
+function refreshItems(items){
+	jQuery("#items").val(items);
+	jQuery("#frm").submit();
+}
+function btnRefreshItem(obj){
+	var rowIndex = obj.parentNode.parentNode.rowIndex;
+	refreshItems($("tbl").rows[rowIndex-1].cells[1].innerHTML);
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true);
+	
+	jQuery("#btnRefresh").click(function(){
+		var indexs = getSelectIndexs("chk");
+		if(indexs.length<1){
+			alert("请选择刷新的项目");
+			return ;
+		}
+		var items = [];
+		for(var i=0;i<indexs.length;i++){
+			items.push($("tbl").rows[indexs[i]].cells[1].innerHTML);
+		}
+		refreshItems(items.join(","));
+	});
+	/*
+	*/
+});
+</script>

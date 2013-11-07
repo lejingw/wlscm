@@ -1,0 +1,70 @@
+<!-- 正配货查询 -->
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/DispatchOrnaDwr.js"])
+<form id="frm" action="dispatchOrna.vm?user_action=showDispatching" method="post">
+	<input type='hidden' name='orderLineId' id='orderLineId' value="$!form.condition.orderLineId"/>
+    <table class='list'>
+    	<thead>
+    		<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+    			<th>商品编码</th><th>商品名称</th><th>计量单位</th><th>款式</th>
+				<th>色级</th><th>净度</th><th>总重量</th><th>主石重</th><th>配石重</th><th>尺寸</th><th>网点金额</th>
+    			<th>配货方式</th><th>说明</th><th></th><th></th>
+    		</tr>
+    	</thead>
+    	<tbody id='tbl'>
+    	#foreach($item in $form.pager.pageData)
+    		<tr>
+				<td><input type='checkbox' name='chk'/></td>
+    			<td>$!item.ornaCode</td>
+    			<td>$!item.ornaDsc</td>
+    			<td>$!BdCommon.getUnitName($!item.unitId)</td>
+				<td>$!HtmlUtil.printStyle($!item.styleId, $!item.styleName, $!item.bigGraph)</td>
+    			<td>$!DictUtil.getValue('diacolorgrade',$!item.colorGradeId)</td>
+    			<td>$!DictUtil.getValue('diaclean',$!item.cleanId)</td>
+    			<td>$!item.allQty</td>
+    			<td>$!item.mainWeight</td>
+    			<td>$!item.partWeight</td>
+    			<td>$!item.sizeName</td>
+    			<td>$!item.newPosMoney</td>
+    			<td>$!DictUtil.getValue('dispatchFlag', $!item.dispatchFlag)</td>
+				<td><input type='text' readonly style='width:90px;' value='#if("1"=="$!{item.isPerfectMatch}")精确匹配#else模糊匹配:#end$!{item.matchRuleDsc}'></td>
+    			<td><input type='button' style='width:40px;' value='变更' onclick="changeDispatching(this,'$!{item.id}')"/></td>
+    			<td><input type='button' style='width:40px;' value='删除' onclick="deleteDispatching(this,'$!{item.id}')"/></td>
+            </tr>
+    	#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+});
+/**
+ * 删除正配货记录
+ */
+function deleteDispatching(obj, ornaLogId){
+	confirm("确定删除配货记录?", function(){
+        DispatchOrnaDwr.deleteDispatchLog(ornaLogId, function(data){
+			alert(data?data:"删除成功", function(){
+				parent.changeDispatchingNum(jQuery("#orderLineId").val());
+    			jQuery("#frm").submit();
+			});
+		});
+	});
+}
+/**
+ * 变更记录
+ */
+function changeDispatching(obj, ornaLogId){
+	parent.parent.changeDispatching(obj, jQuery("#orderLineId").val(), ornaLogId);
+}
+/**
+ * 配货变更回调，刷新页面
+ */
+function refreshWin(){
+	jQuery("#frm").submit();
+}
+</script>

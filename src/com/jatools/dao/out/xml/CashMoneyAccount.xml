@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashMoneyAccount">
+	<typeAlias alias="CashMoneyAccount" type="com.jatools.vo.out.CashMoneyAccount" />
+	
+	<resultMap id="result" class="CashMoneyAccount">
+		<result property = "mrId"       column = "mr_id"       />
+		<result property = "billNo"     column = "bill_no"     />
+		<result property = "billType"   column = "bill_type"   />
+		<result property = "billDate"   column = "bill_date"   />
+		<result property = "orgId"      column = "org_id"      />
+		<result property = "dotype"     column = "dotype"      />
+		<result property = "voderId"    column = "voder_id"    />
+		<result property = "moneys"     column = "moneys"      />
+		<result property = "status"     column = "status"      />
+		<result property = "memo"       column = "memo"        />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId"   column = "create_id"   />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId"   column = "update_id"   />
+		<result property = "lossMoney"   column = "loss_money"   />
+		
+		<result property = "jjId" column = "jjId" />
+		<result property = "wwId"   column = "wwId"   />
+		<result property = "dgId" column = "dgId" />
+		<result property = "dxId"   column = "dxId"   />
+		<result property = "fkId"   column = "fkId"   />
+	</resultMap>
+	<sql id="CashMoneyAccount_columns_all">
+		mr_id, bill_no, bill_type, bill_date, org_id, dotype, voder_id, moneys, status, 
+		memo, create_date, create_id, update_date, update_id, loss_money
+    </sql>
+    <sql id="CashMoneyAccount_columns_all_page">
+		mr_id, bill_no, bill_type, bill_date, org_id, dotype, voder_id, moneys, status, 
+		memo, create_date, create_id, update_date, update_id, loss_money,jjId,wwId,dgId,dxId,fkId
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="CashMoneyAccount.getCashMoneyAccountPageData" resultMap="result" parameterClass="map">
+		select <include refid="CashMoneyAccount_columns_all_page"/> from (select rownum rownum_ , AA.* from (
+			select	
+				(select h.billid  from JAT_PUR_HANDOVER_HEAD h where a.bill_no = h.billno) jjId,
+		      	(select w.billid  from jat_out_vendor_head w where a.bill_no = w.billno and a.bill_type = 'WW') wwId,
+		       	(select d.billid  from jat_out_vendor_head d where a.bill_no = d.billno and a.bill_type = 'DG') dgId,
+		       	(select x.billid  from jat_out_vendor_head x where a.bill_no = x.billno and a.bill_type = 'DX') dxId,
+		       	(select f.pay_id  from jat_cash_pay_money f where a.bill_no = f.BILL_NO) fkId,
+			 <include refid="CashMoneyAccount_columns_all"/> from jat_cash_money_account a 
+			where 1 = 1
+			<isNotEmpty property="billno" prepend="and">  a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and">  a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and">  a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.mr_id DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="CashMoneyAccount.getCashMoneyAccountTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_money_account a
+		where 1 = 1
+		<isNotEmpty property="billno" prepend="and">  a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and">  a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and">  a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<sql id="CashMoneyAccount.getNewLossMoney">
+		(
+			select nvl(max(LOSS_MONEY), 0) + (#moneys#*#dotype#)
+          	from jat_cash_money_account t
+         	where t.voder_id = #voderId#
+           		and exists (select voder_id
+                  from (select voder_id, max(mr_id) mr_id
+                          from jat_cash_money_account
+                         group by voder_id) tt
+                 where t.mr_id = tt.mr_id and t.voder_id=tt.voder_id)
+       ) 
+	</sql>
+    <!-- 保存数据 -->
+    <insert id="CashMoneyAccount.saveCashMoneyAccount" parameterClass="CashMoneyAccount">
+    	<selectKey resultClass="java.math.BigDecimal" keyProperty="mrId" type="pre">
+			select JAT_CASH_MONEY_ACCOUNT_SEQ.nextval as mrId from dual
+		</selectKey>
+		insert into jat_cash_money_account(<include refid="CashMoneyAccount_columns_all"/>)
+		 values(
+		 	#mrId#, #billNo#, #billType#, #billDate#, #orgId#, #dotype#, #voderId#, 
+		 	#moneys#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#,
+		 	<include refid="CashMoneyAccount.getNewLossMoney"/> 
+		 )
+    </insert>
+    
+    <!-- 根据id获取记录对象 -->
+    <select id="CashMoneyAccount.getCashMoneyAccount" resultClass="CashMoneyAccount" resultMap="result" parameterClass="string">
+    	select <include refid="CashMoneyAccount_columns_all"/> from jat_cash_money_account a where a.mr_id = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="CashMoneyAccount.updateCashMoneyAccount" parameterClass="CashMoneyAccount">
+		update jat_cash_money_account a set 
+			a.bill_no     = #billNo#,
+			a.bill_type   = #billType#,
+			a.bill_date   = #billDate#,
+			a.org_id      = #orgId#,
+			a.dotype      = #dotype#,
+			a.voder_id    = #voderId#,
+			a.moneys      = #moneys#,
+			a.status      = #status#,
+			a.memo        = #memo#,
+			a.create_date = #createDate#,
+			a.create_id   = #createId#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#
+		where a.mr_id = #mrId#
+	</update>
+	<delete id="CashMoneyAccount.deleteCashMoneyAccount" parameterClass="string">
+		delete from jat_cash_money_account a where a.mr_id = #value#
+	</delete>
+	<select id="CashMoneyAccount.selectCashMoneyAccountCount" resultClass="int" parameterClass="map">
+		select count(*) from jat_cash_money_account a 
+		where 1=1 
+			and a.bill_no = #billno#
+			and a.dotype = #dotype#
+	</select>
+	
+	<!-- 
+	<update id="CashMoneyAccount.modifyCashMoneyAccountChecked" parameterClass="map">
+		update jat_cash_money_account a set
+			a.is_checked = 1 ,a.update_date = #updateDate#, a.update_id = #userId#
+		where
+			a.bill_no = #billno# 
+			and a.is_checked = 0 
+			and a.item_class_id = #itemClassId#
+			and a.dotype = #dotype#
+			and a.material_type = #materialType#
+	</update>
+	
+	
+	 -->
+</sqlMap>

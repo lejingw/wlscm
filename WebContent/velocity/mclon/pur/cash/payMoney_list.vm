@@ -1,0 +1,209 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+"$StringUtil.getContextPath()/dwr/interface/PayMoneyDwr.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>付款单#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	#set($cond = $form.condition)
+	#set($billno = $!cond.get('billno'))
+	#set($orgId = $!cond.get('orgId'))
+	#set($startDate = $!cond.get('startDate'))
+	#set($endDate = $!cond.get('endDate'))
+	#set($verdorId = $!cond.get('verdorId'))
+	#set($status = $!cond.get('status'))
+	#set($createId = $!cond.get('createId'))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '0802090401','1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '0802090401','2')>
+				##<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '0802090401','3')>
+				<input type='button' value='查询' class='btn' id='btnSearch2' $RightUtil.able($session, '0802090401','3')>
+				<input type='checkbox' id='allBill' name="allBill" onchange="showAllBill(this)" #if("$!status" == "all")checked#end/>显示所有单据
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '0802090401','4')>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+    			<td class="body1">创建人</td>
+    			<td class='body2'>
+    				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+					<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+    			</td>
+    		</tr>
+			<tr>
+				<td class="body1">供应商</td>
+    			<td class='body2'>
+    				<select id="verdorId" name='verdorId'  value="$!{verdorId}" >$StringUtil.emptyOption()</select>
+    			</td>
+				<td class="body1">状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status'  value="$!{status}" >
+						$StringUtil.emptyOption()
+						<option value="all">所有单据</option>
+						<option value="1">保存</option>
+						<option value="8">关闭</option>
+					</select>
+    			</td>
+			</tr>
+			<tr>
+    			<td class="body1">业务时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">业务时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+	<div class="scroll">
+    <table class='list' style="width:1300px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width="60px">状态</th>
+                <th width="120px">单据编号</th>
+        		<th width="180px">采购组织</th>
+        		<th width="180px">供应商</th>
+				<th width="90px">业务时间</th>
+        		<th width="90px">付款金额</th>
+        		<th width="90px">创建人</th>
+        		<th width="120px">创建时间</th>
+				<th width="90px">修改人</th>
+        		<th width="120px">修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td style="color:blue;">$!DictUtil.getValue('status', $!map.status)</td>
+				<td><a href='javascript:toEditPage($!{map.payId});'>$!map.billNo</a></td>
+				<td>$!BdCommon.getOrgName($!map.orgId)</td>
+				<td><input type='text' readonly class='none' value="$!BdCommon.getVendorName($!map.voderId)" style='width:180px;'></td>
+				<td>$!map.billDate</td>
+				<td>$!map.payMoney</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.createDate
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="payId" value="$!map.payId"/>
+				</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!map.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#status").val("$!status");
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!verdorId");
+	});
+}
+
+function disableDeleteBtn(checked, index){
+	jQuery("#btnDelete").attr("disabled", true);
+	if(checked ){
+		if($n("status_list")[index].value==="1"){
+			jQuery("#btnDelete").attr("disabled", false);
+		}
+	}
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', false, disableDeleteBtn, function(index){
+    	window.location = "payMoney.vm?user_action=toEdit&payId=" + $n("payId")[index].value;
+    });
+	//initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("FK01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "payMoney.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deletePayMoney);
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+		jQuery("#status").val("");
+		jQuery("#createName").val("");
+		jQuery("#createId").val("");
+	});
+});
+
+function toEditPage(payId){
+	window.location = "payMoney.vm?user_action=toEdit&payId=" + payId;
+}
+function deletePayMoney(){
+	var idx = getSelectIndex("chk");
+	if(idx == -1){
+		alert("尚未选择要删除的行");
+	} else {
+		confirm("确定删除?", function(){
+			showLayer(true);
+			PayMoneyDwr.deletePayMoney($n("payId")[idx].value, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	});
+	}
+}
+function showAllBill(obj) {
+	if(obj.checked){
+		jQuery("#status").val("all");
+	} else {
+		jQuery("#status").val("");
+	}
+	jQuery("#frm").submit();
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+</script>

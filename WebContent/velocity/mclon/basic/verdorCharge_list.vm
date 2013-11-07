@@ -1,0 +1,73 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/verdorCharge.js"])
+<form  id="myForm" method="post" action="verdorCharge.vm">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>新特殊工费#if($!form.message)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end</td></tr>
+            </td>
+        </tr>
+    </table>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08012701','1')>
+				<input type='button' value='删除' class='btn' onclick='deleteVerdorCharge()' $RightUtil.able($session, '08012701','2')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08012701','3')>
+				<input type='button' value='查询' class='btn' id="btnQueryShow"  $RightUtil.able($session, '08012701','4')>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+	    <table class='list' >
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+                <th width='60px'>状态</th>
+                <th width='180px'>供应商</th>
+				<th width='120px'>款式</th>
+				<th width='120px'>备注</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.chargeId}'/>$velocityCounter
+					<input type='hidden' name='status' value='$!{map.status}'/></td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+                <td><a href='javascript:toEditPage($!{map.chargeId});'>$!BdCommon.getVendorName($!map.verdorId)</a></td>
+                <td>$!HtmlUtil.printStyle("$!map.styleId", $!map.styleName, $!map.isBigGraph)</td>
+				<td><input type='text' readonly class='none' value="$!map.memo" style='width:180px;'></td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('myForm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null, function(index){
+		window.location = "verdorCharge.vm?user_action=toEditVerdorCharge&id=" + $n("chk")[index].value;
+	});
+	initQuery2("XTSGF", 'myForm', 'btnQueryShow');
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "verdorCharge.vm?user_action=toEditVerdorCharge";
+	});
+	
+});
+function toEditPage(id){
+	window.location = "verdorCharge.vm?user_action=toEditVerdorCharge&id=" + id;
+}
+</script>

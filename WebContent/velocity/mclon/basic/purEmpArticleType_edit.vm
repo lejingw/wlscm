@@ -1,0 +1,164 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PurEmpArticleTypeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type='hidden' id="empFlag" value="$!form.empFlag">
+    <table class="title">
+    	<tr><td>采购员商品类别</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='添加行' class='btn' id='btnAddOutOrg'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>#if("1"=="$!form.empFlag") 采购员 #else 商品类别 #end</td>
+			<td class='body2'>
+			#if("1"=="$!form.empFlag")
+				<input type='hidden' id='purEmpId' value="${form.purEmpId}">
+				<input type='text' id='purEmpName' value="$!BdCommon.getUserName(${form.purEmpId})" readonly class="target" ondblclick="showSelectEmpWin()">
+			#else
+                <select id='purEmpId' value='' onchange="changeArticleType()"></select>
+			#end
+			</td>
+			<td class='body1'></td>
+			<td class='body2'></td>
+		</tr>
+    </table>
+	<table class='list' >
+		<thead><tr><th></th><th>#if("1"=="$!form.empFlag") 商品类别  #else 采购员  #end</th><th width='60px;'></th></tr></thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.list)
+			<tr>
+				<td>$!{velocityCounter}</td>
+				<td>
+					<input type='hidden' name='articleTypeId' readonly value='$!item.value'>
+					<input type='text' name='articleTypeName' readonly value='$!item.text' style='width:200px;'>
+				</td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+        </tbody>
+    </table>
+</form>
+<script>
+//显示组织选择窗口
+function showSelectEmpWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#purEmpId").val(idArr.join(","));
+			jQuery("#purEmpName").val(nameArr.join(","));
+			if(!isNull(jQuery("#purEmpId").val())){
+				window.location = "purEmpArticleType.vm?user_action=toEdit&purEmpId=" + jQuery("#purEmpId").val() + "&empFlag=" + jQuery("#empFlag").val();
+			}
+		}, null, null, false, jQuery("#purEmpId").val(), "getPurchaseEmp");
+}
+function changeArticleType(){
+	if(!isNull(jQuery("#purEmpId").val())){
+		window.location = "purEmpArticleType.vm?user_action=toEdit&purEmpId=" + jQuery("#purEmpId").val() + "&empFlag=" + jQuery("#empFlag").val();
+	}
+}
+function addPurEmp(){
+	if(isNull(jQuery("#purEmpId").val())){
+		alert("请先选择商品类别");
+		return ;
+	}
+	selectEmp(function(idArr, nameArr){
+			for(var i=0;i<idArr.length;i++){
+				if(!checkArticleTypeExists(idArr[i])){
+					//alert("组织[" + nameArr[i] + "]已经存在");
+					continue;
+				}
+    			var tdHtmlArr = [$n("articleTypeId").length + 1, "<input type='hidden' name='articleTypeId' readonly value='" + idArr[i] + "'>" +
+						"<input type='text' name='articleTypeName' readonly value='" + nameArr[i] + "' style='width:200px;'>",
+						"<input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,\"tbl\")'>"];
+    			insertRow("tbl", tdHtmlArr, false);
+			}
+		}, null, null, true, getArticleTypeIds(), "getPurchaseEmp");
+}
+function addArticleType(){
+	if(isNull(jQuery("#purEmpId").val())){
+		alert("请先选择采购员");
+		return ;
+	}
+	var tdHtmlArr = [$n("articleTypeId").length + 1, "<select name='articleTypeId' style='width:200px;' onchange='checkArticleType(this)'></select>",
+			"<input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,\"tbl\")'>"];
+	insertRow("tbl", tdHtmlArr, false);
+	
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions2("articleTypeId", $n("articleTypeId").length - 1, data, null, null, true, true);
+	});
+}
+function checkArticleType(obj){
+	if(isNull(obj.value)){return;}
+	for(var i=0;i<$n("articleTypeId").length;i++){
+		if(isNull($n("articleTypeId")[i].value) || $n("articleTypeId")[i] == obj){
+			continue;
+		}
+		if($n("articleTypeId")[i].value == obj.value){
+			alert("当前行和第"+(i+1)+"行 商品类别相同");
+		}
+	}
+}
+function checkLine(){
+	for(var i=0;i<$n("articleTypeId").length;i++){
+		if(isNull($n("articleTypeId")[i].value)){
+			alert("第"+(i+1)+"行 行商品类别为空");
+			return false;
+		}
+		for(var j=i+1;j<$n("articleTypeId").length;j++){
+			if($n("articleTypeId")[i].value == $n("articleTypeId")[j].value){
+			alert("第"+(i+1)+"行 和 第"+(j+1)+"行 商品类别相同");
+				return false;
+			}
+		}
+	}
+	return true;
+}
+function getArticleTypeIds(){
+	var ids = [];
+	for(var i=0;i<$n("articleTypeId").length;i++){
+		ids.push($n("articleTypeId")[i].value);
+	}
+	return ids;
+}
+function checkArticleTypeExists(orgId){
+	for(var i=0;i<$n("articleTypeId").length;i++){
+		if($n("articleTypeId")[i].value == orgId){
+			return false;
+		}
+	}
+	return true;
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnSave").click(saveform);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "purEmpArticleType.vm";
+	});
+#if("1"=="$!form.empFlag")
+	jQuery("#btnAddOutOrg").click(addArticleType);
+#else
+   	jQuery("#btnAddOutOrg").click(addPurEmp);//添加采购员
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions("purEmpId", data, null, null, true, true, "${form.purEmpId}");
+	});
+#end
+});
+function saveform(){
+	if($n("articleTypeId").length<1){
+		alert("请先添加行表组织");
+		return ;
+	}
+	if(!checkLine())return ;
+	confirm("确定保存?", function(){
+    	PurEmpArticleTypeDwr.savePurEmpArticleType(jQuery("#purEmpId").val(), getArticleTypeIds(), jQuery("#empFlag").val(), function(data){
+    		alert(data?data:"保存成功", function(){
+        		window.location = "purEmpArticleType.vm";
+    		});
+    	});
+	});
+}
+</script>

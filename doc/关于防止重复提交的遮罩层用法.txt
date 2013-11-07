@@ -1,0 +1,43 @@
+1、已经在layout.vm中设置DWR的错误处理方式，如果DW报异常会自动，移除遮罩层
+	dwr.engine.setErrorHandler(function(msg, err){
+		showLayer(false);//移除遮罩层
+		//提示异常信息
+		if("Timeout" == msg){
+			alert("系统执行超时...");
+		}else{
+	    	alert(msg);
+		}
+	});
+
+2、在业务单据的主要功能中用到的DWR业务请求前调用如下代码，显示遮罩层:
+	showLayer(true);//显示遮罩层
+
+3、在DWR回调方法的最前面调用如下方法，移除遮罩层:
+	showLayer(false);//移除遮罩层
+
+4、对于DWR嵌套调用的同样，如上处理（见例子）
+
+5、注意事项：确保显示遮罩层是在confirm回调方法里面，即经过确认后，在执行具体功能之间调用
+	而不是在confirm前的某个异步请求前调用
+
+例子：调拨模块->调拨单->保存功能
+//在confirm回调方法中的异步调用，都要显示、移除遮罩层
+confirm("确定"+action+"?", function(){
+		var moveHead = {};
+		var newOrnaCodeArr = [];
+		showLayer(true);//显示遮罩层
+		MoveBillDwr.checkOrnaStatusAvail(newOrnaCodeArr, function(data){//检查饰品状态
+    		showLayer(false);//移除遮罩层
+			if(data){
+				alert("饰品编码：<br>"+data.join("<br>")+"<br>状态不为有效，不能进行调拨");
+				return ;
+			}
+			showLayer(true);//显示遮罩层
+            MoveBillDwr.saveMoveBill(moveHead, newOrnaCodeArr, deleteOrnaCodeArr, function(data2){//保存单据
+				showLayer(false);//移除遮罩层
+            	alert(data2?data2:action+"成功", function(){
+            		window.location = "moveBill.vm?billType=$!{form.billType}";
+            	});
+            });
+		});
+	});

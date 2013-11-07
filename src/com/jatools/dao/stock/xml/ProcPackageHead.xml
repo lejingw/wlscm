@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcPackageHead">
+	<typeAlias alias="ProcPackageHead" type="com.jatools.vo.stock.ProcPackageHead" />
+	
+	<resultMap id="result" class="ProcPackageHead">
+		<result property="billid" column="billid"/>
+		<result property="billno" column="billno"/>
+		<result property="dodate" column="dodate"/>
+		<result property="orgId" column="org_id"/>
+		<result property="stockId" column="stock_id"/>
+		<result property="dotype" column="dotype"/>
+		<result property="invalid" column="invalid"/>
+		<result property="oldWeight" column="old_weight"/>
+		<result property="oldGrains" column="old_grains"/>
+		<result property="oldCost" column="old_cost"/>
+		<result property="newWeight" column="new_weight"/>
+		<result property="newGrains" column="new_grains"/>
+		<result property="newCost" column="new_cost"/>
+		<result property="status" column="status"/>
+		<result property="isCheck" column="is_check"/>
+		<result property="isFlag" column="is_flag"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+		<result property="checkDate" column="check_date"/>
+		<result property="checkId" column="check_id"/>
+		<result property="cancelDate" column="cancel_date"/>
+		<result property="cancelId" column="cancel_id"/>
+
+	</resultMap>
+	<sql id="ProcPackageHead_columns_all">
+		billid, billno, dodate, org_id, stock_id, dotype, invalid, old_weight, old_grains, 
+		old_cost, new_weight, new_grains, new_cost, status, is_check, is_flag, memo, 
+		create_date, create_id, update_date, update_id, check_date, check_id, cancel_date, cancel_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="ProcPackageHead.getProcPackageHeadPageData" resultMap="result" parameterClass="map">
+		select <include refid="ProcPackageHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="ProcPackageHead_columns_all"/>  from jat_proc_package_head a 
+			where 1 = 1
+			<isNotEmpty property="billno" prepend="and">  a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.billno DESC
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcPackageHead.getProcPackageHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_package_head a
+		where 1 = 1
+		<isNotEmpty property="billno" prepend="and">  a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> <![CDATA[a.dodate >= #startDate#]]> </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="ProcPackageHead.saveProcPackageHead" parameterClass="ProcPackageHead">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PROC_PACKAGE_HEAD_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into jat_proc_package_head(<include refid="ProcPackageHead_columns_all"/>)
+		 values(
+		 #billid#, #billno#, #dodate#, #orgId#, #stockId#, #dotype#, #invalid#, #oldWeight#, #oldGrains#, 
+		 #oldCost#, #newWeight#, #newGrains#, #newCost#, #status#, #isCheck#, #isFlag#, #memo#, 
+		 #createDate#, #createId#, #updateDate#, #updateId#, #checkDate#, #checkId#, #cancelDate#, #cancelId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcPackageHead.getProcPackageHead" resultClass="ProcPackageHead" resultMap="result" parameterClass="string">
+    	select <include refid="ProcPackageHead_columns_all"/> from jat_proc_package_head a where a.billid = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="ProcPackageHead.updateProcPackageHead" parameterClass="ProcPackageHead">
+		update jat_proc_package_head a set 
+		a.dodate = #dodate#, 
+		a.org_id = #orgId#, 
+		a.stock_id = #stockId#, 
+		a.dotype = #dotype#, 
+		a.invalid = #invalid#, 
+		a.old_weight = #oldWeight#, 
+		a.old_grains = #oldGrains#, 
+		a.old_cost = #oldCost#, 
+		a.new_weight = #newWeight#, 
+		a.new_grains = #newGrains#, 
+		a.new_cost = #newCost#, 
+		a.status = #status#, 
+		a.is_check = #isCheck#, 
+		a.is_flag = #isFlag#, 
+		a.memo = #memo#, 
+		a.update_date = #updateDate#, 
+		a.update_id = #updateId#, 
+		a.check_date = #checkDate#, 
+		a.check_id = #checkId#, 
+		a.cancel_date = #cancelDate#, 
+		a.cancel_id = #cancelId#
+		where a.billid = #billid#
+	</update>
+	
+	<update id="ProcPackageHead.updateProcPackageHeadStatus" parameterClass="map">
+		update jat_proc_package_head a set 
+		a.status = #status#
+		where a.billid = #billid#
+	</update>
+	
+	<select id="ProcPackageHead.getPrintDataByMater" resultClass="com.jatools.vo.bd.Tag" parameterClass="string">
+		select  
+			a.TAG_TYPE            as "labelType"        ,
+			a.orna_code           as "ornaCode"         ,
+			a.orna_barcode        as "ornaBarCode"      ,
+			a.orna_dsc            as "ornaName"         ,
+			a.pos_amount          as "posAmount"        ,
+			a.main_weight         as "mainWeight"       ,
+			a.part_weight         as "partStoneWeight"  ,
+			a.all_qty             as "allQty"           ,
+			a.special_weight      as "specialWeight"    ,
+			b.size_name           as "sizeName"         ,
+			c.quality_dsc         as "quality"          ,
+			d.item_value          as "mainShape"        ,
+			a.part_content        as "partStoneContent" ,
+			e.item_value          as "cleanName"        ,
+			f.item_value          as "color"            ,
+			a.factory_style_id    as "factoryStyle"     ,
+			g.s_suppliercode      as "venderCode"       ,
+			a.string_work_price   as "stringWorkPrice"  ,
+			a.special_work_price  as "specialWorkPrice" ,
+			h.item_class_dsc      as "itemClassName"    ,
+			a.is_muti_part        as "isMutiPart"       ,
+			a.stone_total_num     as "grian"            ,
+			<!-- nvl(
+	              (select nvl(a.ident_id, '')||'!'||y.THEME_NAME from dual 
+	              where a.item_class_id=188 
+	                 and exists (
+	                    select o.theme_name from Jas_PL_BD_STYLE_THEME o
+	                    inner join jas_bd_style p  on o.theme_id = p.THEME_ID
+	                    where a.style_id = p.STYLEID        
+	                 )
+	        ), a.ident_id) 		  as "ident"			, -->
+	        y.THEME_NAME  		  as "themeName",
+	        a.ident_id			  as "ident",
+			a.hrd_cert            as "HRDCert"          ,
+			a.gia_cert            as "GIACert"          ,
+			a.igi_cert            as "IGICert"          ,
+			a.ags_cert            as "AGSCert"          ,
+			i.item_value          as "colorGrade"       ,
+			j.summarydescription  as "analysisArange"   ,
+			k.stylename           as "styleName",
+			z.ITEM_CLASS_CODE     as "styleItemCode"
+		from ic_mater_active a
+			left join jas_bd_size b on a.size_id = b.size_id
+			left join jas_bd_quality c on c.quality_id = a.quality_id
+			left join jat_sys_dict_item d on d.entry_code = 'diashape' and d.item_key = a.main_shape_id
+			left join jat_sys_dict_item e on e.entry_code = 'diaclean' and a.clean_id = e.item_key
+			left join jat_sys_dict_item f on f.entry_code = 'diacolor' and f.item_key = a.color_id
+			left join jas_bd_cust g on g.custid = a.supplier_id
+			left join jas_bd_item_class h on h.item_class_id = a.item_class_id
+			left join jat_sys_dict_item i on i.entry_code = 'diacolorgrade' and i.item_key = a.main_color_grade_id
+			left join jas_bd_analysis_arange j on j.analysis_arange_id = a.alaysis_id
+			left join jas_bd_style k on k.styleid = a.style_id
+			left join Jas_PL_BD_STYLE_THEME y on k.THEME_ID = y.THEME_ID
+			left join jas_bd_style_item_class z on k.STYLEITEMCLASS = z.ITEM_CLASS_ID
+		where exists (
+		      select 1 from jat_proc_package_newline m where a.orna_code = m.orna_code and m.billid = #value#
+		)
+	</select>
+	
+	<select id="ProcPackageHead.getPrintDataByNoMater" parameterClass="string" resultClass="com.jatools.vo.bd.Tag">
+		select
+			a.TAG_TYPE            as "labelType"        ,
+			a.orna_code           as "ornaCode"         ,
+			a.orna_barcode        as "ornaBarCode"      ,
+			a.orna_dsc            as "ornaName"         ,
+			a.pos_amount          as "posAmount"        ,
+			a.main_weight         as "mainWeight"       ,
+			a.part_weight         as "partStoneWeight"  ,
+			a.all_qty             as "allQty"           ,
+			a.special_weight      as "specialWeight"    ,
+			b.size_name           as "sizeName"         ,
+			c.quality_dsc         as "quality"          ,
+			d.item_value          as "mainShape"        ,
+			a.part_content        as "partStoneContent" ,
+			e.item_value          as "cleanName"        ,
+			f.item_value          as "color"            ,
+			a.factory_style_id    as "factoryStyle"     ,
+			g.s_suppliercode      as "venderCode"       ,
+			a.string_work_price   as "stringWorkPrice"  ,
+			a.special_work_price  as "specialWorkPrice" ,
+			h.item_class_dsc      as "itemClassName"    ,
+			a.is_muti_part        as "isMutiPart"       ,
+			a.stone_total_num     as "grian"            ,
+			<!-- nvl(
+	              (select nvl(a.ident_id, '')||'!'||y.THEME_NAME from dual 
+	              where a.item_class_id=188 
+	                 and exists (
+	                    select o.theme_name from Jas_PL_BD_STYLE_THEME o
+	                    inner join jas_bd_style p  on o.theme_id = p.THEME_ID
+	                    where a.style_id = p.STYLEID        
+	                 )
+	        ), a.ident_id) as "ident", -->
+	        a.ident_id			  as "ident",
+			a.hrd_cert            as "HRDCert"          ,
+			a.gia_cert            as "GIACert"          ,
+			a.igi_cert            as "IGICert"          ,
+			a.ags_cert            as "AGSCert"          ,
+			i.item_value          as "colorGrade"       ,
+			j.summarydescription  as "analysisArange"   ,
+			k.stylename           as "styleName"
+		from ic_mater_noactive a 
+			left join jas_bd_size b on a.size_id = b.size_id
+			left join jas_bd_quality c on c.quality_id = a.quality_id
+			left join jat_sys_dict_item d on d.entry_code = 'diashape' and d.item_key = a.main_shape_id
+			left join jat_sys_dict_item e on e.entry_code = 'diaclean' and a.clean_id = e.item_key
+			left join jat_sys_dict_item f on f.entry_code = 'diacolor' and f.item_key = a.color_id
+			left join jas_bd_cust g on g.custid = a.supplier_id
+			left join jas_bd_item_class h on h.item_class_id = a.item_class_id
+			left join jat_sys_dict_item i on i.entry_code = 'diacolorgrade' and i.item_key = a.main_color_grade_id
+			left join jas_bd_analysis_arange j on j.analysis_arange_id = a.alaysis_id
+			left join jas_bd_style k on k.styleid = a.style_id
+			left join Jas_PL_BD_STYLE_THEME y on k.THEME_ID = y.THEME_ID
+		where exists (
+		      select 1 from jat_proc_package_newline m where a.orna_code = m.orna_code and m.billid = #value#
+		)
+	</select>
+	
+	
+	<delete id="ProcPackageHead.deleteProcPackageHead" parameterClass="string">
+		delete from jat_proc_package_head a where a.billid = #value#
+	</delete>
+
+	<select id="ProcPackageHead.selectAnalysCount" parameterClass="map" resultClass="int">
+		select count(1) from jas_bd_analysis_arange a
+		where a.ANALYSIS_ARANGE_ID = #oldAnalysId#
+		and exists (
+			select 1 from jas_bd_analysis_arange b 
+			where b.ANALYSIS_ARANGE_ID = #newAnalysId#
+			and (a.STARTANALYSIS = b.ENDANALYSIS or a.ENDANALYSIS = b.STARTANALYSIS)
+		)
+	</select>
+</sqlMap>

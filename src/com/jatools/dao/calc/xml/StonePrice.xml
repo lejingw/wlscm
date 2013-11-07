@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="StonePrice">
+	<typeAlias alias="StonePrice" type="com.jatools.vo.calc.StonePrice"/>
+	<resultMap class="StonePrice" id="result">
+		<result property="id" column="id"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="styleStandard" column="STYLE_STANDARD"/>
+		<result property="startWeight" column="START_WEIGHT"/>
+		<result property="endWeight" column="END_WEIGHT"/>
+		<result property="stoneType" column="STONE_TYPE"/>
+		<result property="marketPrice" column="MARKET_PRICE"/>
+		<result property="priceType" column="PRICETYPE"/>
+		
+		<result property="shapeId" column="SHAPE_ID"/>
+		<result property="colorId" column="COLOR_ID"/>
+		<result property="cleanId" column="CLEAN_ID"/>
+		<result property="colorGradeId" column="COLOR_GRADE_ID"/>
+		<result property="cutId" column="CUT_ID"/>
+		
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<sql id="StonePrice.Columns.all">
+		id,item_class_id,STYLE_STANDARD,START_WEIGHT,END_WEIGHT,STONE_TYPE,MARKET_PRICE,PRICETYPE,
+		SHAPE_ID,COLOR_ID,CLEAN_ID,COLOR_GRADE_ID,CUT_ID,createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="StonePrice.getStonePriceAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="StonePrice.Columns.all"/> from jat_calc_stone_price a where a.PRICETYPE = #priceType#
+			<!-- <isNotEmpty prepend="and" property="itemClassId"> a.ITEM_CLASS_ID=#itemClassId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="stoneType"> a.STONE_TYPE=#stoneType# </isNotEmpty>
+			<isNotEmpty prepend="and" property="shapeId"> a.SHAPE_ID=#shapeId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="colorId"> a.COLOR_ID=#colorId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="colorGradeId"> a.COLOR_GRADE_ID=#colorGradeId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="cleanId"> a.CLEAN_ID=#cleanId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="cutId"> a.CUT_ID=#cutId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="createUserId"> a.CREATEUSERID=#createUserId# </isNotEmpty>
+			<isNotEmpty prepend="and" property="marketPrice"> a.MARKET_PRICE=#marketPrice# </isNotEmpty>
+			<isNotEmpty property="beginWeight" prepend="and"> <![CDATA[ a.START_WEIGHT >= #beginWeight#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endWeight" prepend="and"> <![CDATA[ a.END_WEIGHT <= #endWeight#]]> </isNotEmpty> -->
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		 	 order by a.item_class_id , a.start_weight
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="StonePrice.getStonePriceToalCount" resultClass="int">
+		select count(1) from jat_calc_stone_price a where 1=1 and a.PRICETYPE = #priceType#
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		<!-- <isNotEmpty prepend="and" property="itemClassId"> a.ITEM_CLASS_ID=#itemClassId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="stoneType"> a.STONE_TYPE=#stoneType# </isNotEmpty>
+		<isNotEmpty prepend="and" property="shapeId"> a.SHAPE_ID=#shapeId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="colorId"> a.COLOR_ID=#colorId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="colorGradeId"> a.COLOR_GRADE_ID=#colorGradeId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="cleanId"> a.CLEAN_ID=#cleanId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="cutId"> a.CUT_ID=#cutId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="createUserId"> a.CREATEUSERID=#createUserId# </isNotEmpty>
+		<isNotEmpty prepend="and" property="marketPrice"> a.MARKET_PRICE=#marketPrice# </isNotEmpty>
+		<isNotEmpty property="beginWeight" prepend="and"> <![CDATA[ a.START_WEIGHT >= #beginWeight#]]>  </isNotEmpty>
+		<isNotEmpty property="endWeight" prepend="and"> <![CDATA[ a.END_WEIGHT <= #endWeight#]]> </isNotEmpty> -->
+	</select>
+	<!-- findById -->
+	<select id="StonePrice.getStonePriceById" resultClass="StonePrice" parameterClass="string" resultMap="result">
+		select <include refid="StonePrice.Columns.all"/> from jat_calc_stone_price a where a.id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="StonePrice.saveStonePrice" parameterClass="StonePrice">
+		<selectKey keyProperty="id" type="pre">
+			select jat_calc_stone_price_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_stone_price(
+			id,item_class_id,STYLE_STANDARD,START_WEIGHT,END_WEIGHT,STONE_TYPE,MARKET_PRICE,PRICETYPE,
+			SHAPE_ID,COLOR_ID,CLEAN_ID,COLOR_GRADE_ID,CUT_ID,createdate,CREATEUSERID,updatedate,UPDATEUSERID)
+			values(#id#,#itemClassId#,#styleStandard#,#startWeight#,#endWeight#,#stoneType#,#marketPrice#,#priceType#,
+			#shapeId#,#colorId#,#cleanId#,#colorGradeId#,#cutId#,
+			#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="StonePrice.updateStonePrice" parameterClass="StonePrice">
+		update jat_calc_stone_price a set 
+			a.ITEM_CLASS_ID = #itemClassId#,
+			a.STYLE_STANDARD = #styleStandard#,
+			a.START_WEIGHT = #startWeight#,
+			a.END_WEIGHT = #endWeight#,
+			a.STONE_TYPE = #stoneType#,
+			a.MARKET_PRICE = #marketPrice#,
+			a.PRICETYPE = #priceType#,
+			
+			a.SHAPE_ID = #shapeId#,
+			a.COLOR_ID = #colorId#,
+			a.COLOR_GRADE_ID = #colorGradeId#,
+			a.CUT_ID = #cutId#,
+			a.CLEAN_ID = #cleanId#,
+			
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="StonePrice.deleteStonePrice" parameterClass="string">
+		delete jat_calc_stone_price a where a.id = #value#
+	</delete>
+	<!-- 获取主配石市场价 -->
+	<select id="StonePrice.existStonePrice" resultClass="int" parameterClass="StonePrice" >
+		select count(1) from jat_calc_stone_price a where
+			a.ITEM_CLASS_ID = #itemClassId# and
+			a.STONE_TYPE = #stoneType# and
+			a.SHAPE_ID = #shapeId# and
+			a.COLOR_ID = #colorId# and
+			a.COLOR_GRADE_ID = #colorGradeId# and
+			a.CUT_ID = #cutId# and
+			a.CLEAN_ID = #cleanId# and
+            a.PRICETYPE = #priceType# and
+            a.STYLE_STANDARD = #styleStandard# and
+			<![CDATA[
+			((a.START_WEIGHT <= #startWeight# and a.END_WEIGHT > #startWeight#) or
+             (a.START_WEIGHT < #endWeight# and a.END_WEIGHT >= #endWeight#))
+			 ]]>
+			<isNotEmpty prepend="and" property="id"> <![CDATA[a.id <> #id# ]]> </isNotEmpty>
+	</select>
+
+    <!-- 获取主配石市场价 -->
+    <select id="StonePrice.getStonePrice" resultClass="StonePrice" parameterClass="StonePrice" resultMap="result">
+           select <include refid="StonePrice.Columns.all"/> from jat_calc_stone_price a where
+                 a.ITEM_CLASS_ID = #itemClassId# and
+                   a.STONE_TYPE = #stoneType# and
+                    a.SHAPE_ID = #shapeId# and
+                   a.COLOR_ID = #colorId# and
+                  a.COLOR_GRADE_ID = #colorGradeId# and
+                 a.CUT_ID = #cutId# and
+                a.CLEAN_ID = #cleanId# and
+                <![CDATA[ a.START_WEIGHT <= #startWeight# and a.END_WEIGHT > #startWeight# ]]>
+                <isNotEmpty prepend="and" property="id"> a.id!=#id# </isNotEmpty>
+    </select>
+</sqlMap>

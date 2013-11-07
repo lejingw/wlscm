@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PlSale">
+	<typeAlias alias="PlSale" type="com.jatools.vo.stock.PlSaleHead" />
+
+	<sql id="PlSale_column_1">
+		billid, billno, dodate, org_id, stock_id, vendor_id, sum_count, sum_weight, sum_grains, sum_cost, 
+		sum_money, sum_jmmoney, status, memo, create_date, create_id, update_date, update_id
+	</sql>
+	
+	<sql id="PlSale_column_2">
+		a.billid      as "billid",
+		a.billno      as "billno",
+		a.dodate      as "dodate",
+		a.org_id      as "orgId",
+		a.stock_id    as "stockId",
+		a.vendor_id   as "vendorId",
+		a.sum_count   as "sumCount",
+		a.sum_weight  as "sumWeight",
+		a.sum_grains  as "sumGrains",
+		a.sum_cost    as "sumCost",
+		a.sum_money   as "sumMoney",
+		a.sum_jmmoney as "sumJmmoney",
+		a.status      as "status",
+		a.memo        as "memo",
+		a.create_date as "createDate",
+		a.create_id   as "createId",
+		a.update_date as "updateDate",
+		a.update_id   as "updateId",
+		a.check_date  as "checkDate",
+		a.check_id    as "checkId"
+	</sql>
+	
+	<select id="PlSale.getPlSalePageData" resultClass="PlSale" parameterClass="map">
+	
+		select * from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="PlSale_column_2" /> from jat_plsale_head a
+			where 1 = 1
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8 and a.status <> 13 ]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.dodate DESC
+			                                                               
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	
+	<select id="PlSale.getPlSaleTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_plsale_head a where 1 = 1
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8 and a.status <> 13 ]]> </isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+
+	<insert id="PlSale.savePlSale" parameterClass="PlSale">
+		<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PLSALE_HEAD_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into jat_plsale_head(
+			<include refid="PlSale_column_1" />
+		)
+		values(
+			#billid#, #billno#, #dodate#, #orgId#, #stockId#, #vendorId#, #sumCount#, 
+			#sumWeight#, #sumGrains#, #sumCost#, #sumMoney#, #sumJmmoney#, #status#, #memo#, 
+			#createDate#, #createId#, #updateDate#, #updateId#
+		)
+	</insert>
+	
+	<!-- 根据id获取记录对象 -->
+	<select id="PlSale.getPlSale" resultClass="PlSale" parameterClass="string">
+		select <include refid="PlSale_column_2" />
+		from jat_plsale_head a where a.billid = #value#
+	</select>
+	
+	<!-- 修改信息 -->
+	<update id="PlSale.updatePlSale" parameterClass="PlSale">
+		update jat_plsale_head a set
+			a.dodate      = #dodate#,
+			a.org_id      = #orgId#,
+			a.stock_id    = #stockId#,
+			a.vendor_id   = #vendorId#,
+			a.sum_count   = #sumCount#,
+			a.sum_weight  = #sumWeight#,
+			a.sum_grains  = #sumGrains#,
+			a.sum_cost    = #sumCost#,
+			a.sum_money   = #sumMoney#,
+			a.sum_jmmoney = #sumJmmoney#,
+			a.status      = #status#,
+			a.memo        = #memo#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#
+		where a.billid = #billid#
+	</update>
+
+	<!-- 修改状态 -->
+	<update id="PlSale.updatePlSaleStatus" parameterClass="map">
+		update jat_plsale_head a 
+		set 
+			a.status = #status#,
+			a.update_id = #updateId#, 
+			a.update_date = #updateDate#
+		where a.billid = #billid#
+	</update>
+
+	<!-- 物理删除 -->
+	<delete id="PlSale.deletePlSale" 	parameterClass="string">
+		delete from jat_plsale_head a where a.billid = #value#
+	</delete>
+
+	<!-- ===================================== line ============================================== -->
+	<sql id="PlSale_column_3" >
+        a.org_id           as "orgId",
+        a.out_flag         as "outFlag",
+		a.lineid           as "lineid",
+		a.billid           as "billid",
+		a.item_class_id    as "itemClassId",
+		a.orna_class_id    as "ornaClassId",
+		a.styleitemclass   as "styleitemclass",
+		a.stylemiddleclass as "stylemiddleclass",
+		a.styleornaclass   as "styleornaclass",
+		a.style_id         as "styleId",
+		a.alaysis_id       as "alaysisId",
+		a.orna_code        as "ornaCode",
+		a.orna_barcode     as "ornaBarcode",
+		a.orna_dsc         as "ornaDsc",
+		a.unit_id          as "unitId",
+		a.now_qty          as "nowQty",
+		a.all_qty          as "allQty",
+		a.grains           as "grains",
+		a.main_weight      as "mainWeight",
+		a.part_weight      as "partWeight",
+		a.is_muti_part     as "isMutiPart",
+		a.is_dbl_label     as "isDblLabel",
+		a.pos_cost         as "posCost",
+		a.pos_money        as "posMoney",
+		a.status           as "status",
+		a.memo             as "memo",
+		a.create_date      as "createDate",
+		a.create_id        as "createId",
+		a.update_date      as "updateDate",
+		a.update_id        as "updateId",
+		b.STYLENAME 	   as "styleName",
+		b.ISBIGGRAPH 	   as "bigGraph",
+		c.SUMMARYDESCRIPTION as "alaysisName"
+	</sql>
+	
+	<sql id="PlSale_column_4">
+		lineid, billid, item_class_id, orna_class_id, styleitemclass, stylemiddleclass, styleornaclass, 
+		style_id, alaysis_id, orna_code, orna_barcode, orna_dsc, unit_id, now_qty, all_qty, grains, main_weight, 
+		part_weight, is_muti_part, is_dbl_label, pos_cost, pos_money, status, memo, create_date, create_id, update_date, update_id,
+        org_id, out_flag
+	</sql>
+	
+	<select id="PlSale.getLines" parameterClass="string" resultClass="com.jatools.vo.stock.PlSaleLine">
+		select <include refid="PlSale_column_3"/> from jat_plsale_line a 
+		left join jas_bd_style b on a.style_id = b.STYLEID
+		left join jas_bd_analysis_arange c on a.alaysis_id = c.ANALYSIS_ARANGE_ID
+		where a.billid = #value#
+	</select>
+	
+	<insert id="PlSale.insertLine" parameterClass="com.jatools.vo.stock.PlSaleLine">
+		<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PLSALE_LINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_plsale_line ( <include refid="PlSale_column_4"/> ) values (
+			#lineid#, #billid#, #itemClassId#, #ornaClassId#, #styleitemclass#, #stylemiddleclass#, #styleornaclass#, #styleId#, 
+			#alaysisId#, #ornaCode#, #ornaBarcode#, #ornaDsc#, #unitId#, #nowQty#, #allQty#, #grains#, #mainWeight#, #partWeight#, 
+			#isMutiPart#, #isDblLabel#, #posCost#, #posMoney#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#,
+            #orgId#, #outFlag#
+		)
+	</insert>
+	
+	<update id="PlSale.updateLine" parameterClass="com.jatools.vo.stock.PlSaleLine">
+		update jat_plsale_line a 
+		set 
+			a.item_class_id    = #itemClassId#,
+			a.orna_class_id    = #ornaClassId#,
+			a.styleitemclass   = #styleitemclass#,
+			a.stylemiddleclass = #stylemiddleclass#,
+			a.styleornaclass   = #styleornaclass#,
+			a.style_id         = #styleId#,
+			a.alaysis_id       = #alaysisId#,
+			a.orna_code        = #ornaCode#,
+			a.orna_barcode     = #ornaBarcode#,
+			a.orna_dsc         = #ornaDsc#,
+			a.unit_id          = #unitId#,
+			a.now_qty          = #nowQty#,
+			a.all_qty          = #allQty#,
+			a.grains           = #grains#,
+			a.main_weight      = #mainWeight#,
+			a.part_weight      = #partWeight#,
+			a.is_muti_part     = #isMutiPart#,
+			a.is_dbl_label     = #isDblLabel#,
+			a.pos_cost         = #posCost#,
+			a.pos_money        = #posMoney#,
+			a.status           = #status#,
+			a.memo             = #memo#,
+			a.update_date      = #updateDate#,
+			a.update_id        = #updateId#,
+			a.org_id            = #orgId#,
+			a.out_flag        = #outFlag#
+		where a.lineid = #lineid#
+	</update>
+	
+	<delete id="PlSale.deleteLineById" parameterClass="string">
+		delete from jat_plsale_line a where a.lineid = #value#
+	</delete>
+	
+	<delete id="PlSale.deleteLineByBillid" parameterClass="string">
+		delete from jat_plsale_line a where a.billid = #value#
+	</delete>
+
+    <select id="PlSale.isExistsInOtherBill" parameterClass="map" resultClass="int">
+        <![CDATA[
+            select count(1) from jat_plsale_line a
+            left join jat_plsale_head b on a.billid = b.billid
+            where b.status <> 13
+                and a.orna_code = #ornaCode#
+        ]]>
+        <isNotEmpty property="billid" prepend="and"><![CDATA[ a.billid <> #billid#]]> </isNotEmpty>
+    </select>
+
+    <select id="PlSale.isExistsOrnaCode" parameterClass="map" resultClass="int">
+        select count(1) from jat_plsale_line a
+        where a.billid = #billid#
+            and a.orna_code = #ornaCode#
+    </select>
+
+</sqlMap>

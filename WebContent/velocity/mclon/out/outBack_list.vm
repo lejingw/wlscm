@@ -1,0 +1,237 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/out/pubSale.js",
+"$StringUtil.getContextPath()/dwr/interface/OutBackDwr.js",
+"$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+
+<form id="frm" action="outBack.vm" method="post">
+    <input type="hidden" id="user_action" name="user_action" value="toOutBackList"/>
+    <input type="hidden" name="showAll" id="ip_showAll" value="$!form.showAll"/>
+    #if("$!form.showAll" == "1")
+			#set($enableAll = true)
+	#end
+	#set($modelCode = '08040801')
+	  <table class="title">
+    	<tr><td>借出归还单#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td class='body1'>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='修改/查看' class='btn' id='btnEdit' $RightUtil.able($session, $modelCode,'5')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='查询' class='btn' id='btnFilter' $RightUtil.able($session, $modelCode,'3')/>
+				<input type='button' value='高级查询' class='btn' id='btnFilter1' $RightUtil.able($session, $modelCode,'3')/>
+				<input type='checkbox' onclick="show_all(this)" #if($enableAll)checked#end id='showAll'/>显示所有单据
+					<input type='button' value='Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $modelCode,'4')>
+		</td>
+		</tr>
+    </table>
+    <div class="scroll">
+	    <table class='list' style="width:1600px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width='60px'>状态</th>
+                <th width='90px'>单据编号</th>
+				<th width='180px'>库存组织</th>
+				<th width='90px'>仓库</th>
+        		<th width='90px'>单据日期</th>
+        		<th width='60px'>总件数</th>
+        		<th width='60px'>总重量</th>
+        		<th width='60px'>总粒数</th>
+        		<th width='60px'>总金额</th>
+        		<th width='60px'>归还数量</th>
+        		<th width='120px'>创建时间</th>
+				<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td>
+					<input type='checkbox' value="$!{map.headId}" name='chk'/>$velocityCounter
+				</td>
+				<td><input type='hidden' name='statusHid' value='$!{map.status}'/><a href="javascript:viewReviewLog('JC', '$!{map.headId}')">$!DictUtil.getValue('status', $!map.status)</a></td>
+				<td><a href='javascript:toEditPage($!{map.headId});'>$!map.billNo</a></td>
+				<td>$!BdCommon.getOrgName($map.orgId)</td>
+				<td>$!DictUtil.getValue('invcode', $!map.stockId)</td>
+				<td>$!map.doDate</td>
+				<td>$!map.sumCount</td>
+				<td>$!StringUtil.formatDouble($!map.sumWeight,2)</td>
+				<td>$!map.sumGrains</td>
+				<td>$!StringUtil.formatDouble($!map.sumMoney,2)</td>
+				<td>$!map.backSum</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+<!--筛选框-->
+<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		#set($cond = $form.condition)
+    		#set($billno = $!cond.get('billno'))
+			#set($status = $!cond.get('status'))
+    		#set($orgId = $!cond.get('orgId'))
+    		#set($stockId = $!cond.get('stockId'))
+    		#set($startDate = $!cond.get('startDate'))
+    		#set($endDate = $!cond.get('endDate'))
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+					</tr>
+			<tr>
+    			<td class="body1">仓库</td>
+    			<td class='body2'>
+    				<select id="stockId" name='stockId'  value="$!{stockId}" >$StringUtil.emptyOption()</select>
+    			</td>
+    			<td class="body1">单据状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status' value="$!status" >						
+				<option value="">请选择</option>
+						<option value='1' #if($!status==1)selected#end>保存</option>
+						<option value='4' #if($!status==4)selected#end>审批中</option>
+						<option value='5' #if($!status==5)selected#end>审批完成</option>
+						<option value='8' #if($!status==8)selected#end>关闭</option>
+						<option value='10' #if($!status==10)selected#end>出库</option>
+					</select>
+				</td>
+    		</tr>
+    		<tr>
+    			<td class="body1">创建时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">创建时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+    	</table>
+	</div>
+</form>
+<script>
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+jQuery(function(){
+	initQuery("btnFilter", "btnQueryCancel");
+	initQuery2("JC01", 'frm', 'btnFilter1');
+	initCalendarArr(["startDate", "endDate"]);
+	
+});
+jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#orgId").val("");
+		jQuery("#status").val("");
+		jQuery("#orgName").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#stockId").val("");
+	});
+jQuery("#btnQueryOk").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#user_action").val("toOutBackList");
+		jQuery("#frm").submit();
+	});
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());//, "getExecuteOrgTree");
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, changeButtons, function(index){
+		window.location = "outBack.vm?user_action=toEditOutBack&headid=" + $n("chk")[index].value;
+	});
+		DictDwr.getDictsForSlt('invcode', function(data){
+		addOptions("stockId", data, null, null, true, true, '$!{stockId}');
+	});
+	jQuery("#btnAdd").click(function(){
+		window.location = "outBack.vm?user_action=toAddOutBack";
+	});
+	jQuery("#btnEdit").click(function(){
+    	var index = getSelectIndex('chk');
+    	if(index<0){
+    		alert("请选择要修改/查看的记录");
+    		return ;
+    	}
+		toEditPage($n("chk")[index].value);
+	});
+	jQuery("#btnDelete").click(function(){
+		var ch;
+		jQuery("input[name='chk']").each(function(){
+			var _ch=jQuery(this);
+			if(_ch.attr("checked")&&!_ch.attr("disabled"))
+				ch=_ch;
+		});
+		if(ch){
+			deleteBill(ch.attr("value"))
+		}else
+			alert("请选择要删除的单据");
+	});
+		changeButtons(false, 0);
+});
+function changeButtons(checked, index){
+	jQuery("#btnEdit").attr("disabled", true);
+	jQuery("#btnDelete").attr("disabled", true);
+	
+	if(!checked)return ;
+	jQuery("#btnEdit").attr("disabled", false);
+	
+	if("1" == $n("statusHid")[index].value){
+		jQuery("#btnDelete").attr("disabled", false);
+	}
+}
+function toEditPage(headid){
+	window.location = "outBack.vm?user_action=toEditOutBack&headid=" + headid;
+}
+function deleteBill(headid){
+	confirm("确定删除?", function(){
+		showLayer(true);
+		OutBackDwr.deleteBack(headid, function(errMsg){
+			showLayer(false);
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+        			window.location = window.location;
+				});
+			}
+		});
+	});
+}
+</script>

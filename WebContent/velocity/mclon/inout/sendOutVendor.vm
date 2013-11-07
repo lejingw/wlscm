@@ -1,0 +1,143 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value="doHandover"/>
+	#set($cond = $form.condition)
+	#set($billno = $!cond.get('billno'))
+	#set($orgId = $!cond.get('orgId'))
+	#set($startDate = $!cond.get('startDate'))
+	#set($endDate = $!cond.get('endDate'))
+	#set($verdorId = $!cond.get('verdorId'))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='筛选' class='btn' id='btnSearch'>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+    			<td class="body1"></td>
+    			<td class='body2'>
+    				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+    				<input type='hidden' id="orgName" name='orgName' value="$!BdCommon.getOrgName($!orgId)" readonly class="target" onclick="showSelectOrgWin()">
+					<select id="verdorId" name='verdorId'  value="$!{verdorId}" style="display:none;">$StringUtil.emptyOption()</select>
+    			</td>
+    		</tr>
+			<tr>
+    			<td class="body1">业务时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">业务时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>对公销售单号</th>
+				<th>单据日期</th>
+				<th>销售金额</th>
+        		<th>总数量</th>
+				<th>总重量</th>
+				<th>总粒数</th>
+				<th>总成本</th>
+				<th>总金额</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>$!map.billNo</td>
+				<td>$!map.doDate</td>
+				<td>$!map.saleMoney</td>
+				<td>$!map.sumCount</td>
+				<td>$!map.sumWeight</td>
+				<td>$!map.sumGrains</td>
+				<td>$!map.sumCost</td>
+				<td>$!map.sumMoney
+					<input type="hidden" name="bill_no" value="$!map.billNo"/>
+					<input type="hidden" name="saleMoney" value="$!map.saleMoney"/>
+					$!map.lines
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#orgName").val("$!BdCommon.getOrgName($!orgId)");
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!verdorId");
+	});
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', true);
+	initQuery("btnSearch", "btnQueryCancel");
+	
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#orgId").val("");
+		jQuery("#orgName").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+	});
+});
+
+function getValues(){
+	var idxs = getSelectIndexs("chk");
+	if(idxs != -1){
+		var result = [];
+		for(var i=0; i< idxs.length; i++){
+			var idx = idxs[i],
+				obj = {
+					billno		:$n("bill_no")[idx].value,
+					saleMoney	:$n("saleMoney")[idx].value
+				};
+			result.push(obj);
+		}
+		if(result.length <= 0){
+			alert("请选择销售单数据");
+		}else {
+			return result;
+		}
+	} else {
+		alert("请选择销售单数据");
+	}
+	return false;
+}
+
+</script>

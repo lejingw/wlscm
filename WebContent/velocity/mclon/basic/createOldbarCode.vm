@@ -1,0 +1,84 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/CreateOldbarCodeDwr.js",
+"$StringUtil.getContextPath()/script/mclon/ZeroClipboard/ZeroClipboard.js"])
+
+<form id='frm' action="" method="post">
+	<input type='hidden' id='headid' name='headid' value='$!{form.head.headid}'/>
+    <table class="title">
+    	<tr><td>旧品条码生成</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='生成条码' class='btn' id='btnCreateBarCode' $RightUtil.able($session, '08011601','1')>
+				<input type='button' value='打印标签' class='btn' id='btnPrintBarCode' $RightUtil.able($session, '08011601','2')>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>类型</td><td class='body2'><select id='codeType'></select></td>
+			<td class='body1'>年份</td><td class='body2'><select id='year'></select></td>
+			<td class='body1'>月份</td><td class='body2'><select id='month'></select></td>
+			<td class='body1'>数量</td><td class='body2'><input type='text' id='numCount' dataType="Number" msg="不能为空,且必须为正整数"/></td>
+		</tr>
+    </table>
+	<table class='list'>
+		<thead><tr>
+				<th>饰品条码</th>
+		</tr></thead>
+		<tbody id='tbl'></tbody>
+    </table>
+</form>
+<script>
+function createBarCode(){
+	if(!Validator.Validate($("frm"),3))
+		return false;
+	for(var i=$n("barCode").length-1;i>=0;i--){
+		$("tbl").deleteRow(i);
+	}
+	var codeType = jQuery("#codeType").val();
+	var year = jQuery("#year").val();
+	var month = jQuery("#month").val();
+	CreateOldbarCodeDwr.generateOldbarCode(codeType, year, month, jQuery("#numCount").val(), function(data){
+		//info(data);
+		startIndex = data;
+		for(var i=data;i<data+parseInt(jQuery("#numCount").val());i++){
+    		insertRow('tbl', ["<input type='text' readonly name='barCode' value='" + getBarCode(codeType, year, month, i) + "'>"], false);
+		}
+	});
+}
+function getBarCode(codeType, year, month, num){
+	var numStr = "";
+	for(var i=5-(""+num).length;i>0;i--){
+		numStr += "0";
+	}
+	return codeType + year + month + numStr + num;
+}
+var startIndex = -1;
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnCreateBarCode").click(createBarCode);
+	initLabelPrint("btnPrintBarCode", printLabel);
+	DictDwr.getDictsForSlt('oldlable', function(data){
+		addOptions("codeType", data, null, null, true, true);
+	});
+	setContent();
+});
+function printLabel(){
+	var codeType = jQuery("#codeType").val();
+	var year = jQuery("#year").val();
+	var month = jQuery("#month").val();
+	var url = ctxPath + '/basic/createOldbarCode.vm?user_action=printLable&preFix=' + codeType + year + month + "&startIndex=" + startIndex + "&count=" + jQuery("#numCount").val();
+	return url;
+}
+function setContent(){
+	for(var i=1;i<=12;i++){
+		if(i<10){
+        	addOption('month', "0" + i, "0" + i, i == (new Date().getMonth()+1));
+		}else{
+        	addOption('month', i, i, i == (new Date().getMonth()+1));
+		}
+	}
+	for(var i=2012;i<=2017;i++){
+        addOption('year', i, i);
+	}
+}
+</script>

@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Handover">
+	<typeAlias alias="HandoverHead" type="com.jatools.vo.pur.HandoverHead" />
+	<typeAlias alias="HandoverLine" type="com.jatools.vo.pur.HandoverLine" />
+	
+	<!-- ================================================头表处理========================================================== -->
+	
+	<resultMap id="HandoverHead.result" class="HandoverHead">
+		<result property = "billid"     column = "billid"       />
+		<result property = "billno"     column = "billno"       />
+		<result property = "sourceId"   column = "source_id"    />
+		<result property = "sourceNo"   column = "source_no"    />
+		<result property = "sourceType" column = "source_type"  />
+		<result property = "dodate"     column = "dodate"       />
+		<result property = "orgId"      column = "org_id"       />
+		<result property = "verdorId"   column = "verdor_id"    />
+		<result property = "dotype"     column = "dotype"       />
+		<result property = "invalid"    column = "invalid"      />
+		<result property = "sumNum"     column = "sum_num"      />
+		<result property = "sumMoney"   column = "sum_money"    />
+		<result property = "sumCharge"  column = "sum_charge"   />
+		<result property = "receUser"   column = "rece_user"    />
+		<result property = "receDate"   column = "rece_date"    />
+		<result property = "expressNo"  column = "express_no"   />
+		<result property = "isPack"     column = "is_pack"      />
+		<result property = "packNo"     column = "pack_no"      />
+		<result property = "isPsale"    column = "is_psale"     />
+		<result property = "status"     column = "status"       />
+		<result property = "isCheck"    column = "is_check"     />
+		<result property = "isFlag"     column = "is_flag"      />
+		<result property = "memo"       column = "memo"         />
+		<result property = "createDate" column = "create_date"  />
+		<result property = "createId"   column = "create_id"    />
+		<result property = "updateDate" column = "update_date"  />
+		<result property = "updateId"   column = "update_id"    />
+		<result property = "checkDate"  column = "check_date"   />
+		<result property = "checkId"    column = "check_id"     />
+		<result property = "cancelDate" column = "cancel_date"  />
+		<result property = "cancelId"   column = "cancel_id"    />
+		<result property = "materialId"   column = "material_id"    />
+		<result property = "isBill"   column = "is_bill"    />
+	</resultMap>
+	<sql id="HandoverHead_columns_all">
+		billid, billno, source_id, source_no, source_type, dodate, org_id, verdor_id, dotype, 
+		invalid, sum_num, sum_money, sum_charge, rece_user, rece_date, express_no, is_pack, 
+		pack_no, is_psale, status, is_check, is_flag, memo, create_date, create_id, update_date, 
+		update_id, check_date, check_id, cancel_date, cancel_id, material_id, is_bill
+    </sql>
+    
+    <!-- 获取分页数据 -->
+	<select id="HandoverHead.getHandoverHeadPageData" resultMap="HandoverHead.result" parameterClass="map">
+		select <include refid="HandoverHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="HandoverHead_columns_all"/>  from jat_pur_handover_head a 
+			where 1 = 1 
+			<isEmpty property="other" prepend="and"> a.source_type = #sourceType# </isEmpty>
+			<isNotEmpty property="other" prepend="and"> <![CDATA[a.source_type <> 'CM']]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.verdor_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="isBill" prepend="and"> 
+				<isEqual property="isBill" compareValue="1"> a.is_bill = 1 </isEqual>
+				<isNotEqual property="isBill" compareValue="1"> nvl(a.is_bill, 0) = 0 </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.create_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取分页数据 -->
+	<select id="HandoverHead.getReportHandHandoverHeadData" resultMap="HandoverHead.result" parameterClass="map">
+		select <include refid="HandoverHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="HandoverHead_columns_all"/>  from jat_pur_handover_head a 
+				where a.status >= 5 and nvl(a.IS_CHECK, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取分页数据 -->
+	<select id="HandoverHead.getReportOutHandoverHeadData" resultMap="HandoverHead.result" parameterClass="map">
+		select <include refid="HandoverHead_columns_all"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="HandoverHead_columns_all"/>  from jat_pur_handover_head a 
+				where a.status >= 5 and nvl(a.is_bill, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="HandoverHead.getHandoverHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pur_handover_head a where 1 = 1 
+		<isEmpty property="other" prepend="and"> a.source_type = #sourceType# </isEmpty>
+		<isNotEmpty property="other" prepend="and"> <![CDATA[a.source_type <> 'CM']]>  </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.verdor_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="isBill" prepend="and"> 
+			<isEqual property="isBill" compareValue="1"> a.is_bill = 1 </isEqual>
+			<isNotEqual property="isBill" compareValue="1"> (a.is_bill = 0 or a.is_bill is null) </isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="HandoverHead.getReportHandHandoverHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pur_handover_head a where a.status >= 5 and nvl(a.IS_CHECK, 0) = 0
+	</select>
+	<!-- 获取总条数 -->
+    <select id="HandoverHead.getReportOutHandoverHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pur_handover_head a where a.status >= 5 and nvl(a.is_bill, 0) = 0
+	</select>
+	
+	<!-- 保存数据 -->
+    <insert id="HandoverHead.saveHandoverHead" parameterClass="HandoverHead">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PUR_HANDOVER_HEAD_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into jat_pur_handover_head(<include refid="HandoverHead_columns_all"/>)
+		 values(
+		 	#billid#, #billno#, #sourceId#, #sourceNo#, #sourceType#, #dodate#, #orgId#, #verdorId#, 
+		 	#dotype#, #invalid#, #sumNum#, #sumMoney#, #sumCharge#, #receUser#, #receDate#, #expressNo#, 
+		 	#isPack#, #packNo#, #isPsale#, #status#, #isCheck#, #isFlag#, #memo#, #createDate#, #createId#, 
+		 	#updateDate#, #updateId#, #checkDate#, #checkId#, #cancelDate#, #cancelId#, #materialId#, 0
+		 )
+    </insert>
+    
+     <!-- 根据id获取记录对象 -->
+    <select id="HandoverHead.getHandoverHead" resultClass="HandoverHead" resultMap="HandoverHead.result" parameterClass="string">
+    	select <include refid="HandoverHead_columns_all"/> from jat_pur_handover_head a where a.billid = #value# 
+    </select>
+
+     <!-- 根据id获取记录对象 -->
+    <select id="HandoverHead.getHandoverHeadByBillno" resultClass="HandoverHead" resultMap="HandoverHead.result" parameterClass="string">
+    	select <include refid="HandoverHead_columns_all"/> from jat_pur_handover_head a where a.billno = #value#
+    </select>
+    
+    <select id="HandoverHead.getHandoverHeadBySrcBillId" resultClass="HandoverHead" resultMap="HandoverHead.result" parameterClass="map">
+    	select <include refid="HandoverHead_columns_all"/> from jat_pur_handover_head a where a.source_id = #srcBillid# and a.source_type = #srcType# 
+    </select>
+    
+	<!-- 修改信息 -->
+    <update id="HandoverHead.updateHandoverHead" parameterClass="HandoverHead">
+		update jat_pur_handover_head a set 
+			a.source_id    = #sourceId#, 
+			a.source_no    = #sourceNo#, 
+			a.source_type  = #sourceType#, 
+			a.dodate       = #dodate#, 
+			a.org_id       = #orgId#, 
+			a.verdor_id    = #verdorId#, 
+			a.dotype       = #dotype#, 
+			a.invalid      = #invalid#, 
+			a.sum_num      = #sumNum#, 
+			a.sum_money    = #sumMoney#, 
+			a.sum_charge   = #sumCharge#, 
+			a.rece_user    = #receUser#, 
+			a.rece_date    = #receDate#, 
+			a.express_no   = #expressNo#, 
+			a.is_pack      = #isPack#, 
+			a.pack_no      = #packNo#, 
+			a.is_psale     = #isPsale#, 
+			a.status       = #status#, 
+			a.is_check     = #isCheck#, 
+			a.is_flag      = #isFlag#, 
+			a.memo         = #memo#, 
+			a.update_date  = #updateDate#, 
+			a.update_id    = #updateId#, 
+			a.check_date   = #checkDate#, 
+			a.check_id     = #checkId#, 
+			a.cancel_date  = #cancelDate#, 
+			a.cancel_id    = #cancelId# ,
+			a.material_id  = #materialId#,
+			a.is_bill 	   = 0
+		where a.billid = #billid# 
+	</update>
+	
+	<update id="HandoverHead.updateHandoverHeadStatus" parameterClass="map">
+		update jat_pur_handover_head a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.billid = #billid# 
+	</update>
+	
+	<update id="HandoverHead.receiveHandoverHead" parameterClass="map">
+		update jat_pur_handover_head a set 
+		a.status = 10 , a.update_id = #updateId# , a.update_date = #updateDate# ,
+		a.RECE_DATE = #updateDate#, a.RECE_USER = #updateId#
+		where a.billid = #billid# 
+	</update>
+	
+	<delete id="HandoverHead.deleteHandoverHead" parameterClass="string">
+		delete from jat_pur_handover_head a where a.billid = #value# 
+	</delete>
+	
+	
+	<insert id="handoverHead.insert" parameterClass="HandoverHead">
+		<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_PUR_HANDOVER_HEAD_SEQ.NEXTVAL as billid from dual
+		</selectKey>
+		insert into JAT_PUR_HANDOVER_HEAD
+		  (BILLID,
+		   BILLNO,
+		   SOURCE_ID,
+		   SOURCE_NO,
+		   SOURCE_TYPE,
+		   DODATE,
+		   ORG_ID,
+		   DOTYPE,
+		   INVALID,
+		   SUM_NUM,
+		   SUM_MONEY,
+		   SUM_CHARGE,
+		   IS_PSALE,
+		   STATUS,
+		   IS_CHECK,
+		   IS_FLAG,
+		   CREATE_DATE,
+		   CREATE_ID,
+		   verdor_id
+		) values
+		(
+		   #billid#,
+		   #billno#, 			<!-- '单据生成规则', -->
+		   #sourceId#, 			<!-- '来源单据ID', -->
+		   #sourceNo#, 			<!-- '来源单据NO', -->
+		   #sourceType#, 		<!-- '来源单据类型', -->
+		   #dodate#,
+		   #orgId#, 		<!-- '当前库存组织', -->
+		   #dotype#,
+		   0,
+		   0,
+		   0,
+		   0,
+		   0,
+		   #status#, 				<!-- 关闭状态 -->
+		   0,
+		   0,
+		   #createDate#,
+		   #createId#, 			<!-- '当前用户', -->
+		   #verdorId#    
+		   )
+	</insert>
+	
+	<!-- ================================================行表处理========================================================== -->
+	<resultMap id="HandoverLine.result" class="HandoverLine">
+		<result property = "lineid"      column = "lineid"        />
+		<result property = "billid"      column = "billid"        />
+		<result property = "itemClassId" column = "item_class_id" />
+		<result property = "unitNo"      column = "unit_no"       />
+		<result property = "noNumNow"     column = "no_num_now"    />
+		<result property = "hangNum"     column = "hang_num"      />
+		<result property = "handCharge"  column = "hand_charge"   />
+		<result property = "handMoney"   column = "hand_money"    />
+		<result property = "noNumLast"   column = "no_num_last"        />
+		<result property = "yesMoney"    column = "yes_money"     />
+		<result property = "diffNum"     column = "diff_num"      />
+		<result property = "diffMoney"   column = "diff_money"    />
+		<result property = "yesNum"      column = "yes_num"       />
+		<result property = "isIniv"      column = "is_iniv"       />
+		<result property = "status"      column = "status"        />
+		<result property = "memo"        column = "memo"          />
+		<result property = "createDate"  column = "create_date"   />
+		<result property = "createId"    column = "create_id"     />
+		<result property = "updateDate"  column = "update_date"   />
+		<result property = "updateId"    column = "update_id"     />
+		<result property = "hangPrice"    column = "hang_price"   />
+		<result property = "goldPrice"    column = "gold_price"   />
+		<result property = "childList"    column = "child_list"   />
+	</resultMap>
+	<sql id="HandoverLine_columns_all">
+		lineid, billid, item_class_id, unit_no, no_num_now, hang_num, hand_charge, 
+		hand_money, no_num_last, yes_money, diff_num, diff_money, yes_num, is_iniv, status, 
+		memo, create_date, create_id, update_date, update_id, hang_price, gold_price
+    </sql>
+    <sql id="HadnoverLine_child_column">
+    	select 
+    		'['||wmsys.wm_concat('{"childid":"'||childid||'","lineid":"'||lineid ||'","alaysisId":"'||alaysis_id||'","stoneNum":"'||stone_num || '","unitPrice":"' || unit_price|| '"}')||']' 
+    	from jat_pur_handover_child 
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="HandoverLine.getHandoverLinePageData" resultMap="HandoverLine.result" parameterClass="map">
+		select <include refid="HandoverLine_columns_all"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="HandoverLine_columns_all"/>, 
+					(<include refid="HadnoverLine_child_column"/>  where lineid = a.lineid) as child_list  
+			from jat_pur_handover_line a 
+			where 1 = 1 order by a.lineid DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="HandoverLine.getHandoverLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pur_handover_line a where 1 = 1 
+	</select>
+	
+	
+	<select id="HandoverLine.getHandoverLineList" resultMap="HandoverLine.result" parameterClass="string">
+		select <include refid="HandoverLine_columns_all"/>,
+			(<include refid="HadnoverLine_child_column"/>  where lineid = a.lineid) as child_list  
+		from jat_pur_handover_line a 
+		where 1 = 1 and a.billid = #value#
+		order by a.lineid DESC
+	</select>
+	
+	<!-- 保存数据 -->
+    <insert id="HandoverLine.saveHandoverLine" parameterClass="HandoverLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PUR_HANDOVER_LINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_pur_handover_line(<include refid="HandoverLine_columns_all"/>)
+		 values(
+		 	#lineid#,  #billid#,  #itemClassId#,  #unitNo#,  #noNumNow#,  #hangNum#,  
+		 	#handCharge#,  #handMoney#,  #noNumLast#,  #yesMoney#,  #diffNum#,  #diffMoney#,  
+		 	#yesNum#,  #isIniv#,  #status#,  #memo#,  #createDate#,  #createId#,  #updateDate#,  #updateId#, 
+		 	#hangPrice#, #goldPrice#
+		 )
+    </insert>
+    
+     <!-- 根据id获取记录对象 -->
+    <select id="HandoverLine.getHandoverLine" resultClass="HandoverLine" resultMap="HandoverLine.result" parameterClass="string">
+    	select <include refid="HandoverLine_columns_all"/>,
+			(<include refid="HadnoverLine_child_column"/>  where lineid = a.lineid) as child_list  
+		from jat_pur_handover_line a where a.lineid = #value# 
+    </select>
+    
+	<!-- 修改信息 -->
+    <update id="HandoverLine.updateHandoverLine" parameterClass="HandoverLine">
+		update jat_pur_handover_line a set 
+			a.item_class_id = #itemClassId#,
+			a.unit_no       = #unitNo#,
+			a.no_num_now    = #noNumNow#,
+			a.hang_num      = #hangNum#,
+			a.hang_price    = #hangPrice#,
+			a.hand_charge   = #handCharge#,
+			a.hand_money    = #handMoney#,
+			a.no_num_last   = #noNumLast#,
+			a.yes_money     = #yesMoney#,
+			a.diff_num      = #diffNum#,
+			a.diff_money    = #diffMoney#,
+			a.yes_num       = #yesNum#,
+			a.is_iniv       = #isIniv#,
+			a.status        = #status#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#,
+			a.gold_price	= #goldPrice#
+		where a.lineid = #lineid# 
+	</update>
+	
+	<update id="HandoverLine.updateHandoverLineStatus" parameterClass="map">
+		update jat_pur_handover_line a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.lineid = #lineid# 
+	</update>
+	
+	<delete id="HandoverLine.deleteHandoverLine" parameterClass="string">
+		delete from jat_pur_handover_line a where a.lineid = #lineid# 
+	</delete>
+	
+	<delete id="HandoverLine.deleteHandoverLineByBillid" parameterClass="string">
+		delete from jat_pur_handover_line a where a.billid = #value# 
+	</delete>
+	
+	<insert id="handoverLine.insert" parameterClass="HandoverLine">
+		<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PUR_HANDOVER_LINE_seq.Nextval as lineid from dual
+		</selectKey>
+		insert into JAT_PUR_HANDOVER_LINE
+		(  LINEID,
+		   BILLID ,
+		   ITEM_CLASS_ID,
+		   UNIT_NO,
+		   NO_NUM_NOW,
+		   HANG_NUM,
+		   YES_MONEY,
+		   YES_NUM,
+		   IS_INIV,
+		   STATUS,
+		   CREATE_DATE,
+		   CREATE_ID
+		 ) values (
+		  #lineid#,
+		  #billid#, 		<!-- '头ID', -->
+		  #itemClassId#, 	<!-- 大类ID', -->
+		  #unitNo#,			<!--拆所混包为粒数，原料分割则为重量 -->
+		  0,
+		  #hangNum#,
+		  #yesMoney#,
+		  #yesNum#,
+		  1,
+		  3,
+		  #createDate#,
+		  #createId# 		<!-- '当前用户', -->
+		  )
+	</insert>
+	
+	
+	<select id="handover.getMaterialTypeByItemClassId" parameterClass="string" resultClass="string">
+		select a.material_type from jat_basic_material_item a
+		where 
+		<![CDATA[a.material_type <> 'N0']]> and a.item_class_id = #value#
+	</select>
+	
+	<select id="handover.getCashUnitByItemClassId" parameterClass="map" resultClass="string">
+		select a.pur_unit from jat_basic_material_item a
+		where a.item_class_id = #itemClassId#  and a.material_type = #materialType#
+	</select>
+	
+	<sql id="selectNum">
+		select sum(quantity) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id and state = 11
+	</sql>
+	<sql id="selectWeight">
+		select sum(ALL_QTY) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id and state = 11
+	</sql>
+	<sql id="selectGrain">
+		select sum(TOTAL_NUM) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id and state = 11
+	</sql>
+	<sql id="selectCount">
+		select count(*) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id and state = 11
+	</sql>
+	
+	<sql id="selectNum_other">
+		select sum(quantity) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id 
+	</sql>
+	<sql id="selectWeight_other">
+		select sum(ALL_QTY) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id 
+	</sql>
+	<sql id="selectGrain_other">
+		select sum(TOTAL_NUM) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id 
+	</sql>
+	<sql id="selectCount_other">
+		select count(*) from jat_mater_iniv
+		where handover_bill_id=a.billid and item_class_id = a.item_class_id 
+	</sql>
+	
+	<!-- 入库统计 -->
+	<select id="handover.getInStockList" resultClass="com.jatools.vo.pur.HandoverInStock" parameterClass="string">
+		select 
+			a.item_class_id		as "itemClassId",
+			b.item_class_dsc	as "itemClassName",
+			a.unit_no			as "unitId",
+			d.item_value		as "unitName",
+			a.hang_num			as "num",
+			a.no_num_now		as "noNum",
+			(<include refid="selectNum"/>) as "stockNum",
+			(<include refid="selectWeight"/>) as "stockWeight",
+			(<include refid="selectGrain"/>) as "stockGrain",
+			(<include refid="selectCount"/>) as "stockCount",
+			(<include refid="selectNum_other"/>) as "stockAllNum",
+			(<include refid="selectWeight_other"/>) as "stockAllWeight",
+			(<include refid="selectGrain_other"/>) as "stockAllGrain",
+			(<include refid="selectCount_other"/>) as "stockAllCount"
+		from jat_pur_handover_line a
+			left join jas_bd_item_class b on a.item_class_id = b.item_class_id
+			left join jat_sys_dict_item d on a.unit_no = d.item_key
+		where 1 = 1
+			and a.billid = #value#
+			and d.entry_code = 'purunit'
+	</select>
+	
+	<!-- 入库统计 其他交接单 -->
+	<select id="handover.getOtherInStockList" resultClass="com.jatools.vo.pur.HandoverInStock" parameterClass="string">
+		select 
+			a.item_class_id		as "itemClassId",
+			b.item_class_dsc	as "itemClassName",
+			a.unit_no			as "unitId",
+			d.item_value		as "unitName",
+			a.hang_num			as "num",
+			a.no_num_now		as "noNum",
+			(<include refid="selectNum_other"/>) as "stockNum",
+			(<include refid="selectWeight_other"/>) as "stockWeight",
+			(<include refid="selectGrain_other"/>) as "stockGrain",
+			(<include refid="selectCount_other"/>) as "stockCount",
+			(<include refid="selectNum_other"/>) as "stockAllNum",
+			(<include refid="selectWeight_other"/>) as "stockAllWeight",
+			(<include refid="selectGrain_other"/>) as "stockAllGrain",
+			(<include refid="selectCount_other"/>) as "stockAllCount"
+		from jat_pur_handover_line a
+			left join jas_bd_item_class b on a.item_class_id = b.item_class_id
+			left join jat_sys_dict_item d on a.unit_no = d.item_key
+		where 1 = 1
+			and a.billid = #value#
+			and d.entry_code = 'purunit'
+	</select>
+	
+	<sql id="selectNumByYL">
+		select sum(quantity) from jat_mater_iniv
+		where handover_bill_id = b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id and state = 11
+	</sql>
+	<sql id="selectWeightByYL">
+		select sum(ALL_QTY) from jat_mater_iniv 
+		where handover_bill_id = b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id and state = 11
+	</sql>
+	<sql id="selectGrainByYL">
+		select sum(TOTAL_NUM)  from jat_mater_iniv
+		where handover_bill_id=b.billid  and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id  and state = 11
+	</sql>
+	<sql id="selectCountByYL">
+		select count(*) from jat_mater_iniv
+		where handover_bill_id=b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id and state = 11
+	</sql>
+	
+	<sql id="selectNum_otherByYL">
+		select sum(quantity) from jat_mater_iniv
+		where handover_bill_id = b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id 
+	</sql>
+	<sql id="selectWeight_otherByYL">
+		select sum(ALL_QTY) from jat_mater_iniv 
+		where handover_bill_id = b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id 
+	</sql>
+	<sql id="selectGrain_otherByYL">
+		select sum(TOTAL_NUM)  from jat_mater_iniv
+		where handover_bill_id=b.billid  and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id 
+	</sql>
+	<sql id="selectCount_otherByYL">
+		select count(*) from jat_mater_iniv
+		where handover_bill_id=b.billid and item_class_id = b.item_class_id and ANALYSIS_ARANGE_ID = a.alaysis_id 
+	</sql>
+	
+	<select id="handover.getInStockListByYL" resultClass="com.jatools.vo.pur.HandoverInStock" parameterClass="string">
+		select 
+			b.item_class_id 	as "itemClassId",
+			d.item_class_dsc	as "itemClassName",
+			b.unit_no       	as "unitId",
+			e.item_value		as "unitName",
+			a.stone_num     	as "num",
+			a.alaysis_id    	as "analysisId",
+			f.summarydescription as "analysisName",
+			(<include refid="selectNumByYL"/>) as "stockNum",
+			(<include refid="selectWeightByYL"/>) as "stockWeight",
+			(<include refid="selectGrainByYL"/>) as "stockGrain",
+			(<include refid="selectCountByYL"/>) as "stockCount",
+			(<include refid="selectNum_otherByYL"/>) as "stockAllNum",
+			(<include refid="selectWeight_otherByYL"/>) as "stockAllWeight",
+			(<include refid="selectGrain_otherByYL"/>) as "stockAllGrain",
+			(<include refid="selectCount_otherByYL"/>) as "stockAllCount"
+		from jat_pur_handover_child a
+		left join jat_pur_handover_line b on a.lineid = b.lineid
+		left join jas_bd_item_class d on b.item_class_id = d.item_class_id
+		left join jat_sys_dict_item e on b.unit_no = e.item_key
+		left join jas_bd_analysis_arange f on a.alaysis_id = f.analysis_arange_id
+		where exists (select 1 from jat_pur_handover_line c where a.lineid = c.lineid and c.billid = #value#)
+	</select>
+	
+	<select id="handover.getOtherInStockListByYL" resultClass="com.jatools.vo.pur.HandoverInStock" parameterClass="string">
+		select 
+			b.item_class_id 	as "itemClassId",
+			d.item_class_dsc	as "itemClassName",
+			b.unit_no       	as "unitId",
+			e.item_value		as "unitName",
+			a.stone_num     	as "num",
+			a.alaysis_id    	as "analysis",
+			f.summarydescription as "analysisName",
+			(<include refid="selectNum_otherByYL"/>) as "stockNum",
+			(<include refid="selectWeight_otherByYL"/>) as "stockWeight",
+			(<include refid="selectGrain_otherByYL"/>) as "stockGrain",
+			(<include refid="selectCount_otherByYL"/>) as "stockCount",
+			(<include refid="selectNum_otherByYL"/>) as "stockAllNum",
+			(<include refid="selectWeight_otherByYL"/>) as "stockAllWeight",
+			(<include refid="selectGrain_otherByYL"/>) as "stockAllGrain",
+			(<include refid="selectCount_otherByYL"/>) as "stockAllCount"
+		from jat_pur_handover_child a
+		left join jat_pur_handover_line b on a.lineid = b.lineid
+		left join jas_bd_item_class d on b.item_class_id = d.item_class_id
+		left join jat_sys_dict_item e on b.unit_no = e.item_key
+		left join jas_bd_analysis_arange f on a.alaysis_id = f.analysis_arange_id
+		where exists (select 1 from jat_pur_handover_line c where a.lineid = c.lineid and c.billid = #value#)
+	</select>
+	
+	<update id="HandoverLine.modifyDiff" parameterClass="map">
+		update jat_pur_handover_line a 
+		set
+			a.diff_num = #diffNum#,
+			a.diff_money = a.hang_price * #diffNum#,
+			a.update_date = #updateDate#,
+			a.update_id = #updateId#
+		where 1=1 
+			and a.billid = #billid#
+			and a.item_class_id = #itemClassId#
+	</update>
+	
+	
+	<select id="Handover.getAnalysisList" resultClass="com.jatools.vo.util.SelectorOption">
+		select
+			A.ANALYSIS_ARANGE_ID as "value", 
+			A.SUMMARYDESCRIPTION as "text"
+		from jas_bd_analysis_arange a
+		where a.item_class_id = '156'
+			AND A.ORNA_CLASS_ID = '68'
+			AND A.ARCHIVEFLAG = 0
+	</select>
+	
+
+	<!-- 查询采购单  业务类型 不为空  未关闭的单据 -->
+	<select id="Handover.getPurchaseList" resultClass="com.jatools.vo.pur.PurchaseHead" parameterClass="map">
+		select "billno",  "headid", "bizType" , "status", "billType", "dodate", "orderEndDate" from (select rownum rownum_ , AA.* from (
+			select 
+				a.billno as "billno",
+				a.headid as "headid",
+				a.biz_type as "bizType",
+				a.status as "status",
+				a.bill_type as "billType",
+				a.dodate as "dodate",
+				a.order_end_date as "orderEndDate"
+			from JAT_PUR_PURCHASE_HEAD a where 1=1 
+				and a.biz_type is not null 
+				and a.status = 2
+				and a.vendor_id = #verdorId#
+				and a.org_id = #orgId#
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno#</isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and"> a.biz_type = #dotype#</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate#</isNotEmpty>	
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[aa.dodate <= #endDate#]]> </isNotEmpty>
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="Handover.getPurchaseCount" resultClass="int" parameterClass="map">
+		select count(*) from JAT_PUR_PURCHASE_HEAD a where 1=1 
+			and a.biz_type is not null 
+			and a.status = 2
+			and a.vendor_id = #verdorId#
+			and a.org_id = #orgId#
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno#</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate#</isNotEmpty>	
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[aa.dodate <= #endDate#]]> </isNotEmpty>
+	</select>
+	
+	<update id="HandoverLine.modifyHandoverReceiveStatus" parameterClass="map">
+		update jat_pur_handover_head a set 
+		a.is_bill = #status# , a.update_id = #userId# , a.update_date = #updateDate#
+		where a.billno = #billno# 
+	</update>
+	
+	<update id="HandoverLine.modifyHandoverReceiveStatusByBillid" parameterClass="map">
+		update jat_pur_handover_head a set 
+		a.is_bill = #status# , a.update_id = #userId# , a.update_date = #updateDate#
+		where a.billno in 
+		(
+			select t.hand_no from jat_bill_receive_line t where t.billid = #billid#
+		) 
+	</update>
+	
+	<update id="Handover.modifyPurchaseStatus" parameterClass="map">
+		update JAT_PUR_PURCHASE_HEAD a
+		set a.status = #status#, 
+			a.update_date = #updateDate#,
+			a.update_id = #userId#
+		where a.headid = #id#
+	</update>
+	
+	<update id="Handover.modifyPurchaseStatusByHandoverId" parameterClass="map">
+		update JAT_PUR_PURCHASE_HEAD a
+		set a.status = #status#, 
+			a.update_date = #updateDate#,
+			a.update_id = #userId#
+		where exists
+			 (select 1 from jat_pur_handover_head h
+		         where h.source_type = 'CM'
+		         and h.billid = #billid#
+				and instr(',' || h.source_id || ',', ',' || a.headid || ',') > 0
+			  )
+	</update>
+	
+	<!-- 把入库单 价格锁定标志的饰品 改成已引用 -->
+	<update id="Handover.modifyMaterInvalidByHandoverId" parameterClass="string">
+		update ic_mater_active a
+		set a.state = 901
+		where  exists (
+		      select 1 from jat_mater_iniv b
+		      where b.src_bill_id = #value# and b.state = 1 and b.lock_flag = 1 and a.orna_code = b.orna_code
+		 )
+	</update>
+	<!-- 查询交接单 对应的保存状态的入库单是否有价格锁定 -->
+	<select id="Handover.getInivPriceLockCount" parameterClass="string" resultClass="int">
+		select count(*) from jat_mater_iniv b
+		where b.src_bill_id = #value# and b.state = 901 and b.lock_flag = 1
+	</select>
+	
+	<insert id="Handover.insertPriceLockLineFromIniv" parameterClass="map">
+		insert into jat_basic_price_lock_line (
+			 LINEID ,
+			 HEADID ,ORNA_CODE ,ORNA_DSC ,ITEM_CLASS_ID ,
+			 ORNA_CLASS_ID ,STYLE_ID ,BASIC_PRICE ,POS_MONEY ,STATUS ,BAR_CODE,
+			 ALL_WEIGHT, MAIN_WEIGHT, PART_WEIGHT, COLOR_GRADE_ID, CLEAN_ID	
+		)
+		select 
+			jat_basic_price_lock_line_seq.nextval,
+			#priceLockId#, a.orna_code, a.orna_name, a.item_class_id,
+			a.orna_class_id, a.style_id, a.basic_price, a.pos_amount, 1, a.orna_barcode,
+			a.all_qty, a.main_weight, a.part_stone_weight, a.main_color_grade_id, a.clean_id
+		from jat_mater_iniv a 
+		where a.src_bill_id = #handoverId# and a.state = 901 and a.lock_flag = 1
+	</insert>
+	<!-- 交接装箱单审核，回写快递单号 -->
+	<update id="Handover.updatePackNoFromMovePack" parameterClass="map">
+		update jat_pur_handover_head a
+		   set a.pack_no = #billNo#, a.express_no = #expressNo#
+		 where exists (select 1
+		          from jat_move_pack_line b
+		         where b.headid = #headid#
+		           and b.bill_id = a.billid)
+	</update>
+	
+	<!-- 查询满足条件的核价单的数量 -->
+	<select id="Handover.selectPriceStonesByHandover" parameterClass="string" resultClass="com.jatools.vo.pur.HandoverPriceStone">
+		select 
+			b.src_bill_id		as "handoverId",
+            c.vender			as "vendorId",
+            d.luodan_code		as "ornaCode",
+            sum(d.stone_nums)	as "stoneNum"
+        from jat_mater_iniv            b,
+             jat_calc_price_head       c,
+             jat_calc_price_stone_line d
+       where b.nuclear_bill_id = c.id
+         and c.id = d.head_id
+         and d.verification_flag = 0
+         and b.allow_iniv_type = 2
+         and c.iniv_flag = 1
+         and b.state = 901
+         and d.luodan_code is not null
+         and d.private_type = 1
+         and b.src_bill_id = #value#
+       group by b.src_bill_id, c.vender, d.luodan_code
+	</select>
+	<!-- 查询满足条件的货品台账 -->
+	<select id="Handover.selectProdAccountByHandover" parameterClass="string" resultClass="com.jatools.vo.out.CashProdAccount">
+		select
+			pr_id			as "prId",
+			bill_type		as "billType",
+			bill_no			as "billNo",
+			bill_date		as "billDate",
+			org_id			as "orgId",
+			dotype			as "dotype",
+			voder_id		as "voderId",
+			item_class_id	as "itemClassId",
+			material_type	as "materialType",
+			cash_unit		as "cashUnit",
+			bill_nums		as "billNums",
+			cash_nums		as "cashNums",
+			no_nums			as "noNums",
+			user_nums		as "userNums",
+			is_checked		as "isChecked",
+			status			as "status",
+			memo			as "memo"
+		from jat_cash_prod_account a
+		where a.is_checked = 0
+		   and a.status = 2
+		   and a.dotype = 1
+		   and a.memo is not null
+		   and exists (select 1
+		          from jat_mater_iniv            b,
+		               jat_calc_price_head       c,
+		               jat_calc_price_stone_line d
+		         where b.nuclear_bill_id = c.id
+		           and c.id = d.head_id
+		           and d.verification_flag = 0
+		           and b.src_bill_id = #value#
+		           and c.vender = a.voder_id
+		           and d.luodan_code = a.memo
+		           and b.allow_iniv_type = 2
+		           and b.state = 901
+		           and c.iniv_flag = 1)
+	</select>
+	
+	<update id="Handover.updateProdAccountByCalc" parameterClass="map">
+		update jat_cash_prod_account a
+	   set (a.cash_nums, a.no_nums) =
+	       (select a.cash_nums + aa.stone_nums, a.no_nums - aa.stone_nums
+	          from (select b.src_bill_id,
+	                       c.vender,
+	                       d.luodan_code,
+	                       sum(d.stone_nums) as stone_nums
+	                  from jat_mater_iniv            b,
+	                       jat_calc_price_head       c,
+	                       jat_calc_price_stone_line d
+	                 where b.nuclear_bill_id = c.id
+	                   and c.id = d.head_id
+	                   and d.verification_flag = 0
+	                   and b.allow_iniv_type = 2
+	                   and c.iniv_flag = 1
+	                   and b.state = 1
+	                 group by b.src_bill_id, c.vender, d.luodan_code) aa
+	         where aa.src_bill_id = #srcBillId#
+	           and aa.vender = a.voder_id
+	           and aa.luodan_code = a.memo),
+	      a.update_date = #updateDate#,
+		  a.update_id = #updateId#
+	 where a.is_checked = 0
+	   and a.status = 2
+	   and exists (select 1
+	          from jat_mater_iniv            b,
+	               jat_calc_price_head       c,
+	               jat_calc_price_stone_line d
+	         where b.nuclear_bill_id = c.id
+	           and c.id = d.head_id
+	           and d.verification_flag = 0
+	           and b.src_bill_id = #srcBillId#
+	           and c.vender = a.voder_id
+	           and d.luodan_code = a.memo
+	           and b.allow_iniv_type = 2
+	           and b.state = 1
+	           and c.iniv_flag = 1)
+	</update>
+	
+	<insert id="Handover.insertProdAccountByCalc" parameterClass="map">
+		insert into jat_cash_prod_account
+		(
+			PR_ID	,
+			BILL_TYPE	,BILL_NO	,BILL_DATE	,ORG_ID	,DOTYPE	,VODER_ID	,MATERIAL_TYPE	,ITEM_CLASS_ID	,
+			CASH_UNIT	,BILL_NUMS	,CASH_NUMS	,NO_NUMS	,IS_CHECKED	,STATUS	,MEMO	,CREATE_DATE	,CREATE_ID	,
+			UPDATE_DATE	,UPDATE_ID
+		)
+		select 
+			jat_cash_prod_account_seq.nextval,
+			'HJ', ch.no as BILL_NO,substr(ch.createdate, 1, 10) as BILL_DATE, mi.iniv_org as ORG_ID, -1, ch.vender as VODER_ID, a.material_type, a.item_class_id,
+			a.pur_unit as cash_unit, cl.stone_nums as BILL_NUMS, cl.stone_nums as CASH_NUMS, 0, 1, 2, cl.luodan_code as MEMO, #createDate#, #userId#,
+			#updateDate#, #userId#
+		from jat_mater_iniv            mi,
+			jat_calc_price_head        ch,
+			jat_calc_price_stone_line  cl,
+			jat_basic_material_item a,
+			ic_mater_noactive b 
+		where mi.nuclear_bill_id = ch.id
+			and ch.id = cl.head_id
+			and cl.verification_flag = 0
+			and cl.luodan_code = b.orna_code
+			and b.item_class_id=a.item_class_id
+			and mi.allow_iniv_type = 2
+            and ch.iniv_flag = 1
+            and mi.state = 901
+			and mi.src_bill_id = #srcBillId#
+	</insert>
+	
+	<update id="Handover.modifyCalcByHandover" parameterClass="map">
+		update JAT_CALC_PRICE_STONE_LINE a
+		set a.verification_flag = 1, a.updatedate = #updateDate#
+		where exists (
+			    select 1 
+			    from JAT_MATER_INIV b, 
+			    	 JAT_CALC_PRICE_HEAD c
+			    where b.nuclear_bill_id = c.id
+				    and a.head_id = c.id
+				    and a.verification_flag = 0
+				    and b.allow_iniv_type = 2
+		           	and c.iniv_flag = 1
+		           	and b.state = 901
+				    and b.src_bill_id = #srcBillId#
+			)
+	</update>
+	
+	
+	<update id="Handover.modifyHandoverCashStatus" parameterClass="map">
+		update jat_pur_handover_head h 
+		set h.is_check = 1, h.update_date = #udpateDate#, h.update_id = #userId#
+		where h.billid = #billid#
+		and (h.is_check = 0 or h.is_check is null)
+	</update>
+	<!-- 查询入库单 -->
+	<select id="Handover.getMaterInivList" parameterClass="string" resultClass="com.jatools.vo.stock.MaterIniv">
+		select 
+			a.id			as "id", 
+			a.total_cost	as "totalCost", 
+			a.cost_price	as "costPrice",
+			a.quantity		as "quantity",
+			a.orna_code		as "ornaCode",
+			a.allow_iniv_type as "allowInivType",
+      		a.all_qty         as "weight",
+      		a.cost_unit		as "costUnit",
+      		a.total_num		as "totalNum",
+      		a.unit_id		as "unitId"
+		from jat_mater_iniv a 
+		where a.src_bill_id = #value# 
+	</select>
+	
+	<!-- 修改入库单原成本 -->
+	<update id="Handover.modifyMaterInivOldTotalCost" parameterClass="string">
+		update jat_mater_iniv a
+		set a.Iniv_cost = a.total_cost
+		where a.id = #value#
+	</update>
+	
+	<!-- 修改入库单 新成本 -->
+	<update id="Handover.modifyMaterInivNewTotalCost" parameterClass="com.jatools.vo.stock.MaterIniv">
+		update jat_mater_iniv a
+		set a.total_cost = #totalCost#, a.cost_price = #costPrice#, a.updatedate = #updatedate#
+		where a.id = #id#
+	</update>
+	
+	
+	<update id="Handover.updateHandoverHead" parameterClass="HandoverHead">
+		update jat_pur_handover_head h 
+		set h.sum_money = #sumMoney#, h.sum_num = #sumNum#, h.sum_charge = #sumCharge#, h.update_date = #updateDate#, h.update_id = #updateId#
+		where h.billid = #billid#
+	</update>
+	
+	<update id="Handover.updateHandoverLine" parameterClass="HandoverLine">
+		update jat_pur_handover_line a 
+		set 
+			a.item_class_id = #itemClassId#, a.hang_price = #hangPrice#, a.hand_charge = #handCharge#,
+			a.gold_price = #goldPrice#,
+			a.unit_no = #unitNo#, a.hang_num = #hangNum#, a.hand_money = #handMoney#, 
+			a.yes_money = #yesMoney#, a.last_hang_num = #lastHangNum#,
+			a.yes_num = #yesNum#, a.update_date = #updateDate#, a.update_id = #updateId#
+		where a.lineid = #lineid#
+	</update>
+	
+	<update id="Handover.updateHandoverChild" parameterClass="com.jatools.vo.pur.HandoverChild">
+		update jat_pur_handover_child c 
+		set c.stone_num = #stoneNum#, c.update_date = #updateDate#, c.update_id = #updateId#
+		where c.childid = #childid#
+	</update>
+	
+	<select id="Handover.checkHandoverModify" parameterClass="map" resultClass="int">
+		select count(1) from jat_pur_handover_head a
+		where a.billid = #billid# and a.update_date = #updateDate#
+	</select>
+	
+	<insert id="Handover.backuphandoverLine" parameterClass="map">
+		insert into JAT_PUR_HANDOVER_LINE_rec (
+			ID, 
+			LINEID, BILLID, ITEM_CLASS_ID, UNIT_NO, HANG_NUM, HANG_PRICE, HAND_MONEY, HAND_CHARGE, NO_NUM_LAST, 
+			NO_NUM_NOW, YES_NUM, YES_MONEY, DIFF_NUM, DIFF_MONEY, IS_INIV, STATUS, MEMO, CREATE_DATE, CREATE_ID, 
+			UPDATE_DATE, UPDATE_ID, GOLD_PRICE, LAST_HANG_NUM, 
+			EDIT_DATE, EDIT_ID
+		)
+		select 
+			JAT_PUR_HANDOVER_LINE_rec_seq.Nextval,
+			LINEID, BILLID, ITEM_CLASS_ID, UNIT_NO, HANG_NUM, HANG_PRICE, HAND_MONEY, HAND_CHARGE, NO_NUM_LAST, 
+			NO_NUM_NOW, YES_NUM, YES_MONEY, DIFF_NUM, DIFF_MONEY, IS_INIV, STATUS, MEMO, CREATE_DATE, CREATE_ID, 
+			UPDATE_DATE, UPDATE_ID, GOLD_PRICE, LAST_HANG_NUM,
+			#updateDate#,
+			#updateId#	
+		from JAT_PUR_HANDOVER_LINE a
+		where a.billid = #billid#
+	</insert>
+	
+	<insert id="Handover.backupHandoverchild" parameterClass="map">
+		insert into JAT_PUR_HANDOVER_CHILD_REC
+		select * from JAT_PUR_HANDOVER_CHILD a where exists(
+		  select 1 from Jat_Pur_Handover_Line b where a.lineid = b.lineid and b.billid= #billid#
+		)
+	</insert>
+	
+	
+	<!-- ====================== 重新处理核价单 核销 ================================ -->
+	<select id="Handover.selectProdAccountByHandId" parameterClass="string" resultClass="com.jatools.vo.out.CashProdAccount">
+		select
+	      t.pr_id      as "prId",
+	      t.bill_type    as "billType",
+	      t.bill_no        as "billNo",
+	      t.bill_date      as "billDate",
+	      t.org_id        as "orgId",
+	      t.dotype        as "dotype",
+	      t.voder_id      as "voderId",
+	      t.item_class_id as "itemClassId",
+	      t.material_type as "materialType",
+	      t.cash_unit    as "cashUnit",
+	      t.bill_nums    as "billNums",
+	      t.cash_nums    as "cashNums",
+	      t.no_nums      as "noNums",
+	      t.user_nums    as "userNums",
+	      t.is_checked   as "isChecked",
+	      t.status       as "status",
+	      t.memo         as "memo",
+	     (select sum(a.user_nums) from jat_cash_prod_user a 
+	              where exists(
+	                    select 1 from jat_calc_price_stone_line b
+	                    left join jat_calc_price_head h on b.head_id=h.id
+	                    left join jat_mater_iniv   c on h.id = c.nuclear_bill_id
+	                    where 1=1
+	                         and c.state = 901
+	                         and c.allow_iniv_type = 2
+	                         and h.iniv_flag = 1
+	                         and b.verification_flag = 0
+	                         and c.src_bill_id= #handId#
+	                         and b.id = a.source_id
+	              )  and t.pr_id = a.pr_id
+	       )    as "calcNums"
+	    from jat_cash_prod_account t
+	    where 1=1
+	      and t.is_checked = 0
+	      and t.status = 2
+	      and t.dotype = 1
+	      and t.memo is not null
+	      and exists(select 1 from jat_cash_prod_user a 
+	              where exists(
+	                    select 1 from jat_calc_price_stone_line b
+	                    left join jat_calc_price_head h on b.head_id=h.id
+	                    left join jat_mater_iniv   c on h.id = c.nuclear_bill_id
+	                    where 1=1
+	                         and c.state = 901
+	                         and c.allow_iniv_type = 2
+	                         and h.iniv_flag = 1
+	                         and b.verification_flag = 0
+	                         and c.src_bill_id= #handId#
+	                         and b.id = a.source_id
+	              )  and t.pr_id = a.pr_id
+	       )
+	</select>
+	
+	<update id="Handover.subProdAccountUserNumsByHandId" parameterClass="map">
+		update jat_cash_prod_account t
+	    set t.user_nums = t.user_nums - (
+	            select sum(a.user_nums) from jat_cash_prod_user a 
+	              where exists(
+	                    select 1 from jat_calc_price_stone_line b
+	                    left join jat_calc_price_head h on b.head_id=h.id
+	                    left join jat_mater_iniv   c on h.id = c.nuclear_bill_id
+	                    where 1=1
+	                         and c.state = 901
+	                         and c.allow_iniv_type = 2
+	                         and h.iniv_flag = 1
+	                         and b.verification_flag = 0
+	                         and c.src_bill_id= #handId#
+	                         and b.id = a.source_id
+	              )  and t.pr_id = a.pr_id
+	    ), t.update_date = #updateDate#, t.update_id = #updateId#
+	    where exists (
+	           select 1 from jat_cash_prod_user a 
+	              where exists(
+	                    select 1 from jat_calc_price_stone_line b
+	                    left join jat_calc_price_head h on b.head_id=h.id
+	                    left join jat_mater_iniv   c on h.id = c.nuclear_bill_id
+	                    where 1=1
+	                         and c.state = 901
+	                         and c.allow_iniv_type = 2
+	                         and h.iniv_flag = 1
+	                         and b.verification_flag = 0
+	                         and c.src_bill_id= #handId#
+	                         and b.id = a.source_id
+	              )  and t.pr_id = a.pr_id
+	    )
+	    and t.status = 2
+	    and t.dotype = 1
+	    and t.memo is not null
+	</update>
+	
+	<!-- 通过退料单 插入交接单行信息 -->
+	<insert id="Handover.insertLineByExit" parameterClass="map">
+		insert into jat_pur_handover_line (
+		       lineid, billid, 
+		       item_class_id, unit_no, hang_num, yes_num,
+		       create_date, create_id, update_date, update_id
+		) 
+		select  
+		       jat_pur_handover_line_seq.nextval, #handoverId#,
+		       aa.item_class_id, aa.cash_unit, aa.exit_nums, aa.exit_nums,
+		       #createDate#, #createId#, #updateDate#, #updateId#
+		from (
+		    select 
+		       a.item_class_id, a.cash_unit, sum(a.exit_nums)  as exit_nums
+		    from jat_proc_exit_line a 
+		    where a.billid = #exitBillid#
+		    group by a.item_class_id, a.cash_unit
+		    order by a.item_class_id, a.cash_unit
+		) aa
+	</insert>
+</sqlMap>

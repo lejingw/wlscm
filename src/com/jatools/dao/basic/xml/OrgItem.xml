@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="OrgItem">
+	<typeAlias alias="OrgItem" type="com.jatools.vo.basic.OrgItem"/>
+	<resultMap class="OrgItem" id="result">
+		<result property="orgItemId" column="orgItem_id"/>
+		<result property="orgId" column="org_id"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="status" column="STATUS"/>
+		<result property="memo" column="MEMO"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+	</resultMap>
+	<sql id="OrgItem.Columns.all">
+		orgItem_id,org_id,item_class_id,status,memo,create_date,create_id,update_date,update_id
+	</sql>
+	<select id="OrgItem.getOrgItemPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="OrgItem.Columns.all"/> from jat_basic_org_itemclass a where a.status!=-1
+			 order by a.orgItem_id desc 
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>     
+	<select id="OrgItem.getItemByOrgId" resultClass="string" parameterClass="string">
+		select oi.item_class_id "itemClassId" from jat_basic_org_itemclass oi where oi.org_id = #value#
+	</select>
+	<select id="OrgItem.getOrgItemTotalCount" resultClass="int">
+		select count(1) from jat_basic_org_itemclass a where a.status!=-1
+	</select>
+	<!-- 删除 -->
+	<delete id="OrgItem.deleteOrgItem" parameterClass="string">
+		delete jat_basic_org_itemclass a where a.orgItem_id = #value#
+	</delete>
+	<!-- 删除 -->
+	<delete id="OrgItem.deleteOrgItemByOrgId" parameterClass="string">
+		delete jat_basic_org_itemclass a where a.org_id = #value#
+	</delete>
+	<!-- findById -->
+	<select id="OrgItem.getOrgItemById" resultClass="OrgItem" parameterClass="string" resultMap="result">
+		select <include refid="OrgItem.Columns.all"/> from jat_basic_org_itemclass a where a.orgItem_id = #value#
+	</select>
+	<select id="OrgItem.getOrgItemByOrgId" resultClass="string" parameterClass="map">
+		select count(1) from jat_basic_org_itemclass a where a.org_id = #orgId# 
+	</select>
+	<!-- 保存数据  and a.orgItem_id!=#id#-->
+	<insert id="OrgItem.saveOrgItem" parameterClass="OrgItem">
+		<selectKey keyProperty="orgItemId" type="pre">
+			select JAT_BASIC_ORG_ITEM_SEQ.nextval as orgItemId from dual
+		</selectKey>
+		insert into jat_basic_org_itemclass(
+			orgItem_id,org_id,ITEM_CLASS_ID,status,memo,create_date,create_id,update_date,update_id)
+			values(#orgItemId#,#orgId#,#itemClassId#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="OrgItem.updateOrgItem" parameterClass="OrgItem">
+		update jat_basic_org_itemclass a set 
+			a.org_id = #orgId#,
+			a.item_class_id = #itemClassId#,
+			a.status = #status#,
+			a.memo = #memo#,
+			a.create_date = #createDate#,
+			a.create_id = #createId#,
+			a.update_date = #updateDate#,
+			a.update_id = #updateId# where a.orgItem_id = #orgItemId#
+	</update>
+	<!-- 逻辑删除 -->
+	<update id="OrgItem.deleteOrgItemLJ" parameterClass="string">
+		update jat_basic_org_itemclass a set 
+			a.status = -1 where a.orgItem_id = #value#
+	</update>
+</sqlMap>

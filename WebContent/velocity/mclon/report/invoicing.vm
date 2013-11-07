@@ -1,0 +1,276 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><th>报表管理【进销存查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</th></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+					
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">
+			    <input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08050301','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08050301','2')>
+				<input type='button' value='库存统计查询' class='btn' id='btnlink' onclick="window.location='../report/report.vm?reportType=23'" >
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<th class='body1'>组织</th>
+			<th class='body2'>
+				<input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='hidden' id="OrgId" name='OrgId' value="">
+				<input type='text' id="OrgName" name='OrgName' value="" readonly class="target" onclick="showSelectOrgWin()">
+			</th>
+			<th class='body1'>仓库</th>
+			<th class='body2'>
+				<select id="stockid" name='stockid'  value="" >
+				<option value='' >请选择</option>
+				<option value='1'>饰品库</option>
+				<option value='2'>旧品库</option>
+				
+				</select>
+			</th>
+				<th class='body1'>含税</th>
+			<th class='body2'>
+				<select id="isTax" name='isTax'  value="" >
+				<option value='1' >是</option>
+				<option value='1.17'>否</option>
+				</select>
+			</th>
+			<th class='body1'>时间始</th>
+			<th class='body2'>	
+				<input type='text' id="startDate" name='startDate' >必输
+					</th>
+			  <th class='body1'>时间止</th>
+			<th class='body2'>
+					<input type='text' id="endDate" name='endDate' >必输
+</th>		
+</tr>
+		
+		
+		
+    </table>
+
+	<div class='scroll2'>
+        <table class='list' style='width:3200px;'>
+    	<thead>
+   <tr> 
+    <th colspan="6" rowspan="2">&nbsp;</th>
+    <th colspan="14"> 
+      <div align="center">入库</div>
+    </th>
+    <th colspan="14"><div align="center">出库</div></th>
+    <th colspan="3" rowspan="2">&nbsp;</th>
+  </tr>
+  <tr> 
+    <th colspan="2"> 
+      <div align="center">采购</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">委外</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">调拔</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">以旧换新</div>
+    </th>
+    <th colspan="2">转换入库</th>
+    <th colspan="2">其它入库</th>
+    <th colspan="2">小计</th>
+    <th colspan="2"> 
+      <div align="center">销售</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">委外</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">调拔</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">转换出库</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">代销退回</div>
+    </th>
+    <th colspan="2"> 
+      <div align="center">其它出库</div>
+    </th>
+    <th colspan="2">小计</th>
+  </tr>
+  <tr> 
+    <th width="8%">组织</th>
+    <th width="3%">仓库</th>
+    <th width="3%">大类</th>
+    <th width="3%">小类</th>
+    <th width="4%">期初数量</th>
+    <th width="4%">期初金额</th>
+    <th width="3%">数量</th>
+    <th width="3%">金额</th>
+    <th width="3%">数量</th>
+    <th width="3%">金额</th>
+    <th width="3%">数量</th>
+    <th width="3%">金额</th>
+    <th width="3%">数量</th>
+    <th width="3%">金额</th>
+    <th width="3%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+    <th width="2%">数量</th>
+    <th width="2%">金额</th>
+	<th width="4%">磅差数量</th>
+    <th width="4%">期末数量</th>
+    <th width="5%">期末金额</th>
+  </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+			    <td>$!map.ORG_NAME</td>
+				<td>$!map.STOCK</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.FIRST_QTY</td>
+				<td>$!map.FIRST_MONEY</td>
+				<td>$!map.INIVCG_QTY</td>
+				<td>$!map.INIVCG_MONEY</td>
+				<td>$!map.INIVWW_QTY</td>
+				<td>$!map.INIVWW_MONEY</td>
+				<td>$!map.MOVEIN_QTY</td>
+				<td>$!map.MOVEIN_MONEY</td>
+				<td>$!map.SALEIN_QTY</td>
+				<td>$!map.SALEIN_MONEY</td>
+				<td>$!map.CHANGEIN_QTY</td>
+				<td>$!map.CHANGEIN_MONEY</td>
+				<td>$!map.OTHERIN_QTY</td>
+				<td>$!map.OTHERIN_MONEY</td>
+				<td>$!map.SUMIN_QTY</td>
+				<td>$!map.SUMIN_MONEY</td>
+				<td>$!map.SALEOUT_QTY</td>
+				<td>$!map.SALEOUT_MONEY</td>
+				<td>$!map.WWOUT_QTY</td>
+				<td>$!map.WWOUT_MONEY</td>
+				<td>$!map.MOVEOUT_QTY</td>
+				<td>$!map.MOVEOUT_MONEY</td>
+				<td>$!map.CHANGEOUT_QTY</td>
+				<td>$!map.CHANGEOUT_MONEY</td>
+				<td>$!map.DXOUT_QTY</td>
+				<td>$!map.DXOUT_MONEY</td>
+				<td>$!map.OTHEROUT_QTY</td>
+				<td>$!map.OTHEROUT_MONEY</td>
+				<td>$!map.SUMOUT_QTY</td>
+				<td>$!map.SUMOUT_MONEY</td>
+				<td>$!map.BANGC_QTY</td>
+				<td>$!map.END_QTY</td>
+				<td>$!map.END_MONEY</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#OrgId").val(idArr.join(","));
+			jQuery("#OrgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#OrgId").val());
+}
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+function setnull(){
+	jQuery("#OrgId").val("");
+	jQuery("#OrgName").val("");
+	jQuery("#stockid").val("");
+	jQuery("#isTax").val("1");
+	jQuery("#startDate").val("");
+	jQuery("#endDate").val("");
+}
+
+function setValues(){
+    altRowCSS("tbl");
+	jQuery("#OrgId").val("$!form.condition.OrgId");
+	jQuery("#OrgName").val("$!BdCommon.getOrgName($!form.condition.OrgId)");
+	jQuery("#stockid").val("$!form.condition.stockid");
+	jQuery("#isTax").val(#if("$!form.condition.isTax"=="") "1" #else "$!form.condition.isTax" #end);
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+}	
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+	
+	 	jQuery("#frm").submit();
+	});
+	
+
+	newCalendar();
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+</script>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LabelTagApplyLine">
+	<typeAlias alias="LabelTagApplyLine" type="com.jatools.vo.tag.LabelTagApplyLine" />
+	
+	<resultMap class="LabelTagApplyLine" id="LabelTagApplyLine.result">
+		<result property = "id"                  column = "id"                     />
+		<result property = "headId"              column = "head_id"                />
+		<result property = "ornaCode"            column = "orna_code"              />
+		<result property = "ornaName"            column = "orna_name"              />
+		<result property = "unitId"              column = "unit_id"                />
+		<result property = "num"                 column = "num"                    />
+		<result property = "weighr"              column = "weighr"                 />
+		<result property = "oldAmount"           column = "old_amount"             />
+		<result property = "newAmount"           column = "new_amount"             />
+		<result property = "oidSize"             column = "oid_size"               />
+		<result property = "newSize"             column = "new_size"               />
+		<result property = "oldOrnaName"         column = "old_orna_name"          />
+		<result property = "newOrnaName"         column = "new_orna_name"          />
+		<result property = "oldNativeCert"       column = "old_native_cert"        />
+		<result property = "newNativeCert"       column = "new_native_cert"        />
+		<result property = "oldGiaCert"          column = "old_gia_cert"           />
+		<result property = "newGiaCert"          column = "new_gia_cert"           />
+		<result property = "oldHrdCert"          column = "old_hrd_cert"           />
+		<result property = "newHrdCert"          column = "new_hrd_cert"           />
+		<result property = "oldIgiCert"          column = "old_igi_cert"           />
+		<result property = "newIgiCert"          column = "new_igi_cert"           />
+		<result property = "oldZodiac"           column = "old_zodiac"             />
+		<result property = "newZodiac"           column = "new_zodiac"             />
+		<result property = "updateReason"        column = "update_reason"          />
+		<result property = "state"               column = "state"                  />
+		<result property = "updatedate"          column = "updatedate"             />
+		<result property = "isDblLabel"          column = "is_dbl_label"           />
+		<result property = "labelKind"           column = "label_kind"             />
+		<result property = "oldBasicPrice"       column = "old_basic_price"        />
+		<result property = "newBasicPrice"       column = "new_basic_price"        />
+		<result property = "itemClassId"         column = "item_class_id"          />
+		<result property = "ornaClassId"         column = "orna_class_id"          />
+		<result property = "oldSpecialWorkPrice" column = "old_special_work_price" />
+		<result property = "newSpecialWorkPrice" column = "new_special_work_price" />
+		<result property ="oldSizeName" column = "old_size_name" />
+		<result property ="newSizeName" column = "new_size_name" />
+	</resultMap>
+	
+	<sql id="LabelTagApplyLine_columns">
+		id, head_id, orna_code, orna_name, unit_id, num, weighr, old_amount, new_amount, oid_size, new_size, old_orna_name, new_orna_name, 
+		old_native_cert, new_native_cert, old_gia_cert, new_gia_cert, old_hrd_cert, new_hrd_cert, old_igi_cert, new_igi_cert, old_zodiac, 
+		new_zodiac, update_reason, state, updatedate, is_dbl_label, label_kind, old_basic_price, new_basic_price, item_class_id, 
+		orna_class_id, old_special_work_price, new_special_work_price
+	</sql>
+	<sql id="LabelTagApplyLine_old_size_column">
+		(select t.size_name  from jas_bd_size t where t.size_id = a.oid_size) as old_size_name
+	</sql>
+	<sql id="LabelTagApplyLine_new_size_column">
+		(select t.size_name  from jas_bd_size t where t.size_id = a.new_size) as new_size_name
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="LabelTagApplyLine.getLabelTagApplyLinePageData" resultMap="LabelTagApplyLine.result" parameterClass="map">
+		select <include refid="LabelTagApplyLine_columns"/>, old_size_name, new_size_name from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="LabelTagApplyLine_columns"/>, 
+					<include refid="LabelTagApplyLine_old_size_column"/>,
+					<include refid="LabelTagApplyLine_new_size_column"/>
+			from jat_lable_tag_apply_line a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+			</isNotEmpty>
+			order by a.updatedate DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="LabelTagApplyLine.getLabelTagApplyLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_lable_tag_apply_line a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<insert id="LabelTagApplyLine.saveLabelTagApplyLine" parameterClass="LabelTagApplyLine">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select JAT_LABLE_TAG_APPLY_LINE_SEQ.nextval as "id" from dual
+		</selectKey>
+		insert into jat_lable_tag_apply_line(<include refid="LabelTagApplyLine_columns"/>)
+		 values(
+		 	#id#, #headId#, #ornaCode#, #ornaName#, #unitId#, #num#, #weighr#, #oldAmount#, #newAmount#, #oidSize#, #newSize#, #oldOrnaName#, #newOrnaName#, #oldNativeCert#, #newNativeCert#, #oldGiaCert#, #newGiaCert#, #oldHrdCert#, #newHrdCert#, #oldIgiCert#, #newIgiCert#, #oldZodiac#, #newZodiac#, #updateReason#, #state#, #updatedate#, #isDblLabel#, #labelKind#, #oldBasicPrice#, #newBasicPrice#, #itemClassId#, #ornaClassId#, #oldSpecialWorkPrice#, #newSpecialWorkPrice#
+		 )
+    </insert>
+    
+    <select id="LabelTagApplyLine.getLabelTagApplyLine" parameterClass="string" resultMap="LabelTagApplyLine.result">
+		select <include refid="LabelTagApplyLine_columns"/>, 
+				<include refid="LabelTagApplyLine_old_size_column"/>,
+				<include refid="LabelTagApplyLine_new_size_column"/>
+		from jat_lable_tag_apply_line a 
+		where 1=1
+			and a.id = #value#
+	</select>
+	
+	<select id="LabelTagApplyLine.getLabelTagApplyLineListByHeadid" parameterClass="string" resultMap="LabelTagApplyLine.result">
+		select <include refid="LabelTagApplyLine_columns"/>, 
+				<include refid="LabelTagApplyLine_old_size_column"/>,
+				<include refid="LabelTagApplyLine_new_size_column"/>
+		from jat_lable_tag_apply_line a 
+		where 1=1
+			and a.head_id = #value#
+	</select>
+	
+	<update id="LabelTagApplyLine.updateLabelTagApplyLine" parameterClass="LabelTagApplyLine">
+		update jat_lable_tag_apply_line a set 
+			a.orna_code              = #ornaCode#,
+			a.orna_name              = #ornaName#,
+			a.unit_id                = #unitId#,
+			a.num                    = #num#,
+			a.weighr                 = #weighr#,
+			a.old_amount             = #oldAmount#,
+			a.new_amount             = #newAmount#,
+			a.oid_size               = #oidSize#,
+			a.new_size               = #newSize#,
+			a.old_orna_name          = #oldOrnaName#,
+			a.new_orna_name          = #newOrnaName#,
+			a.old_native_cert        = #oldNativeCert#,
+			a.new_native_cert        = #newNativeCert#,
+			a.old_gia_cert           = #oldGiaCert#,
+			a.new_gia_cert           = #newGiaCert#,
+			a.old_hrd_cert           = #oldHrdCert#,
+			a.new_hrd_cert           = #newHrdCert#,
+			a.old_igi_cert           = #oldIgiCert#,
+			a.new_igi_cert           = #newIgiCert#,
+			a.old_zodiac             = #oldZodiac#,
+			a.new_zodiac             = #newZodiac#,
+			a.update_reason          = #updateReason#,
+			a.state                  = #state#,
+			a.updatedate             = #updatedate#,
+			a.is_dbl_label           = #isDblLabel#,
+			a.label_kind             = #labelKind#,
+			a.old_basic_price        = #oldBasicPrice#,
+			a.new_basic_price        = #newBasicPrice#,
+			a.item_class_id          = #itemClassId#,
+			a.orna_class_id          = #ornaClassId#,
+			a.old_special_work_price = #oldSpecialWorkPrice#,
+			a.new_special_work_price = #newSpecialWorkPrice#
+		where a.id = #id# 
+	</update>
+	
+	<delete id="LabelTagApplyLine.deleteLabelTagApplyLine" parameterClass="string">
+		delete from jat_lable_tag_apply_line a where a.id = #value# 
+	</delete>
+	
+	<delete id="LabelTagApplyLine.deleteLabelTagApplyLineByHeadid" parameterClass="string">
+		delete from jat_lable_tag_apply_line a where a.head_id = #value# 
+	</delete>
+	
+	<update id="LabelTagApplyLine.updateLabelTagApplyLineStatus" parameterClass="map">
+		update jat_lable_tag_apply_line a set 
+		a.state = #status# , a.updatedate = #updateDate# 
+		where a.id = #id# 
+	</update>
+	
+</sqlMap>

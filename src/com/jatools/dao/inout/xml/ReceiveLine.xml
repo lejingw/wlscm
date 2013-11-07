@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ReceiveLine">
+	<typeAlias alias="ReceiveLine" type="com.jatools.vo.inout.ReceiveLine" />
+	
+	<resultMap class="ReceiveLine" id="ReceiveLine.result">
+		<result property = "lineid"       column = "lineid"        />
+		<result property = "billid"       column = "billid"        />
+		<result property = "handNo"       column = "hand_no"       />
+		<result property = "itemClassId"  column = "item_class_id" />
+		<result property = "handUnit"     column = "hand_unit"     />
+		<result property = "handNum"      column = "hand_num"      />
+		<result property = "price"        column = "price"         />
+		<result property = "moneys"       column = "moneys"        />
+		<result property = "tax"          column = "tax"           />
+		<result property = "taxMoney"     column = "tax_money"     />
+		<result property = "allMoney"     column = "all_money"     />
+		<result property = "status"       column = "status"        />
+		<result property = "createDate"   column = "create_date"   />
+		<result property = "createId"     column = "create_id"     />
+		<result property = "updateDate"   column = "update_date"   />
+		<result property = "updateId"     column = "update_id"     />
+		<result property = "memo"     column = "memo"     />
+	</resultMap>
+	
+	<sql id="ReceiveLine_columns">
+		lineid, billid, hand_no, item_class_id, hand_unit, hand_num, price, moneys, tax, tax_money, 
+		all_money, status, create_date, create_id, update_date, update_id, memo
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="ReceiveLine.getReceiveLinePageData" resultMap="ReceiveLine.result" parameterClass="map">
+		select <include refid="ReceiveLine_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="ReceiveLine_columns"/>  from jat_bill_receive_line a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+			order by a.create_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="ReceiveLine.getReceiveLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_bill_receive_line a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+	</select>
+	
+	<insert id="ReceiveLine.saveReceiveLine" parameterClass="ReceiveLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_BILL_RECEIVE_LINE_SEQ.nextval as "lineid" from dual
+		</selectKey>
+		insert into jat_bill_receive_line(<include refid="ReceiveLine_columns"/>)
+		 values(
+		 	#lineid#, #billid#, #handNo#, #itemClassId#, #handUnit#, #handNum#, #price#, #moneys#, #tax#, 
+		 	#taxMoney#, #allMoney#, #status#, #createDate#, #createId#, #updateDate#, #updateId#, #memo#
+		 )
+    </insert>
+    
+    <select id="ReceiveLine.getReceiveLine" parameterClass="string" resultMap="ReceiveLine.result">
+		select <include refid="ReceiveLine_columns"/> from jat_bill_receive_line a 
+		where 1=1
+			and a.lineid = #value#
+	</select>
+	
+	<select id="ReceiveLine.getReceiveLineListByBillid" parameterClass="string" resultMap="ReceiveLine.result">
+		select <include refid="ReceiveLine_columns"/> from jat_bill_receive_line a 
+		where 1=1
+			and a.billid = #value#
+		order by a.create_date desc, a.lineid
+	</select>
+	
+	<update id="ReceiveLine.updateReceiveLine" parameterClass="ReceiveLine">
+		update jat_bill_receive_line a set 
+			a.hand_no       = #handNo#,
+			a.item_class_id = #itemClassId#,
+			a.hand_unit     = #handUnit#,
+			a.hand_num      = #handNum#,
+			a.price         = #price#,
+			a.moneys        = #moneys#,
+			a.tax           = #tax#,
+			a.tax_money     = #taxMoney#,
+			a.all_money     = #allMoney#,
+			a.status        = #status#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#,
+			a.memo		    = #memo#
+		where a.lineid = #lineid# 
+	</update>
+	
+	<delete id="ReceiveLine.deleteReceiveLine" parameterClass="string">
+		delete from jat_bill_receive_line a where a.lineid = #value# 
+	</delete>
+	
+	<delete id="ReceiveLine.deleteReceiveLineByBillid" parameterClass="string">
+		delete from jat_bill_receive_line a where a.billid = #value# 
+	</delete>
+	
+	<update id="ReceiveLine.updateReceiveLineStatus" parameterClass="map">
+		update jat_bill_receive_line a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.lineid = #lineId# 
+	</update>
+	
+	<update id="ReceiveLine.modifyHandoverBillStatus" parameterClass="map">
+		update jat_pur_handover_head h 
+		set 
+			h.is_bill = #status#, h.update_id = #userId#, h.update_date = #updateDate#
+		where h.billno = (select a.hand_no from jat_bill_receive_line a where a.lineid = #lineid#)
+	</update>
+</sqlMap>

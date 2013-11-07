@@ -1,0 +1,97 @@
+<style >
+	input.analyz{
+        cursor:pointer;
+        background-image:url($!StringUtil.getContextPath()/image/mclon/sel.png);
+        background-repeat:no-repeat; 
+		border-style: solid;
+		color: white;
+		background-color: white;
+		border:0px;
+    }
+</style>
+<form id='frm' action="handover.vm" method="post">
+	#set($cond = $form.condition)
+	#set($billid = $!cond.get('billid'))
+	<input type="hidden" id="billid" name="billid" value="$!billid"/>
+	<input type="hidden" id="user_action" name="user_action" value="doSearchLineRec"/>
+    <div class="scroll">
+	<table class='list' style="width:1000px;">
+    	<thead>
+			<tr>
+				<th width="24px"></th>
+				<th>大类</th>
+				<th>计量单位</th>
+				<th>交接数<br>量/重量</th>
+				<th>金价</th>
+                <th>单价</th>
+				<th>交接工费</th>
+				<th>交接金额</th>
+				<th>前次不合格<br>数量/重量</th>
+				<th>本次不合格<br>数量/重量</th>
+				<th>合格数<br>量/重量</th>	
+				<th>合格金额</th>
+				<th>磅差数<br>量/重量</th>
+        		<th>磅差金额</th>
+				<th>修改人</th>
+				<th>修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $form.pager.pageData)
+			<tr>
+				<td>#if("$!line.id"=="-2")<img src="$!StringUtil.getContextPath()/image/mclon/new.png"/>#end</td>
+				<td>$!line.itemClassDesc
+					#if("$!line.itemClassId"=="156")
+					<input type="button" name="itemBtn" value="" class="analyz" onclick='showLineChild("$!line.lineid")'/>
+					#end
+				</td>
+				<td>$!line.unitName</td>
+				<td>$!line.hangNum</td>
+				<td>$!line.goldPrice</td>
+				<td>$!line.hangPrice</td>
+				<td>$!line.handCharge</td>
+				<td>$!line.handMoney</td>
+				<td>$!line.noNumLast</td>
+				<td>$!line.noNumNow</td>
+				<td>$!line.yesNum</td>
+				<td>$!line.yesMoney</td>
+				<td>$!line.diffNum</td>
+				<td>$!line.diffMoney</td>
+				<td>$!line.editName</td>
+				<td>$!line.editDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+	<script>
+    	createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+    </script>
+</form>
+<script>
+
+
+jQuery(function(){
+	altRowCSS("tbl");
+})
+function showLineChild(lineid){
+	var _iframeId = "childHistoryIframe";
+	var options = {
+		title : '交接单分析范围修改记录',
+		contentType : 'iframe',
+		iframeId : _iframeId,
+		width : 550,
+		height : 260,
+		okBtnName : '确定',
+		closeable:true,
+		boxid:'winDiv',
+		onok : function(box) {
+			box.close();
+		},
+		oncancel : function(box) {
+			box.close();
+		}
+	};
+	var url = ctxPath + '/pur/handover.vm?user_action=doSearchChildRec&lineid='+lineid;
+	jQuery.weeboxs.open(url, options);
+}
+</script>

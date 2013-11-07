@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="DisplayStandard">
+	<sql id="DisplayStandard.getDisplayOrgTypePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="DisplayStandard.getDisplayOrgTypePageData" parameterClass="map" resultClass="com.jatools.vo.push.DisplayOrgtypeHead">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid       as "headid",
+			       a.orgtype_name as "orgtypeName",
+			       a.memo         as "memo",
+			       a.create_id    as "createId",
+			       a.create_date  as "createDate",
+			       a.update_id    as "updateId",
+			       a.update_date  as "updateDate",
+			       a.status       as "status"
+			  from jat_pl_display_orgtype_head a
+			  <include refid="DisplayStandard.getDisplayOrgTypePageDataCD"/>
+			 order by a.orgtype_name
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+    <select id="DisplayStandard.getDisplayOrgTypeTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_display_orgtype_head a
+			  <include refid="DisplayStandard.getDisplayOrgTypePageDataCD"/>
+	</select>
+	<select id="DisplayStandard.getAllDisplayOrgtype" resultClass="java.util.HashMap">
+		select a.headid       as "headid",
+		       a.orgtype_name as "orgtypeName",
+		       b.org_id       as "orgId",
+		       a.memo         as "memo",
+		       a.create_id    as "createId",
+		       a.create_date  as "createDate",
+		       a.update_id    as "updateId",
+		       a.update_date  as "updateDate",
+		       a.status       as "status"
+		  from jat_pl_display_orgtype_head a, jat_pl_display_orgtype_line b
+		 where a.headid = b.headid
+		 order by a.orgtype_name
+	</select>
+	<select id="DisplayStandard.getAllDisplayStandard" resultClass="java.util.HashMap">
+		select b.orgtype_name          as "orgtypeName",
+		       a.item_class_id         as "itemClassId",
+		       a.orna_class_id         as "ornaClassId",
+		       a2.summarydescription   as "analysisName",
+		       a.style_item_class_id   as "styleItemClassId",
+		       a.style_middle_class_id as "styleMiddleClassId",
+		       a.style_orna_class_id   as "styleOrnaClassId",
+		       a3.stylename            as "styleName",
+		       a.min_count             as "minCount",
+		       a.max_count             as "maxCount",
+		       a.create_id             as "createId",
+		       a.create_date           as "createDate",
+		       a.update_id             as "updateId",
+		       a.update_date           as "updateDate",
+		       a.status                as "status"
+		  from jat_pl_display_standand a
+		  left join jas_bd_analysis_arange a2
+		    on a2.analysis_arange_id = a.analysis_id
+		  left join jas_bd_style a3
+		    on a3.styleid = a.style_id, jat_pl_display_orgtype_head b
+		 where a.headid = b.headid
+		 order by b.headid,
+		          a.item_class_id,
+		          a.orna_class_id,
+		          a.analysis_id,
+		          a.style_item_class_id,
+		          a.style_id,
+		          a.min_count,
+		          a.max_count
+	</select>
+	<insert id="DisplayStandard.saveDisplayStandard" parameterClass="com.jatools.vo.push.DisplayStandard">
+		<selectKey keyProperty="lineid" resultClass="string">select jat_pl_display_standand_seq.nextval from dual</selectKey>
+		insert into jat_pl_display_standand(lineid, headid, item_class_id, orna_class_id, analysis_id, style_item_class_id, style_middle_class_id, style_orna_class_id, style_id, min_count, max_count, memo, create_id, create_date, update_id, update_date, status)
+		values(#lineid#, #headid#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#, #styleMiddleClassId#, #styleOrnaClassId#, #styleId#, #minCount#, #maxCount#, #memo#, #createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<insert id="DisplayStandard.saveDisplayStandard2" parameterClass="com.jatools.vo.push.DisplayStandard">
+		<selectKey keyProperty="lineid" resultClass="string">select jat_pl_display_standand_seq.nextval from dual</selectKey>
+		insert into jat_pl_display_standand2(
+                lineid, headid, item_class_id, orna_class_id, analysis_id, style_item_class_id,
+                min_count, max_count, memo, create_id, create_date, update_id, update_date, status
+        ) values(
+                #lineid#, #headid#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#,
+                #minCount#, #maxCount#, #memo#, #createId#, #createDate#, #updateId#, #updateDate#, #status#
+        )
+	</insert>
+	<update id="DisplayStandard.updateDisplayStandard" parameterClass="com.jatools.vo.push.DisplayStandard">
+		update jat_pl_display_standand
+		set min_count = #minCount#,
+			max_count = #maxCount#,
+			memo = #memo#,
+			update_id = #updateId#,
+			update_date = #updateDate#
+		where lineid = #lineid#
+	</update>
+	<update id="DisplayStandard.updateDisplayStandard2" parameterClass="com.jatools.vo.push.DisplayStandard">
+		update jat_pl_display_standand2
+		set min_count = #minCount#,
+			max_count = #maxCount#,
+			memo = #memo#,
+			update_id = #updateId#,
+			update_date = #updateDate#
+		where lineid = #lineid#
+	</update>
+	<delete id="DisplayStandard.deleteDisplayStandard" parameterClass="string">
+		delete jat_pl_display_standand where lineid = #value#
+	</delete>
+	<delete id="DisplayStandard.deleteDisplayStandard2" parameterClass="string">
+		delete jat_pl_display_standand2 where lineid = #value#
+	</delete>
+	<delete id="DisplayStandard.deleteDisplayStandardByHeadid" parameterClass="string">
+		delete jat_pl_display_standand where headid = #value#
+	</delete>
+	
+	<select id="DisplayStandard.getDisplayOrg" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+		select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       decode((select count(1)
+		                from jat_pl_display_orgtype_head b,
+		                     jat_pl_display_orgtype_line c
+		               where b.headid = c.headid
+		               <isNotEmpty property="value"><![CDATA[and b.headid <> #value#]]></isNotEmpty>
+		                 and c.org_id = a.org_id),
+		              0,
+		              0,
+		              1) as "nocheck"
+		  from jas_sm_org a
+		 start with a.parent_id = 0
+		        and a.org_type = 1
+		        and a.archiveflag = '0'
+		connect by prior a.org_id = a.parent_id
+		       and a.org_type = 1
+		       and a.archiveflag = '0'
+		 order by level, a.sort
+	</select>
+	<select id="DisplayStandard.getDisplayOrgByHeadid" parameterClass="string" resultClass="com.jatools.vo.push.DisplayOrgtypeLine">
+		select a.lineid as "lineid", a.org_id as "orgId", b.org_name as "orgName"
+		  from jat_pl_display_orgtype_line a, jas_sm_org b
+		 where a.headid = #value#
+		   and a.org_id = b.org_id
+		order by a.org_id
+	</select>
+	<insert id="DisplayStandard.saveDisplayOrgtype" parameterClass="com.jatools.vo.push.DisplayOrgtypeHead">
+		<selectKey keyProperty="headid">select jat_pl_display_orgtype_hseq.nextval from dual</selectKey>
+		insert into jat_pl_display_orgtype_head(headid, orgtype_name, memo, create_id, create_date, update_id, update_date, status)
+		values(#headid#, #orgtypeName#, #memo#, #createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<insert id="DisplayStandard.saveDisplayOrgtypeLine" parameterClass="com.jatools.vo.push.DisplayOrgtypeLine">
+		<selectKey keyProperty="lineid">select jat_pl_display_orgtype_lseq.nextval from dual</selectKey>
+		insert into jat_pl_display_orgtype_line(lineid, headid, org_id, create_id, create_date, status)
+		values(#lineid#, #headid#, #orgId#, #createId#, #createDate#, #status#)
+	</insert>
+	<update id="DisplayStandard.updateDisplayOrgtype" parameterClass="com.jatools.vo.push.DisplayOrgtypeHead">
+		update jat_pl_display_orgtype_head a
+		set a.orgtype_name = #orgtypeName#,
+		    a.memo = #memo#,
+		    a.update_id = #updateId#,
+		    a.update_date = #updateDate#
+		where a.headid = #headid#
+	</update>
+	<delete id="DisplayStandard.deleteDisplayOrgtype" parameterClass="string">
+		delete jat_pl_display_orgtype_head a where a.headid = #value#
+	</delete>
+	<delete id="DisplayStandard.deleteDisplayOrgtypeLine" parameterClass="string">
+		delete jat_pl_display_orgtype_line a where a.lineid = #value#
+	</delete>
+	<delete id="DisplayStandard.deleteDisplayOrgtypeLineByHeadid" parameterClass="string">
+		delete jat_pl_display_orgtype_line a where a.headid = #value#
+	</delete>
+	<select id="DisplayStandard.checkOrgAvail" parameterClass="map" resultClass="string">
+		<![CDATA[select a.orgtype_name
+		  from jat_pl_display_orgtype_head a
+		 where a.headid <> #headid#
+		   and exists (select 1
+		          from jat_pl_display_orgtype_line b
+		         where a.headid = b.headid
+		           and b.org_id = #orgId#)]]>
+	</select>
+	<select id="DisplayStandard.getSelectStylePageData" parameterClass="map" resultClass="com.jatools.vo.push.SaleStatistics">
+		select * from (select rownum rownum_ , AA.* from (
+			select aa.stylemiddleclass as "styleMiddleClassId",
+			       aa.styleornaclass as "styleOrnaClassId",
+			       aa.styleid as "styleId",
+			       aa.stylename as "styleName",
+			       aa.createdate as "styleCreateDate",
+			       aa.isbiggraph as "picUrl",
+			       nvl(cc.stock_num, 0) as "stockNum",
+			       nvl(bb.year_num, 0) as "yearNum",
+			       nvl(bb.half_year_num, 0) as "halfYearNum",
+			       nvl(bb.half_year_avg_num, 0) as "halfYearAvgNum",
+			       nvl(bb.month_num, 0) as "monthNum"
+			  from jas_bd_style aa
+			  left join (select a.style_middle_class_id,
+			                    a.style_orna_class_id,
+			                    a.style_id,
+			                    sum(case
+			                          when a.type = 4 then
+			                           a.sale_num
+			                          else
+			                           0
+			                        end) as year_num,
+			                    sum(case
+			                          when a.type = 2 then
+			                           a.sale_num
+			                          else
+			                           0
+			                        end) as half_year_num,
+			                    sum(case
+			                          when a.type = 3 then
+			                           a.sale_num
+			                          else
+			                           0
+			                        end) as half_year_avg_num,
+			                    sum(case
+			                          when a.type = 1 then
+			                           a.sale_num
+			                          else
+			                           0
+			                        end) as month_num
+			               from jat_pl_sale_statistics_grade a
+			              where a.item_class_id = #itemClassId#
+			                and a.orna_class_id = #ornaClassId#
+			                and a.analysis_id = #analysisId#
+			                and a.style_item_class_id = #styleItemClassId#
+			                and exists (select 1
+			                       from jat_pl_display_orgtype_line b
+			                      where a.org_id = b.org_id
+			                        and b.headid = #headid#)
+			              group by a.style_middle_class_id,
+			                       a.style_orna_class_id,
+			                       a.style_id) bb
+			    on bb.style_middle_class_id = aa.stylemiddleclass
+			   and bb.style_orna_class_id = aa.styleornaclass
+			   and bb.style_id = aa.styleid
+			  left join (select e.style_middle_class_id,
+			                    e.style_orna_class_id,
+			                    e.style_id,
+			                    nvl(sum(e.stock_num), 0) as stock_num
+			               from jat_pl_stock_statistics_grade e
+			              where e.item_class_id = #itemClassId#
+			                and e.orna_class_id = #ornaClassId#
+			                and e.analysis_id = #analysisId#
+			                and e.style_item_class_id = #styleItemClassId#
+			                and exists (select 1
+			                       from jat_pl_display_orgtype_line f
+			                      where e.org_id = f.org_id
+			                        and f.headid = #headid#)
+			              group by e.style_middle_class_id,
+			                       e.style_orna_class_id,
+			                       e.style_id) cc
+			    on cc.style_middle_class_id = aa.stylemiddleclass
+			   and cc.style_orna_class_id = aa.styleornaclass
+			   and cc.style_id = aa.styleid
+			 where exists (select 1
+			          from jas_pl_article_set b
+			         where aa.itemclassid = b.itemclassid
+			           and aa.ornaclassid = b.ornaclassid
+			           and aa.styleitemclass = b.styleitemclass
+			           and aa.styleid = b.styleid
+			           and b.itemclassid = #itemClassId#
+			           and b.ornaclassid = #ornaClassId#
+			           and b.analysis_arange_id = #analysisId#
+			           and b.styleitemclass = #styleItemClassId#)
+			 order by nvl(bb.year_num, 0) desc,
+			          nvl(bb.half_year_num, 0) desc,
+			          nvl(bb.month_num, 0) desc,
+			          aa.styleid
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="DisplayStandard.getSelectStyleTotalCount" parameterClass="map" resultClass="int">
+		select count(1)
+		  from jas_bd_style aa
+		 where exists (select 1
+		          from jas_pl_article_set b
+		         where aa.itemclassid = b.itemclassid
+		           and aa.ornaclassid = b.ornaclassid
+		           and aa.styleitemclass = b.styleitemclass
+		           and aa.styleid = b.styleid
+		           and b.itemclassid = #itemClassId#
+		           and b.ornaclassid = #ornaClassId#
+		           and b.analysis_arange_id = #analysisId#
+		           and b.styleitemclass = #styleItemClassId#)
+	</select>
+	<select id="DisplayStandard.getDisplayStandardList2" parameterClass="string" resultClass="com.jatools.vo.push.DisplayStandard">
+        select a.lineid                as "lineid",
+                a.item_class_id         as "itemClassId",
+                a.orna_class_id         as "ornaClassId",
+                a.analysis_id           as "analysisId",
+                c.summarydescription    as "analysisName",
+                a.style_item_class_id   as "styleItemClassId",
+                a.min_count             as "minCount",
+                a.max_count             as "maxCount"
+        from jat_pl_display_standand2 a
+        left join jas_bd_analysis_arange c  on a.analysis_id = c.analysis_arange_id
+        where a.headid = #value#
+        order by a.item_class_id,
+                a.orna_class_id,
+                a.analysis_id,
+                a.style_item_class_id
+	</select>
+	<select id="DisplayStandard.getDisplayStandardList" parameterClass="string" resultClass="com.jatools.vo.push.DisplayStandard">
+		select a.lineid                as "lineid",
+		       a.item_class_id         as "itemClassId",
+		       a.orna_class_id         as "ornaClassId",
+		       a.analysis_id           as "analysisId",
+		       c.summarydescription    as "analysisName",
+		       a.style_item_class_id   as "styleItemClassId",
+		       a.style_middle_class_id as "styleMiddleClassId",
+		       a.style_orna_class_id   as "styleOrnaClassId",
+		       a.style_id              as "styleId",
+		       b.stylename             as "styleName",
+		       b.isbiggraph            as "bigGraph",
+		       a.min_count             as "minCount",
+		       a.max_count             as "maxCount"
+		  from jat_pl_display_standand a
+		  left join jas_bd_style b
+		    on a.style_id = b.styleid
+		  left join jas_bd_analysis_arange c
+		    on a.analysis_id = c.analysis_arange_id
+		 where a.headid = #value#
+		 order by a.item_class_id,
+		          a.orna_class_id,
+		          a.analysis_id,
+		          c.summarydescription,
+		          a.style_item_class_id,
+		          a.style_middle_class_id,
+		          a.style_orna_class_id,
+		          a.style_id
+	</select>
+	<select id="DisplayStandard.getRegionOrgs" resultClass="java.util.HashMap">
+		select a.region_name as "regionName", b.org_id as "orgId", c.org_name as "orgName"
+		  from jas_pl_region a, jas_pl_region_org b, jas_sm_org c
+		 where a.region_id = b.region_id
+		 and b.org_id = c.org_id
+		 order by b.org_id
+	</select>
+</sqlMap>

@@ -1,0 +1,77 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/unsaleOrna.js?t=201204011123.js", 
+	"$StringUtil.getContextPath()/dwr/interface/UnsaleOrnaDwr.js?t=201204011123.js"])
+	
+	#set($unsaleOrna = $form.unsaleOrna)
+	
+<form id='frm' action="unsaleOrna.vm" method="post">
+	
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="unsaleId" name="unsaleId" value="$!{unsaleOrna.unsaleId}"/>
+    <table class="title">
+    	<tr><td>滞销商品规则</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012602','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require"  msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>金额始</td>	
+			<td class='body2'>
+				<input type='text' id="moneyStr" name='moneyStr' value="$!unsaleOrna.moneyStr" onblur="checkField(this);" dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+			<td class='body1'>金额止</td>	
+			<td class='body2'>
+				<input type='text' id="moneyEnd" name='moneyEnd' value="$!unsaleOrna.moneyEnd" onblur="checkField(this);"  dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+			<td class='body1'>流转周期(天)</td>	
+			<td class='body2'>
+				<input type='text' id="flowCycle" name='flowCycle' value="$!unsaleOrna.flowCycle" onblur="checkField(this);"  dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>淘汰款式周期(天)</td>
+			<td class='body2'>
+				<input type='text' id="unfashCycle" name='unfashCycle' value="$!unsaleOrna.unfashCycle" onblur="checkField(this);"  dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>非淘汰款式周期(天)</td>
+			<td class='body2'>
+				<input type='text' id="unfashUncycle" name='unfashUncycle' value="$!unsaleOrna.unfashUncycle" onblur="checkField(this);"  dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>状态</td>
+			<td class='body2' colspan="3">
+				<input type='text' name='status' readonly value="保存">
+			</td>
+			
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="7">
+				<input type="text" id="memo" name="memo" style="width:90%;" value="$!{unsaleOrna.memo}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+jQuery(function(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!unsaleOrna.itemClassId");
+	});
+	jQuery("#btnSave").click(saveform);
+	
+	jQuery("#btnToList").click(function(){
+		window.location = "unsaleOrna.vm";
+	});
+})
+
+</script>

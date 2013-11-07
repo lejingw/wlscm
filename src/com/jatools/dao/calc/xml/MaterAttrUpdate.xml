@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="MaterAttrUpdate">
+	<typeAlias alias="MaterAttrUpdate" type="com.jatools.vo.calc.MaterAttrUpdate"/>
+	<resultMap id="MaterAttrUpdate.MaterActiveResult" class="com.jatools.vo.stock.MaterActive">
+		<result property="ornaCode"			column="ORNA_CODE"/>
+		<result property="ornaBarcode"		column="ORNA_BARCODE"/>
+		<result property="ornaDsc"			column="ORNA_DSC"/>
+		<result property="stockId"			column="STOCK_ID"/>
+		<result property="groups"			column="GROUPS"/>
+		<result property="styleId"			column="STYLE_ID"/>
+		<result property="nowQty"			column="NOW_QTY"/>
+		<result property="allQty"			column="ALL_QTY"/>
+		<result property="itemClassId"		column="ITEM_CLASS_ID"/>
+		<result property="ornaClassId"		column="ORNA_CLASS_ID"/>
+		<result property="alaysisId"		column="ALAYSIS_ID"/>
+		<result property="styleNoId"		column="STYLE_NO_ID"/>
+		<result property="qualityId"		column="QUALITY_ID"/>
+		<result property="tagType"			column="TAG_TYPE"/>
+		<result property="saleUnitId"		column="SALE_UNIT_ID"/>
+		<result property="buyUnitId"		column="BUY_UNIT_ID"/>
+		<result property="pricUnitId"		column="PRIC_UNIT_ID"/>
+		<result property="priceAttrGroup"	column="PRICE_ATTR_GROUP"/>
+		<result property="state"			column="STATE"/>
+		<result property="basicPrice"		column="BASIC_PRICE"/>
+		<result property="rebate"			column="REBATE"/>
+		<result property="rebateType"		column="REBATE_TYPE"/>
+		<result property="storeUnitCost"	column="STORE_UNIT_COST"/>
+		<result property="realUnitCost"		column="REAL_UNIT_COST"/>
+		<result property="posAmount"		column="POS_AMOUNT"/>
+		<result property="realTotalCost"	column="REAL_TOTAL_COST"/>
+		<result property="storeTotalCost"	column="STORE_TOTAL_COST"/>
+		<result property="productdate"		column="PRODUCTDATE"/>
+		<result property="oldResponsible"	column="OLD_RESPONSIBLE"/>
+		<result property="storeColor"		column="STORE_COLOR"/>
+		<result property="comStore"			column="COM_STORE"/>
+		<result property="storagedate"		column="STORAGEDATE"/>
+		<result property="toshopdate"		column="TOSHOPDATE"/>
+		<result property="nuclearBillId"	column="NUCLEAR_BILL_ID"/>
+		<result property="mainShapeId"		column="MAIN_SHAPE_ID"/>
+		<result property="colorId"			column="COLOR_ID"/>
+		<result property="mainWeight"		column="MAIN_WEIGHT"/>
+		<result property="partWeight"		column="PART_WEIGHT"/>
+		<result property="partContent"		column="PART_CONTENT"/>
+		<result property="cleanId"			column="CLEAN_ID"/>
+		<result property="mainColorGradeId"	column="MAIN_COLOR_GRADE_ID"/>
+		<result property="qltyId"			column="QLTY_ID"/>
+		<result property="stoneTotalNum"	column="STONE_TOTAL_NUM"/>
+		<result property="stoneNowNum"		column="STONE_NOW_NUM"/>
+		<result property="specialWorkPrice"	column="SPECIAL_WORK_PRICE"/>
+		<result property="stringWorkPrice"	column="STRING_WORK_PRICE"/>
+		<result property="summaryId"		column="SUMMARY_ID"/>
+		<result property="isConsign"		column="IS_CONSIGN"/>
+		<result property="isCustom"			column="IS_CUSTOM"/>
+		<result property="handoverBillId"	column="HANDOVER_BILL_ID"/>
+		<result property="manufacturerId"	column="MANUFACTURER_ID"/>
+		<result property="supplierId"		column="SUPPLIER_ID"/>
+		<result property="zodiac"			column="ZODIAC"/>
+		<result property="identId"			column="IDENT_ID"/>
+		<result property="factoryStyleId"	column="FACTORY_STYLE_ID"/>
+		<result property="storagePricAttrGroup"	column="STORAGE_PRIC_ATTR_GROUP"/>
+		<result property="rebateAmount"		column="REBATE_AMOUNT"/>
+		<result property="specialWeight"	column="SPECIAL_WEIGHT"/>
+		<result property="cutId"			column="CUT_ID"/>
+		<result property="cutWideScale"		column="CUT_WIDE_SCALE"/>
+		<result property="cutDeepScale"		column="CUT_DEEP_SCALE"/>
+		<result property="symmetryId"		column="SYMMETRY_ID"/>
+		<result property="polishineId"		column="POLISHINE_ID"/>
+		<result property="fluorescenceId"	column="FLUORESCENCE_ID"/>
+		<result property="waistlineId"		column="WAISTLINE_ID"/>
+		<result property="vertexId"			column="VERTEX_ID"/>
+		<result property="hrdCert"			column="HRD_CERT"/>
+		<result property="giaCert"			column="GIA_CERT"/>
+		<result property="igiCert"			column="IGI_CERT"/>
+		<result property="bracketcolorId"	column="BRACKETCOLOR_ID"/>
+		<result property="updatedate"		column="UPDATEDATE"/>
+		<result property="wearId"			column="WEAR_ID"/>
+		<result property="styleTypeId"		column="STYLE_TYPE_ID"/>
+		<result property="isMutiPart"		column="IS_MUTI_PART"/>
+		<result property="currencyPrice"	column="CURRENCY_PRICE"/>
+		<result property="currencyMoney"	column="CURRENCY_MONEY"/>
+		<result property="currencyTax"		column="CURRENCY_TAX"/>
+		<result property="tax"				column="TAX"/>
+		<result property="totalCurrencyTax"	column="TOTAL_CURRENCY_TAX"/>
+		<result property="sizeId"			column="SIZE_ID"/>
+		<result property="mainNum"			column="MAIN_NUM"/>
+		<result property="partNum"			column="PART_NUM"/>
+		<result property="materialId"		column="MATERIAL_ID"/>
+		<result property="orgId"			column="ORG_ID"/>
+		<result property="useQtyTemp"		column="USE_QTY_TEMP"/>
+		<result property="agsCert"			column="AGS_CERT"/>
+		<result property="realCost"			column="REAL_COST"/>
+		<result property="customizeNo"		column="CUSTOMIZE_NO"/>
+		<result property="isDblLabel"		column="IS_DBL_LABEL"/>
+		<result property="billCode"			column="BILL_CODE"/>
+		<result property="billNo"			column="BILL_NO"/>
+		<result property="isMaterial"		column="IS_MATERIAL"/>
+		<result property="materialType"		column="MATERIAL_TYPE"/>
+		<result property="colorGradeGradeId"	column="COLOR_GRADE_GRADE_ID"/>
+		<result property="cleanGradeId"		column="CLEAN_GRADE_ID"/>
+	</resultMap>
+	<resultMap class="MaterAttrUpdate" id="resultMaterAttrUpdate">
+		<result property="billid"              column="BILLID"/>                 
+		<result property="billno"              column="BILLNO"/>                 
+		<result property="orgid"               column="ORG_ID"/>                 
+		<result property="status"              column="STATUS"/>                 
+		<result property="rebate"              column="REBATE"/>                 
+		<result property="newrebate"           column="NEW_REBATE"/>             
+		<result property="rebatetype"          column="REBATE_TYPE"/>            
+		<result property="newrebatetype"       column="NEW_REBATE_TYPE"/>        
+		<result property="tagtype"             column="TAG_TYPE"/>               
+		<result property="newtagtype"          column="NEW_TAG_TYPE"/>           
+		<result property="stringworkprice"     column="STRING_WORK_PRICE"/>      
+		<result property="newstringworkprice"  column="NEW_STRING_WORK_PRICE"/>  
+		<result property="specialworkprice"    column="SPECIAL_WORK_PRICE"/>     
+		<result property="newspecialworkprice" column="NEW_SPECIAL_WORK_PRICE"/> 
+		<result property="ornastate"           column="ORNA_STATE"/>             
+		<result property="newornastate"        column="NEW_ORNA_STATE"/>         
+		<result property="isdbllabel"          column="IS_DBL_LABEL"/>           
+		<result property="newisdbllabel"       column="NEW_IS_DBL_LABEL"/>       
+		<result property="mainshapeid"         column="MAIN_SHAPE_ID"/>          
+		<result property="newmainshapeid"      column="NEW_MAIN_SHAPE_ID"/>      
+		<result property="colorid"             column="COLOR_ID"/>               
+		<result property="newcolorid"          column="NEW_COLOR_ID"/>           
+		<result property="cleanid"             column="CLEAN_ID"/>               
+		<result property="newcleanid"          column="NEW_CLEAN_ID"/>           
+		<result property="maincolorgradeid"    column="MAIN_COLOR_GRADE_ID"/>    
+		<result property="newmaincolorgradeid" column="NEW_MAIN_COLOR_GRADE_ID"/>
+		<result property="cutid"               column="CUT_ID"/>                 
+		<result property="newcutid"            column="NEW_CUT_ID"/>             
+		<result property="cutwidescale"        column="CUT_WIDE_SCALE"/>         
+		<result property="newcutwidescale"     column="NEW_CUT_WIDE_SCALE"/>     
+		<result property="cutdeepscale"        column="CUT_DEEP_SCALE"/>         
+		<result property="newcutdeepscale"     column="NEW_CUT_DEEP_SCALE"/>     
+		<result property="symmetryid"          column="SYMMETRY_ID"/>            
+		<result property="newsymmetryid"       column="NEW_SYMMETRY_ID"/>        
+		<result property="polishineid"         column="POLISHINE_ID"/>           
+		<result property="newpolishineid"      column="NEW_POLISHINE_ID"/>       
+		<result property="fluorescenceid"      column="FLUORESCENCE_ID"/>        
+		<result property="newfluorescenceid"   column="NEW_FLUORESCENCE_ID"/>    
+		<result property="waistlineid"         column="WAISTLINE_ID"/>           
+		<result property="newwaistlineid"      column="NEW_WAISTLINE_ID"/>       
+		<result property="vertexid"            column="VERTEX_ID"/>              
+		<result property="newvertexid"         column="NEW_VERTEX_ID"/>          
+		<result property="bracketcolorid"      column="BRACKETCOLOR_ID"/>        
+		<result property="newbracketcolorid"   column="NEW_BRACKETCOLOR_ID"/>    
+		<result property="wearid"              column="WEAR_ID"/>                
+		<result property="newwearid"           column="NEW_WEAR_ID"/>            
+		<result property="styletypeid"         column="STYLE_TYPE_ID"/>          
+		<result property="newstyletypeid"      column="NEW_STYLE_TYPE_ID"/>      
+		<result property="ismutipart"          column="IS_MUTI_PART"/>           
+		<result property="newismutipart"       column="NEW_IS_MUTI_PART"/>       
+		<result property="partcontent"         column="PART_CONTENT"/>           
+		<result property="newpartcontent"      column="NEW_PART_CONTENT"/>       
+		<result property="zodiac"              column="ZODIAC"/>                 
+		<result property="newzodiac"           column="NEW_ZODIAC"/>             
+		<result property="createdate"          column="CREATE_DATE"/>            
+		<result property="createid"            column="CREATE_ID"/>              
+		<result property="updatedate"          column="UPDATE_DATE"/>            
+		<result property="updateid"            column="UPDATE_ID"/>              
+		<result property="memo"                column="MEMO"/>                   
+		<result property="updatereason"        column="UPDATE_REASON"/>          
+		<result property="rebateamount"        column="REBATE_AMOUNT"/>          
+		<result property="newrebateamount"     column="NEW_REBATE_AMOUNT"/>  
+		<result property="ornacode"		       column="ORNA_CODE"/> 
+		<result property="ornabarcode"		   column="ORNA_BARCODE"/>      
+	</resultMap>
+	<sql id="MaterAttrUpdate.Columns.all">
+		BILLID,
+		BILLNO,                 
+		ORG_ID,                 
+		STATUS,                 
+		REBATE,                 
+		NEW_REBATE,             
+		REBATE_TYPE,            
+		NEW_REBATE_TYPE,        
+		TAG_TYPE,               
+		NEW_TAG_TYPE,           
+		STRING_WORK_PRICE,      
+		NEW_STRING_WORK_PRICE,  
+		SPECIAL_WORK_PRICE,     
+		NEW_SPECIAL_WORK_PRICE, 
+		ORNA_STATE,             
+		NEW_ORNA_STATE,         
+		IS_DBL_LABEL,           
+		NEW_IS_DBL_LABEL,       
+		MAIN_SHAPE_ID,          
+		NEW_MAIN_SHAPE_ID,      
+		COLOR_ID,               
+		NEW_COLOR_ID,           
+		CLEAN_ID,               
+		NEW_CLEAN_ID,           
+		MAIN_COLOR_GRADE_ID,    
+		NEW_MAIN_COLOR_GRADE_ID,
+		CUT_ID,                 
+		NEW_CUT_ID,             
+		CUT_WIDE_SCALE,         
+		NEW_CUT_WIDE_SCALE,     
+		CUT_DEEP_SCALE,         
+		NEW_CUT_DEEP_SCALE,     
+		SYMMETRY_ID,            
+		NEW_SYMMETRY_ID,        
+		POLISHINE_ID,           
+		NEW_POLISHINE_ID,       
+		FLUORESCENCE_ID,        
+		NEW_FLUORESCENCE_ID,    
+		WAISTLINE_ID,           
+		NEW_WAISTLINE_ID,       
+		VERTEX_ID,              
+		NEW_VERTEX_ID,          
+		BRACKETCOLOR_ID,        
+		NEW_BRACKETCOLOR_ID,    
+		WEAR_ID,                
+		NEW_WEAR_ID,            
+		STYLE_TYPE_ID,          
+		NEW_STYLE_TYPE_ID,      
+		IS_MUTI_PART,           
+		NEW_IS_MUTI_PART,       
+		PART_CONTENT,           
+		NEW_PART_CONTENT,       
+		ZODIAC,                 
+		NEW_ZODIAC,             
+		CREATE_DATE,            
+		CREATE_ID,              
+		UPDATE_DATE,            
+		UPDATE_ID,              
+		MEMO,                   
+		UPDATE_REASON,          
+		REBATE_AMOUNT,          
+		NEW_REBATE_AMOUNT,
+		ORNA_CODE,
+		ORNA_BARCODE 
+	</sql>
+	<!-- 分页查询 -->
+	<select id="MaterAttrUpdate.getMaterAttrUpdateAllPageData" resultMap="resultMaterAttrUpdate" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="MaterAttrUpdate.Columns.all"/> from JAT_MATER_ATTR_UPDATE a where 1=1
+			<isNotEqual compareValue="on" property="stateId" prepend="and">  <![CDATA[a.STATUS<>8 ]]> </isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.billid desc
+		) AA )where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="MaterAttrUpdate.getMaterAttrUpdateToalCount" resultClass="int">
+		select count(1) from JAT_MATER_ATTR_UPDATE a where 1=1
+		<isNotEqual compareValue="on" property="stateId" prepend="and"> <![CDATA[a.STATUS<>8 ]]></isNotEqual>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+		order by a.billid desc
+	</select>
+	<!-- findById -->
+	<select id="MaterAttrUpdate.getMaterAttrUpdateById" resultClass="MaterAttrUpdate" parameterClass="string" resultMap="resultMaterAttrUpdate">
+		select <include refid="MaterAttrUpdate.Columns.all"/> from JAT_MATER_ATTR_UPDATE a where a.billid = #value#
+	</select>
+	<update id="MaterAttrUpdate.updateMaterStatus" parameterClass="map">
+		update JAT_MATER_ATTR_UPDATE a set 
+			a.status = #status#,          
+			a.UPDATE_DATE= #updatedate#,         
+			a.UPDATE_ID= #updateid#
+		 where a.billid = #billid#
+	</update>
+	<!-- 更新现有量 -->
+	<update id="MaterAttrUpdate.updateMaterActionByMB" parameterClass="MaterAttrUpdate">
+		update ic_mater_active m set   
+			<isNotEmpty property="newrebate">m.rebate=               #newrebate#,</isNotEmpty>  
+			<isNotEmpty property="newrebatetype">m.rebate_type=      #newrebatetype#,  </isNotEmpty> 
+			<isNotEmpty property="newtagtype">m.tag_type=             #newtagtype#,</isNotEmpty>    
+			<isNotEmpty property="newstringworkprice">m.string_work_price=    #newstringworkprice#, </isNotEmpty> 
+			<isNotEmpty property="newspecialworkprice">m.special_work_price=   #newspecialworkprice#,  </isNotEmpty> 
+			<isNotEmpty property="newisdbllabel">m.is_dbl_label=     #newisdbllabel#, </isNotEmpty>   
+			<isNotEmpty property="newmainshapeid">m.main_shape_id=   #newmainshapeid#,</isNotEmpty>  
+			<isNotEmpty property="newcolorid">m.color_id=            #newcolorid#,</isNotEmpty>   
+			<isNotEmpty property="newcleanid">m.clean_id=            #newcleanid#,</isNotEmpty> 
+			<isNotEmpty property="newmaincolorgradeid">m.main_color_grade_id=  #newmaincolorgradeid#, </isNotEmpty> 
+			<isNotEmpty property="newcutid">m.cut_id=                #newcutid#,</isNotEmpty>    
+			<isNotEmpty property="newcutwidescale">m.cut_wide_scale= #newcutwidescale#,</isNotEmpty> 
+			<isNotEmpty property="newcutdeepscale">m.cut_deep_scale= #newcutdeepscale#,</isNotEmpty> 
+			<isNotEmpty property="newsymmetryid">m.symmetry_id=      #newsymmetryid#,</isNotEmpty> 
+			<isNotEmpty property="newpolishineid">m.polishine_id=    #newpolishineid#,</isNotEmpty> 
+			<isNotEmpty property="newfluorescenceid">m.fluorescence_id=      #newfluorescenceid#, </isNotEmpty>
+			<isNotEmpty property="newwaistlineid">m.waistline_id=    #newwaistlineid#,</isNotEmpty>   
+			<isNotEmpty property="newvertexid">m.vertex_id=          #newvertexid#,</isNotEmpty> 
+			<isNotEmpty property="newbracketcolorid">m.bracketcolor_id=      #newbracketcolorid#,</isNotEmpty> 
+			<isNotEmpty property="newwearid">m.wear_id=              #newwearid#,</isNotEmpty>    
+			<isNotEmpty property="newstyletypeid">m.style_type_id=   #newstyletypeid#,</isNotEmpty> 
+			<isNotEmpty property="newismutipart">m.is_muti_part=     #newismutipart#,</isNotEmpty>
+			<isNotEmpty property="newpartcontent">m.part_content=    #newpartcontent#,</isNotEmpty>
+			<isNotEmpty property="newzodiac">m.zodiac=               #newzodiac#,</isNotEmpty>   
+			<isNotEmpty property="newrebateamount">m.rebate_amount=  #newrebateamount#,</isNotEmpty> 
+			<isNotEmpty property="newornastate">m.state=             #newornastate#,</isNotEmpty> 
+			m.id=m.id 
+		    where m.orna_code=      #ornacode#
+	</update>
+	<!-- 更新单品入库 -->
+	<update id="MaterAttrUpdate.updateMaterInivByMB" parameterClass="MaterAttrUpdate">
+		update jat_mater_iniv m set   
+			<isNotEmpty property="newtagtype">m.SMALL_LABEL_TYPE=             #newtagtype#,</isNotEmpty>    
+			<isNotEmpty property="newstringworkprice">m.string_work_price=    #newstringworkprice#, </isNotEmpty> 
+			<isNotEmpty property="newspecialworkprice">m.special_work_price=   #newspecialworkprice#,  </isNotEmpty> 
+			<isNotEmpty property="newisdbllabel">m.is_dbl_label=     #newisdbllabel#, </isNotEmpty>   
+			<isNotEmpty property="newmainshapeid">m.main_shape_id=   #newmainshapeid#,</isNotEmpty>  
+			<isNotEmpty property="newcolorid">m.color_id=            #newcolorid#,</isNotEmpty>   
+			<isNotEmpty property="newcleanid">m.clean_id=            #newcleanid#,</isNotEmpty> 
+			<isNotEmpty property="newmaincolorgradeid">m.main_color_grade_id=  #newmaincolorgradeid#, </isNotEmpty> 
+			<isNotEmpty property="newcutid">m.cut_id=                #newcutid#,</isNotEmpty>    
+			<isNotEmpty property="newcutwidescale">m.cut_wide_scale= #newcutwidescale#,</isNotEmpty> 
+			<isNotEmpty property="newcutdeepscale">m.cut_deep_scale= #newcutdeepscale#,</isNotEmpty> 
+			<isNotEmpty property="newsymmetryid">m.symmetry_id=      #newsymmetryid#,</isNotEmpty> 
+			<isNotEmpty property="newpolishineid">m.polishine_id=    #newpolishineid#,</isNotEmpty> 
+			<isNotEmpty property="newfluorescenceid">m.fluorescence_id=      #newfluorescenceid#, </isNotEmpty>
+			<isNotEmpty property="newwaistlineid">m.waistline_id=    #newwaistlineid#,</isNotEmpty>   
+			<isNotEmpty property="newvertexid">m.vertex_id=          #newvertexid#,</isNotEmpty> 
+			<isNotEmpty property="newbracketcolorid">m.bracketcolor_id=      #newbracketcolorid#,</isNotEmpty> 
+			<isNotEmpty property="newwearid">m.wear_id=              #newwearid#,</isNotEmpty>    
+			<isNotEmpty property="newstyletypeid">m.style_type=   #newstyletypeid#,</isNotEmpty> 
+			<isNotEmpty property="newismutipart">m.is_muti_part=     #newismutipart#,</isNotEmpty>
+			<isNotEmpty property="newpartcontent">m.part_content=    #newpartcontent#,</isNotEmpty>
+			<isNotEmpty property="newzodiac">m.zodiac=               #newzodiac#,</isNotEmpty>   
+			<isNotEmpty property="newornastate">m.state=             #newornastate#,</isNotEmpty>
+			m.id=m.id  
+		    where m.orna_code=      #ornacode#
+	</update>
+	<!-- 更新核价库 -->
+	<update id="MaterAttrUpdate.updatePriceByMB" parameterClass="MaterAttrUpdate">
+		update jat_calc_price_head m set   
+			<isNotEmpty property="newtagtype">m.SECOND_DSCSECOND_DSC=             #newtagtype#,</isNotEmpty>    
+			<isNotEmpty property="newisdbllabel">m.IS_DOUBLE_LABEL=     #newisdbllabel#, </isNotEmpty>   
+			<isNotEmpty property="newmainshapeid">m.DM_SHAPE_ID=   #newmainshapeid#,</isNotEmpty>  
+			<isNotEmpty property="newcolorid">m.COLOR_ID=            #newcolorid#,</isNotEmpty>   
+			<isNotEmpty property="newcleanid">m.CLEAN_ID=            #newcleanid#,</isNotEmpty> 
+			<isNotEmpty property="newmaincolorgradeid">m.COLORGRADE_ID=  #newmaincolorgradeid#, </isNotEmpty> 
+			<isNotEmpty property="newcutid">m.CUT_ID=                #newcutid#,</isNotEmpty>    
+			<isNotEmpty property="newbracketcolorid">m.SBRA_COLOR_ID=      #newbracketcolorid#,</isNotEmpty> 
+			<isNotEmpty property="newpartcontent">m.SECOND_DSC=    #newpartcontent#,</isNotEmpty>
+			<isNotEmpty property="newornastate">m.state=             #newornastate#,</isNotEmpty> 
+			m.id=m.id  
+		    where m.wl_code=      #ornacode#
+	</update>
+	<!-- 保存数据 -->
+	<insert id="MaterAttrUpdate.saveMaterAttrUpdate" parameterClass="MaterAttrUpdate">
+		<selectKey keyProperty="billid" type="pre">
+			select JAT_MATER_ATTR_UPDATE_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into JAT_MATER_ATTR_UPDATE(
+			BILLID,
+			BILLNO,                 
+			ORG_ID,                 
+			STATUS,                 
+			REBATE,                 
+			NEW_REBATE,             
+			REBATE_TYPE,            
+			NEW_REBATE_TYPE,        
+			TAG_TYPE,               
+			NEW_TAG_TYPE,           
+			STRING_WORK_PRICE,      
+			NEW_STRING_WORK_PRICE,  
+			SPECIAL_WORK_PRICE,     
+			NEW_SPECIAL_WORK_PRICE, 
+			ORNA_STATE,             
+			NEW_ORNA_STATE,         
+			IS_DBL_LABEL,           
+			NEW_IS_DBL_LABEL,       
+			MAIN_SHAPE_ID,          
+			NEW_MAIN_SHAPE_ID,      
+			COLOR_ID,               
+			NEW_COLOR_ID,           
+			CLEAN_ID,               
+			NEW_CLEAN_ID,           
+			MAIN_COLOR_GRADE_ID,    
+			NEW_MAIN_COLOR_GRADE_ID,
+			CUT_ID,                 
+			NEW_CUT_ID,             
+			CUT_WIDE_SCALE,         
+			NEW_CUT_WIDE_SCALE,     
+			CUT_DEEP_SCALE,         
+			NEW_CUT_DEEP_SCALE,     
+			SYMMETRY_ID,            
+			NEW_SYMMETRY_ID,        
+			POLISHINE_ID,           
+			NEW_POLISHINE_ID,       
+			FLUORESCENCE_ID,        
+			NEW_FLUORESCENCE_ID,    
+			WAISTLINE_ID,           
+			NEW_WAISTLINE_ID,       
+			VERTEX_ID,              
+			NEW_VERTEX_ID,          
+			BRACKETCOLOR_ID,        
+			NEW_BRACKETCOLOR_ID,    
+			WEAR_ID,                
+			NEW_WEAR_ID,            
+			STYLE_TYPE_ID,          
+			NEW_STYLE_TYPE_ID,      
+			IS_MUTI_PART,           
+			NEW_IS_MUTI_PART,       
+			PART_CONTENT,           
+			NEW_PART_CONTENT,       
+			ZODIAC,                 
+			NEW_ZODIAC,             
+			CREATE_DATE,            
+			CREATE_ID,              
+			UPDATE_DATE,            
+			UPDATE_ID,              
+			MEMO,                   
+			UPDATE_REASON,          
+			REBATE_AMOUNT,          
+			NEW_REBATE_AMOUNT,
+			ORNA_CODE,
+			ORNA_BARCODE )
+		values(  
+			#billid#,          
+			#billno#,             
+			#orgid#,              
+			#status#,             
+			#rebate#,             
+			#newrebate#,          
+			#rebatetype#,         
+			#newrebatetype#,      
+			#tagtype#,            
+			#newtagtype#,         
+			#stringworkprice#,    
+			#newstringworkprice#, 
+			#specialworkprice#,   
+			#newspecialworkprice#,
+			#ornastate#,          
+			#newornastate#,       
+			#isdbllabel#,         
+			#newisdbllabel#,      
+			#mainshapeid#,        
+			#newmainshapeid#,     
+			#colorid#,            
+			#newcolorid#,         
+			#cleanid#,            
+			#newcleanid#,         
+			#maincolorgradeid#,   
+			#newmaincolorgradeid#,
+			#cutid#,              
+			#newcutid#,           
+			#cutwidescale#,       
+			#newcutwidescale#,    
+			#cutdeepscale#,       
+			#newcutdeepscale#,    
+			#symmetryid#,         
+			#newsymmetryid#,      
+			#polishineid#,        
+			#newpolishineid#,     
+			#fluorescenceid#,     
+			#newfluorescenceid#,  
+			#waistlineid#,        
+			#newwaistlineid#,     
+			#vertexid#,           
+			#newvertexid#,        
+			#bracketcolorid#,     
+			#newbracketcolorid#,  
+			#wearid#,             
+			#newwearid#,          
+			#styletypeid#,        
+			#newstyletypeid#,     
+			#ismutipart#,         
+			#newismutipart#,      
+			#partcontent#,        
+			#newpartcontent#,     
+			#zodiac#,             
+			#newzodiac#,          
+			#createdate#,         
+			#createid#,           
+			#updatedate#,         
+			#updateid#,           
+			#memo#,               
+			#updatereason#,       
+			#rebateamount#,       
+			#newrebateamount#,
+			#ornacode#,
+			#ornabarcode#
+			)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="MaterAttrUpdate.updateMaterAttrUpdate" parameterClass="MaterAttrUpdate">
+	update JAT_MATER_ATTR_UPDATE set 
+		BILLNO=                 #billno#,             
+		ORG_ID=                 #orgid#,              
+		STATUS=                 #status#,             
+		REBATE=                 #rebate#,             
+		NEW_REBATE=             #newrebate#,          
+		REBATE_TYPE=            #rebatetype#,         
+		NEW_REBATE_TYPE=        #newrebatetype#,      
+		TAG_TYPE=               #tagtype#,            
+		NEW_TAG_TYPE=           #newtagtype#,         
+		STRING_WORK_PRICE=      #stringworkprice#,    
+		NEW_STRING_WORK_PRICE=  #newstringworkprice#, 
+		SPECIAL_WORK_PRICE=     #specialworkprice#,   
+		NEW_SPECIAL_WORK_PRICE= #newspecialworkprice#,
+		ORNA_STATE=             #ornastate#,          
+		NEW_ORNA_STATE=         #newornastate#,       
+		IS_DBL_LABEL=           #isdbllabel#,         
+		NEW_IS_DBL_LABEL=       #newisdbllabel#,      
+		MAIN_SHAPE_ID=          #mainshapeid#,        
+		NEW_MAIN_SHAPE_ID=      #newmainshapeid#,     
+		COLOR_ID=               #colorid#,            
+		NEW_COLOR_ID=           #newcolorid#,         
+		CLEAN_ID=               #cleanid#,            
+		NEW_CLEAN_ID=           #newcleanid#,         
+		MAIN_COLOR_GRADE_ID=    #maincolorgradeid#,   
+		NEW_MAIN_COLOR_GRADE_ID=#newmaincolorgradeid#,
+		CUT_ID=                 #cutid#,              
+		NEW_CUT_ID=             #newcutid#,           
+		CUT_WIDE_SCALE=         #cutwidescale#,       
+		NEW_CUT_WIDE_SCALE=     #newcutwidescale#,    
+		CUT_DEEP_SCALE=         #cutdeepscale#,       
+		NEW_CUT_DEEP_SCALE=     #newcutdeepscale#,    
+		SYMMETRY_ID=            #symmetryid#,         
+		NEW_SYMMETRY_ID=        #newsymmetryid#,      
+		POLISHINE_ID=           #polishineid#,        
+		NEW_POLISHINE_ID=       #newpolishineid#,     
+		FLUORESCENCE_ID=        #fluorescenceid#,     
+		NEW_FLUORESCENCE_ID=    #newfluorescenceid#,  
+		WAISTLINE_ID=           #waistlineid#,        
+		NEW_WAISTLINE_ID=       #newwaistlineid#,     
+		VERTEX_ID=              #vertexid#,           
+		NEW_VERTEX_ID=          #newvertexid#,        
+		BRACKETCOLOR_ID=        #bracketcolorid#,     
+		NEW_BRACKETCOLOR_ID=    #newbracketcolorid#,  
+		WEAR_ID=                #wearid#,             
+		NEW_WEAR_ID=            #newwearid#,          
+		STYLE_TYPE_ID=          #styletypeid#,        
+		NEW_STYLE_TYPE_ID=      #newstyletypeid#,     
+		IS_MUTI_PART=           #ismutipart#,         
+		NEW_IS_MUTI_PART=       #newismutipart#,      
+		PART_CONTENT=           #partcontent#,        
+		NEW_PART_CONTENT=       #newpartcontent#,     
+		ZODIAC=                 #zodiac#,             
+		NEW_ZODIAC=             #newzodiac#,          
+		CREATE_DATE=            #createdate#,         
+		CREATE_ID=              #createid#,           
+		UPDATE_DATE=            #updatedate#,         
+		UPDATE_ID=              #updateid#,           
+		MEMO=                   #memo#,               
+		UPDATE_REASON=          #updatereason#,       
+		REBATE_AMOUNT=          #rebateamount#,     
+		NEW_REBATE_AMOUNT=      #newrebateamount#,    
+		ORNA_CODE=		        #ornacode#,
+		ORNA_BARCODE=		    #ornabarcode#  
+		where BILLID=#billid#       
+	</update>
+	<!-- 删除 -->
+	<delete id="MaterAttrUpdate.deleteMaterAttrUpdate" parameterClass="string">
+		delete JAT_MATER_ATTR_UPDATE a where a.billid = #billid#
+	</delete>
+	<!-- 根据饰品编码获取饰品信息 -->
+    <select id="MaterAttrUpdate.getMaterByCode" resultMap="MaterAttrUpdate.MaterActiveResult" resultClass="com.jatools.vo.stock.MaterActive" parameterClass="map">
+   	select a.* from ic_mater_active a where 
+   		<isEqual property="type" compareValue="1">a.orna_code = #code#</isEqual>
+    	<isNotEqual property="type" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+</sqlMap>

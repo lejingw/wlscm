@@ -1,0 +1,98 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/ornaDesc.js?t=201202281426.js", 
+	"$StringUtil.getContextPath()/dwr/interface/OrnaDescDwr.js"])
+	
+#set($ornaDesc = $form.ornaDesc)
+
+<form id='frm' action="ornaDesc.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="ornadscId" name="ornadscId" value="$!{ornaDesc.ornadscId}"/>
+    <table class="title">
+    	<tr><td>饰品名管理</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012102','1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='hidden' id="copySave" value=''>
+                <span id="copyMsg" style="color:red;"></span>
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>商品类别</td>	
+			<td class='body2'>
+				<select id="articleTypeId" name="articleTypeId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" name="itemClassId"  dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>材质</td>	
+			<td class='body2'>
+				<select id="qualityId" name="qualityId"  value="">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>饰品名称</td>
+			<td class='body2'>
+				<input type='text' id="ornaDsc" name='ornaDsc'  value="$!ornaDesc.ornaDsc" dataType="Require" msg="不能为空">$StringUtil.star()
+			</td>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' name='status' readonly value="保存">
+			</td>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="3">
+				<input type="text" id="memo" name="memo" style="width:90%;" value="$!{ornaDesc.memo}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+
+function setValues(){
+	var values = {
+		articleTypeId:"$!ornaDesc.articleTypeId", 
+		itemClassId:"$!ornaDesc.itemClassId", 
+		ornaClassId:"$!ornaDesc.ornaClassId",
+		qualityId:"$!ornaDesc.qualityId"
+	};
+	initData(values);
+}
+
+jQuery(function(){
+	jQuery("#articleTypeId").change(function(){
+		var values = {
+			articleTypeId:jQuery("#articleTypeId").val()
+		};
+		changeArticle(values);
+	});
+	jQuery("#itemClassId").change(function(){
+		var values = {
+			articleTypeId:jQuery("#articleTypeId").val(),
+			itemClassId:jQuery("#itemClassId").val()
+		};
+		changeItemClass(values);
+	});
+	jQuery("#ornaClassId").change(changeOrnaDsc);
+	jQuery("#qualityId").change(changeOrnaDsc);
+	
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnToList").click(function(){
+		window.location = "ornaDesc.vm";
+	});
+
+	setValues();
+	
+})
+
+</script>

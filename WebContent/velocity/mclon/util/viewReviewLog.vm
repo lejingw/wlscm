@@ -1,0 +1,39 @@
+<!-- 查看真实总成本 -->
+<table class='control'>
+	<tr>
+		<td>#if(""!="$!{form.message}")
+					[<font color='red'>$!{form.message}</font>]
+				#end</td>
+	</tr>
+</table>
+<table class='list'>
+	<thead>
+		<tr>
+			<th style="width:40px;">关口</th>
+			<th style="width:90px;">状态</th>
+			<th style="width:90px;">审批类型</th>
+			<th style="width:90px;">审批人</th>
+			<th style="width:150px;">审批时间</th>
+			<th>意见</th>
+			<th style="width:40px;">新增</th>
+		</tr>
+	</thead>
+	<tbody id='tbl'>
+		#foreach($item in $form.reviewLogList)
+			<tr>
+				<td>$item.sort</td>
+				<td>$item.stateName</td>
+				<td>$item.reviewType</td>
+				<td>$item.reviewEmp</td>
+				<td>$item.reveiwDate</td>
+				<td>$item.advice</td>
+				<td>#if("1" == "$!item.insertFlag") 是 #else 否 #end</td>
+			</tr>
+		#end
+    </tbody>
+</table>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+});
+</script>

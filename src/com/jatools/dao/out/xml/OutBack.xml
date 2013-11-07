@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OutBack">
+	<!--  -->
+	<!-- ===============BackHead===================== -->
+	<typeAlias alias="OutBackHead" type="com.jatools.vo.out.OutBackHead" />
+	<resultMap id="outBackHeadResult" class="OutBackHead">
+		 <result column="BILLID" property="headId" />
+	    <result column="BILLNO" property="billNo" />
+	    <result column="DODATE" property="doDate" />
+	    <result column="ORG_ID" property="orgId" />
+	    <result column="STOCK_ID" property="stockId" />
+	    <result column="USER_ID" property="userId" />
+	    <result column="BACK_DATE" property="backDate" />
+	    <result column="BACK_BODY" property="backBody" />
+	    <result column="BACK_SUM" property="backSum" />
+	    <result column="OUT_ORG_ID" property="outOrgId" />
+	    <result column="INVALID" property="invalid" />
+	    <result column="SUM_COUNT" property="sumCount" />
+	    <result column="SUM_WEIGHT" property="sumWeight" />
+	    <result column="SUM_GRAINS" property="sumGrains" />
+	    <result column="SUM_COST" property="sumCost" />
+	    <result column="SUM_MONEY" property="sumMoney" />
+	    <result column="STATUS" property="status" />
+	    <result column="IS_CHECK" property="isCheck" />
+	    <result column="IS_FLAG" property="isFlag" />
+	    <result column="MEMO" property="memo" />
+	    <result column="CREATE_DATE" property="createDate" />
+	    <result column="CREATE_ID" property="createId" />
+	    <result column="UPDATE_DATE" property="updateDate" />
+	    <result column="UPDATE_ID" property="updateId" />
+	    <result column="CHECK_DATE" property="checkDate" />
+	    <result column="CHECK_ID" property="checkId" />
+	    <result column="CANCEL_DATE" property="cancelDate" />
+	    <result column="CANCEL_ID" property="cancelId" />
+	</resultMap>
+    <resultMap id="outBackLineResult" class="com.jatools.vo.out.OutBackLine">
+    	 <result column="LINEID" property="lineId" />
+	    <result column="BILLID" property="headId" />
+	    <result column="ITEM_CLASS_ID" property="itemClassId" />
+	    <result column="ORNA_CLASS_ID" property="ornaClassId" />
+	    <result column="STYLE_ID" property="styleId" />
+    	<result property="styleName" column="stylename"/>
+    	<result property="styleItemClass" column="styleitemclass"/>
+    	<result property="styleMiddleClass" column="stylemiddleclass"/>
+    	<result property="styleOrnaClass" column="styleornaclass"/>
+    	<result property="alaysisCode" column="analysis_arange_code"/>
+	    <result column="ALAYSIS_ID" property="alaysisId" />
+	    <result column="ORNA_CODE" property="ornaCode" />
+	    <result column="ORNA_BARCODE" property="ornaBarCode" />
+	    <result column="ORNA_DSC" property="ornaDsc" />
+	    <result column="UNIT_ID" property="unitId" />
+	    <result column="NOW_QTY" property="nowQty" />
+	    <result column="ALL_QTY" property="allQty" />
+	    <result column="GRAINS" property="grains" />
+	    <result column="MAIN_WEIGHT" property="mainWeight" />
+	    <result column="PART_WEIGHT" property="partWeight" />
+	    <result column="IS_MUTI_PART" property="isMutiPart" />
+	    <result column="IS_DBL_LABEL" property="isDblLabel" />
+	    <result column="POS_COST" property="posCost" />
+	    <result column="POS_MONEY" property="posMoney" />
+	    <result column="IS_PSALE" property="isPSale" />
+	    <result column="IS_BACK" property="isBack" />
+	    <result column="STATUS" property="status" />
+	    <result column="MEMO" property="memo" />
+	    <result column="BACK_DATE" property="backDate" />
+	    <result column="BACK_BODY" property="backBody" />
+	    <result column="CREATE_DATE" property="createDate" />
+	    <result column="CREATE_ID" property="createId" />
+	    <result column="UPDATE_DATE" property="updateDate" />
+	    <result column="UPDATE_ID" property="updateId" />
+    	<result property="bigGraph" column="ISBIGGRAPH"/>
+    </resultMap>
+    <resultMap id="outOrnaResult" class="com.jatools.vo.out.OutOrna">
+    	<result property="ornaCode" column="orna_code"/>
+    	<result property="ornaBarCode" column="ORNA_BARCODE"/>
+    	<result property="ornaDsc" column="orna_dsc"/>
+    	<result property="unitId" column="sale_unit_id"/>
+    	<result property="styleId" column="style_id"/>
+    	<result property="styleName" column="stylename"/>
+    	<result property="alaysisCode" column="analysis_arange_code"/>
+    	<result property="mainWeight" column="main_weight"/>
+    	<result property="partWeight" column="part_weight"/>
+    	<result property="itemClassId" column="item_class_id"/>
+    	<result property="ornaClassId" column="orna_class_id"/>
+    	<result property="styleItemClass" column="styleitemclass"/>
+    	<result property="styleMiddleClass" column="stylemiddleclass"/>
+    	<result property="styleOrnaClass" column="styleornaclass"/>
+    	<result property="isPSale" column="IS_CONSIGN"/>
+    	<result property="alaysisId" column="alaysis_id"/>
+    	<result property="status" column="state"/>
+    	<result property="nowQty" column="now_qty"/>
+    	<result property="allQty" column="all_qty"/>
+    	<result property="realTotalCost" column="real_total_cost"/>
+    	<result property="orgId" column="org_id"/>
+    	<result property="posAmount" column="POS_AMOUNT"/>
+    	<result property="isMutiPart" column="IS_MUTI_PART"/>
+    	<result property="isDblLabel" column="IS_DBL_LABEL"/>
+    	<result property="grains" column="STONE_NOW_NUM"/>
+    	<result property="stockId" column="STOCK_ID"/>
+    </resultMap>
+      <sql id="OutBack.listCond">
+    	<isNotEmpty property="billno" prepend="and">
+			a.BILLNO =	#billno#
+		</isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">
+			a.STOCK_ID =	#stockId#
+		</isNotEmpty>
+		<isNotEmpty property="status" prepend="and">
+			a.STATUS =	#status#
+		</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and">
+			<![CDATA[a.create_date >= #startDate#]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and">
+			<![CDATA[a.create_date <= #endDate#]]>
+		</isNotEmpty>
+    </sql>
+    <!-- 获取所有Back数据 -->
+	<select id="OutBack.getBackHeadPage" resultMap="outBackHeadResult">
+		select * from (select rownum rownum_ , AA.* from (
+			select * from JAT_OUT_BACK_HEAD a where exists (select 1 from jas_bd_emp_org b where a.org_id = b.orgid and b.empid = #userId#)
+			<isEqual property="showAll" compareValue="0" prepend="and"> a.STATUS != 8 and a.STATUS != 0</isEqual>
+		<include refid="OutBack.listCond"/>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		order by a.CREATE_DATE desc	
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="OutBack.getTotalCount" resultClass="int">
+		select count(1) from JAT_OUT_BACK_HEAD a where exists (select 1 from jas_bd_emp_org b where a.org_id = b.orgid and b.empid = #userId#)
+		<isEqual property="showAll" compareValue="0" prepend="and"> a.STATUS != 8 and a.STATUS != 0</isEqual>
+		<include refid="OutBack.listCond"/>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+    </select>
+	    <!-- 根据饰品编码获取饰品信息 -->
+    <select id="OutBack.getOutOrna" resultMap="outOrnaResult" parameterClass="map">
+    	select a.*,s.stylename,aa.analysis_arange_code,s.styleitemclass,s.stylemiddleclass,s.styleornaclass
+    	from ic_mater_active a 
+    	 inner join jas_bd_style s on s.styleid=a.style_id
+      inner join jas_bd_analysis_arange aa on aa.analysis_arange_id=a.alaysis_id
+     where <isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+	    <!-- 根据饰品编码获取借出饰品信息 -->
+    <select id="OutBack.getBackLine" resultMap="outBackLineResult" parameterClass="map">
+    	select a.*,s.stylename,s.ISBIGGRAPH,aa.analysis_arange_code,s.styleitemclass,s.stylemiddleclass,s.styleornaclass
+    	from jat_out_Back_line a 
+    	inner join jas_bd_style s on s.styleid=a.style_id
+      	inner join jas_bd_analysis_arange aa on aa.analysis_arange_id=a.alaysis_id
+      where a.billid=#headId# and <isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+	    <!-- 获取头信息 -->
+    <select id="OutBack.getBackHead" resultMap="outBackHeadResult" parameterClass="string">
+    	select * from jat_out_Back_head a where a.billid = #value#
+    </select>
+	    <!-- 根据头id获取所有行信息 -->
+    <select id="OutBack.getBackLines" resultMap="outBackLineResult" parameterClass="string">
+    	select a.*,s.stylename,s.Isbiggraph,aa.analysis_arange_code,s.styleitemclass,s.stylemiddleclass,s.styleornaclass from jat_out_Back_line a
+    	inner join jas_bd_style s on s.styleid=a.style_id
+      	inner join jas_bd_analysis_arange aa on aa.analysis_arange_id=a.alaysis_id
+        where a.billid=#value#
+    </select>
+	    <!-- 插入头信息 -->
+    <insert id="OutBack.insertHead" parameterClass="OutBackHead">
+    	<selectKey resultClass="string" keyProperty="headId" type="pre">
+			select Jat_Out_Back_head_seq.nextval as headId from dual
+		</selectKey>
+		 insert into JAT_OUT_BACK_HEAD (BILLID,BILLNO, DODATE, ORG_ID, STOCK_ID, USER_ID, BACK_DATE,
+	      BACK_BODY, BACK_SUM, INVALID, SUM_COUNT, SUM_WEIGHT, SUM_GRAINS, SUM_COST, SUM_MONEY, STATUS,
+	      IS_CHECK, IS_FLAG, MEMO, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID, CHECK_DATE, CHECK_ID,
+	      CANCEL_DATE, CANCEL_ID,OUT_ORG_ID)
+	    values (#headId#,#billNo#, #doDate#, #orgId#, #stockId#,
+	      #userId#, #backDate#, #backBody#, #backSum#,
+	      #invalid#, #sumCount#, #sumWeight#, #sumGrains#,
+	      #sumCost#, #sumMoney#, #status#, #isCheck#, #isFlag#,
+	      #memo#, #createDate#, #createId#, #updateDate#,
+	      #updateId#, #checkDate#, #checkId#, #cancelDate#,
+	      #cancelId#,#outOrgId#)
+	</insert>
+	
+	<update id="OutBack.updateBillHeadStatus"  parameterClass="java.util.Map">
+    	update JAT_OUT_BACK_HEAD a set  a.update_date = #date#, a.update_id = #userid#, a.status = #status#
+		where a.BILLID = #headid#
+	</update>
+    <!-- 修改头表 -->
+	<update id="OutBack.updateHead" parameterClass="OutBackHead">
+	    update JAT_OUT_BACK_HEAD
+	    set BILLNO = #billNo#,
+	      DODATE = #doDate#,
+	      ORG_ID = #orgId#,
+	      STOCK_ID = #stockId#,
+	      USER_ID = #userId#,
+	      BACK_DATE = #backDate#,
+	      BACK_BODY = #backBody#,
+	      BACK_SUM = #backSum#,
+	      INVALID = #invalid#,
+	      SUM_COUNT = #sumCount#,
+	      SUM_WEIGHT = #sumWeight#,
+	      SUM_GRAINS = #sumGrains#,
+	      SUM_COST = #sumCost#,
+	      SUM_MONEY = #sumMoney#,
+	      STATUS = #status#,
+	      IS_CHECK = #isCheck#,
+	      IS_FLAG = #isFlag#,
+	      MEMO = #memo#,
+	      UPDATE_DATE = #updateDate#,
+	      UPDATE_ID = #updateId#,
+	      OUT_ORG_ID = #outOrgId#
+	    where BILLID = #headId#
+	</update>
+	<!-- 插入行信息 -->
+    <insert id="OutBack.insertLine" parameterClass="com.jatools.vo.out.OutBackLine">
+    	<selectKey resultClass="string" keyProperty="lineId" type="pre">
+			select Jat_Out_Back_Line_seq.nextval as lineId from dual
+		</selectKey>
+	    insert into JAT_OUT_BACK_LINE (LINEID,billid, ITEM_CLASS_ID, ORNA_CLASS_ID,styleitemclass,stylemiddleclass,styleornaclass, STYLE_ID,
+	    	 ALAYSIS_ID, ORNA_CODE, ORNA_BARCODE, ORNA_DSC,
+	      UNIT_ID, NOW_QTY, ALL_QTY, GRAINS, MAIN_WEIGHT, PART_WEIGHT, IS_MUTI_PART, IS_DBL_LABEL,
+	      POS_COST, POS_MONEY, IS_PSALE, IS_BACK, STATUS, MEMO, CREATE_DATE, CREATE_ID, UPDATE_DATE,
+	      UPDATE_ID)
+	    values (#lineId#,#headId#, #itemClassId#, #ornaClassId#,#styleItemClass#,#styleMiddleClass#,#styleOrnaClass#,
+	      #styleId#, #alaysisId#, #ornaCode#, #ornaBarCode#,
+	      #ornaDsc#, #unitId#, #nowQty#, #allQty#, #grains#,
+	      #mainWeight#, #partWeight#, #isMutiPart#, #isDblLabel#,
+	      #posCost#, #posMoney#, #isPSale#, #isBack#, #status#,
+	      #memo#, #createDate#, #createId#, #updateDate#,
+	      #updateId#)
+	</insert>
+    <!-- 修改行表 -->
+	<update id="OutBack.updateLine" parameterClass="com.jatools.vo.out.OutBackLine">
+	update JAT_OUT_BACK_LINE
+	    set BILLID = #headId#,
+	      ITEM_CLASS_ID = #itemClassId#,
+	      ORNA_CLASS_ID = #ornaClassId#,
+	      STYLE_ID = #styleId#,
+	      ALAYSIS_ID = #alaysisId#,
+	      ORNA_CODE = #ornaCode#,
+	      ORNA_BARCODE = #ornaBarCode#,
+	      ORNA_DSC = #ornaDsc#,
+	      UNIT_ID = #unitId#,
+	      NOW_QTY = #nowQty#,
+	      ALL_QTY = #allQty#,
+	      GRAINS = #grains#,
+	      MAIN_WEIGHT = #mainWeight#,
+	      PART_WEIGHT = #partWeight#,
+	      IS_MUTI_PART = #isMutiPart#,
+	      IS_DBL_LABEL = #isDblLabel#,
+	      POS_COST = #posCost#,
+	      POS_MONEY = #posMoney#,
+	      IS_PSALE = #isPSale#,
+	      IS_BACK = #isBack#,
+	      STATUS = #status#,
+	      MEMO = #memo#,
+	      UPDATE_DATE = #updateDate#,
+	      UPDATE_ID = #updateId#
+	    where LINEID = #lineId#
+	</update>
+	<!-- 根据头id删除所有行信息 -->
+	<delete id="OutBack.deleteLinesByHeadId" parameterClass="string">
+		delete jat_out_Back_line l where l.billid=#value#
+	</delete>
+	<!-- 删除头表 -->
+	<delete id="OutBack.deleteHead" parameterClass="string">
+		delete jat_out_Back_head h where h.billid=#value#
+	</delete>
+	
+    <!-- 改变头表状态 -->
+	<update id="OutBack.changeHeadStatus" parameterClass="OutBackHead">
+		update jat_out_Back_head
+		set status=#status#,update_date=#updateDate#,update_id=#updateId#
+		<isEqual property="status" compareValue="5">,CHECK_DATE = #checkDate#,CHECK_ID=#checkId#</isEqual>
+		<isEqual property="status" compareValue="0">,CANCEL_DATE = #cancelDate#,CANCEL_ID=#cancelId#</isEqual>
+		where billid = #headId#
+	</update>
+    <!--出入库日志-->
+    <insert id="OutBack.saveMaterTrans" parameterClass="com.jatools.vo.out.OutBackLine">
+	   insert into jat_mater_trans(trans_id,org_id,stock_id,item_class_id,orna_class_id,styleitemclass,stylemiddleclass,styleornaclass,style_id,alaysis_id,orna_code,orna_barcode
+		,orna_dsc,unit_id,now_qty,all_qty,grains,pos_cost,pos_money,trans_flag,trans_source_bill,trans_source_no,trans_body,trans_date,trans_finance
+		,trans_cost,trans_money,trans_qty,is_psale,create_date,create_id)
+		values(jat_mater_trans_seq.nextval,#orgId#,#stockId#,#itemClassId#,#ornaClassId#,#styleItemClass#,#styleMiddleClass#,#styleOrnaClass#,#styleId#,#alaysisId#,#ornaCode#,#ornaBarCode#,#ornaDsc#,
+			#unitId#,#nowQty#,#allQty#,#grains#,#posCost#,#posMoney#,-1,#billType#,#billNo#,#memo#,#createDate#,#finaceType#,#transCost#,
+			#transMoney#,#transQty#,#isPSale#,#updateDate#,#updateId#)
+	</insert>
+	
+</sqlMap>

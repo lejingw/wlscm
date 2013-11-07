@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="FashionCoefficient">
+	<typeAlias alias="FashionCoefficient" type="com.jatools.vo.calc.FashionCoefficient"/>
+	<typeAlias alias="Quality" type="com.jatools.vo.bd.Quality"/>
+	<resultMap class="FashionCoefficient" id="result">
+		<result property="fashId" column="FASH_ID"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		<result property="priceStr" column="PRICE_STR"/>
+		<result property="priceEnd" column="PRICE_END"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="update_DATE"/>
+		<result property="updateId" column="update_Id"/>
+	</resultMap>
+	<sql id="FashionCoefficient.Columns.all">
+		FASH_ID,ITEM_CLASS_ID,coefficient,PRICE_STR,PRICE_END,status,memo,
+		create_date,CREATE_ID,update_DATE,update_Id
+	</sql>
+	<sql id="FashionCoefficient.Columns.allM">
+		FASH_ID,ITEM_CLASS_ID,max(coefficient),PRICE_STR,PRICE_END,status,memo,
+		create_date,CREATE_ID,update_DATE,update_Id
+	</sql>
+	<!-- 分页查询 -->
+	<select id="FashionCoefficient.getFashionCoefficientAllPageData" resultMap="result" parameterClass="map">
+		select <include refid="FashionCoefficient.Columns.all"/> from(
+			select <include refid="FashionCoefficient.Columns.all"/>, rownum as rownum_ from JAT_BASIC_FASHION_COEFFICIENT a where 1=1
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.item_class_id ,a.PRICE_STR 
+		)where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="FashionCoefficient.getFashionCoefficientToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_FASHION_COEFFICIENT a where 1=1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<!-- findById -->
+	<select id="FashionCoefficient.getFashionCoefficientById" resultClass="FashionCoefficient" parameterClass="string" resultMap="result">
+		select <include refid="FashionCoefficient.Columns.all"/> from JAT_BASIC_FASHION_COEFFICIENT a where a.FASH_ID = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="FashionCoefficient.saveFashionCoefficient" parameterClass="FashionCoefficient">
+		<selectKey keyProperty="fashId" type="pre">
+			select BASIC_FASHION_COEFFICIENT_SEQ.nextval as fashId from dual
+		</selectKey>
+		insert into JAT_BASIC_FASHION_COEFFICIENT(
+			FASH_ID,ITEM_CLASS_ID,COEFFICIENT,PRICE_STR,status,memo,PRICE_END,create_date,CREATE_ID,update_DATE,update_Id)
+			values(#fashId#,#itemClassId#,#coefficient#,#priceStr#,#status#,#memo#,
+			#priceEnd#,#createDate#,#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="FashionCoefficient.updateFashionCoefficient" parameterClass="FashionCoefficient">
+		update JAT_BASIC_FASHION_COEFFICIENT a set 
+			a.ITEM_CLASS_ID = #itemClassId#,
+			a.COEFFICIENT = #coefficient#,
+			a.PRICE_STR = #priceStr#,
+			a.PRICE_END = #priceEnd#,
+			a.status = #status#,
+			a.memo = #memo#,
+			a.create_date = #createDate#,
+			a.CREATE_ID = #createId#,
+			a.update_DATE = #updateDate#,
+			a.update_Id = #updateId# where a.FASH_ID = #fashId#
+	</update>
+	<!-- 删除 -->
+	<delete id="FashionCoefficient.deleteFashionCoefficient" parameterClass="string">
+		delete JAT_BASIC_FASHION_COEFFICIENT a where a.FASH_ID = #value#
+	</delete>
+	<!-- 找系数 -->
+	<select id="FashionCoefficient.getFashionCoefficientByItemClassId" resultClass="com.jatools.vo.calc.FashionCoefficient" parameterClass="map" >
+		select max(a.coefficient) "coefficient" from JAT_BASIC_FASHION_COEFFICIENT a where 
+			a.ITEM_CLASS_ID=#itemClassId# and 
+			<![CDATA[a.PRICE_STR<=#num# and a.PRICE_END>#num#]]>
+			<isNotEmpty prepend="and" property="fashId"> a.FASH_ID!=#fashId# </isNotEmpty>
+	</select>
+</sqlMap>

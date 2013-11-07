@@ -1,0 +1,75 @@
+<form name="myForm">
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>采购组织与大类关系#if($!form.successfulFlag)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end</td></tr>
+            </td>
+        </tr>
+    </table>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' class='btn' value='删除' onclick="deleteOrgItem()" />
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+	    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>采购组织</th>
+        		<th>大类</th>
+        		<th>创建时间</th>
+        		<th>创建人</th>
+        		<th>修改时间</th>
+        		<th>修改人</th>
+        		<th>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.orgItemId}"/></td>
+                <td><a href='javascript:toEditPage($!{map.orgItemId});'>$!BdCommon.getOrgName($!{map.orgId})</a></td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, null, function(index){
+		window.location = "orgItem.vm?user_action=toEditOrgItem&orgItemId="+$n("chk")[index].value;
+	});
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "orgItem.vm?user_action=toEditOrgItem";
+	});
+});
+function toEditPage(orgItemId){
+	window.location = "orgItem.vm?user_action=toEditOrgItem&orgItemId="+orgItemId;
+}
+function deleteOrgItem(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var orgItemId = $n("chk")[index].value;
+	confirm("确定删除?", function(){
+		window.location = "orgItem.vm?user_action=deleteOrgItem&orgItemId="+orgItemId;
+	});
+}
+</script>

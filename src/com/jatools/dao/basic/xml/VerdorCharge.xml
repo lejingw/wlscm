@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="VerdorCharge">
+	<typeAlias alias="VerdorCharge" type="com.jatools.vo.basic.VerdorCharge"/>
+	<resultMap class="VerdorCharge" id="result">
+		<result property="chargeId" column="CHARGE_ID"/>
+		<result property="verdorId" column="VERDOR_ID"/>
+		<result property="styleName" column="STYLENAME"/>
+		<result property="isBigGraph" column="ISBIGGRAPH"/>
+		<result property="styleId" column="STYLE_ID"/>
+		<result property="status" column="STATUS"/>
+		<result property="memo" column="MEMO"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+	</resultMap>
+	<sql id="VerdorCharge.Columns.all">
+		CHARGE_ID,VERDOR_ID,STYLE_ID,STYLENAME,ISBIGGRAPH,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="VerdorCharge.getVerdorChargeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="VerdorCharge.Columns.all"/> from JAT_BASIC_VERDOR_CHARGE a , 
+			jas_bd_style s  where a.style_id = s.STYLEID and 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+			order by a.VERDOR_ID desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="VerdorCharge.getVerdorChargeToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_VERDOR_CHARGE a ,jas_bd_style s  where a.style_id = s.STYLEID and 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+	</select>
+	<!-- findById -->
+	<select id="VerdorCharge.getVerdorChargeById" resultClass="VerdorCharge" parameterClass="string" resultMap="result">
+		select <include refid="VerdorCharge.Columns.all"/> from JAT_BASIC_VERDOR_CHARGE a ,
+		jas_bd_style s  where a.style_id = s.STYLEID and a.CHARGE_ID = #value#
+	</select>
+	<!--  -->
+	<select id="VerdorCharge.getVerdorCharge" resultMap="result" parameterClass="VerdorCharge">
+		select <include refid="VerdorCharge.Columns.all"/> from JAT_BASIC_VERDOR_CHARGE c ,
+			jas_bd_style s  where c.style_id = s.STYLEID and
+			c.STYLE_ID = #styleId# and c.VERDOR_ID = #verdorId#
+		<isNotEmpty prepend="and" property="chargeId"> c.CHARGE_ID !=#chargeId# </isNotEmpty>
+	</select>
+	<!-- 保存数据 -->
+	<insert id="VerdorCharge.saveVerdorCharge" parameterClass="VerdorCharge">
+		<selectKey keyProperty="chargeId" type="pre">
+			select JAT_BASIC_VERDOR_CHARGE_SEQ.nextval as chargeId from dual
+		</selectKey>
+		insert into JAT_BASIC_VERDOR_CHARGE(
+			CHARGE_ID,VERDOR_ID,STYLE_ID,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID)
+			values(#chargeId#,#verdorId#,#styleId#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="VerdorCharge.updateVerdorCharge" parameterClass="VerdorCharge">
+		update JAT_BASIC_VERDOR_CHARGE a set 
+			a.VERDOR_ID = #verdorId#,
+			a.STYLE_ID = #styleId#,
+			a.STATUS = #status#,
+			a.MEMO = #memo#,
+			a.CREATE_DATE = #createDate#,
+			a.CREATE_ID = #createId#,
+			a.UPDATE_DATE = #updateDate#,
+			a.UPDATE_ID = #updateId#
+			where a.CHARGE_ID = #chargeId#
+	</update>
+	<!-- 删除 -->
+	<delete id="VerdorCharge.deleteVerdorCharge" parameterClass="string">
+		delete JAT_BASIC_VERDOR_CHARGE a where a.CHARGE_ID = #value#
+	</delete>
+</sqlMap>
+

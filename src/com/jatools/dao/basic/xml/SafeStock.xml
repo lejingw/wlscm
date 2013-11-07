@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SafeStock">
+	<select id="SafeStock.getSafeStockPageData" resultClass="com.jatools.vo.basic.SafeStock" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.safe_id            as "safeId",
+			       a.item_class_id      as "itemClassId",
+			       a.orna_class_id      as "ornaClassId",
+			       a.analysis_id        as "analysisId",
+			       b.summarydescription as "analysisName",
+			       a.style_item_class_id   as "styleItemClassId",
+			       a.style_middle_class_id as "styleMiddleClassId",
+			       a.style_orna_class_id   as "styleOrnaClassId",
+			       a.style_id           as "styleId",
+			       c.stylename          as "styleName",
+			       c.isbiggraph         as "bigGraph",
+			       a.safe_num           as "safeNum",
+			       a.memo               as "memo",
+			       a.create_date        as "createDate",
+			       a.create_id          as "createId",
+			       a.update_date        as "updateDate",
+			       a.update_id          as "updateId",
+			       a.status             as "status"
+			  from jat_basic_safe_stock a
+			  left join jas_bd_analysis_arange b
+			    on a.analysis_id = b.analysis_arange_id
+			  left join jas_bd_style c
+			    on a.style_id = c.styleid
+			 where 1=1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			 order by a.item_class_id, a.orna_class_id, a.analysis_id, a.style_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="SafeStock.getSafeStockTotalCount" resultClass="int">
+		select count(1) from jat_basic_safe_stock a
+			  left join jas_bd_analysis_arange b
+			    on a.analysis_id = b.analysis_arange_id
+			  left join jas_bd_style c
+			    on a.style_id = c.styleid
+		where 1=1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	<select id="SafeStock.getSafeStock" resultClass="com.jatools.vo.basic.SafeStock" parameterClass="string">
+		select a.safe_id            as "safeId",
+		       a.item_class_id      as "itemClassId",
+		       a.orna_class_id      as "ornaClassId",
+		       a.analysis_id        as "analysisId",
+		       b.summarydescription as "analysisName",
+		       a.style_item_class_id   as "styleItemClassId",
+		       a.style_middle_class_id as "styleMiddleClassId",
+		       a.style_orna_class_id   as "styleOrnaClassId",
+		       a.style_id           as "styleId",
+		       c.stylename          as "styleName",
+		       c.isbiggraph         as "bigGraph",
+			   a.safe_num           as "safeNum",
+		       a.memo               as "memo",
+		       a.create_date        as "createDate",
+		       a.create_id          as "createId",
+		       a.update_date        as "updateDate",
+		       a.update_id          as "updateId",
+		       a.status             as "status"
+		  from jat_basic_safe_stock a
+		  left join jas_bd_analysis_arange b
+		    on a.analysis_id = b.analysis_arange_id
+		  left join jas_bd_style c
+		    on a.style_id = c.styleid
+		where a.safe_id = #value#
+	</select>
+	<select id="SafeStock.getSafeStockCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_basic_safe_stock a
+		where a.item_class_id = #itemClassId#
+			and a.orna_class_id = #ornaClassId#
+			and a.analysis_id = #analysisId#
+			and a.style_id = #styleId#
+			<isNotEmpty property="safeId"><![CDATA[and a.safe_id <> #safeId#]]></isNotEmpty>
+	</select>
+	<update id="SafeStock.updateSafeStock" parameterClass="com.jatools.vo.basic.SafeStock">
+		update jat_basic_safe_stock a
+		   set a.item_class_id          = #itemClassId#,
+		       a.orna_class_id          = #ornaClassId#,
+		       a.analysis_id            = #analysisId#,
+		       a.style_item_class_id    = #styleItemClassId#,
+		       a.style_middle_class_id  = #styleMiddleClassId#,
+		       a.style_orna_class_id    = #styleOrnaClassId#,
+		       a.style_id               = #styleId#,
+			   a.safe_num               = #safeNum#,
+		       a.memo                   = #memo#,
+		       a.update_date            = #updateDate#,
+		       a.update_id              = #updateId#
+		where a.safe_id         = #safeId#
+	</update>
+	<delete id="SafeStock.deleteSafeStock" parameterClass="string">
+		delete jat_basic_safe_stock a where a.safe_id = #value#
+	</delete>
+	<insert id="SafeStock.saveSafeStock" parameterClass="com.jatools.vo.basic.SafeStock">
+		<selectKey keyProperty="safeId" resultClass="string" type="pre">
+			select jat_basic_safe_stock_seq.nextval as "safeId" from dual
+		</selectKey>
+		insert into jat_basic_safe_stock(safe_id, item_class_id, orna_class_id, analysis_id, style_item_class_id, style_middle_class_id, style_orna_class_id, style_id, safe_num, memo, create_date, create_id, update_date, update_id, status)
+		values(#safeId#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#, #styleMiddleClassId#, #styleOrnaClassId#, #styleId#, #safeNum#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #status#)
+	</insert>
+	<select id="SafeStock.queryBatchCreateSafeStock" resultClass="com.jatools.vo.basic.SafeStock" parameterClass="map">
+		select b.itemclassid as "itemClassId",
+		       b.ornaclassid as "ornaClassId",
+		       a.analysis_arange_id as "analysisId",
+		       c.summarydescription as "analysisName",
+		       b.styleitemclass as "styleItemClassId",
+		       b.stylemiddleclass as "styleMiddleClassId",
+		       b.styleornaclass as "styleOrnaClassId",
+		       b.styleid  as "styleId",
+               b.stylename as "styleName",
+               b.isbiggraph as "bigGraph",
+               nvl(a.startorder, 0) as "startOrder"
+		  from jas_bd_style_arange a, jas_bd_style b, jas_bd_analysis_arange c
+		 where a.style_id = b.styleid
+		   and a.analysis_arange_id = c.analysis_arange_id
+		   and a.archiveflag = '0'
+		   and b.isout = '0'
+		   and b.isarchive = '0'
+		   and c.archiveflag = '0'
+		<isNotEmpty property="itemClassId">and b.itemclassid = #itemClassId#</isNotEmpty>
+		<isNotEmpty property="ornaClassId">and b.ornaclassid = #ornaClassId#</isNotEmpty>
+		<isNotEmpty property="analysisId">and a.analysis_arange_id = #analysisId#</isNotEmpty>
+		<isNotEmpty property="styleItemClassId">and b.styleitemclass = #styleItemClassId#</isNotEmpty>
+		<isNotEmpty property="styleMiddleClassId">and b.stylemiddleclass = #styleMiddleClassId#</isNotEmpty>
+		<isNotEmpty property="styleOrnaClassId">and b.styleornaclass = #styleOrnaClassId#</isNotEmpty>
+		<isNotEmpty property="styleId">and b.styleid = #styleId#</isNotEmpty>
+		<isNotEmpty property="startOrderNum1"><![CDATA[and nvl(a.startorder, 0) >= #startOrderNum1#]]></isNotEmpty>
+		<isNotEmpty property="startOrderNum2"><![CDATA[and nvl(a.startorder, 0) <= #startOrderNum2#]]></isNotEmpty>
+		 order by b.itemclassid,
+		          b.ornaclassid,
+		          a.analysis_arange_id,
+		          c.summarydescription,
+		          b.styleitemclass,
+		          b.stylemiddleclass,
+		          b.styleornaclass,
+		          b.styleid
+	</select>
+	<delete id="SafeStock.deleteBatchSafeStock" parameterClass="com.jatools.vo.basic.SafeStock">
+		delete jat_basic_safe_stock a
+		 where  a.item_class_id = #itemClassId# and
+		 		a.orna_class_id = #ornaClassId# and
+		 		a.analysis_id = #analysisId# and
+		 		a.style_item_class_id = #styleItemClassId# and
+		 		a.style_middle_class_id = #styleMiddleClassId# and
+		 		a.style_orna_class_id = #styleOrnaClassId# and
+		 		a.style_id = #styleId#
+	</delete>
+</sqlMap>

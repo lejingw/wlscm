@@ -1,0 +1,233 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js", 
+"$StringUtil.getContextPath()/dwr/interface/LabelTagApplyDwr.js?t=201203201629.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>标签申请单#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    		#set($cond = $form.condition)
+    		#set($billno = $!cond.get('billno'))
+    		#set($orgId = $!cond.get('orgId'))
+    		#set($startDate = $!cond.get('startDate'))
+    		#set($endDate = $!cond.get('endDate'))
+			#set($verdorId = $!cond.get('verdorId'))
+			#set($status = $!cond.get('status'))
+			#set($createId = $!cond.get('createId'))
+			#set($ornaCode = $!cond.get('ornaCode'))
+			#set($printNo = $!cond.get('printNo'))
+			#set($curOrgId = $StringUtil.getOrgId($session))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08080101','1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08080101','2')>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '08080101','3')>
+				<input type='button' value='高级查询' class='btn' id='btnSearch2' $RightUtil.able($session, '08080101','3')>
+				<input type='checkbox' id='allBill' name="allBill" onchange="showAllBill(this)" #if("$!status" == "all")checked#end/>显示所有单据
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08080101','4')>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+				<td class="body1">饰品编号</td>
+    			<td class='body2'>
+    				<input type='text' id="ornaCode" name='ornaCode' value="$!ornaCode" >
+    			</td>
+    		</tr>
+			<tr>
+				<td class="body1">打印单号</td>
+    			<td class='body2'>
+    				<input type='text' id="printNo" name='printNo' value="$!printNo" >
+    			</td>
+				<td class="body1">组织</td>
+    			<td class='body2'>
+    				<select id="orgId" name="orgId" ></select>
+    			</td>
+			</tr>
+			<tr>
+				<td class="body1">创建人</td>
+    			<td class='body2'>
+    				<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+    			</td>
+				<td class="body1">状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status'  value="$!{status}" >
+						$StringUtil.emptyOption()
+						<option value="all">所有单据</option>
+						<option value="1">保存</option>
+						<option value="4">审批中</option>
+						<option value="5">审批完毕</option>
+						<option value="15">已合并</option>
+						<option value="14">接收中</option>
+						<option value="8">关闭</option>
+					</select>
+    			</td>
+			</tr>
+			<tr>
+    			<td class="body1">创建时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">创建时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width="60px">状态</th>
+                <th width="120px">单据编号</th>
+        		<th width="180px">组织</th>
+				<th width="60px">件数合计</th>
+				<th width="120px">打印单号</th>
+				<th width="120px">换标签原因</th>
+        		<th width="90px">创建人</th>
+        		<th width="120px">创建时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td><a href="javascript:viewReviewLog('BS', '$!{map.id}')">$!DictUtil.getValue('status', $!map.state)</a></td>
+				<td><a href='javascript:toEditPage($!{map.id});'>$!map.no</a></td>
+				<td>$!BdCommon.getOrgName($!map.orgId)</td>
+				<td>$!map.numTotal</td>
+				<td>$!map.printNo</td>
+				<td><input type='text' readonly class='none' value="$!map.changelabelName" style='width:120px;'></td>
+				<td>$!BdCommon.getUserName($!map.createuserid)</td>
+				<td>$!map.createdate
+					<input type="hidden" name="status_list" value="$!map.state"/>
+					<input type="hidden" name="status_orgId" value="$!map.orgId"/>
+					<input type="hidden" name="id" value="$!map.id"/>
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+var curOrgId = "$!curOrgId";
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#status").val("$!status");
+	/*BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!verdorId");
+	});*/
+	
+	LabelTagApplyDwr.getCurrentOrgList(function(data){
+		addOptions("orgId",  data, null, null, true, true, "$!orgId");
+	});
+}
+
+function disableDeleteBtn(checked, index){
+	jQuery("#btnDelete").attr("disabled", true);
+	if(checked ){
+		if($n("status_list")[index].value==="1" && curOrgId == $n("status_orgId")[index].value){
+			jQuery("#btnDelete").attr("disabled", false);
+		}
+	}
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', false, disableDeleteBtn, function(index){
+    	window.location = "labelTagApply.vm?user_action=toEdit&id=" + $n("id")[index].value;
+    });
+	initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("BS01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "labelTagApply.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deleteLabelApply);
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+		jQuery("#status").val("");
+		jQuery("#createName").val("");
+		jQuery("#createId").val("");
+		jQuery("#ornaCode").val("");
+		jQuery("#orgId").val("");
+		jQuery("#printNo").val("");
+	});
+});
+
+function toEditPage(id){
+	window.location = "labelTagApply.vm?user_action=toEdit&id=" + id;
+}
+function deleteLabelApply(){
+	var idx = getSelectIndex("chk");
+	if(idx == -1){
+		alert("请选择要删除的单据");
+	}else {
+    	confirm("确定删除?", function(){
+			showLayer(true);
+			LabelTagApplyDwr.deleteLabelApply($n("id")[idx].value, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	})
+	}
+}
+function showAllBill(obj) {
+	if(obj.checked){
+		jQuery("#status").val("all");
+	} else {
+		jQuery("#status").val("");
+	}
+	jQuery("#frm").submit();
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function showSelectUserWin(){
+	var orgId = jQuery("#orgId").val();
+	if(orgId){
+    	selectEmp(function(idArr, nameArr){
+    			jQuery("#createId").val(idArr);
+    			jQuery("#createName").val(nameArr);
+    		}, 
+    		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:orgId});
+	}else{
+		alert("请先选择组织");
+	}
+}
+</script>

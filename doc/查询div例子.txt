@@ -1,0 +1,40 @@
+例子见：库存管理->订单配货
+html
+<div id="queryDiv"><!-- id:queryDiv固定,样式默认渲染宽度为520px，高度300px -->
+	<table class="control"><!-- 控制按钮 -->
+		<tr>
+			<td>
+				<input type='button' value='确定' id='btnQueryOk'>
+				<input type='button' value='重置' id='btnQueryReset'>
+				<input type='button' value='取消' id='btnQueryCancel'>
+			</td>
+		</tr>
+	</table>
+	<table class='content'><!-- 查询页面 -->
+		<tr>
+			<td class="body1">总单编号</td>
+			<td class='body2'><input type='text' id='gatherNo' name='gatherNo' value="$!{form.condition.gatherNo}"/></td>
+			<td class="body1">要货汇总日期</td>
+			<td class='body2'><input type='text' readonly id='gatherDate' name='gatherDate' value="$!{form.condition.gatherDate}"/></td>
+		</tr>
+	</table>
+</div>
+
+
+js
+//初始化查询div common_query.js中定义默认已经引入
+initQuery("btnQueryShow", "btnQueryCancel");
+
+
+java
+Map<String, String> conditon = CommonUtil.getConditionForPage(req, "gatherNo", "gatherDate");
+Pager pager = dispatchOrnaManager.getGatherHeadPageData(conditon);
+DispatchOrnaForm form = new DispatchOrnaForm();
+form.setPager(pager);
+form.setCondition(conditon);//保存查询条件，供页面显示使用
+
+
+xml
+<!-- 拼接sql -->
+<isNotEmpty property="gatherNo" prepend="and"> a.headquarter_gather_no like '%$gatherNo$%'</isNotEmpty>
+<isNotEmpty property="gatherDate" prepend="and"> a.gather_date = #gatherDate#</isNotEmpty>

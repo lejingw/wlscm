@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LabelTagApply">
+	<typeAlias alias="LabelTagApply" type="com.jatools.vo.tag.LabelTagApply" />
+	
+	<resultMap class="LabelTagApply" id="LabelTagApply.result">
+		<result property = "id"             column = "id"                 />
+		<result property = "no"             column = "no"                 />
+		<result property = "createdate"     column = "createdate"         />
+		<result property = "createuserid"   column = "createuserid"       />
+		<result property = "orgId"          column = "org_id"             />
+		<result property = "tagPrintBillId" column = "tag_print_bill_id"  />
+		<result property = "numTotal"       column = "num_total"          />
+		<result property = "changelabelId"  column = "changelabel_id"     />
+		<result property = "state"          column = "state"              />
+		<result property = "updatedate"     column = "updatedate"         />
+		<result property = "printNo"     column = "print_no"         />
+		<result property = "changelabelName"     column = "changelabel_name"         />
+	</resultMap>
+	
+	<sql id="LabelTagApply_columns">
+		id, no, createdate, createuserid, org_id, tag_print_bill_id, num_total, changelabel_id, state, updatedate
+	</sql>
+	
+	<sql id="LabelTagApply_print_no_column">
+		(select no  from jat_lable_tag_print where id = tag_print_bill_id ) as print_no
+	</sql>
+	
+	<sql id="labeltagApply_labelReason_column">
+		(select CHANGELABEL_REASON from jat_basic_sale_changelabel where CHANGELABEL_ID = a.changelabel_id) as changelabel_name
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="LabelTagApply.getLabelTagApplyPageData" resultMap="LabelTagApply.result" parameterClass="map">
+		select <include refid="LabelTagApply_columns"/>, print_no, changelabel_name from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="LabelTagApply_columns"/>, 
+				   <include refid="LabelTagApply_print_no_column"/>,
+				   <include refid="labeltagApply_labelReason_column"/>
+			from jat_lable_tag_apply a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isEmpty property="orgId" prepend="and">
+				 exists (select 1 from jas_bd_emp_org t where a.org_id = t.orgid and t.empid = #userId#) 
+			</isEmpty>
+			<isNotEmpty property="ornaCode" prepend="and">
+				 exists ( select 1 from jat_lable_tag_apply_line b where a.id=b.head_id and b.orna_code=#ornaCode# ) 
+			</isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.createuserid = #createId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="printNo" prepend="and"> 
+				exists (select 1 from jat_lable_tag_print where a.tag_print_bill_id = id and no = #printNo#)
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.createdate DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="LabelTagApply.getLabelTagApplyTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_lable_tag_apply a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isEmpty property="orgId" prepend="and">
+			 exists (select 1 from jas_bd_emp_org t where a.org_id = t.orgid and t.empid = #userId#) 
+		</isEmpty>
+		<isNotEmpty property="ornaCode" prepend="and">
+			 exists ( select 1 from jat_lable_tag_apply_line b where a.id=b.head_id and b.orna_code=#ornaCode# ) 
+		</isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.createuserid = #createId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="printNo" prepend="and"> 
+			exists (select 1 from jat_lable_tag_print where a.tag_print_bill_id = id and no = #printNo#)
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="LabelTagApply.saveLabelTagApply" parameterClass="LabelTagApply">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select JAT_LABLE_TAG_APPLY_SEQ.nextval as "id" from dual
+		</selectKey>
+		insert into jat_lable_tag_apply(<include refid="LabelTagApply_columns"/>)
+		 values(
+		 	#id#, #no#, #createdate#, #createuserid#, #orgId#, #tagPrintBillId#, #numTotal#, #changelabelId#, #state#, #updatedate#
+		 )
+    </insert>
+    
+    <select id="LabelTagApply.getLabelTagApply" parameterClass="string" resultMap="LabelTagApply.result">
+		select <include refid="LabelTagApply_columns"/>, 
+			   <include refid="LabelTagApply_print_no_column"/>,
+			   <include refid="labeltagApply_labelReason_column"/> 
+		from jat_lable_tag_apply a 
+		where 1=1
+			and a.id = #value#
+	</select>
+	
+	<update id="LabelTagApply.updateLabelTagApply" parameterClass="LabelTagApply">
+		update jat_lable_tag_apply a set 
+			a.org_id            = #orgId#,
+			a.tag_print_bill_id = #tagPrintBillId#,
+			a.num_total         = #numTotal#,
+			a.changelabel_id    = #changelabelId#,
+			a.state             = #state#,
+			a.updatedate        = #updatedate#
+		where a.id = #id# 
+	</update>
+	
+	<delete id="LabelTagApply.deleteLabelTagApply" parameterClass="string" >
+		delete from jat_lable_tag_apply a where a.id = #value# 
+	</delete>
+	
+	<update id="LabelTagApply.updateLabelTagApplyStatus" parameterClass="map">
+		update jat_lable_tag_apply a set 
+		a.state = #status# , a.updatedate = #updateDate# 
+		where a.id = #id# 
+	</update>
+	
+	<update id="LabelTagApply.updateLabelTagApplyStatusByPrintId" parameterClass="map">
+		update jat_lable_tag_apply a set 
+		a.state = #status# , a.updatedate = #updateDate#
+		where a.tag_print_bill_id = #printId# 
+	</update>
+	
+	<select id="LabelTagApply.getApplyReason" resultClass="com.jatools.vo.util.SelectorOption">
+        select 
+			a.changelabel_id as "value",
+			a.changelabel_reason as "text"
+		from jat_basic_sale_changelabel a
+		where a.status is null or a.status = 1
+		order by a.changelabel_reason
+	</select>
+	
+	<select id="LabelTagApply.getApplyReasoninfo" resultClass="com.jatools.vo.tag.LabelReasonInfo" parameterClass="string">
+		select 
+			a.changelabel_id 		as "changelabelId",
+			a.changelabel_reason	as "changelabelReason",
+			a.NOTE					as "note",
+			a.isincreaseamount		as "isincreaseamount",
+			a.isupdatecauses		as "isupdatecauses",
+			a.label_kind			as "labelKind",
+			a.isbasic_price 		as "isbasicPrice",
+			a.special_work_price	as "specialWorkPrice"
+		from jat_basic_sale_changelabel a  where a.changelabel_id = #value#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="HandoverCash">
+	<typeAlias alias="HandoverCash" type="com.jatools.vo.pur.HandoverCash" />
+	
+	<resultMap id="result" class="HandoverCash">
+		<result property = "lineid"       column = "lineid"        />
+		<result property = "billid"       column = "billid"        />
+		<result property = "materialType" column = "material_type" />
+		<result property = "itemClassId"  column = "item_class_id" />
+		<result property = "moneys"       column = "moneys"        />
+		<result property = "status"       column = "status"        />
+		<result property = "memo"         column = "memo"          />
+		<result property = "createDate"   column = "create_date"   />
+		<result property = "createId"     column = "create_id"     />
+		<result property = "updateDate"   column = "update_date"   />
+		<result property = "updateId"     column = "update_id"     />
+	</resultMap>
+	<sql id="HandoverCash_columns_all">
+		lineid, billid, material_type, item_class_id, moneys, status, memo, create_date, 
+		create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="HandoverCash.getHandoverCashPageData" resultMap="result" parameterClass="map">
+		select <include refid="HandoverCash_columns_all"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="HandoverCash_columns_all"/>  from jat_pur_handover_cash a 
+			where 1 = 1
+			<isNotEmpty property="billid" prepend="and">  a.billid = #billid# </isNotEmpty>
+			order by a.lineid DESC
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="HandoverCash.getHandoverCashTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pur_handover_cash a
+		where 1 = 1
+		<isNotEmpty property="billid" prepend="and">  a.billid = #billid# </isNotEmpty>
+	</select>
+	
+    <!-- 保存数据 -->
+    <insert id="HandoverCash.saveHandoverCash" parameterClass="HandoverCash">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PUR_HANDOVER_CASH_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_pur_handover_cash(<include refid="HandoverCash_columns_all"/>)
+		 values(
+		 	#lineid#, #billid#, #materialType#, #itemClassId#, #moneys#, #status#, #memo#, 
+		 	#createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="HandoverCash.getHandoverCash" resultClass="HandoverCash" resultMap="result" parameterClass="string">
+    	select <include refid="HandoverCash_columns_all"/> from jat_pur_handover_cash a where a.lineid = #value#
+    </select>
+    
+    <!-- 根据单号获取记录对象 -->
+    <select id="HandoverCash.getHandoverCashList" resultClass="HandoverCash" resultMap="result" parameterClass="string">
+    	select <include refid="HandoverCash_columns_all"/> from jat_pur_handover_cash a where a.billid = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="HandoverCash.updateHandoverCash" parameterClass="HandoverCash">
+		update jat_pur_handover_cash a set 
+			a.material_type  = #materialType#, 
+			a.item_class_id  = #itemClassId#, 
+			a.moneys         = #moneys#, 
+			a.status         = #status#, 
+			a.memo           = #memo#, 
+			a.update_date    = #updateDate#, 
+			a.update_id      = #updateId#
+		where a.lineid = #lineid#
+	</update>
+	<delete id="HandoverCash.deleteHandoverCash" parameterClass="string">
+		delete from jat_pur_handover_cash a where a.lineid = #value#
+	</delete>
+	
+	<delete id="HandoverCash.deleteHandoverCashByBillid" parameterClass="string">
+		delete from jat_pur_handover_cash a where a.billid = #value#
+	</delete>
+</sqlMap>

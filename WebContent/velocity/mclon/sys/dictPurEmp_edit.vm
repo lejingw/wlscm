@@ -1,0 +1,142 @@
+<form id='frm' action="" method="post">
+	<input type='hidden' id='entryType' value='$!form.entry.entryType'>
+    <table class="title">
+    	<tr><td>数据字典[采购员]</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1' width="12%">编码</td>
+			<td class='body2' width="13%">
+				<input type='text' id='entryCode' readonly value="$!form.entry.entryCode">
+			</td>
+			<td class='body1' width="12%">名称</td>
+			<td class='body2' width="13%">
+				<input type='text' id='entryName' readonly value="$!form.entry.entryName">
+			</td>
+			<td class='body1' width="12%">说明</td>
+			<td class='body2' colspan="3">
+				<input type='text' id='memo' readonly value="$!form.entry.memo" style="width:98%">
+			</td>
+		</tr>
+    </table>
+	<table class="list" >
+		<thead>
+			<tr>
+				<th><input type='checkbox' id="chkall"/></th>
+				<th>键</th>
+				<th>值</th>
+				<th>排序</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.list)
+			<tr>
+				<td><input type='checkbox' name="chk"/></td>
+				<td><input type='text' name='itemKey' value='$!item.itemKey' readonly></td>
+				<td><input type='text' name='itemValue' value='$!item.itemValue' readonly></td>
+				<td><input type='text' name='itemOrder' onblur='checkField(this)' value='$!item.itemOrder'></td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+        </tbody>
+	</table>
+</form>
+<script>
+function checkField(obj){
+	if(obj.value){
+		if(!isNumber(obj.value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+function checkform(){
+	if(!Validator.Validate($("frm"),3))
+		return false;
+	for(var i=0;i<$n("itemOrder").length;i++){
+		if(!isNumber($n("itemOrder")[i].value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+	}
+	return true;
+}
+function saveform(){
+	if(!checkform())	return;
+	confirm("确定保存?", function(){
+		var entry = {
+			entryCode:jQuery("#entryCode").val(),
+			entryName:jQuery("#entryName").val(),
+			entryType:jQuery("#entryType").val(),
+			memo:jQuery("#memo").val()
+		};
+		var itemArr = [];
+		for(var i=0;i<$n("itemKey").length;i++){
+			itemArr.push({
+				entryCode:jQuery("#entryCode").val(),
+				itemKey:$n("itemKey")[i].value,
+				itemValue:$n("itemValue")[i].value,
+				itemOrder:$n("itemOrder")[i].value
+			});
+		}
+		DictDwr.updateDictEntry(entry, itemArr, function(data){
+			if(!data){
+				alert('保存成功', function(){
+					window.location = "dictEntry.vm?entryCode=purchaseEmp";
+				});
+			}else{
+				alert(data);
+			}
+		});
+	});
+}
+//增行
+function addRow(empid, empname){
+	var field0 = "<input type='checkbox' name='chk'/>";
+	var field1 = "<input type='text' name='itemKey' readonly value='" + empid + "'>";
+	var field2 = "<input type='text' name='itemValue' readonly value='" + empname + "'>";
+	var field3 = "<input type='text' name='itemOrder' onblur='checkField(this)' value='" + $("tbl").rows.length + "'>";
+	var field4 = "<input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,\"tbl\")'>";
+	insertRow("tbl",[field0, field1,field2,field3,field4],false);
+}
+function checkExists(receUser){
+	for(var i=0;i<$n("itemKey").length;i++){
+		if($n("itemKey")[i].value == receUser){
+			return false;
+		}
+	}
+	return true;
+}
+function getSelectPurEmps(){
+	var receUsers = [];
+	for(var i=0;i<$n("itemKey").length;i++){
+		receUsers.push($n("itemKey")[i].value);
+	}
+	return receUsers;
+}
+function addPurEmp(){
+	selectEmp(function(idArr, nameArr){
+			for(var i=0;i<idArr.length;i++){
+				if(!checkExists(idArr[i])){
+					continue;
+				}
+    			addRow(idArr[i], nameArr[i]);
+			}
+		}, null, null, true, getSelectPurEmps().join(","), "getEmpByExeOrgId");
+}
+
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+	jQuery("#btnAddRow").click(addPurEmp);
+	jQuery("#btnSave").click(saveform);
+});
+</script>

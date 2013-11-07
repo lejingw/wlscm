@@ -1,0 +1,103 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/PushStyleDwr.js"])
+<form id="frm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="title">
+    	<tr><td>推式款式配对</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' onclick="addBill()" $RightUtil.able($session, '08091401','1')>
+				<input type='button' value='修改' class='btn' onclick="editBill()" $RightUtil.able($session, '08091401','2')>
+				<input type='button' value='删除' class='btn' onclick="deleteBill()" $RightUtil.able($session, '08091401','3')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08091401','4')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' >
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+        <table class='list' style="width:1400px;">
+        	<thead>
+    			<tr>
+                    <th width='45px'><input type='checkbox' id='chkall'/></th>
+					<th width='120px'>大类</th>
+					<th width='120px'>小类</th>
+					<th width='120px'>款式大类</th>
+					<th width='120px'>款式1</th>
+					<th width='60px'>款式2</th>
+            		<th width='90px'>创建人</th>
+            		<th width='120px'>创建时间</th>
+            		<th width='90px'>修改人</th>
+            		<th width='120px'>修改时间</th>
+            		<th width='90px'>状态</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($item in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value='$!{item.id}'/>
+						$velocityCounter
+					</td>
+    				<td><a href='javascript:;editBill("$!{item.id}")'>$BdCommon.getItemClassDesc($!item.itemClassId)</a></td>
+    				<td>$BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+    				<td>$BdCommon.getStyleItemClassNames($!item.styleItemClassId)</td>
+                    <td>$!HtmlUtil.printStyle($!item.styleId1, $!item.styleName1, $!item.bigGraph1)</td>
+                    <td>$!HtmlUtil.printStyle($!item.styleId2, $!item.styleName2, $!item.bigGraph2)</td>
+    				<td>$!BdCommon.getUserName($!item.createId)</td>
+    				<td>$!item.createDate</td>
+    				<td>$!BdCommon.getUserName($!item.updateId)</td>
+    				<td>$!item.updateDate</td>
+    				<td>$!DictUtil.getValue('status', $!item.status)</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function addBill(){
+    window.location = "pushStyle.vm?user_action=toEdit";
+}
+function editBill(id){
+    window.location = "pushStyle.vm?user_action=toEdit&id=" + id;
+}
+
+function deleteBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	confirm("确定删除?", function(){
+		showLayer(true);
+		var regionIdArr = [];
+		for(var i=0, j=idxs.length;i<j;i++){
+			regionIdArr.push($n("chk")[idxs[i]].value);
+		}
+    	PushStyleDwr.deletePushStyle(regionIdArr, function(data){
+    		showLayer(false);
+    		alert(data?data:"删除成功", function(){
+    			if(!data){
+                	window.location = "pushStyle.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+        window.location = "pushStyle.vm?user_action=toEdit&id=" + $n("chk")[index].value;
+	});
+	initQuery2('PushStyle01', "frm", 'btnQueryShow');
+	resetWinSize();
+});
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

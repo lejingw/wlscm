@@ -1,0 +1,15 @@
+一、暂存查询条件（例子见：库存管理->订单配货)
+	1、修改CommonUtil.getConditionForPage为CommonUtil.getConditionForPageSession
+	2、同时在第一个参数位置，增加传入当前controller对象参数
+	3、如果一个controller对应多个列表（如：MoveBillController对应，调拨单、退货单、退残单列表等）
+		则要重写父类public String getSessionKey();方法，使得列表条件值在session中的key保持唯一
+二、通用查询条件配置
+	1、在系统管理模块->查询条件配置 模块下配置
+	2、在common_query.js中包含响应的方法，已经配置到默认的layout.vm中
+	3、在页面加载后调用（见：moveBill_list.vm第184行）
+		initQuery2(queryCode, frmId, btnId);
+		queryCode 查询条件配置模块配置的查询条件编码
+		frmId 查询页面表单id
+		btn 查询按钮button的id
+	4、在获取分页数据和获取总条数的sql语句中引入一下代码段（见moveBill.xml第11行）：
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>

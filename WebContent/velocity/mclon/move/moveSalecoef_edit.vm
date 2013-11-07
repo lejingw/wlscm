@@ -1,0 +1,162 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/move/moveSalecoef.js", "$StringUtil.getContextPath()/dwr/interface/MoveSalecoefDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="headid" value="$!form.head.headid"/>
+    <table class="title">
+    	<tr><td>调拨销价系数</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='复制' class='btn' id='btnCopy'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>调入组织</td>
+			<td class='body2'>
+				<input type='hidden' id='inOrgId' value="">
+				<input type='text' id='inOrgName' dataType="Require" msg="不能为空" value="" class='target' readonly ondblclick="showSelectOrgWin()">
+				$StringUtil.star()
+			</td>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'></td>
+			<td class='body2'></td>
+		</tr>
+    	<tr>
+			<td class='body1'>款式大类</td>
+			<td class='body2' colspan="3">
+				<input type="hidden" id="styleItemIds"/>
+				<input type="text" id="styleItemNames" style="width:90%;" value='' class='target' readonly ondblclick="showStyleItemClassWin()"/>
+			</td>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="3">
+				<input type="text" name="memo" style="width:90%;" value=''/>
+			</td>
+		</tr>
+    </table>
+	<table class="list">
+		<thead>
+			<tr>
+				<th width='28%'>起始主石重</th>
+				<th width='28%'>截止主石重</th>
+				<th width='28%'>调拨系数</th>
+				<th width=''></th>
+			</tr>
+        </thead>
+		<tbody id='tbl'>
+	#if("" != "$!form.head.headid")
+		#foreach($item in $form.list)
+			<tr>
+				<td><input type='text' name='mainwtStr' onblur='checkField(this)' value='$!item.mainwtStr'></td>
+				<td><input type='text' name='mainwtEnd' onblur='checkField(this)' value='$!item.mainwtEnd'></td>
+				<td><input type='text' name='moveCoef' onblur='checkField(this)' value='$!item.moveCoef'></td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+	#end
+        </tbody>
+	</table>
+</form>
+<script>
+//显示组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#inOrgId").val(idArr.join(","));
+			jQuery("#inOrgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#inOrgId").val());//, "getExecuteOrgTree");
+}
+//显示款式大类选择窗口
+function showStyleItemClassWin(){
+	if(isNull(jQuery("#itemClassId").val()) || isNull(jQuery("#ornaClassId").val())){
+		alert("请先选择大类、小类");
+		return ;
+	}
+	selectStyleClass(function(idArr, nameArr){
+			jQuery("#styleItemIds").val(idArr.join(","));
+			jQuery("#styleItemNames").val(nameArr.join(","));
+		}, null, null, true, jQuery("#styleItemIds").val(), "getStyleItemClassByItemClassOrnaClass",
+			{itemClassId:jQuery("#itemClassId").val(), ornaClassId:jQuery("#ornaClassId").val()});
+}
+function changeItemClass(ornaValue){
+	jQuery("#styleItemIds").val("");
+	jQuery("#styleItemNames").val("");
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, ornaValue);
+	});
+}
+function changeOrnaClass(){
+	jQuery("#styleItemIds").val("");
+	jQuery("#styleItemNames").val("");
+}
+//设置页面内容
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+}
+function setValues(){
+	jQuery("#inOrgId").val("$!form.head.inOrgId");
+	//alert("$!form.head.inOrgId");
+	jQuery("#inOrgName").val("$!BdCommon.getOrgName($!form.head.inOrgId)");
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!form.head.itemClassId");
+    	//info("$!form.head.itemClassId");
+    	changeItemClass("$!form.head.ornaClassId");
+    	jQuery("#styleItemIds").val("$!form.head.styleItemIds");
+		jQuery("#styleItemNames").val("$!BdCommon.getStyleItemClassNames($!form.head.styleItemIds)");
+	});
+	jQuery("#memo").val("$!form.head.memo");
+}
+jQuery(function(){
+	//altRowCSS('tbl');
+	checkTable('tbl', 'chkall', 'chk', true,null, function(index){
+	});
+	jQuery("#btnAddRow").click(addRow);
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnCopy").click(copyData);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "moveSalecoef.vm";
+	});
+	jQuery("#itemClassId").change(changeItemClass);
+	jQuery("#ornaClassId").change(changeOrnaClass);
+	if("$!form.head.headid"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+});
+function copyData(){
+	selectOrg(function(idArr, nameArr){
+			if(idArr.length<1){
+				alert("请选要复制的组织");
+				return ;
+			}
+			for(var i=0;i<idArr.length;i++){
+				if(idArr[i] == jQuery("#inOrgId").val()){
+					alert("复制的组织不能包括["+jQuery("#inOrgName").val()+"]");
+					return ;
+				}
+			}
+			confirm("确定复制["+jQuery("#inOrgName").val()+"]的数据到以下组织：<br>" + nameArr.join(",") + "<br>" + "注意：此操作会清除原有的数据", function(){
+				MoveSalecoefDwr.copyData(jQuery("#inOrgId").val(), idArr.join(","), function(data){
+					alert(data?data:"复制成功", function(){
+						if(!data){
+							window.location = "moveSalecoef.vm";
+						}
+					});
+				});
+			});
+		}, null, null, true, jQuery("#orgid").val());
+}
+</script>

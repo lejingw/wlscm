@@ -1,0 +1,19 @@
+
+<div id="wrap">
+	<div id="nav">
+		<a href="home.vm">首页</a> > 异常提示
+	</div>
+	<div id="content">
+		<div class="home_body">
+			<div class="home_body">
+				<div class="home_body">
+					#if($!error)
+						<div class="tips_n tips_error"><p>$!error</p></div>
+					#else
+						<div class="tips_n tips_error"><a href="login.vm">登  陆 首 页</a></div>
+					#end
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

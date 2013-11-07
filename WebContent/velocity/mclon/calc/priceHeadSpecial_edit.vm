@@ -1,0 +1,298 @@
+#set($jsfiles = [
+"$StringUtil.getContextPath()/js/calc/priceHead.js?t=201207301127.js",
+"$StringUtil.getContextPath()/dwr/interface/SbraTypeDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/SbraPriceDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/SbraCoefficientDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/StoneCoefficientDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/script/mclon/ZeroClipboard/ZeroClipboard.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/CoefficientDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/CoefficientWWDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/StonePriceDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/BasicPriceOneDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/BasicPriceTwoDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/BasicPriceJadeDwr.js?t=201202071126.js",
+"$StringUtil.getContextPath()/dwr/interface/PriceHeadDwr.js?t=201202071126.js"])
+#set($cssfiles = ["$!StringUtil.getContextPath()/css/mclon/tabpanel.css"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="id" value="$!form.head.id"/>
+	<input type="hidden" id="caclType" value="4"/>
+	<input type="hidden" id="no" value="$!form.head.no"/>
+	<input type="hidden" id="updateDate" value="$!form.head.updateDate"/>
+	<input type="hidden" id="createUserId" value="$!form.head.createUserId"/>
+	<input type="hidden" id="createDate" value="$!form.head.createDate"/>
+	<input type="hidden" id='orgId' value="$!form.head.orgId">
+	<input type='hidden' id='createDate' readonly value="$!form.head.createDate" />
+	<input type='hidden' id='handoverNo_h' value="$!form.head.handoverNo"/>
+	<input type='hidden' id='isConsignment' value="$!form.iniv.isConsignment"/>
+    <table class="title">
+    	<tr><td>$!DictUtil.getValue('cacltype', $!form.caclType)</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='重置' class='btn' id='btnSave' onclick='result()'>
+				<input type='button' value='保存' class='btn' id='btnSave1' onclick='save(1)' $RightUtil.able($session, '08060205','1')>
+				<input type='button' value='保存复制' class='btn' id='btnSave2' onclick='save(2)' $RightUtil.able($session, '08060205','2')>
+				<input type='button' value='保存复制并打印' class='btn' id='btnSave3' onclick='save(3)' $RightUtil.able($session, '08060205','4')>
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08060205','3')>
+				<input type='button' value='返回列表' class='btn' id='btnToList' onclick='returnList()'>
+                <font color='red'><label id="showMasage"></label></font>
+		</td></tr>
+    </table>
+	<div id="tab">
+    	<h3 class="up" onclick="go_to(1)">$!DictUtil.getValue('cacltype', $!form.caclType)</h3>
+    	<div class="block">
+    		<table class='content'>
+    			<tr>
+    				<td class='body1'>创建人</td>
+    				<td class='body2'>
+						<input type="hidden" id='createUserId' readonly value="$!form.head.createUserId">
+						<input type='text' id='createUserName' readonly value="$!BdCommon.getUserName($!form.head.createUserId)">
+					</td>
+    				<td class='body1'>饰品编码</td>
+    				<td class='body2'>
+						<input type='text' id='wlCode' readonly value="$!form.head.wlCode" />
+					</td>
+					<td class='body1'>条码</td>
+    				<td class='body2'>
+						<input type='text' id='ornaBarCode' readonly value="$!form.head.ornaBarCode"/>
+					</td>
+					<td class='body1'>单据状态</td>
+    				<td class='body2'>
+						<input type="hidden" id='state' readonly value="$!form.head.state">
+						<input type='text' id='stateName' readonly value="$!DictUtil.getValue('status', $!form.head.state)"" />
+					</td>
+    			</tr>
+				
+				<tr>
+    				<td class='body1'>核价组织</td>
+    				<td class='body2'>
+						<input type='text' id='orgName_h' readonly value="$!BdCommon.getOrgName($!form.head.orgId)">
+					</td>
+					<td class='body1'>交接单</td>
+    				<td class='body2'>
+						<input type='text' id='handoverName' dataType="Require" msg="不能为空" value="$!form.head.handoverName" readonly>&nbsp;<IMG src="$!StringUtil.getContextPath()/image/mclon/sel.png" alt="选择交接单" onclick="showHandover()"/>$StringUtil.star()
+					</td>
+    				<td class='body1'>供应商</td>
+    				<td class='body2'>
+						<input type="hidden" id='vender_h' value="$!form.head.vender">
+						<input type='text' id='venderName_h' readonly/>
+					</td>
+					<td class='body1'>业务类型</td>
+    				<td class='body2'>
+						<select id="inivFlag" disabled>$StringUtil.emptyOption()</select>
+					</td>
+    			</tr>
+				
+				<tr>
+    				<td class='body1'>大类</td>
+    				<td class='body2'>
+						<select id="itemClassId" dataType="Require" msg="不能为空" onchange="changeItemClassId()" #if($!form.head.id!="") disabled #end>$StringUtil.emptyOption()</select>$StringUtil.star()
+					</td>
+					<td class='body1'>小类</td>
+    				<td class='body2'>
+						<select id="ornaClassId" dataType="Require" msg="不能为空" onchange="changeOrnaClassId()" #if($!form.head.id!="") disabled #end>$StringUtil.emptyOption()</select>$StringUtil.star()
+					</td>
+    				<td class='body1'>材质</td>
+    				<td class='body2'>
+						<select id="qualityId" onchange="changeQuality()" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>$StringUtil.star()
+					</td>
+    				<td class='body1'>托架颜色</td>
+    				<td class='body2'>
+						<select id="sbraColorId_h" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+					</td>
+    			</tr>
+				
+                <tr>
+					<td class='body1'>主石粒数</td>
+    				<td class='body2'>
+						<input type='text' id='mainNumber_h' onblur="countAllNumber(1)" value="$!form.head.mainNumber"  />
+					</td>
+					<td class='body1'>主石重量</td>
+    				<td class='body2'>
+						<input type='text' id='mainWeight_h' value="$!form.head.mainWeight" onblur="checkNum('mainWeight_h')" />
+					</td>
+					<td class='body1'>配石粒数</td>
+    				<td class='body2'>
+						<input type='text' id='secondNumber_h' onblur="countAllNumber(2)" value="$!form.head.secondNumber"  />
+					</td>
+					<td class='body1'>配石重量</td>
+    				<td class='body2'>
+						<input type='text' id='secondWeight_h' value="$!form.head.secondWeight" onblur="checkNum('secondWeight_h')"/>
+					</td>
+				</tr>
+				
+				<tr>
+					<td class='body1'>总粒数</td>
+    				<td class='body2'>
+						<input type='text' id='allNumber_h' readonly  value="$!form.head.allNumber"/>
+					</td>
+    				<td class='body1'>饰品总重</td>
+    				<td class='body2'>
+						<input type='text' id='allWeight_h' value="$!form.head.allWeight" onblur="checkNum('allWeight_h')" dataType="Require" msg="不能为空">$StringUtil.star()
+					</td>
+					<td class='body1'>配石内容</td>
+    				<td class='body2'>
+						<input type='text' id='secondDsc_h' value="$!form.head.secondDsc"/>
+                    </td>
+					<td class='body1'>分析范围</td>
+    				<td class='body2'>
+						<input type='hidden' id='analysisArangeId_h' readonly value="$!form.head.analysisArangeId"/>
+						<input type='text' id='analysisArangeName_h' readonly />
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>税率</td>
+    				<td class='body2'>
+						<select id="taxCoefficient_h" name="taxCoefficient_h" onchange="blurAllWidthoutTaxPrice_h()">
+    						<option value="1">1</option>
+    						<option value="1.17">1.17</option>
+    						<option value="1.03">1.03</option>
+                        </select>
+					</td>
+					<td class='body1'>总不含税价</td>
+    				<td class='body2'>
+						<input type='text' id='allWidthoutTaxPrice_h' value="$!form.head.allWidthoutTaxPrice" onblur="blurAllWidthoutTaxPrice_h()" dataType="Require" msg="不能为空" />$StringUtil.star()
+					</td>
+					<td class='body1'>总含税价</td>
+    				<td class='body2'>
+						<input type='text' id='allWidthTaxPrice_h' value="$!form.head.allWidthTaxPrice" onblur="blurAllWidthTaxPrice_h()" dataType="Require" msg="不能为空"  />$StringUtil.star()
+					</td>
+					<td class='body1'>基础价</td>
+    				<td class='body2'>
+						<input type='text' id='basicPrice_h' dataType='Double' msg='不能为空,且为数字类型' onblur="checkNum('basicPrice_h')"  value="$!form.head.basicPrice"/>$StringUtil.star()
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>标签名称</td>
+    				<td class='body2'>
+						<select id="labelId_h" onchange="changeLabel()" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+					</td>
+    				<td class='body1'>是否双标签</td>
+    				<td class='body2'>
+						<input type='checkbox' id='isDoubleLabel_h' disabled value="$!form.head.isDoubleLabel"/>
+					</td>
+    				<td class='body1'>形状</td>
+    				<td class='body2'>
+						<select id='dmShapeId'  ></select>
+					</td>
+					<td class='body1'>颜色</td>
+    				<td class='body2'>
+						<select id='colorId' ></select>
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>金重量</td>
+    				<td class='body2'>
+						<input type='text'  id='sbraWeight_h' value="$!form.head.sbraWeight" onblur="checkNum('sbraWeight_h')"/>
+					</td>
+					<td class='body1'>翡翠档级</td>
+    				<td class='body2'>
+						<select id="hlevel" onchange="loadCoefficient()">$StringUtil.emptyOption()</select>
+					</td>
+					<td class='body1'>原基础价</td>
+    				<td class='body2'>
+						<input type='text' id='basicPriceOld' readonly value="$!form.head.basicPriceOld"/>
+					</td>
+    			</tr>
+    		</table>
+    	</div>
+    </div>
+</form>
+<script>
+jQuery(function(){
+	altRowCSS('tbl');//为列表添加换行样式
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	getInivCalcCode();
+	initLabelPrint("btnSave3", function(){return save('3');});
+	
+	if("$!form.head.id")
+		loadPageValue();
+	else{
+		setPageValue();
+		jQuery("#createUserName").val("$StringUtil.getUserName($session)");
+		jQuery("#orgName_h").val("$StringUtil.getOrgName($session)");
+	}
+});
+function loadPageValue(){
+	BdCommonDwr.getCustById("$!form.head.vender",function(venderName){//交接单下的供应商
+		if(venderName!=null)
+			jQuery("#venderName_h").val(venderName);
+	});
+	//业务类型
+	DictDwr.getDictsForSlt("purbiztype", function(data){
+		addOptions("inivFlag", data,null, null, true, true,"$!form.head.inivFlag");
+	});
+	PriceHeadDwr.getHandoerItemClassByHeadId("$!form.head.handoverNo","4","","1",function(data){//交接单下的大类
+		addOptions("itemClassId", data, null, null, true, true,"$!form.head.itemClassId");
+	});
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt("$!form.head.itemClassId", function(data){//大类下的小类
+		addOptions("ornaClassId", data, null, null, true, true,"$!form.head.ornaClassId");
+	});
+	//所有材质
+	BdCommonDwr.getAllQualityForSlt(function(data){
+		addOptions("qualityId", data, null, null, true, true,"$!form.head.qualityId");
+	});
+	BdCommonDwr.getBracketColorByQualityId("$!form.head.qualityId",function(data){//托架材质下托架颜色
+		addOptions("sbraColorId_h", data, null, null, true, true,"$!form.head.sbraColorId");
+	});
+	BdCommonDwr.getNewLabelTypeByCalc("$!form.head.itemClassId","$!form.head.ornaClassId","612", "$!form.head.qualityId","0",function(data){
+		addOptions("labelId_h", data, null, null, true, true,"$!form.head.labelId"+"_"+"$!form.head.isDoubleLabel");
+		if(data==""||data==null||jQuery("#labelId_h").val()==""){
+			jQuery("#labelId_h").val("$!form.head.labelId"+"_"+"$!form.head.isDoubleLabel");
+			jQuery("#labelId_h option:selected").text("$!form.head.labelId");
+		}
+	});
+	BdCommonDwr.getAnalysisName("$!form.head.analysisArangeId", function(a){//分析范围
+		jQuery("#analysisArangeName_h").val(a);
+	});
+	DictDwr.getDictsForSlt("diashape", function(data){//形状
+		addOptions("dmShapeId", data, null, null, true, true,"$!form.head.dmShapeId");
+	});
+	DictDwr.getDictsForSlt("diacolor", function(data){//颜色
+		addOptions("colorId",data, null, null, true, true,"$!form.head.colorId");
+	});
+	DictDwr.getDictsForSlt("hlevel", function(data){
+		addOptions("hlevel", data, null, null, true, true,"$!form.head.hlevel");
+	});
+	jQuery("#isDoubleLabel_h")[0].checked= "$!form.head.isDoubleLabel"=="1"?true:false;
+	jQuery("#taxCoefficient_h").val("$!form.head.taxCoefficient");
+	
+}
+function returnList(){
+	window.location = "priceHead.vm";
+}
+//计算总粒数
+function countAllNumber(v){
+	var mainNumber_h = jQuery("#mainNumber_h").val();
+	var secondNumber_h = jQuery("#secondNumber_h").val();
+	var value = (v=="1"?mainNumber_h:secondNumber_h);
+	//info(v+"_"+isNumber(value));
+	if(value!=""&&!isNumber(value)||value=="0"){
+		alert("必须输入正整数格式");
+		if(v=="1"){
+			mainNumber_h="";
+			jQuery("#mainNumber_h").val("");
+		}else{
+			secondNumber_h="";
+			jQuery("#secondNumber_h").val("");
+		}
+	}
+	var val = floatAdd(mainNumber_h,secondNumber_h);
+	jQuery("#allNumber_h").val(val=="0"?"":val);
+}
+//计算总含税
+function countAllWidthoutTaxPrice(){
+	var val = floatMul(1.17, jQuery("#allWidthoutTaxPrice_h").val()); 
+	jQuery("#allWidthTaxPrice_h").val(val.toFixed(2));
+	jQuery("#basicPrice_h").val(val.toFixed(0));
+}
+function result(){
+	window.location.reload();
+}
+</script>

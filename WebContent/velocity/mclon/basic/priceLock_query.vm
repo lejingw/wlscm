@@ -1,0 +1,331 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PriceLockDwr.js"])
+
+<form id="frm2" action="priceLock.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value="toQuery">
+	<input type="hidden" name="flag" value="1">
+	<table class="title">
+		<tr><td>价格锁定饰品查询</td></tr>
+	</table>
+	#set($cond = $form.condition)
+	#set($orgId = $!cond.get('orgId'))
+	#set($itemClassId = $!cond.get('itemClassId'))
+	#set($ornaClassId = $!cond.get('ornaClassId'))
+	#set($analysisId = $!cond.get('analysisId'))
+	#set($styleItemClassId = $!cond.get('styleItemClassId'))
+	#set($styleMiddleClassId = $!cond.get('styleMiddleClassId'))
+	#set($styleOrnaClassId = $!cond.get('styleOrnaClassId'))
+	#set($styleId = $!cond.get('styleId'))
+	#set($lockFlag = $!cond.get('lockFlag'))
+	#set($posAmountStart = $!cond.get('posAmountStart'))
+	#set($posAmountEnd = $!cond.get('posAmountEnd'))
+	#set($ornaCode = $!cond.get('ornaCode'))
+	#set($barCode = $!cond.get('barCode'))
+	<table class="control">
+		<tr>
+			<td>
+				<input type='button' value='锁定' class='btn' id='btnLock' $RightUtil.able($session, '08011104','1')>
+				<input type='button' value='解锁' class='btn' id='btnUnlock' $RightUtil.able($session, '08011104','2')>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '08011104','3')>
+				<input type='button' value='新建单据' class='btn' id='btnAdd' $RightUtil.able($session, '08011102','1')>
+				<input type='button' value='返回列表' class='btn' id='btnBackToList'>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>组织</td>
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!orgId">
+				<input type='text' id="orgName" value="$!BdCommon.getOrgName($!orgId)" readonly class="target" onclick="showSelectOrgWin()">
+			</td>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name="itemClassId" dataType="Require" value="$!BdCommon.getItemClassDesc($!itemClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId" dataType="Require" value="$!BdCommon.getOrnaClassDesc($!ornaClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" name="analysisId" dataType="Require" value="$!analysisId" msg="不能为空">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式大类</td>
+			<td class='body2'>
+				<select id="styleItemClassId" name='styleItemClassId' >$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式中类</td>
+			<td class='body2'>
+				<select id="styleMiddleClassId" name="styleMiddleClassId">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式小类</td>
+			<td class='body2'>
+				<select id="styleOrnaClassId" name='styleOrnaClassId'>$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式</td>
+			<td class='body2'>
+				<select id="styleId" name="styleId">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr >
+			<td class='body1'>网点金额起始</td>
+			<td class='body2'>
+				<input type='text' id="posAmountStart" name="posAmountStart" value="$!posAmountStart" >
+			</td>
+			<td class='body1'>网点金额截止</td>
+			<td class='body2'>
+				<input type='text' id="posAmountEnd" name="posAmountEnd" value="$!posAmountEnd" >
+			</td>
+			<td class='body1'>是否锁定</td>
+			<td class='body2'>
+				<select id="lockFlag" name="lockFlag">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>饰品条码</td>
+			<td class='body2'>
+				<input type='text' id="barCode" name="barCode" value="$!barCode" >
+			</td>
+			<td class='body1'>饰品编码</td>
+			<td class='body2'>
+				<input type='text' id="ornaCode" name="ornaCode" value="$!ornaCode" >
+			</td>
+			<td class='body1'>锁定原因</td><td class='body2' colspan="3"><input type='text' id='lockReason' style="width:95%;"/></td>
+		</tr>
+	</table>
+	<div class='scroll2' style="height:480px;">
+	<table class='list' style="width:2000px;">
+		<thead>
+			<tr>
+				<th width='20px'><input type='checkbox' id='chkall'/></th>
+				<th width='90px'>是否锁定</th>
+				<th width='90px'>饰品状态</th>
+				<th width='180px'>组织</th>
+				<th width='120px'>饰品编码</th>
+				<th width='120px'>饰品名称</th>
+				<th width='90px'>大类</th>
+				<th width='90px'>小类</th>
+				<th width='90px'>分析范围</th>
+				<th width='120px'>款式大类</th>
+				<th width='120px'>款式中类</th>
+				<th width='120px'>款式小类</th>
+				<th width='120px'>款式</th>
+				<th width='90px'>计量单位</th>
+				<th width='60px'>现有量</th>
+				<th width='60px'>总重量</th>
+				<th width='60px'>粒数</th>
+				<th width='90px'>销售金额</th>
+				<th width='90px'>主石重量</th>
+				<th width='90px'>配石重量</th>
+			</tr>
+		</thead>
+		<tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!map.lockFlag"/></td>
+				<td align="center">
+					#if("$!map.lockFlag" == "1") 是 #else 否 #end
+					<input type="hidden" name="ornaCode2" value="$!map.ornaCode"/>
+					<input type="hidden" name="status" value="$!map.status"/>
+				</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+				<td>$!BdCommon.getOrgName($!map.orgId)</td>
+				<td>$!map.ornaCode</td>
+				<td>$!map.ornaDsc</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!map.analysisName</td>
+				<td>$!BdCommon.getStyleItemClassNames($!map.styleItemClassId)</td>
+				<td>$!BdCommon.getStyleMiddleClassNames($!map.styleMiddleClassId)</td>
+				<td>$!BdCommon.getStyleOrnaClassNames($!map.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!map.styleId, $!map.styleName, $!map.bigGraph)</td>
+				<td>$!BdCommon.getUnitName($!map.unitId)</td>
+				<td>$!StringUtil.formatDouble($!map.nowQty, 2)</td>
+				<td>$!StringUtil.formatDouble($!map.allQty, 2)</td>
+				<td>$!StringUtil.formatDouble($!map.stoneTotalNum, 2)</td>
+				<td>$!StringUtil.formatDouble($!map.posAmount, 2)</td>
+				<td>$!StringUtil.formatDouble($!map.mainWeight, 2)</td>
+				<td>$!StringUtil.formatDouble($!map.partWeight, 2)</td>
+			</tr>
+		#end
+    	</tbody>
+	</table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#orgId").val());
+}
+function setValues(){
+	var value = {
+		itemClassId : "$!itemClassId",
+    	ornaClassId : "$!ornaClassId",
+    	analysisId : "$!analysisId",
+    	styleItemClassId : "$!styleItemClassId",
+    	styleMiddleClassId : "$!styleMiddleClassId",
+    	styleOrnaClassId : "$!styleOrnaClassId",
+    	styleId : "$!styleId",
+    	lockFlag : "$!lockFlag"
+	};
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!itemClassId");
+    	changeItemClass(value);
+	});
+	DictDwr.getDictsForSlt('yesorno', function(data){
+		addOptions("lockFlag", data, null, null, true, true, "$!lockFlag");
+	});
+}
+function lockOrna(lockflag){
+	if(!checkBill(lockflag))	return ;
+	confirm("确定"+(lockflag?"锁定":"解锁")+"?", function(){
+    	var indexs = getSelectIndexs('chk');
+		var ornaCodeArr = [];
+    	for(var i=0;i<indexs.length;i++){
+    		var index = indexs[i];
+			ornaCodeArr.push($n("ornaCode2")[index].value);
+    	}
+		var head = {
+			headid : null,
+			billno : null,
+			lockFlag : lockflag?"1":"0",
+			lockReason : jQuery("#lockReason").val(),
+			sumCount : ornaCodeArr.length,
+			status : 4
+		};
+    	PriceLockDwr.savePriceLock(head, ornaCodeArr, null, function(data){
+    		alert(data?data:(lockflag?"锁定":"解锁")+"成功", function(){
+				if(!data){
+            		jQuery("#frm2").submit();
+				}
+    		});
+    	});
+		
+	});
+}
+function checkBill(lockflag){
+	var indexs = getSelectIndexs('chk');
+	if(indexs.length<1){
+		alert("请选择要" + (lockflag?"锁定":"解锁") + "的饰品");
+		return false;
+	}
+	for(var i=0;i<indexs.length;i++){
+		var index = indexs[i];
+   		if(lockflag && ("1" == $n("chk")[index].value)){
+			alert("第"+(index+1)+"行饰品已经锁定，不需要再次锁定");
+			return false;
+		}
+		if(!lockflag && ("1" != $n("chk")[index].value)){
+			alert("第"+(index+1)+"行饰品已经解锁，不需要再次解锁");
+			return false;
+		}
+   		if("900" != $n("status")[index].value){
+			alert("第"+(index+1)+"行饰品状态不为有效，不能进行锁定、解锁");
+			return false;
+		}
+	}
+	if(lockflag && isNull(jQuery("#lockReason").val())){
+		alert("请填写锁定原因");
+		return false;
+	}
+	return true;
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true);
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm2").submit();
+	});
+	jQuery("#btnLock").click(function(){
+		lockOrna(true);
+	});
+	jQuery("#btnUnlock").click(function(){
+		lockOrna(false);
+	});
+	jQuery("#btnAdd").click(function(){
+		window.location = "priceLock.vm?user_action=toEdit";
+	});
+	jQuery("#btnBackToList").click(function(){
+		window.location = "priceLock.vm";
+	});
+	setValues();
+	onButtons();
+});
+
+function onButtons(){
+	jQuery("#itemClassId").change(function(){
+		var value = {};
+		changeItemClass(value);
+	});
+	jQuery("#ornaClassId").change(function(){
+		changeOrnaClass({});
+	});
+	jQuery("#styleItemClassId").change(function(){
+		changeStyleItemClass({});
+	});
+	jQuery("#styleMiddleClassId").change(function(){
+		changeStyleMiddleClass({});
+	});
+	jQuery("#styleOrnaClassId").change(function(){
+		changeStyleOrnaClass({});
+	});
+}
+
+function changeItemClass(value){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, value.ornaClassId);
+		changeOrnaClass(value);
+	});
+}
+
+function changeOrnaClass(value){
+	//获取分析范围
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true, value.analysisId);
+	});
+	//获取款式大类
+	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("styleItemClassId", data, null, null, true, true, value.styleItemClassId);
+		changeStyleItemClass(value);
+	});
+}
+
+/**
+ *　改变款式大类
+ */
+function changeStyleItemClass(value){
+	//获取款式中类
+	BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+		addOptions("styleMiddleClassId", data, null, null, true, true, value.styleMiddleClassId);
+		changeStyleMiddleClass(value);
+	});
+}
+
+/**
+ *　改变款式中类
+ */
+function changeStyleMiddleClass(value){
+	//获取款式小类
+	BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+		addOptions("styleOrnaClassId", data, null, null, true, true, value.styleOrnaClassId);
+		changeStyleOrnaClass(value);
+	});
+}
+
+/**
+ *　改变款式小类
+ */
+function changeStyleOrnaClass(value){
+	//获取款式
+	BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true, value.styleId);
+	});
+}
+</script>

@@ -1,0 +1,124 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/GatherSetDwr.js"])
+#set($modelCode='08090102')
+<form id="frm" method="post">
+	<input type='hidden' id='headid' value='$!{form.head.headid}'/>
+    <table class="title">
+    	<tr><td>推式订单</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' #if("1"!="$!{form.head.status}"&&""!="$!{form.head.status}") disabled #end onclick="saveGatherSetHead()" $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='返回列表' class='btn' onclick="backToList()">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+		<tr>
+            <td class='body1'>总单编号</td>
+			<td class='body2'><input type='text' value="自动生成" id='billNo' readonly ></td>
+    		<td class='body1'>区域</td>
+            <td class='body2'><select id='regionId' dataType="Require" msg="不能为空"></select></td>
+            <td class="body1">周期类型</td>
+            <td class='body2'><select id='cycleTypeId' dataType="Require" msg="不能为空"></select></td>
+    		<td class="body1">情侣款</td>
+    		<td class='body2'><input type="checkbox" id="isLoveStyle" #if("$!form.head.isLoveStyle" =="1") checked  #end #if("$!form.head.headid" !="") disabled  #end /></td>
+        </tr>
+		<tr>
+            <td class='body1'>商品类别</td>
+			<td class='body2' colspan="3">
+				<input type='hidden' id='articleTypeIds' value="$!{form.head.articleTypeIds}"/>
+				<input type='text' readonly class='target' style="width:95%;" id='articleTypeNames' value="$!{form.head.articleTypeNames}" ondblclick="showArticleTypeWin()" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>购物开始日期</td>
+			<td class='body2'><input type='text' readonly id='purDateStart' value="$!{form.head.purDateStart}" dataType="Require" msg="不能为空"></td>
+			<td class='body1'>购物结束日期</td>
+			<td class='body2'><input type='text' readonly id='purDateEnd' value="$!{form.head.purDateEnd}" dataType="Require" msg="不能为空"></td>
+		</tr>
+		<tr>
+			<td class='body1'>销售开始日期</td>
+			<td class='body2'><input type='text' readonly id='saleDateStart' value="$!{form.head.saleDateStart}" dataType="Require" msg="不能为空"></td>
+			<td class='body1'>销售结束日期</td>
+			<td class='body2'><input type='text' readonly id='saleDateEnd' value="$!{form.head.saleDateEnd}" dataType="Require" msg="不能为空"></td>
+			<td class='body1'>最后到货日期</td>
+			<td class='body2'><input type='text' readonly id='purArriveDateEnd' value="$!{form.head.purArriveDateEnd}" dataType="Require" msg="不能为空"></td>
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="7"><input type='text' style='width:99%;' id='memo' value="$!{form.head.memo}"></td>
+		</tr>
+    </table>
+</form>
+<script>
+function showArticleTypeWin(){
+	selectArticleType(function(idArr, nameArr){
+		jQuery("#articleTypeIds").val(idArr.join(","));
+		jQuery("#articleTypeNames").val(nameArr.join(","));
+	}, null, null, true, jQuery("#articleTypeIds").val(), null, null); 
+}
+function backToList(){
+	window.location = "gatherSet.vm?user_action=setList";
+}
+function setValues(){
+	BdCommonDwr.getAllCycleTypeForSlt(function(data){
+		addOptions('cycleTypeId', data, null, null, true, true, "$!form.head.cycleTypeId");
+	});
+	BdCommonDwr.getAllRegionForSlt(function(data){
+		addOptions('regionId', data, null, null, true, true, "$!form.head.regionId");
+	});
+	if(isNull(jQuery("#headid").val()))	return ;
+	jQuery("#billNo").val("$!{form.head.billNo}");
+	jQuery("#regionId").attr("disabled", true);
+	jQuery("#cycleTypeId").attr("disabled", true);
+	jQuery("#articleTypeNames").attr("disabled", true);
+}
+jQuery(function(){
+	initCalendarArr(['purDateStart', 'purDateEnd', 'saleDateStart', 'saleDateEnd', 'purArriveDateEnd']);
+	setValues();
+});
+//保存头
+function saveGatherSetHead(){
+	if(!Validator.Validate($("frm"),3))
+		return;
+	if(jQuery("#purDateStart").val()>jQuery("#purDateEnd").val()){
+		alert("购物开始日期 不能大于 购物结束日期");
+		return ;
+	}
+	if(jQuery("#purDateEnd").val()>jQuery("#saleDateStart").val()){
+		alert("购物结束日期 不能大于 销售开始日期");
+		return ;
+	}
+	if(jQuery("#saleDateStart").val()>jQuery("#saleDateEnd").val()){
+		alert("销售开始日期 不能大于 销售结束日期");
+		return ;
+	}
+	if(jQuery("#purArriveDateEnd").val()<=jQuery("#purDateEnd").val() || jQuery("#purArriveDateEnd").val()>=jQuery("#saleDateEnd").val()){
+		alert("最后到货日期必须要 大于 购物结束日期 且要 小于 销售结束日期");
+		return ;
+	}
+	confirm("确定保存?", function(){
+		showLayer(true);
+    	GatherSetDwr.saveOrUpdateGatherSetHead({
+			"headid":jQuery("#headid").val(),
+			"billNo":jQuery("#billNo").val(),
+			"regionId":jQuery("#regionId").val(),
+			"cycleTypeId":jQuery("#cycleTypeId").val(),
+			"articleTypeIds":jQuery("#articleTypeIds").val(),
+			"purDateStart":jQuery("#purDateStart").val(),
+			"purDateEnd":jQuery("#purDateEnd").val(),
+			"saleDateStart":jQuery("#saleDateStart").val(),
+			"saleDateEnd":jQuery("#saleDateEnd").val(),
+			"purArriveDateEnd":jQuery("#purArriveDateEnd").val(),
+			"memo":jQuery("#memo").val(),
+			"isLoveStyle":jQuery("#isLoveStyle")[0].checked?"1":"0"
+		}, function(data){
+    		showLayer(false);
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+                	window.location = "gatherSet.vm?user_action=setList";
+    			}
+    		});
+    	});
+	});
+}
+</script>

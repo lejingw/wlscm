@@ -1,0 +1,83 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PurEmpArticleTypeDwr.js"])
+<form id="frm" method="post">
+    <table class="title">
+    	<tr><td>采购员商品类别</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' value='删除' class='btn' id="btnDelete">
+				<input type='button' value='查询' class='btn' id="btnQueryShow">
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+        		<th>状态</th>
+                <th>采购员</th>
+                <th>商品类别</th>
+        		<th>创建时间</th>
+        		<th>创建人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.id}'/>
+					<input type='hidden' name='purEmpId' value='$!{map.purEmpId}'/></td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+				<td><a href='javascript:toEditPage($!{map.purEmpId}, 1);'>$BdCommon.getUserName($!map.purEmpId)</a></td>
+				<td><a href='javascript:toEditPage($!{map.articleTypeId}, 0);'>$!BdCommon.getArticleTypeDesc($!{map.articleTypeId})</a></td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true,null, function(index){
+		window.location = "purEmpArticleType.vm?user_action=toEdit&purEmpId=" + $n("purEmpId")[index].value + "&empFlag=1";
+	});
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "purEmpArticleType.vm?user_action=toEdit&empFlag=1";
+	});
+	jQuery("#btnDelete").click(deletePurEmpArticleType);
+	initQuery2('07', "frm", 'btnQueryShow');
+});
+function toEditPage(purEmpId, empFlag){
+	window.location = "purEmpArticleType.vm?user_action=toEdit&purEmpId=" + purEmpId + "&empFlag=" + empFlag;
+}
+function deletePurEmpArticleType(){
+	var indexs = getSelectIndexs('chk');
+	if(indexs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var idArr = [];
+	for(var i=0;i<indexs.length;i++){
+		idArr.push($n("chk")[indexs[i]].value);
+	}
+	confirm("确定删除?", function(){
+		PurEmpArticleTypeDwr.deletePurEmpArticleType(idArr, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+        			window.location = "purEmpArticleType.vm";
+				});
+			}
+		});
+	});
+}
+</script>

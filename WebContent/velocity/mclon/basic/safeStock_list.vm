@@ -1,0 +1,116 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/SafeStockDwr.js"])
+<form id="frm" name="frm" method="post" action="safeStock.vm">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="title">
+    	<tr><td>总部安全库存</td></tr>
+    </table>
+	#set($rightCode = '08012201')
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, $rightCode,'1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, $rightCode,'2')>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, $rightCode,'3')>
+				<input type='button' value='批量生成' class='btn' id='btnBatchCreate' $RightUtil.able($session, $rightCode,'5')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $rightCode, '4')/>
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th>状态</th>
+        		<th>大类</th>
+        		<th>小类</th>
+				<th>分析范围</th>
+				<th>款式大类</th>
+				<th>款式中类</th>
+				<th>款式小类</th>
+				<th>款式</th>
+        		<th>库存标准</th>
+        		<th>创建人</th>
+        		<th>创建时间</th>
+        		<th>修改人</th>
+        		<th>修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.safeId}'/>$velocityCounter</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+				<td><a href='javascript:toEditPage($!{map.safeId});'>$!BdCommon.getItemClassDesc($!map.itemClassId)</a></td>
+				<td>$!BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!map.analysisName</td>
+				<td>$!BdCommon.getStyleItemClassNames($!map.styleItemClassId)</td>
+				<td>$!BdCommon.getStyleMiddleClassNames($!map.styleMiddleClassId)</td>
+				<td>$!BdCommon.getStyleOrnaClassNames($!map.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!map.styleId, $!map.styleName, $!map.bigGraph)</td>
+				<td>$!StringUtil.formatDouble($!map.safeNum, 2)</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!map.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+		window.location = "safeStock.vm?user_action=toEdit&safeId=" + $n("chk")[index].value;
+	});
+	jQuery("#btnAdd").click(function(){
+		window.location = "safeStock.vm?user_action=toEdit";
+	});
+	jQuery("#btnBatchCreate").click(function(){
+		window.location = "safeStock.vm?user_action=batchCreate";
+	});
+	jQuery("#btnDelete").click(deleteRow);
+	initQuery2('safeStock', "frm", 'btnSearch');
+});
+function toEditPage(safeId){
+	window.location = "safeStock.vm?user_action=toEdit&safeId=" + safeId;
+}
+function deleteRow(){
+	var idx = getSelectIndexs("chk");
+	if(idx.length < 1){
+		alert("请选择删除的记录");
+		return;
+	}
+	confirm("确定删除?", function(){
+		var ids = [];
+		for(var i=0, j=idx.length;i<j;i++){
+			ids.push($n("chk")[i].value);
+		}
+		SafeStockDwr.deleteSafeStock(ids.join(','), function(msg){
+			if(msg){
+				alert(msg);
+			} else {
+				alert("删除成功", function(){
+					window.location = "safeStock.vm";
+				});
+			}
+		});
+	});
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

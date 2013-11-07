@@ -1,0 +1,188 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/pur/cash/cashHead.js?t=201205281636.js", 
+"$StringUtil.getContextPath()/dwr/interface/CashHeadDwr.js"])
+	
+<form id='frm' action="cashHead.vm" method="post">
+	#set($cashHead = $!form.cashHead)
+	#set($lines = $!form.lines)
+	#if($StringUtil.isBlank($!cashHead.billNo))
+		#set($billNo = "自动生成")
+		#set($orgId = $StringUtil.getOrgId($session))
+		#set($billDate = $DateUtil.getCurrentDate10())
+		#set($statusName = "保存")
+		#set($status = "1")
+		#set($createDate = $DateUtil.getCurrentDate10())
+		#set($createId = $StringUtil.getUserId($session))
+	#else
+		#set($billNo = $cashHead.billNo)
+		#set($orgId = $cashHead.orgId)
+		#set($billDate = $cashHead.billDate)
+		#set($statusName = $!DictUtil.getValue('status', $!{cashHead.status}))
+		#set($status = $!{cashHead.status})
+		#set($createDate = $cashHead.createDate)
+		#set($createId = $!cashHead.createId)
+	#end
+	
+	#set($enableSave = false)
+	#set($disable = false)
+	#set($isSaved = false)
+	#set($enableCheck = false)
+	#set($enableCashCheck = false)
+	#if($StringUtil.isNotBlank($status))
+		#if($status == "1")
+			#set($enableSave = true)
+			#set($isSaved = true)
+			#set($enableCheck = true)
+			#if($!cashHead)
+				#set($enableAccount = true)
+			#end
+		#elseif($status == "5")
+			#set($enableCashCheck = true)
+		#end
+	#end
+	#if($cashHead)
+		#set($disable = true)
+	#end
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="cashId" name="cashId" value="$!{cashHead.cashId}"/>
+    <table class="title">
+    	<tr><td>结算单详情</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' #if(!$enableSave)disabled#end class='btn' id='btnSave' $RightUtil.able($session, '0802090302','1')>
+				<input type='button' value='审核' #if(!$enableCheck)disabled#end class='btn' id='btnCheck' $RightUtil.able($session, '0802090302','2')>
+				<input type='button' value='财务审核' #if(!$enableCashCheck)disabled#end class='btn' id='btnCashCheck' $RightUtil.able($session, '0802090302','3')>
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '0802090302','4')>
+				<input type='button' value='返回结算单列表' class='btn' id="btnToList">
+				<input type='button' value='返回货品台账列表' class='btn' id="btnToProdList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billNo" name='billNo' readonly value="$!billNo">
+			</td>
+			
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>单据时间：</td>
+			<td class='body2'>
+				<input type='text' id="billDate" name='billDate' readonly #if(!$isSaved)disabled#end value="$!{billDate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status" name='status' readonly value="$!statusName">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>供应商：</td>
+			<td class='body2'>
+				#*<select id="verdorId" name="verdorId" #if($disable)disabled#end dataType="Require" value="$!cashHead.voderId" onchange="changeVendor(this)" msg="不能为空" >
+					$StringUtil.emptyOption()
+                </select>$StringUtil.star()*#
+				<input type='hidden' id='verdorId' name="verdorId" value="$!cashHead.voderId">
+				<input type='text' id='vendorName' value="$!BdCommon.getVendorName($!cashHead.voderId)" #if($disable)disabled#end readonly class='target' ondblclick="showVendorWin()" dataType="Require" msg="不能为空">
+				$!StringUtil.star()
+			</td>
+			<td class='body1'>单据类型：</td>
+			<td class='body2'>
+				<select id="billType" name="billType" #if($disable)disabled#end dataType="Require" value="$!cashHead.dotype" msg="不能为空" >
+					$StringUtil.emptyOption()
+                    <option value="-1">交接单</option>
+					<option value="1">委外发料</option>
+                </select>$StringUtil.star()
+			</td>
+			
+			<td class='body1'>创建人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{createId}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!createId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>创建时间：</td>	
+			<td class='body2'>
+				<input type='text' id="createDate" name='createDate'  value="$!createDate" readonly  dataType="Require" msg="不能为空" >
+			</td>
+		</tr>
+    </table>
+	<input type="button" value="选择源台账" #if(!$!isSaved)disabled#end onclick="showSelectCashWinSrc()"/>
+	<input type="button" value="选择目标台账" #if(!$!isSaved)disabled#end onclick="showSelectCashWinDist()"/>
+	<input type="hidden" value="" name="deleteIds" id="deleteIds"/>
+	<input type="hidden" value="" name="articleTypeId" id="articleTypeId"/>
+	<input type="hidden" value="" name="cashNums" id="cashNums"/>
+	<table class='list'>
+    	<thead>
+			<tr>
+				<th></th>
+				<th>业务类型</th>
+				<th>单号</th>
+				<th>商品类别</th>
+				<th>大类</th>
+                <th>需核销数量</th>
+        		<th>本次结算数量</th>
+        		<th>说明</th>
+				<th width='60px'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $lines)
+			<tr>
+				<td></td>
+				<td>#if($line.billType=="1")委外发料#else交接单#end</td>
+				<td>$!line.billNo</td>
+				<td>$!BdCommon.getArticleTypeDesc($!line.articleId)</td>
+				<td>$!BdCommon.getItemClassDesc($!line.itemClassId)</td>
+				<td>$!line.lessNums</td>
+				<td><input type="text" name="curNums" value="$!line.curNums" #if(!$!isSaved)readonly#end onblur="checkField()" dataType="Require" msg="不能为空"/></td>
+				<td><input type="text" name="memo" value="$!line.memo" #if(!$!isSaved)readonly#end/></td>
+				<td><input type='button' value='删除' #if(!$!isSaved)disabled#end style='width:60px;' onclick='deleteCashRow(this, "tbl")'/>
+    				<input type='hidden' name='lineId' value="$!line.lineId" />
+    				<input type='hidden' name='prId' value="$!line.prId" />
+    				<input type='hidden' name='bill_type' value="$!line.billType" />
+					<input type='hidden' name='lessNums' value="$!line.lessNums" />		
+					<input type='hidden' name='itemClassId' value="$!line.itemClassId" />	
+					<input type='hidden' name='oldCurNums' value="$!line.curNums" />	
+					<input type='hidden' name='articleId' value="$!line.articleId" />	
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+
+<script>
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		jQuery("#verdorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#verdorId").val());
+}
+function setValues(){
+	/*BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!cashHead.voderId");
+	});*/
+	jQuery("#billType").val("$!cashHead.dotype");
+}
+
+jQuery(function(){
+	initCalendar("billDate");
+	setValues();
+	jQuery("#deleteIds").val("");
+	jQuery("#btnSave").click(saveForm);
+	jQuery("#btnCheck").click(checkBill);
+	jQuery("#btnCashCheck").click(closeBill);
+	jQuery("#btnToList").click(function(){
+		window.location = "cashHead.vm";
+	});
+	jQuery("#btnToProdList").click(function(){
+		window.location = "$StringUtil.getContextPath()/pur/cash/prodAccount.vm";
+	});
+	altRowCSS('tbl');
+	checkReview();
+	changeSeq("tbl");
+})
+
+</script>

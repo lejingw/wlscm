@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LabelTagApplyPrint">
+	<typeAlias alias="LabelTagApplyPrint" type="com.jatools.vo.tag.LabelTagApplyPrint" />
+	
+	<resultMap class="LabelTagApplyPrint" id="LabelTagApplyPrint.result">
+		<result property = "id"               column = "id"                 />
+		<result property = "no"               column = "no"                 />
+		<result property = "createdate"       column = "createdate"         />
+		<result property = "createuserid"     column = "createuserid"       />
+		<result property = "orgId"            column = "org_id"             />
+		<result property = "numTotal"         column = "num_total"          />
+		<result property = "receiveNum"       column = "receive_num"        />
+		<result property = "cancelNum"        column = "cancel_num"         />
+		<result property = "updateuserid"     column = "updateuserid"       />
+		<result property = "updatedate"       column = "updatedate"         />
+		<result property = "labelReceiveType" column = "label_receive_type" />
+		<result property = "receiveUserid"    column = "receive_userid"     />
+		<result property = "state"            column = "state"              />
+		<result property = "printType"        column = "print_type"         />
+		<result property = "srcBillNo"        column = "src_bill_no"        /> 
+	</resultMap>
+	
+	<sql id="LabelTagApplyPrint_columns">
+		id, no, createdate, createuserid, org_id, num_total, receive_num, cancel_num, updateuserid, updatedate, label_receive_type, receive_userid, state, print_type, src_bill_no
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="LabelTagApplyPrint.getLabelTagApplyPrintPageData" resultMap="LabelTagApplyPrint.result" parameterClass="map">
+		select <include refid="LabelTagApplyPrint_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="LabelTagApplyPrint_columns"/>  from jat_lable_tag_print a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="userId" prepend="and">
+				exists (
+					select 1 
+					from jas_bd_emp_org t 
+					left join jas_sm_org b on t.orgid = b.org_id 
+					where a.org_id = t.orgid and b.org_type = 1 and t.empid = #userId#
+				) 
+			</isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.createuserid = #createId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.createdate DESC, a.no DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="LabelTagApplyPrint.getLabelTagApplyPrintTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_lable_tag_print a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.state <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.state is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.state = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="userId" prepend="and">
+			exists (
+				select 1 
+				from jas_bd_emp_org t 
+				left join jas_sm_org b on t.orgid = b.org_id 
+				where a.org_id = t.orgid and b.org_type = 1 and t.empid = #userId#
+			) 
+		</isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.createuserid = #createId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="LabelTagApplyPrint.saveLabelTagApplyPrint" parameterClass="LabelTagApplyPrint">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select JAT_LABLE_TAG_PRINT_SEQ.nextval as "id" from dual
+		</selectKey>
+		insert into jat_lable_tag_print(<include refid="LabelTagApplyPrint_columns"/>)
+		 values(
+		 	#id#, #no#, #createdate#, #createuserid#, #orgId#, #numTotal#, #receiveNum#, #cancelNum#, #updateuserid#, #updatedate#, #labelReceiveType#, #receiveUserid#, #state#, #printType#, #srcBillNo#
+		 )
+    </insert>
+    
+    <select id="LabelTagApplyPrint.getLabelTagApplyPrint" parameterClass="string" resultMap="LabelTagApplyPrint.result">
+		select <include refid="LabelTagApplyPrint_columns"/> from jat_lable_tag_print a 
+		where 1=1
+			and a.id = #value#
+	</select>
+	
+	<update id="LabelTagApplyPrint.updateLabelTagApplyPrint" parameterClass="LabelTagApplyPrint">
+		update jat_lable_tag_print a set 
+			a.org_id             = #orgId#,
+			a.num_total          = #numTotal#,
+			a.receive_num        = #receiveNum#,
+			a.cancel_num         = #cancelNum#,
+			a.updateuserid       = #updateuserid#,
+			a.updatedate         = #updatedate#,
+			a.label_receive_type = #labelReceiveType#,
+			a.receive_userid     = #receiveUserid#,
+			a.state              = #state#,
+			a.print_type         = #printType#
+		where a.id = #id# 
+	</update>
+	
+	<delete id="LabelTagApplyPrint.deleteLabelTagApplyPrint" parameterClass="string" >
+		delete from jat_lable_tag_print a where a.id = #value# 
+	</delete>
+	
+	<update id="LabelTagApplyPrint.updateLabelTagApplyPrintStatus" parameterClass="map">
+		update jat_lable_tag_print a set 
+		a.state = #status# , a.updatedate = #updateDate# ,a.updateuserid = #updateId#
+		where a.id = #id# 
+	</update>
+	
+	<update id="LabelTagApplyPrint.updateLabelTagApplyPrintStatus2" parameterClass="map">
+		update jat_lable_tag_print a set 
+		a.state = #status# , a.updatedate = #updateDate# ,a.updateuserid = #updateId#,
+		a.receive_num = a.num_total, a.cancel_num = 0, a.label_receive_type = 1
+		where a.id = #id# 
+	</update>
+	<select id="LabelTagApplyPrint.getPrintData" parameterClass="map" resultClass="com.jatools.vo.bd.Tag">
+		select 
+		    m.TAG_TYPE            as "labelType"        ,
+		    m.orna_code           as "ornaCode"         ,
+		    m.orna_barcode        as "ornaBarCode"      ,
+		    nvl(a.new_orna_name, m.orna_dsc)  as "ornaName"         ,
+		    nvl(a.new_amount,m.pos_amount)    as "posAmount"        ,
+		    m.main_weight         as "mainWeight"       ,
+		    m.part_weight         as "partStoneWeight"  ,
+		    nvl(a.weight,m.all_qty)           as "allQty"           ,
+		    m.special_weight      as "specialWeight"    ,
+		    nvl(b1.size_name, b.size_name) as "sizeName"         ,
+		    c.quality_dsc         as "quality"          ,
+		    d.item_value          as "mainShape"        ,
+		    m.part_content        as "partStoneContent" ,
+		    e.item_value          as "cleanName"        ,
+		    f.item_value          as "color"            ,
+		    m.factory_style_id    as "factoryStyle"     ,
+		    g.s_suppliercode      as "venderCode"       ,
+		    m.string_work_price   as "stringWorkPrice"  ,
+		    nvl(a.new_special_work_price,m.special_work_price) as "specialWorkPrice" ,
+		    h.item_class_dsc      as "itemClassName"    ,
+		    nvl(a.is_dbl_label,m.is_muti_part)   as "isMutiPart"       ,
+		    m.stone_total_num     as "grian"            ,
+		    <!-- nvl((select nvl(nvl(a.new_native_cert,m.ident_id), '')||'!'||y.THEME_NAME from dual where m.item_class_id=188 
+	                 and exists (select o.theme_name from Jas_PL_BD_STYLE_THEME o
+	                    inner join jas_bd_style p  on o.theme_id = p.THEME_ID
+	                    where m.style_id = p.STYLEID        
+	                 )
+	        ), nvl(a.new_native_cert,m.ident_id)) as "ident", -->
+	        nvl(a.new_native_cert,m.ident_id)    as "ident",
+		    nvl(a.new_hrd_cert,m.hrd_cert)       as "HRDCert"          ,
+		    nvl(a.new_gia_cert, m.gia_cert)      as "GIACert"          ,
+		    nvl(a.new_igi_cert,m.igi_cert)       as "IGICert"          ,
+		    m.ags_cert            as "AGSCert"          ,
+		    i.item_value          as "colorGrade"       ,
+		    j.summarydescription  as "analysisArange"   ,
+		    k.stylename           as "styleName",
+		    nvl(a.new_zodiac,m.zodiac)   as "bornImg",
+		    z.ITEM_CLASS_CODE     as "styleItemCode",
+		    y.THEME_NAME  		  as "themeName"
+		from jat_lable_tag_print_line a
+			left join ic_mater_active m on a.orna_code = m.orna_code
+			left join jas_bd_size b on m.size_id = b.size_id
+			left join jas_bd_size b1 on a.new_size = b1.size_id
+			left join jas_bd_quality c on c.quality_id = m.quality_id
+			left join jat_sys_dict_item d on d.entry_code = 'diashape' and d.item_key = m.main_shape_id
+			left join jat_sys_dict_item e on e.entry_code = 'diaclean' and m.clean_id = e.item_key
+			left join jat_sys_dict_item f on f.entry_code = 'diacolor' and f.item_key = m.color_id
+			left join jas_bd_cust g on g.custid = m.supplier_id
+			left join jas_bd_item_class h on h.item_class_id = m.item_class_id
+			left join jat_sys_dict_item i on i.entry_code = 'diacolorgrade' and i.item_key = m.main_color_grade_id
+			left join jas_bd_analysis_arange j on j.analysis_arange_id = m.alaysis_id
+			left join jas_bd_style k on k.styleid = m.style_id
+			left join Jas_PL_BD_STYLE_THEME y on k.THEME_ID = y.THEME_ID
+			left join jas_bd_style_item_class z on k.STYLEITEMCLASS = z.ITEM_CLASS_ID
+		where 1=1 and exists (select 1  from ic_mater_active ic where a.orna_code = ic.orna_code)
+			<isNotEmpty property="labelType" prepend="and">
+				<isEqual property="labelType" compareValue="1"> ( a.is_dbl_label = 0 or a.is_dbl_label is null ) </isEqual>
+				<isNotEqual property="labelType" compareValue="1"> a.is_dbl_label = 1 </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="lineids" prepend="and"> a.id in ($lineids$) </isNotEmpty>
+		   and a.head_id = #headid#
+		   <isNotEmpty property="orderBy"> $orderBy$ </isNotEmpty>
+	</select>
+	
+	<select id="LabelTagApplyPrint.getApplyCountByOrgId" resultClass="int" parameterClass="string">
+		select count(*)  from jat_lable_tag_apply_line a
+			left join jat_lable_tag_apply h on a.head_id = h.id
+		where 1=1 and h.state = 5
+			and h.org_id = #value#
+	</select>
+	
+	<!-- 门店创建打印单 行表 -->
+	<insert id="LabelTagApplyPrint.insertLines" parameterClass="map">
+		insert into jat_lable_tag_print_line (
+			ID, 
+			HEAD_ID, ORNA_CODE, ORNA_NAME, UNIT_ID, NUM, WEIGHT, OLD_AMOUNT, NEW_AMOUNT, 
+			OID_SIZE, NEW_SIZE, OLD_ORNA_NAME, NEW_ORNA_NAME, OLD_NATIVE_CERT, NEW_NATIVE_CERT, 
+			OLD_GIA_CERT, NEW_GIA_CERT, OLD_HRD_CERT, NEW_HRD_CERT, OLD_IGI_CERT, NEW_IGI_CERT, 
+			OLD_ZODIAC, NEW_ZODIAC, UPDATE_REASON, STATE, UPDATEDATE, IS_DBL_LABEL, LABEL_KIND, 
+			OLD_BASIC_PRICE, NEW_BASIC_PRICE, ITEM_CLASS_ID, ORNA_CLASS_ID, OLD_SPECIAL_WORK_PRICE, 
+			NEW_SPECIAL_WORK_PRICE 
+		)
+		select 
+			JAT_LABLE_TAG_PRINT_LINE_SEQ.nextval, 
+			#headid#, ORNA_CODE, ORNA_NAME, UNIT_ID, NUM, WEIGHR as WEIGHT, OLD_AMOUNT, NEW_AMOUNT, 
+			OID_SIZE, NEW_SIZE, OLD_ORNA_NAME, NEW_ORNA_NAME, OLD_NATIVE_CERT, NEW_NATIVE_CERT, 
+			OLD_GIA_CERT, NEW_GIA_CERT, OLD_HRD_CERT, NEW_HRD_CERT, OLD_IGI_CERT, NEW_IGI_CERT, 
+			OLD_ZODIAC, NEW_ZODIAC, UPDATE_REASON, 15, #updateDate#, IS_DBL_LABEL, LABEL_KIND, 
+			OLD_BASIC_PRICE, NEW_BASIC_PRICE, ITEM_CLASS_ID, ORNA_CLASS_ID, OLD_SPECIAL_WORK_PRICE, 
+			NEW_SPECIAL_WORK_PRICE
+		from jat_lable_tag_apply_line a
+			left join jat_lable_tag_apply h on a.head_id = h.id
+		where 1=1 and h.state = 5
+			and h.org_id = #orgId#
+	</insert>
+	
+	<!-- 修改 申请单 状态为已合并 并把打印单的id写入到申请单中 -->
+	<update id="LabelTagApplyPrint.updateLabelApply" parameterClass="map">
+		update jat_lable_tag_apply a
+		set	a.tag_print_bill_id = #printId#,
+			a.state = 15,
+			a.updatedate = #updateDate#
+		where a.state = 5
+			and a.org_id = #orgId#
+	</update>
+	
+	<update id="LabelTagApplyPrint.updateLabelApplyLines" parameterClass="map">
+		update jat_lable_tag_apply_line t
+		set t.state = 15, t.updatedate = #updateDate#
+		where t.head_id in (
+		     select a.id from jat_lable_tag_apply a where a.state = 15 and a.org_id = #orgId# and a.tag_print_bill_id = #printId#
+		)
+	</update>
+	
+	<update id="LabelTagApplyPrint.updateLabelApplyStatusByPrintId" parameterClass="map">
+		update jat_lable_tag_apply a 
+	    set a.state = 14, a.updatedate = #updateDate#
+	    where a.state = 15
+	      and a.tag_print_bill_id = #printId#
+	</update>
+	<update id="LabelTagApplyPrint.updateLabelApplyLineStatusByPrintId" parameterClass="map">
+		update jat_lable_tag_apply_line l
+		set l.state = 14 , l.updatedate = #updateDate#
+		where 
+			l.head_id in (select a.id from jat_lable_tag_apply a where a.tag_print_bill_id = #printId#)
+	</update>
+	
+	<!-- 修改饰品信息 -->
+	<update id="LabelTagApplyPrint.modifyMater" parameterClass="map">
+		update ic_mater_active a
+		set (
+			a.pos_amount,
+			a.size_id,
+			a.orna_dsc,
+			a.ident_id,
+			a.gia_cert,
+			a.hrd_cert,
+			a.igi_cert,
+			a.zodiac,
+			a.basic_price,
+			a.special_work_price
+		) = (
+			select 
+				nvl(b.NEW_AMOUNT, a.pos_amount),
+				nvl(b.NEW_SIZE, a.size_id),
+				nvl(b.NEW_ORNA_NAME, a.orna_dsc),
+				nvl(b.NEW_NATIVE_CERT, a.ident_id),
+				nvl(b.NEW_GIA_CERT, a.gia_cert),
+				nvl(b.NEW_HRD_CERT, a.hrd_cert),
+				nvl(b.NEW_IGI_CERT, a.igi_cert),
+				nvl(b.NEW_ZODIAC, a.zodiac),
+				nvl(b.NEW_BASIC_PRICE, a.basic_price),
+                (case when b.NEW_SPECIAL_WORK_PRICE = 0 then null
+                else
+				    nvl(b.NEW_SPECIAL_WORK_PRICE, a.special_work_price)
+                end)
+			 from jat_lable_tag_print_line b 
+			 where b.state = 10 and a.orna_code = b.orna_code and b.head_id = #headid#
+		),
+		a.updatedate = #updateDate#
+		where exists (
+			select 1 from jat_lable_tag_print_line b 
+			where b.state = 10 and a.orna_code = b.orna_code and  b.head_id = #headid# 
+		)
+	</update>
+	
+	<update id="LabelTagApplyPrint.modifyMater2" parameterClass="map">
+		update ic_mater_active a
+		set (
+			a.pos_amount,
+			a.size_id,
+			a.orna_dsc,
+			a.ident_id,
+			a.gia_cert,
+			a.hrd_cert,
+			a.igi_cert,
+			a.zodiac,
+			a.basic_price,
+			a.special_work_price
+		) = (
+			select 
+				nvl(b.NEW_AMOUNT, a.pos_amount),
+				nvl(b.NEW_SIZE, a.size_id),
+				nvl(b.NEW_ORNA_NAME, a.orna_dsc),
+				nvl(b.NEW_NATIVE_CERT, a.ident_id),
+				nvl(b.NEW_GIA_CERT, a.gia_cert),
+				nvl(b.NEW_HRD_CERT, a.hrd_cert),
+				nvl(b.NEW_IGI_CERT, a.igi_cert),
+				nvl(b.NEW_ZODIAC, a.zodiac),
+				nvl(b.NEW_BASIC_PRICE, a.basic_price),
+				nvl(b.NEW_SPECIAL_WORK_PRICE, a.special_work_price)
+			 from jat_lable_tag_print_line b 
+			 where a.orna_code = b.orna_code and b.head_id = #headid#
+		),
+		a.updatedate = #updateDate#
+		where exists (
+			select 1 from jat_lable_tag_print_line b 
+			where a.orna_code = b.orna_code and  b.head_id = #headid# 
+		)
+	</update>
+	
+	<update id="LabelTagApplyPrint.modifyMaterAnalysis" parameterClass="map">
+		update ic_mater_active ic
+		set ic.alaysis_id = 
+		<![CDATA[
+			nvl(( select b.analysis_arange_id 
+			  from jas_bd_analysis_arange b 
+			  where b.archiveflag = 0 and b.item_class_id = ic.item_class_id and b.orna_class_id = ic.orna_class_id
+			      and b.analysis_unit_id = (select max(a.analysis_unit_id) from jas_bd_analysis_unit a where a.archiveflag = 0
+			      and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			      and b.startanalysis <= (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then ic.all_qty when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then ic.basic_price when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then ic.main_weight end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			      and b.endanalysis    > (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then ic.all_qty when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then ic.basic_price when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then ic.main_weight end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			), ic.alaysis_id)
+		]]>,
+			ic.updatedate = #updateDate#
+		where exists (
+			select 1 from jat_lable_tag_print_line l 
+			where l.state = 10 
+		      and ic.orna_code = l.orna_code
+		      and l.new_basic_price is not null
+		      and  l.head_id = #headid# 
+		)
+	</update>
+
+    <update id="LabelTagApplyPrint.modifyMaterAnalysis2" parameterClass="map">
+        update ic_mater_active ic
+        set ic.alaysis_id =
+        <![CDATA[
+			nvl(( select b.analysis_arange_id
+			  from jas_bd_analysis_arange b
+			  where b.archiveflag = 0 and b.item_class_id = ic.item_class_id and b.orna_class_id = ic.orna_class_id
+			      and b.analysis_unit_id = (select max(a.analysis_unit_id) from jas_bd_analysis_unit a where a.archiveflag = 0
+			      and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			      and b.startanalysis <= (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then ic.all_qty when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then ic.basic_price when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then ic.main_weight end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			      and b.endanalysis    > (select case when a.weight = 1 and a.markup = 0 and a.storeweight = 0 then ic.all_qty when a.weight = 0 and a.markup = 1 and a.storeweight = 0 then ic.basic_price when a.weight = 0 and a.markup = 0 and a.storeweight = 1 then ic.main_weight end from jas_bd_analysis_unit a where a.archiveflag = 0 and a.item_class_id = b.item_class_id and a.orna_class_id = b.orna_class_id)
+			), ic.alaysis_id)
+		]]>,
+        ic.updatedate = #updateDate#
+        where exists (
+        select 1 from jat_lable_tag_print_line l
+        where ic.orna_code = l.orna_code
+        and l.new_basic_price is not null
+        and  l.head_id = #headid#
+        )
+    </update>
+	<update id="LabelTagApplyPrint.initReceiveBill" parameterClass="map">
+		update jat_lable_tag_print a
+		set 
+			a.receive_num = 0, 
+			a.cancel_num = 0,
+			a.receive_userid = null ,
+			a.updateuserid=#userId#,
+			a.label_receive_type = null,
+			a.updatedate = #updateDate#
+		where a.id = #printId#
+	</update>
+	
+	<update id="LabelTagApplyPrint.updateApplyLineStatus" parameterClass="map">
+		update jat_lable_tag_apply_line a
+		set a.state = (
+			select b.state from jat_lable_tag_print_line b
+			left join jat_lable_tag_apply d on d.tag_print_bill_id=b.head_id
+			where  
+			a.head_id = d.id and
+			b.orna_code = a.orna_code and
+			b.head_id = #headId#
+			),
+			a.updatedate = #updateDate#
+		where
+		exists (
+			select 1 from jat_lable_tag_print_line e
+			left join jat_lable_tag_apply g on g.tag_print_bill_id=e.head_id
+			where  
+			a.head_id = g.id and
+			e.orna_code = a.orna_code and
+			e.head_id = #headId#
+			)
+	</update>
+	
+	<update id="LabelPrint.modifyLabelPrintNum" parameterClass="map">
+	<![CDATA[
+		update jat_lable_tag_print a 
+		set 
+			a.receive_num = (
+			    select count(*) from jat_lable_tag_print_line b where a.id=b.head_id and b.state=10
+			), 
+			a.cancel_num = (
+				select count(*) from jat_lable_tag_print_line b where a.id=b.head_id and b.state<>10
+			),
+			a.updatedate = #updateDate#, 
+			a.updateuserid = #userId#
+		where a.id = #headid#
+		]]>
+	</update>
+	
+	
+	<update id="LabelPrint.closeLabelPrints" parameterClass="map">
+		update jat_lable_tag_print a
+		   set a.state = 8, a.receive_num = 0, a.cancel_num = a.num_total,
+		   a.updatedate = #updateDate#, a.updateuserid = #userId#
+		 where a.id in ($billids$)
+		   and <![CDATA[ a.state <> 8 ]]>
+	</update>
+	
+	<update id="LabelPrint.cancelPrintLines" parameterClass="map">
+		update jat_lable_tag_print_line a
+		   set a.state = 16, a.updatedate = #updateDate#
+		 where a.head_id in ($billids$)
+		   and exists (select 1
+		          from jat_lable_tag_print b
+		         where b.id in ($billids$)
+		           and <![CDATA[ b.state <> 8]]> and a.head_id=b.id)
+	</update>
+	
+	<update id="LabelTagApplyPrint.revocatMater" parameterClass="map">
+		update ic_mater_active a
+	    set (
+	      a.pos_amount,
+	      a.size_id,
+	      a.orna_dsc,
+	      a.ident_id,
+	      a.gia_cert,
+	      a.hrd_cert,
+	      a.igi_cert,
+	      a.zodiac,
+	      a.basic_price,
+	      a.special_work_price
+	    ) = (
+	      select 
+	        b.old_amount,
+	        b.oid_size, 
+	        b.old_orna_name, 
+	        b.old_native_cert, 
+	        b.old_gia_cert,
+	        b.old_hrd_cert,
+	        b.old_igi_cert,
+	        b.old_zodiac,
+	        b.old_basic_price,
+	        b.old_special_work_price
+	       from jat_lable_tag_print_line b 
+	       where b.state = 10 and a.orna_code = b.orna_code and b.head_id = #headid#
+	    ),
+	    a.updatedate = #updateDate#
+	    where exists (
+	      select 1 from jat_lable_tag_print_line b 
+	      where b.state = 10 and a.orna_code = b.orna_code and  b.head_id = #headid# 
+	    )
+	</update>
+</sqlMap>

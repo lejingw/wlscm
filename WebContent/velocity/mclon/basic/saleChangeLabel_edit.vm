@@ -1,0 +1,75 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/saleChangeLabel.js?t=201204011204.js", 
+	"$StringUtil.getContextPath()/dwr/interface/SaleChangeLabelDwr.js"])
+	
+#set($saleChangeLabel = $form.saleChangeLabel)
+		
+<form id='frm' action="saleChangeLabel.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="changelabelId" name="changelabelId" value="$!{saleChangeLabel.changelabelId}"/>
+    <table class="title">
+    	<tr><td>换标签原因</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012302','1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>换标签原因：</td>	
+			<td class='body2' colspan="3">
+				<input type='text' id="changelabelReason" name='changelabelReason' style="width:90%;"  value="$!saleChangeLabel.changelabelReason"  dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+			<td class='body2'>
+				<input type="checkbox" id="isArchiveflag" #if("$!saleChangeLabel.status"=="0")checked#end style="width:10px;"/>是否封存
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>是否允许为空：</td>
+            <td class='body2'><input type='checkbox' id="isincreaseamount" name='isincreaseamount' #if("$saleChangeLabel.isincreaseamount"=="1")checked#end style="width:10px;"/>新增金额</td>
+			<td class='body2'><input type='checkbox' id="isbasicPrice" name='isbasicPrice' #if("$saleChangeLabel.isbasicPrice"=="1")checked#end style="width:10px;"/>新增基础价</td>
+			<td class='body2'><input type='checkbox' id="specialWorkPrice" name='specialWorkPrice' #if("$saleChangeLabel.specialWorkPrice"=="1")checked#end style="width:10px;"/>新增特殊工费</td>
+			<td class='body2'><input type='checkbox' id="isupdatecauses" name='isupdatecauses' #if("$saleChangeLabel.isupdatecauses"=="1")checked#end style="width:10px;"/>更新原因</td>
+		</tr>
+		<tr>
+			#set($tranLabel = "0")
+			#set($pricelabel = "0")
+			#if("$saleChangeLabel.labelKind"=="010" || "$saleChangeLabel.labelKind"=="011")
+				#set($tranLabel = "1")
+			#end
+			#if("$saleChangeLabel.labelKind"=="001" || "$saleChangeLabel.labelKind"=="011")
+				#set($pricelabel = "1")
+			#end
+            <td class='body1'>标签种类(<span style="color:red;">必选其一</span>)：</td>
+			<td class='body2'><input type='checkbox' id="tranLabel" name='tranLabel' #if("$tranLabel"=="1")checked#end style="width:10px;"/>物流标签</td>
+			<td class='body2'><input type='checkbox' id="pricelabel" name='pricelabel' #if("$pricelabel"=="1")checked#end style="width:10px;"/>价格标签	</td>
+			<td class='body2'></td>
+			<td class='body2'></td>
+		</tr>
+		<tr>
+			<td class='body1'>备注：</td>	
+			<td class='body2' colspan="5">
+				<input type="text" id="note" name="note" style="width:90%;" value="$!{saleChangeLabel.note}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+
+function setValues(){
+	
+}
+
+jQuery(function(){
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnToList").click(function(){
+		window.location = "saleChangeLabel.vm";
+	});
+	
+})
+
+</script>

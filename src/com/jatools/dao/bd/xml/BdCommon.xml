@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BdCommon">
+	<select id="BdCommon.getAllParameters" resultClass="com.jatools.vo.sys.Parameter">
+		select a.param_name as "name", a.param_value as "value", a.memo as "memo" from jat_sys_parameter a where a.status = '1' order by a.param_name
+	</select>
+	<!--  -->
+	<select id="BdCommon.getAllArticleType" resultClass="com.jatools.vo.bd.ArticleType">
+		select a.article_type_id as "articleTypeId", a.article_type_dsc as "articleTypeDesc" from jas_bd_articletype a where a.archiveflag = '0' and a.ismaterials = '0' order by a.article_type_code
+	</select>
+	<!-- ===============大类ItemClass===================== -->
+	<typeAlias alias="ItemClass" type="com.jatools.vo.bd.ItemClass" />
+	<resultMap id="itemClassResult" class="ItemClass">
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="itemClassDesc" column="item_class_dsc"/>
+		<result property="articleTypeId" column="article_type_id"/>
+	</resultMap>
+    <!-- 获取所有大类数据 -->
+	<select id="BdCommon.getAllItemClass" resultMap="itemClassResult">
+		select a.item_class_id, a.item_class_dsc, a.article_type_id from jas_bd_item_class a where a.archiveflag = '0' order by a.sort, a.item_class_code, a.item_class_id
+	</select>
+	
+	<!-- ===============小类OrnaClass===================== -->
+	<typeAlias alias="OrnaClass" type="com.jatools.vo.bd.OrnaClass" />
+	<resultMap id="ornaClassResult" class="OrnaClass">
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="ornaClassDesc" column="orna_class_dsc"/>
+	</resultMap>
+	<!-- 获取所有小类数据 -->
+	<select id="BdCommon.getAllOrnaClass" resultMap="ornaClassResult">
+		select a.orna_class_id, a.orna_class_dsc from jas_bd_orna_class a where a.archiveflag='0' order by a.sort, a.orna_class_code, a.orna_class_id
+	</select>
+	
+	<!-- ===============组织Org===================== -->
+	<typeAlias alias="Org" type="com.jatools.vo.bd.Org" />
+	<resultMap id="orgResult" class="Org">
+		<result property="orgId" column="org_id"/>
+		<result property="parentId" column="parent_id"/>
+		<result property="orgName" column="org_name"/>
+		<result property="jmFlag" column="isfranchise"/>
+	</resultMap>
+	<!-- 获取所有组织数据 -->
+	<select id="BdCommon.getOrgTreeByType" resultMap="orgResult" parameterClass="string">
+		select a.org_id, a.parent_id, a.org_name, nvl(a.isfranchise,0) as isfranchise from jas_sm_org a
+		 where a.org_type = #value#
+		   and a.archiveflag = '0'
+		 start with a.parent_id = 0
+		connect by prior a.org_id = a.parent_id
+		 order siblings by a.sort
+	</select>
+	
+	<!-- ================大类小类关系================== -->
+	<typeAlias alias="ItemOrnaClass" type="com.jatools.vo.bd.ItemOrnaClass"/>
+	<resultMap id="itemOrnaClassResult" class="ItemOrnaClass">
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="ornaClassDesc" column="orna_class_dsc"/>
+	</resultMap>
+	<select id="BdCommon.getAllItemOrnaClass" resultMap="itemOrnaClassResult">
+		select a.item_class_id, a.orna_class_id, b.orna_class_dsc from jas_bd_itemclass_ornaclass a, jas_bd_orna_class b where a.orna_class_id = b.orna_class_id and a.archiveflag = '0'
+			order by a.item_class_id, b.sort, b.orna_class_code, b.orna_class_id
+	</select>
+	
+	<!-- ================款式大类===================== -->
+	<typeAlias alias="StyleItemClass" type="com.jatools.vo.bd.StyleItemClass"/>
+	 <resultMap id="styleItemClassResult" class="StyleItemClass">
+	 	<result property="itemClassId" column="item_class_id"/>
+	 	<result property="itemClassDesc" column="item_class_name"/>
+	 	<result property="itemClassCode" column="ITEM_CLASS_CODE"/>
+	 </resultMap>
+	<select id="BdCommon.getAllStyleItemClass" resultMap="styleItemClassResult">
+		select a.item_class_id, a.item_class_name, a.ITEM_CLASS_CODE from jas_bd_style_item_class a where a.archiveflag = '0' order by a.item_class_code, a.item_class_id
+	</select>
+	
+	<!-- ================款式中类===================== -->
+	<typeAlias alias="StyleMiddleClass" type="com.jatools.vo.bd.StyleMiddleClass"/>
+	 <resultMap id="styleMiddleClassResult" class="StyleMiddleClass">
+	 	<result property="middleClassId" column="middle_class_id"/>
+	 	<result property="middleClassDesc" column="middle_class_name"/>
+	 </resultMap>
+	<select id="BdCommon.getAllStyleMiddleClass" resultMap="styleMiddleClassResult">
+		select a.middle_class_id, a.middle_class_name from jas_bd_style_middle_class a where a.archiveflag = '0' order by a.middle_class_code, a.middle_class_id
+	</select>
+	
+	<!-- ================款式小类===================== -->
+	<typeAlias alias="StyleOrnaClass" type="com.jatools.vo.bd.StyleOrnaClass"/>
+	 <resultMap id="styleOrnaClassResult" class="StyleOrnaClass">
+	 	<result property="ornaClassId" column="orna_class_id"/>
+	 	<result property="ornaClassDesc" column="orna_class_name"/>
+	 </resultMap>
+	<select id="BdCommon.getAllStyleOrnaClass" resultMap="styleOrnaClassResult">
+		select a.orna_class_id, a.orna_class_name from jas_bd_style_orna_class a where a.archiveflag = '0' order by a.orna_class_code, a.orna_class_id
+	</select>
+	
+	<!-- ================计量单位==================== -->
+	<typeAlias alias="unit" type="com.jatools.vo.bd.Unit"/>
+	 <resultMap id="unitResult" class="unit">
+	 	<result property="unitId" column="unitid"/>
+	 	<result property="unitName" column="unitname"/>
+	 </resultMap>
+	<select id="BdCommon.getAllUnit" resultMap="unitResult">
+		select a.unitid, a.unitname from jas_bd_unit a where a.archiveflag = '0' order by a.unitcode
+	</select>
+	
+	<!-- ================商品材质=================== -->
+	<select id="BdCommon.getAllQuality" resultClass="com.jatools.vo.bd.Quality">
+		select a.quality_id as "qualityId", a.quality_dsc as "qualityName" from jas_bd_quality a where a.archiveflag = '0' order by a.quality_code, a.quality_id
+	</select>
+	<!-- ================根据款式id获取款式名称=================== -->
+	<select id="BdCommon.getStyleNameById" resultClass="string" parameterClass="string">
+		select a.stylename from jas_bd_style a where a.styleid = #value#
+	</select>
+	<!-- ================根据分析范围id获取分析范围名称=================== -->
+	<select id="BdCommon.getAnalysisNameById" resultClass="string" parameterClass="string">
+		select a.summarydescription from jas_bd_analysis_arange a where a.analysis_arange_id = #value#
+	</select>
+	<!-- ================根据大类小类获取分析范围=================== -->
+	<select id="BdCommon.getAnalysis" resultClass="com.jatools.vo.bd.Analysis" parameterClass="map">
+		select a.analysis_arange_id as "analysisId", a.summarydescription as "analysisDesc" from jas_bd_analysis_arange a where a.item_class_id = #itemClassId# and a.orna_class_id = #ornaClassId# and a.archiveflag = 0 order by a.startanalysis
+	</select>
+	<!-- ================根据大类、小类获取款式大类=================== -->
+	<select id="BdCommon.getStyleItemClass" resultClass="com.jatools.vo.bd.StyleItemClass" parameterClass="map">
+		select a.item_class_id as "itemClassId", a.item_class_name as "itemClassDesc" from jas_bd_style_item_class a where a.archiveflag = 0 and exists (select 1 from jas_bd_styleitemclass_itemorna b, jas_bd_itemclass_ornaclass c where b.archiveflag = 0 and c.archiveflag = 0 and c.id = b.itemornaid and a.item_class_id = b.styleitemclassid and c.item_class_id = #itemClassId# and c.orna_class_id = #ornaClassId#) order by a.item_class_code
+	</select>
+	<!-- ================根据大类小类款式大类获取款式中类=================== -->
+	<select id="BdCommon.getStyleMiddleClass" resultClass="com.jatools.vo.bd.StyleMiddleClass" parameterClass="map">
+	    select a.middle_class_id   as "middleClassId",
+	           a.middle_class_name as "middleClassDesc"
+	      from jas_bd_style_middle_class a
+	     where exists (select 1
+	              from jas_bd_itemclass_middleclass b
+	             where a.middle_class_id = b.middle_class_id
+	               and b.archiveflag = '0'
+	               and b.item_class_id = #itemClassId#
+	               and b.orna_class_id = #ornaClassId#
+	               and b.style_item_class_id = #styleItemClassId#)
+	       and a.archiveflag = '0'
+	     order by a.middle_class_code
+	</select>
+	<!-- ================根据大类小类款式大类款式中类获取款式小类=================== -->
+	<select id="BdCommon.getStyleOrnaClass" resultClass="com.jatools.vo.bd.StyleOrnaClass" parameterClass="map">
+	    select a.orna_class_id   as "ornaClassId",
+	           a.orna_class_name as "ornaClassDesc"
+	      from jas_bd_style_orna_class a
+	     where exists (select 1
+	              from jas_bd_middleclass_ornaclass b
+	             where a.orna_class_id = b.style_orna_class_id
+	               and b.archiveflag = '0'
+	               and b.item_class_id = #itemClassId#
+	               and b.orna_class_id = #ornaClassId#
+	               and b.middle_class_id = #styleMiddleClassId#)
+	       and a.archiveflag = '0'
+	     order by a.orna_class_code
+	</select>
+	<!-- ================根据大类小类款式大类、款式中类、款式小类获取款式=================== -->
+	<select id="BdCommon.getStyle" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+	    select a.styleid, a.stylename
+	      from jas_bd_style a
+	     where a.itemclassid = #itemClassId#
+	       and a.ornaclassid = #ornaClassId#
+	       and a.styleitemclass = #styleItemClassId#
+	       and a.stylemiddleclass = #styleMiddleClassId#
+	       and a.styleornaclass = #styleOrnaClassId#
+	       and a.isarchive = '0'
+	</select>
+	<select id="BdCommon.getStyle3" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+	    select a.styleid, a.stylename
+	      from jas_bd_style a
+	     where a.itemclassid = #itemClassId#
+	       and a.ornaclassid = #ornaClassId#
+	       and a.styleitemclass = #styleItemClassId#
+	       and a.isarchive = '0'
+        order by a.stylename
+	</select>
+	<select id="BdCommon.getStyle2" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+		select a.styleid, a.stylename
+		  from jas_bd_style a
+		 where a.itemclassid = #itemClassId#
+		   and a.ornaclassid = #ornaClassId#
+		   and exists (select 1
+		          from jas_bd_style_arange b
+		         where a.styleid = b.style_id
+		           and b.analysis_arange_id = #analysisId#)
+	       and a.isarchive = '0'
+		 order by a.stylename, a.styleid
+	</select>
+	<!-- ================获取所有供应商=================== where (a.attribute = '2' or a.attribute = '3') and a.archiveflag = '0' and a.s_state = '1' and a.style = '0' -->
+	<select id="BdCommon.getAllVendor" resultClass="com.jatools.vo.basic.Vendor">
+		select a.custid as "vendorId", a.custname as "vendorName", a.s_suppliercode as "supplierCode" from jas_bd_cust a
+		order by a.custname, a.custid
+	</select>
+	<!-- ================获取所有常用摘要=================== -->
+	<select id="BdCommon.getAllSummay" resultClass="com.jatools.vo.bd.Summary">
+		select t.summary_id "summaryId", t.summary_name "summaryName"  from jas_bd_summary t where t.archiveflag = 0
+	</select>
+	<!-- ================根据托架材质找托架颜色=================== -->
+	<select id="BdCommon.getBracketColorByQualityId" resultClass="com.jatools.vo.bd.BracketColor" parameterClass="string">
+		select a.BRACKETCOLOR_ID   as "bracketColorId",
+		       a.BRACKET_COLOR_DSC as "bracketColorDsc",
+		       a.ARCHIVEFLAG      as "archiveFlag "
+		  from JAS_BD_BRACKETCOLOR a left join JAS_BD_BRACKET_QUALITY z
+		  on a.bracketcolor_id = z.bracketcolor_id where z.quality_id = #value#
+	</select>
+	
+	<!-- 根据供应商ID返回供应商 -->
+	<select id="BdCommon.getCustById" resultClass="com.jatools.vo.bd.Cust" parameterClass="string">
+		select a.custid "custId",a.custname "custName" from jas_bd_cust a where a.custid =#value#
+	</select>
+	<!-- 尺寸ID找Name -->
+	<select id="BdCommon.getSizeNameById" resultClass="string" parameterClass="string">
+		select s.size_name from jas_bd_size s where s.size_id = #value#
+	</select>
+	<!--  -->
+	<select id="BdCommon.getQualityByStyleId1" resultClass="com.jatools.vo.bd.Quality" parameterClass="string">
+		select q.quality_id "qualityId", q.quality_dsc "qualityName"
+		  from jas_bd_quality q
+		 inner join JAS_bd_style_ware_property t
+		    on q.quality_id = t.bracket_quality_id
+		 where t.styleid = #value#
+	</select>
+	<!-- 根据款式ID得到款式对象 and v.cust_id = #vendorId#-->
+	<select id="BdCommon.getStyleByIdAndVendor" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+		select t.styleid          "styleId",
+		       t.stylename        "styleName",
+		       t.itemclassid      "itemclassid",
+		       t.ornaclassid      "ornaclassid",
+		       t.styleitemclass   "styleitemclass",
+		       t.stylemiddleclass "stylemiddleclass",
+		       t.styleornaclass   "styleornaclass",
+		       t.is_specialcharge "isSpecialCharge",
+		       (select  nvl(max(v.TO_STYLE_ID),'') from  JAS_VE_STYLE_VENDER  v where v.STYLE_ID = t.STYLEID and v.CUST_ID = #vendorId#) "note",
+               t.THEME_COEFFICIENT	 "themeCoefficient",
+		       t.iscm			  "iscm",
+		       t.ARTICLETYPEID	  "articletypeid",
+			   t.saleanalyst	  "saleanalyst",
+		       t.ISCUSTOMIZE	  "iscustomize",
+		       t.ISSUCHINDA		  "issuchinda",
+		       t.SUMMARYID		  "summaryid"
+		  from jas_bd_style t
+		 where t.styleid = #styleId#
+	</select>
+	<!-- 取特殊工费 -->
+	<select id="BdCommon.getChargeByNum" parameterClass="string" resultClass="string">
+		select c.charge_val "chargeVal" from jat_basic_charge c where  <![CDATA[c.weight_str<=#value# and c.weight_end>#value#]]>
+	</select>
+	<!-- 取最小特殊工费 -->
+	<select id="BdCommon.getMinChargeByNum" resultClass="string" >
+		select c.charge_val "chargeVal" from jat_basic_charge c
+			 where  <![CDATA[c.weight_str<=(select min(c.weight_str) from jat_basic_charge c   ) 
+			 and c.weight_end>(select min(c.weight_str) from jat_basic_charge c   )]]>
+	</select>
+	<!-- pt950取特殊工费 -->
+	<select id="BdCommon.getPtChargeByNum" parameterClass="string" resultClass="string">
+		select c.charge_unit "chargeVal" from JAT_BASIC_PTSPECIAL_CHARGE c where  <![CDATA[c.weight_str<=#value# and c.weight_end>#value#]]>
+	</select>
+	<!-- pt950取最小特殊工费 -->
+	<select id="BdCommon.getPtMinChargeByNum" resultClass="string" >
+		select c.charge_unit "chargeVal" from JAT_BASIC_PTSPECIAL_CHARGE c
+			 where  <![CDATA[c.weight_str<=(select min(c.weight_str) from JAT_BASIC_PTSPECIAL_CHARGE c   ) 
+			 and c.weight_end>(select min(c.weight_str) from JAT_BASIC_PTSPECIAL_CHARGE c   )]]>
+	</select>
+	<!-- 大小类材质组织取金价 -->
+	<select id="BdCommon.getGoldByCalc" parameterClass="map" resultClass="string">
+		select  max(t.today_gold) "todayGold"
+		  from jas_bd_sale_store_gold t
+		 where t.item_class_id = #itemClassId#
+		   and t.orna_class_id = #ornaClassId#  
+		   <isEmpty property="qualityId" prepend="and"> t.quality_id is null </isEmpty>
+		   <isNotEmpty property="qualityId" prepend="and"> t.quality_id = #qualityId# </isNotEmpty>
+		   and t.orgid = #orgId#
+	</select>
+	<!-- 大小类计量单位取标签类型 -->
+	<select id="BdCommon.getLabelTypeByCalc" parameterClass="map" resultClass="com.jatools.vo.bd.LabelType">
+		select t.label_type_id "labelTypeId", t.label_type_name "labelTypeName", t.is_dbl_label "isDblLabel" 
+		  from JAS_BD_DIAM_LABEL_TYPE t
+		 where t.item_class_id = #itemClassId#
+		   and t.ornaclass_id = #ornaClassId#
+		   and t.unit_id = #unitId#
+	</select>
+	<select id="BdCommon.getNewLabelTypeByCalc" parameterClass="map" resultClass="com.jatools.vo.basic.LabelType">
+		select t.label_type_id "labelTypeId", t.bracket_flag "bracketFlag", t.label_type_name "labelTypeName", t.dbl_label_flag "dblLabelFlag"
+		  from jat_basic_label_type t
+		 where t.item_class_id = #itemClassId#
+		   and t.orna_class_id = #ornaClassId#
+		   and t.unit_id = #unitId#
+		   and t.PRIVATE_TYPE = #privateType#
+		   <![CDATA[ and t.archiveflag <> 1 ]]>
+	</select>
+	
+	<select id="BdCommon.getStyleById" parameterClass="string" resultClass="com.jatools.vo.bd.Style">
+		select styleitemclass as "styleitemclass", stylemiddleclass as "stylemiddleclass", styleornaclass as "styleornaclass", styleid as "styleId", stylename as "styleName", a.ISBIGGRAPH as "isbiggraph", a.ISSMALLGRAPH as "issmallgraph", a.theme_id as "themeId",
+                a.OBLIQUEGRAPH as "obliquegraph",
+                a.TOPVIEWGRAPH as "topviewgraph"
+		from jas_bd_style a where a.styleid = #value#
+	</select>
+	<!-- 大小类的尺寸 -->
+	<select id="BdCommon.getSizeByItemIdAndOrnaId" parameterClass="map" resultClass="com.jatools.vo.bd.Size">
+		select a.size_id "sizeId", a.size_name "sizeName", a.size_num as "sizeNum"
+		  from jas_bd_size a
+		 where a.item_class_id = #itemClassId#
+		   and a.orna_class_id = #ornaClassId#
+	</select>
+	<!-- 佩戴对象列表 -->
+	<select id="BdCommon.getAllWear" resultClass="com.jatools.vo.bd.Wear">
+		select t.wear_id "wearId", t.wear_name "wearName" from jas_bd_wear t where t.archiveflag !=1
+	</select>
+	<!-- 大类下的材质 -->
+	<select id="BdCommon.getQualityByItemClassId" resultClass="com.jatools.vo.bd.Quality" parameterClass="string">
+		select b.QUALITY_ID "qualityId", b.QUALITY_DSC "qualityName"
+			  from jas_bd_itemclass_quality q
+			 inner join jas_bd_quality b
+			    on b.QUALITY_ID = q.QUALITY_ID
+			 where q.ITEM_CLASS_ID = #itemClassId#
+	</select>
+	<!-- 大小类材质获取饰品名 -->
+	<select id="BdCommon.getOrnadscByItemIdAndOrnaId" resultClass="com.jatools.vo.bd.Ornadsc">
+		select o.ornadsc_id "ornadscId", o.ornadscname "ornadscName" 
+	  from JAS_BD_ORNADSC o
+	 where o.item_class_id = #itemClassId#
+	   and o.orna_class_id = #ornaClassId#
+	   <isNotEmpty property="qualityId" prepend="and">  o.quality_id = #qualityId# </isNotEmpty>
+	   <isEmpty property="qualityId" prepend="and"> o.quality_id is null </isEmpty>
+	   and rowNum = 1 
+	</select>
+	<!-- 大小类材质获取饰品名 -->
+	<select id="BdCommon.getNewOrnadscByItemIdAndOrnaId" resultClass="com.jatools.vo.basic.OrnaDesc">
+		select o.ornadsc_id "ornadscId", o.orna_dsc "ornaDsc"
+		  from jat_basic_ornadsc o
+		 where o.item_class_id = #itemClassId#
+		   and o.orna_class_id = #ornaClassId#
+	   <isNotEmpty property="qualityId" prepend="and">  o.quality_id = #qualityId# </isNotEmpty>
+	   <isEmpty property="qualityId" prepend="and"> o.quality_id is null </isEmpty>
+	   and rowNum = 1 
+	</select>
+	<!-- 大小组织取价格属性组 -->
+	<select id="BdCommon.getGoldByIniv" parameterClass="map" resultClass="com.jatools.vo.bd.Gold">
+		select t.store_gold_id "goldId", t.price_attr_group "group"
+	      from jas_bd_sale_store_gold t
+	     where t.item_class_id = #itemClassId#
+	       and t.orna_class_id = #ornaClassId# 
+		   and t.orgid = #orgId# order  by t.price_attr_group
+	</select>
+	<!-- 根据原料类型查 大类 -->
+	<select id="BdCommon.getItemClassByMaterialType" resultClass="com.jatools.vo.bd.ItemClass" parameterClass="string">
+		select a.item_class_id as "itemClassId", a.item_class_dsc as "itemClassDesc" from jas_bd_item_class a 
+		where a.item_class_id 
+			in (
+				select b.item_class_id from jat_basic_material_item b where b.material_type = #value#
+			   )
+	</select>
+	<!-- 款式下的材质 -->
+	<select id="BdCommon.getQualityByStyleId" resultClass="com.jatools.vo.bd.Quality" parameterClass="string">
+		select distinct(bq.quality_id) "qualityId", bq.quality_dsc "qualityName" 
+		   from  JAS_BD_STYLE_WARE_PROPERTY p
+	       inner join JAS_BD_BRACKET_QUALITY q on p.bracket_quality_id = q.id
+	       inner join jas_bd_quality bq on q.quality_id = bq.quality_id
+	       where p.styleid = #styleId# and p.archiveflag = 0
+	</select>
+	<!-- 款式材质下的颜色 -->
+	<select id="BdCommon.getColorByStyleId" resultClass="com.jatools.vo.bd.BracketColor" parameterClass="map">
+		select b.bracketcolor_id "bracketColorId", b.bracket_color_dsc "bracketColorDsc" 
+			  from  JAS_BD_STYLE_WARE_PROPERTY p
+		      inner join JAS_BD_BRACKET_QUALITY q on p.bracket_quality_id = q.id
+		      inner join JAS_BD_BRACKETCOLOR b on q.bracketcolor_id = b.bracketcolor_id
+		      where p.styleid = #styleId# and q.quality_id = #qualityId# and p.archiveflag = 0
+	</select>	
+	<!-- 大类找时尚千足金系数 -->
+	<select id="BdCommon.getCoefficientBySS" resultClass="string" parameterClass="map">
+		select max(c.coefficient)
+	         from JAT_BASIC_FASHION_COEFFICIENT c
+	        where c.item_class_id = #itemClassId# 
+	          <![CDATA[ and c.price_str <= #num# and c.price_end > #num# ]]>
+	</select>
+	<!-- 获取所有周期类型 -->
+	<select id="BdCommon.getAllCycleTypeForSlt" resultClass="com.jatools.vo.util.SelectorOption">
+		select a.cycle_type_id as "value", a.cycle_type_code as "text" from jas_pl_cycle_type a where a.isorno_sealed = '0' order by a.cycle_type_id
+	</select>
+	<!-- 获取所有区域 -->
+	<select id="BdCommon.getAllRegionForSlt" resultClass="com.jatools.vo.util.SelectorOption">
+		select t.region_id as "value", t.region_name as "text"
+		  from jas_pl_region t
+		 order by t.region_id
+	</select>
+	<!-- 获取所有主题款 -->
+	<select id="BdCommon.getAllStyleTheme" resultClass="com.jatools.vo.util.SelectorOption">
+		select a.theme_id as "value", a.theme_name as "text" from jas_pl_bd_style_theme a where a.archiveflag = '0' order by a.theme_name
+	</select>
+	<!-- 款式取主题名 -->
+	<select id="BdCommon.getStyleThemeName" resultClass="string" parameterClass="string">
+		select t.theme_name from Jas_PL_BD_STYLE_THEME t inner join jas_bd_style s on t.theme_id = s.THEME_ID where s.STYLEID = #value#
+	</select>
+	<!-- 大小类，供应商下的款式   (select  nvl(max(v.TO_STYLE_ID),'') from  JAS_VE_STYLE_VENDER  v where v.STYLE_ID = s.STYLEID and v.CUST_ID = #custId#) "note",-->
+	<select id="BdCommon.getAllStyleByCalc" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			 select s.styleid          "styleId",
+				       s.stylename        "styleName",
+				       s.itemclassid      "itemclassid",
+	       			   s.ornaclassid      "ornaclassid",
+				       s.styleitemclass   "styleitemclass",
+				       s.stylemiddleclass "stylemiddleclass",
+				       s.styleornaclass   "styleornaclass",
+	           		   s.IS_SPECIALCHARGE "isSpecialCharge",
+				       s.STYLENO		  "styleno",
+				       s.CREATEDATE 	  "createdate",
+				       s.STYLECODE		  "stylecode",
+				       s.ISBIGGRAPH 	  "isbiggraph",
+				       s.ISSMALLGRAPH	  "issmallgraph"
+				  from jas_bd_style s where 1=1 
+				<isNotEmpty property="itemClassId" prepend="and"> s.itemclassid = #itemClassId# </isNotEmpty>
+		       	<isNotEmpty property="ornaClassId" prepend="and"> s.ornaclassid = #ornaClassId# </isNotEmpty>
+		       	<isNotEmpty property="styleItemId" prepend="and"> s.styleitemclass = #styleItemId# </isNotEmpty>
+		       	<isNotEmpty property="styleMiddleId" prepend="and"> s.stylemiddleclass = #styleMiddleId# </isNotEmpty>
+		       	<isNotEmpty property="styleOrnaId" prepend="and"> s.styleornaclass = #styleOrnaId# </isNotEmpty>
+		       	order by s.stylename
+		)AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="BdCommon.getAllStyleByCalcTotalCount" resultClass="int">
+	 	select count(1)
+				  from jas_bd_style s where 1=1 
+				<isNotEmpty property="itemClassId" prepend="and"> s.itemclassid = #itemClassId# </isNotEmpty>
+		       	<isNotEmpty property="ornaClassId" prepend="and"> s.ornaclassid = #ornaClassId# </isNotEmpty>
+		       	<isNotEmpty property="styleItemId" prepend="and"> s.styleitemclass = #styleItemId# </isNotEmpty>
+		       	<isNotEmpty property="styleMiddleId" prepend="and"> s.stylemiddleclass = #styleMiddleId# </isNotEmpty>
+		       	<isNotEmpty property="styleOrnaId" prepend="and"> s.styleornaclass = #styleOrnaId# </isNotEmpty>
+				order by s.stylename
+	</select>
+	<select id="BdCommon.getExeOrgEmpPageData" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select b.empid as "value", b.empname as "text"
+			  from jas_bd_emp_org a, jas_bd_emp b
+			 where a.orgid = #orgId#
+			   and a.empid = b.empid
+			   and b.ARCHIVEFLAG = '0'
+			   and b.STATE = 1
+			 order by a.sort, b.empcode
+		)AA ) where <![CDATA[rownum_ >= $start$ and rownum <= $limit$]]>
+	</select>
+	<select id="BdCommon.getExeOrgEmpTotalCount" resultClass="int">
+		select count(1) from jas_bd_emp_org a, jas_bd_emp b where a.orgid = #orgId# and a.empid = b.empid and b.ARCHIVEFLAG = '0' and b.STATE = 1
+	</select>
+	<select id="BdCommon.getGradeByColorGradeId" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+		select b.item_key as "value", b.item_value as "text"
+		  from jat_basic_color_grade_grade a
+		  left join jat_sys_dict_item b
+		    on b.entry_code = 'gradelevel'
+		   and b.item_key = a.grade_id
+		 where a.color_grade_id = #value#
+	</select>
+	<select id="BdCommon.getGradeByCleanId" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+		select b.item_key as "value", b.item_value as "text"
+		  from jat_basic_clean_grade a
+		  left join jat_sys_dict_item b
+		    on b.entry_code = 'gradelevel'
+		   and b.item_key = a.grade_id
+		 where a.clean_id = #value#
+	</select>
+	<!-- 原料类型获取耗料 -->
+	<select id="BdCommon.getMaintainClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="string">
+		select i.item_class_id||'_'||i.pur_unit as "value", c.ITEM_CLASS_DSC as "text"
+		  from jat_basic_material_item i, jas_bd_item_class c
+		 where i.item_class_id = c.ITEM_CLASS_ID
+		   and i.MATERIAL_TYPE = #value#
+	</select>
+</sqlMap>

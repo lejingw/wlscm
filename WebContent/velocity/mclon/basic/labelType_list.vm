@@ -1,0 +1,201 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/LabelTypeDwr.js"])
+<form id="myForm" method="post">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>标签类型#if($!form.message)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end</td></tr>
+            </td>
+        </tr>
+    </table>
+	<div id="queryDiv">
+        <table class="control">
+        	<tr>
+        		<td>
+        			<input type='button' value='确定' id='btnCopyOk'>
+        			<input type='button' value='重置' id='btnCopyReset'>
+        			<input type='button' value='取消' id='btnCopyCancel'>
+        		</td>
+        	</tr>
+        </table>
+        <table class='content'>
+			<tr>
+        		<td class="body1">源大类</td>
+        		<td class='body2'>
+					<select id="itemClassId1" name="itemClassId1" onchange="change1()" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>
+				</td>
+        		<td class="body1">目标大类</td>
+        		<td class='body2'>
+					<select id="itemClassId2" name="itemClassId2" onchange="change2()" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>
+                </td>
+        	</tr>
+			<tr>
+        		<td class="body1">源小类</td>
+        		<td class='body2'>
+					<select id="ornaClassId1" name="ornaClassId1" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>
+				</td>
+        		<td class="body1">目标小类</td>
+        		<td class='body2'>
+					<select id="ornaClassId2" name="ornaClassId2" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>
+                </td>
+        	</tr>
+        </table>
+    </div>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08012401','1')>
+				<input type='button' value='删除' class='btn' onclick='deleteLine()'  $RightUtil.able($session, '08012401','2')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' $RightUtil.able($session, '08012401','3')>
+				<input type='checkbox' id='showAllFlag' name="showAllFlag" #if("1" == "$!{form.condition.showAllFlag}") checked #end value='1' onclick="showAllBill('myForm')">显示所有状态</input>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" >
+				<input type='button' value='复制' class='btn' id='btnCopyShow' $RightUtil.able($session, '08012401','4')>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+	    <table class='list' style="width:1390px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width='90px'>状态</th>
+				<th width='90px'>大类</th>
+        		<th width='90px'>小类</th>
+        		<th width='90px'>计量单位</th>
+				<th width='90px'>是否高工艺</th>
+				<th width='90px'>是否镶嵌</th>
+				<th width='90px'>标签名称</th>
+				<th width='120px'>是否双标签</th>
+				<th width='90px'>是否封存</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.labelTypeId}"/>$velocityCounter</td>
+				<td><a href="javascript:viewReviewLog('LU', '$!{map.labelTypeId}')">$!DictUtil.getValue('status', $!map.status)</a></td>
+				<td><a href='javascript:toEditPage($!{map.labelTypeId});'>$!BdCommon.getItemClassDesc($!map.itemClassId)</a></td>
+				<td>$!BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!BdCommon.getUnitName($!map.unitId)</td>
+				<td>$!DictUtil.getValue('yesorno',$!map.privateType)</td>
+				<td>$!DictUtil.getValue('yesorno',$!map.bracketFlag)</td>
+				<td>$!map.labelTypeName</td>
+				<td>$!DictUtil.getValue('yesorno',$!map.dblLabelFlag)</td>
+				<td>$!DictUtil.getValue('yesorno',$!map.archiveflag)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td> 
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('myForm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function showAllBill(formId){
+	jQuery("#" + formId).submit();
+}
+function labeltypeCopy(){
+	var itemClassId = jQuery("#itemClassId1").val();
+	var itemClassId2 = jQuery("#itemClassId2").val();
+	var ornaClassId = jQuery("#ornaClassId1").val();
+	var ornaClassId2 = jQuery("#ornaClassId2").val();
+	if(Validator.Validate($("myForm"),3)){
+    	if(itemClassId==itemClassId2){
+    		alert("复制的大类不能相同");
+    		return;
+    	}else{
+    		confirm("复制前会清空目标大类的所有数据请确认?", function(){
+				LabelTypeDwr.copyLabelType(itemClassId,itemClassId2,
+					ornaClassId,ornaClassId2,function(data){
+        			var m = data.split("_");
+        			if(m[0]=="2"){
+        				alert(m[1]);
+        			}else{
+        				alert(m[1], function(){
+        					window.location = "labelType.vm";
+        				});
+        			}
+        		});
+        	});
+    	}
+	}
+	
+}
+function change1(){
+	var itemClassId1 = jQuery("#itemClassId1").val(); 
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(itemClassId1,function(data){
+		addOptions("ornaClassId1", data, null, null, true, true);
+	});	
+}
+function change2(){
+	var itemClassId2 = jQuery("#itemClassId2").val(); 
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(itemClassId2,function(data){
+		addOptions("ornaClassId2", data, null, null, true, true);
+	});	
+}
+function resetCopy(){
+	jQuery("#itemClassId1").val("");
+	jQuery("#ornaClassId2").val("");
+	jQuery("#itemClassId2").val("");
+	jQuery("#ornaClassId1").val("");
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true,null, function(index){
+		window.location = "labelType.vm?user_action=toEditLabelType&id=" + $n("chk")[index].value;
+	});
+	initQuery("btnCopyShow", "btnCopyCancel");
+	initQuery2("BQ01", 'myForm', 'btnQueryShow');
+	jQuery("#btnCopyOk").click(labeltypeCopy);
+	jQuery("#btnCopyReset").click(resetCopy);
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "labelType.vm?user_action=toEditLabelType";
+	});
+	
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId1", data);
+	});
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId2", data);
+	});
+});
+function toEditPage(id){
+	window.location = "labelType.vm?user_action=toEditLabelType&id=" + id;
+}
+function deleteLabelType(id){
+	confirm("确定删除?", function(){
+		window.location = "labelType.vm?user_action=deleteLabelType&id=" + id;
+	});
+}
+function deleteLine(){
+	var index = getSelectIndexs('chk');
+	if(index.length==''){
+		alert("至少选择一行");
+		return;
+	}
+	//var id = $n("chk")[index[0]].value;
+	confirm("确定删除?", function(){
+		var ids = ""; 
+		var array = (index+"").split(',');
+		for(var t=0;t<array.length;t++){
+			ids+=$n("chk")[array[t]].value+",";
+		}
+		window.location = "labelType.vm?user_action=deleteLabelType&id=" + ids;
+	});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#myForm").submit();
+	//user_action改回之前的值，否则之后的任何提交如果不重新设置user_action，则都将是导出excel，比如上下翻页
+	jQuery("#user_action").val("");
+}
+</script>

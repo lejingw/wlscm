@@ -1,0 +1,243 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/StandardDispatchDwr.js"])
+#set($modelCode='08031401')
+#set($queryCode='14')
+<form id="frm" action="standardDispatch.vm" method="post">
+	<input type='hidden' id='user_action' name='user_action' value=''>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='查看' class='btn' id='btnView' $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='删除' class='btn' id="btnDelete" $RightUtil.able($session, $modelCode,'3')>
+				<input type='button' value='生成调拨单' class='btn' id="btnCreateMoveBill" $RightUtil.able($session, $modelCode,'4')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $modelCode,'5')>
+				<input type='button' value='查询' class='btn' id="btnQueryShow" $RightUtil.able($session, $modelCode,'6')>
+				<input type='button' value='款式配货表' class='btn' id="btnStyleDispatch" onclick="showDispatchStyleWin()" $RightUtil.able($session, $modelCode,'7')>
+				<input type='button' value='价位带配货表' class='btn' id="btnPriceDispatch" onclick="showDispatchPriceWin()" $RightUtil.able($session, $modelCode,'8')>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width='80px'>状态</th>
+        		<th width='80px'></th>
+                <th width='120px'>单据编号</th>
+                <th width='120px'>是否锁定</th>
+                <th width='180px'>锁定人员</th>
+        		<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{item.headid}'/><input type='hidden' name='status' value='$!{item.status}'/>$velocityCounter</td>
+				<td>$!DictUtil.getValue('status', $!item.status)</td>
+				<td><input type="button" class="btn" value="进入配货" #if("1"!="$!{item.status}")disabled#end onclick="dispatch(this, $!item.headid)"/></td>
+				<td><a href='javascript:toEditPage($!{item.headid});'>$!item.billno</a></td>
+				<td>$!DictUtil.getValue("yesorno", $!item.lockFlag)</td>
+				<td>$!BdCommon.getUserName($!item.lockUserIds)</td>
+				<td>$!item.createDate</td>
+				<td>$!BdCommon.getUserName($!item.createId)</td>
+				<td>$!item.updateDate</td>
+				<td>$!BdCommon.getUserName($!item.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+/**
+ * 选择配货参数
+ */
+function selectDispatchCondition(gheadid, selectFunc, newfunc) {
+	var _iframeId = "selectDispatchCondition";
+	var options = {
+		title : '选择配货参数',
+		contentType : 'iframe',
+		iframeId : _iframeId,
+		width : 500,
+		height : 300,
+		okBtnName : '选择参数进入',
+		//cancelBtnName : '',
+		closeable:true,
+		boxid:'winDiv',
+		onok : function(box) {
+			var result = jQuery("#" + _iframeId)[0].contentWindow.getValues();
+			if(!selectFunc(result))
+				return ;
+			box.close();// 增加事件方法后需手动关闭弹窗
+		},
+		oncancel : function(box) {
+			box.close();// 增加事件方法后需手动关闭弹窗
+		}
+	};
+	var url = 'standardDispatch.vm?user_action=condition&gheadid=' + gheadid;
+	jQuery.weeboxs.open(url, options).addButton({
+		title : '创建新的分配',
+		fn : function(box){
+			if(!newfunc())
+				return ;
+			box.close();// 增加事件方法后需手动关闭弹窗
+		}
+	});
+}
+function dispatch(obj, gatherHeadId){
+	var rowIndex = obj.parentNode.parentNode.rowIndex - 1;
+	//非明细下单只能不减库生成采购单,且不能配货,，若是已生成采购单，则还可以生成采购单
+   	//if("3" == $n("orderKind")[rowIndex].value){
+	//	alert("要货类型为 非明细下单，不能进行配货");
+	//	return;
+	//}
+	selectDispatchCondition(gatherHeadId, function(result){
+		if(!result){
+			alert("请先选择配货参数记录");
+			return ;
+		}
+		if(result.createId != "$!StringUtil.getUserId($session)"){
+			alert('只能选择自己创建的配货参数');
+			return false;
+		}
+    	window.location = "standardDispatch.vm?user_action=dispatch&gheadid="+gatherHeadId+"&conditionId=" + result.conditionId;
+		return true;
+	}, function(){
+    	window.location = "standardDispatch.vm?user_action=dispatch&gheadid="+gatherHeadId+"&conditionId=-1";
+		return true;
+	});
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+    	window.location = "standardDispatch.vm?user_action=view&gheadid="+gatherHeadId;
+	});
+	//初始化查询div common_query.js中定义默认已经引入
+	jQuery("#btnAdd").click(function(){
+    	window.location = "standardDispatch.vm?user_action=dispatch&gheadid=-1&conditionId=-1";
+	});
+	jQuery("#btnView").click(function(){
+    	var index = getSelectIndexs('chk');
+    	if(index.length!=1){
+    		alert("请选择要一条要查看的记录");
+    		return ;
+    	}
+    	window.location = "standardDispatch.vm?user_action=view&gheadid="+$n("chk")[index[0]].value;
+	});
+	jQuery("#btnDelete").click(deleteStandardDispatch);
+	jQuery("#btnCreateMoveBill").click(createMoveBill);
+	initQuery2('${queryCode}', "frm", 'btnQueryShow');
+});
+function showAllBill(formId){
+	jQuery("#" + formId).submit();
+}
+function toEditPage(headid){
+    window.location = "standardDispatch.vm?user_action=view&gheadid="+headid;
+}
+function deleteStandardDispatch(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var gheadidArr = [];
+	for(var i=0;i<idxs.length;i++){
+		if("1" != $n("status")[idxs[i]].value){
+			alert("第"+(idxs[i]+1)+"行 只有保存状态的单据才可以删除");
+			return ;
+		}
+		gheadidArr.push($n("chk")[idxs[i]].value);
+	}
+	confirm("确定删除?", function(){
+		StandardDispatchDwr.deleteStandardDispatch(gheadidArr, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+					jQuery("#frm").submit();
+				});
+			}
+		});
+	});
+}
+function createMoveBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length<1){
+		alert("请选择要生成调拨单的记录");
+		return ;
+	}
+	var gheadidArr = [];
+	for(var i=0;i<idxs.length;i++){
+		if("1" != $n("status")[idxs[i]].value){
+			alert("第"+(idxs[i]+1)+"行 只有保存状态的单据才可以生成调拨单");
+			return ;
+		}
+		gheadidArr.push($n("chk")[idxs[i]].value);
+	}
+	confirm("确定生成调拨单?", function(){
+		StandardDispatchDwr.createMoveBill(gheadidArr, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("生成调拨单成功", function(){
+					jQuery("#frm").submit();
+				});
+			}
+		});
+	});
+}
+
+function showDispatchStyleWin(){
+    var _iframeId = "DispatchStyleIframe";
+    var options = {
+        title : '款式配货表',
+        contentType : 'iframe',
+        iframeId : _iframeId,
+        width : 1000,
+        height : 500,
+        okBtnName : '确定',
+        closeable:true,
+        boxid:'winDiv',
+        onok : function(box) {
+            box.close();
+        },
+        oncancel : function(box) {
+            box.close();
+        }
+    };
+    var url = ctxPath + '/move/dispatchWay.vm?user_action=styleDispatchReport';
+    jQuery.weeboxs.open(url, options);
+}
+function showDispatchPriceWin(){
+    var _iframeId = "DispatchPriceIframe";
+    var options = {
+        title : '价位带配货表',
+        contentType : 'iframe',
+        iframeId : _iframeId,
+        width : 1000,
+        height : 500,
+        okBtnName : '确定',
+        closeable:true,
+        boxid:'winDiv',
+        onok : function(box) {
+            box.close();
+        },
+        oncancel : function(box) {
+            box.close();
+        }
+    };
+    var url = ctxPath + '/move/dispatchWay.vm?user_action=priceDispatchReport';
+    jQuery.weeboxs.open(url, options);
+}
+</script>

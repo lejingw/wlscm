@@ -1,0 +1,112 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+	"$StringUtil.getContextPath()/dwr/interface/PurchaseDwr.js"])
+#if("1" == "$!{form.jmFlag}")
+	#set($modelCode = '09070102')
+#else
+	#set($modelCode = '08020802')
+#end
+<form id='frm' action="purchase.vm" method="post">
+	<input type="hidden" name="user_action" value="toView"/>
+	<input type="hidden" id="custid" name="custid" value="${form.cust.custid}"/>
+	<input type='hidden' id='jmFlag' name='jmFlag' value='$!{form.jmFlag}'/>
+	<table class="title">
+    	<tr><td>定做单</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='接收' class='btn' id="btnReceive" $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='拒绝' class='btn' id="btnReject" $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='打印' class='btn' id="btnPrint">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+	<table class="content">
+		<tr>
+			<td class='body1' style="width:12%;height:60px;">说明</td>
+			<td class='body2' colspan="7">
+				<textarea id="reviewMemo" style="width:95%;height:100%;"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>定做单编号</td><td class='body2'>$!form.cust.billno</td>
+			<td class='body1'>组织</td><td class='body2'>$!BdCommon.getOrgName($!form.cust.orgId)</td>
+			<td class='body1'>创建人</td><td class='body2'>$!BdCommon.getUserName($!form.cust.createId)</td>
+			<td class='body1'>创建时间</td><td class='body2'>$!form.cust.createDate</td>
+		</tr>
+		<tr>
+			<td class='body1'>顾客姓名</td><td class='body2'>$!form.cust.customerName</td>
+			<td class='body1'>顾客电话</td><td class='body2'>$!form.cust.customerTel</td>
+            <td class='body1'>计划岗审批意见</td><td class='body2' colspan="3"><input type="text" readonly style="width:99%" value="$!form.cust.appviewReason"/></td>
+		</tr>
+		<tr>
+			<td class='body1'>预定数量</td><td class='body2'>$!form.cust.doomNum</td>
+			<td class='body1'>预定重量</td><td class='body2'>$!form.cust.doomWeight</td>
+			<td class='body1'>要求到货时间</td><td class='body2'>$!form.cust.requestDate</td>
+		</tr>
+		<tr>
+            <td class='body1'>备注</td><td class='body2' colspan="7"><textarea readonly style="width:99%" rows="2">$!form.cust.memo</textarea></td>
+		</tr>
+		<tr>
+			<td class='body1'>商品类别</td><td class='body2'>$!BdCommon.getArticleTypeDesc($!form.cust.articleTypeId)</td>
+			<td class='body1'>大类</td><td class='body2'>$!BdCommon.getItemClassDesc($!form.cust.itemClassId)</td>
+			<td class='body1'>小类</td><td class='body2'>$!BdCommon.getOrnaClassDesc($!form.cust.ornaClassId)</td>
+			<td class='body1'>分析范围</td><td class='body2'>$!form.cust.analysisName</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式大类</td><td class='body2'>$!BdCommon.getStyleItemClassNames($!form.cust.styleItemClassId)</td>
+			<td class='body1'>款式中类</td><td class='body2'>$!BdCommon.getStyleMiddleClassNames($!form.cust.styleMiddleClassId)</td>
+			<td class='body1'>款式小类</td><td class='body2'>$!BdCommon.getStyleOrnaClassNames($!form.cust.styleOrnaClassId)</td>
+			<td class='body1'>款式</td><td class='body2'><a href='javascript:viewStyle("$!form.cust.styleId")'>$!form.cust.styleName</a></td>
+		</tr>
+		<tr>
+			<td class='body1'>商品材质</td><td class='body2'>$!BdCommon.getQualityName($!form.cust.qualityId)</td>
+			<td class='body1'>计量单位</td><td class='body2'>$!BdCommon.getUnitName($!form.cust.unitId)</td>
+			<td class='body1'>尺寸</td><td class='body2'>$!form.cust.sizeName</td>
+		</tr>
+		<tr>
+			<td class='body1'>色级</td><td class='body2'>$!DictUtil.getValue('diacolorgrade',$!form.cust.colorGradeId)</td>
+			<td class='body1'>净度</td><td class='body2'>$!DictUtil.getValue('diaclean',$!form.cust.cleanId)</td>
+			<td class='body1'>品质</td><td class='body2'>$!{DictUtil.getValue('gradelevel',$!form.cust.colorGradeGradeId)}$!{DictUtil.getValue('gradelevel',$!form.cust.cleanGradeId)}</td>
+			<td class='body1'>定做类别</td><td class='body2'>$!form.cust.customizeClass</td>
+		</tr>
+		#if(""!="$!{form.stylePicPath}")
+    		<tr>
+    			<td class='body1' colspan="4">
+    				<img src="$!{form.stylePicPath}" style="width:400px;height:300px;"/>
+    			</td>
+    		</tr>
+		#end
+	</table>
+</form>
+<script>
+function reviewBill(flag){
+	if(1!=flag && isNull(jQuery("#reviewMemo").val())){
+		alert("拒绝接收必须要填写说明");
+		return ;
+	}
+	confirm("确定"+(1==flag?"接收":"拒绝")+"?", function(){
+    	showLayer(true);
+    	PurchaseDwr.reviewCustBill(jQuery("#custid").val(), jQuery("#jmFlag").val(), flag, jQuery("#reviewMemo").val(), function(data){
+           	showLayer(false);
+			alert(data?data:(1==flag?"接收成功":"拒绝成功"), function(){
+				if(!data){
+					backToList();
+				}
+			});
+    	});
+	});
+}
+jQuery(function(){
+	jQuery("#btnToList").click(backToList);
+	jQuery("#btnReject").click(function(){reviewBill(0);});
+	jQuery("#btnReceive").click(function(){reviewBill(1);});
+	jQuery("#btnPrint").click(printBill);
+});
+function printBill(){
+	window.print();
+}
+function backToList(){
+	window.location = "purchaseCust.vm?user_action=receiveList&jmFlag=" + jQuery("#jmFlag").val();
+}
+</script>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ExcelUtil">
+	<select id="ExcelUtil.getexcelKey" resultClass="string">
+		select JAT_SYS_EXCEL_TEMP_DATA_SEQ.nextval from dual
+	</select>
+	<insert id="ExcelUtil.saveExcelData" parameterClass="com.jatools.vo.util.ExcelRowData">
+	insert into JAT_SYS_EXCEL_TEMP_DATA(SEQ_ID, SHEETINDEX, ROWINDEX, col0, col1, col2, col3, col4, col5, col6, col7, col8, col9,
+		col10, col11, col12, col13, col14, col15, col16, col17, col18, col19, col20, col21, col22, col23, col24, col25, col26, col27, 
+		col28, col29, col30, col31, col32, col33, col34, col35, col36, col37, col38, col39, col40, col41, col42, col43, col44, col45, 
+		col46, col47, col48, col49, col50, col51, col52, col53, col54, col55, col56, col57, col58, col59, col60, col61, col62, col63, 
+		col64, col65, col66, col67, col68, col69, col70, col71, col72, col73, col74, col75, col76, col77, col78, col79, col80, col81, 
+		col82, col83, col84, col85, col86, col87, col88, col89, col90, col91, col92, col93, col94, col95, col96, col97, col98, col99)
+	values(#seqId#, #sheetIndex#, #rowIndex#, #col0#, #col1#, #col2#, #col3#, #col4#, #col5#, #col6#, #col7#, #col8#, #col9#, 
+		#col10#, #col11#, #col12#, #col13#, #col14#, #col15#, #col16#, #col17#, #col18#, #col19#, #col20#, #col21#, #col22#, #col23#, 
+		#col24#, #col25#, #col26#, #col27#, #col28#, #col29#, #col30#, #col31#, #col32#, #col33#, #col34#, #col35#, #col36#, #col37#, 
+		#col38#, #col39#, #col40#, #col41#, #col42#, #col43#, #col44#, #col45#, #col46#, #col47#, #col48#, #col49#, #col50#, #col51#, 
+		#col52#, #col53#, #col54#, #col55#, #col56#, #col57#, #col58#, #col59#, #col60#, #col61#, #col62#, #col63#, #col64#, #col65#, 
+		#col66#, #col67#, #col68#, #col69#, #col70#, #col71#, #col72#, #col73#, #col74#, #col75#, #col76#, #col77#, #col78#, #col79#, 
+		#col80#, #col81#, #col82#, #col83#, #col84#, #col85#, #col86#, #col87#, #col88#, #col89#, #col90#, #col91#, #col92#, #col93#, 
+		#col94#, #col95#, #col96#, #col97#, #col98#, #col99#)
+	</insert>
+	<select id="ExcelUtil.getExcelData" parameterClass="string" resultClass="com.jatools.vo.util.ExcelRowData">
+		select sheetindex as "sheetIndex",
+		       rowindex   as "rowIndex",
+		       col0       as "col0",
+		       col1       as "col1",
+		       col2       as "col2",
+		       col3       as "col3",
+		       col4       as "col4",
+		       col5       as "col5",
+		       col6       as "col6",
+		       col7       as "col7",
+		       col8       as "col8",
+		       col9       as "col9",
+		       col10      as "col10",
+		       col11      as "col11",
+		       col12      as "col12",
+		       col13      as "col13",
+		       col14      as "col14",
+		       col15      as "col15",
+		       col16      as "col16",
+		       col17      as "col17",
+		       col18      as "col18",
+		       col19      as "col19",
+		       col20      as "col20",
+		       col21      as "col21",
+		       col22      as "col22",
+		       col23      as "col23",
+		       col24      as "col24",
+		       col25      as "col25",
+		       col26      as "col26",
+		       col27      as "col27",
+		       col28      as "col28",
+		       col29      as "col29",
+		       col30      as "col30",
+		       col31      as "col31",
+		       col32      as "col32",
+		       col33      as "col33",
+		       col34      as "col34",
+		       col35      as "col35",
+		       col36      as "col36",
+		       col37      as "col37",
+		       col38      as "col38",
+		       col39      as "col39",
+		       col40      as "col40",
+		       col41      as "col41",
+		       col42      as "col42",
+		       col43      as "col43",
+		       col44      as "col44",
+		       col45      as "col45",
+		       col46      as "col46",
+		       col47      as "col47",
+		       col48      as "col48",
+		       col49      as "col49",
+		       col50      as "col50",
+		       col51      as "col51",
+		       col52      as "col52",
+		       col53      as "col53",
+		       col54      as "col54",
+		       col55      as "col55",
+		       col56      as "col56",
+		       col57      as "col57",
+		       col58      as "col58",
+		       col59      as "col59",
+		       col60      as "col60",
+		       col61      as "col61",
+		       col62      as "col62",
+		       col63      as "col63",
+		       col64      as "col64",
+		       col65      as "col65",
+		       col66      as "col66",
+		       col67      as "col67",
+		       col68      as "col68",
+		       col69      as "col69",
+		       col70      as "col70",
+		       col71      as "col71",
+		       col72      as "col72",
+		       col73      as "col73",
+		       col74      as "col74",
+		       col75      as "col75",
+		       col76      as "col76",
+		       col77      as "col77",
+		       col78      as "col78",
+		       col79      as "col79",
+		       col80      as "col80",
+		       col81      as "col81",
+		       col82      as "col82",
+		       col83      as "col83",
+		       col84      as "col84",
+		       col85      as "col85",
+		       col86      as "col86",
+		       col87      as "col87",
+		       col88      as "col88",
+		       col89      as "col89",
+		       col90      as "col90",
+		       col91      as "col91",
+		       col92      as "col92",
+		       col93      as "col93",
+		       col94      as "col94",
+		       col95      as "col95",
+		       col96      as "col96",
+		       col97      as "col97",
+		       col98      as "col98",
+		       col99      as "col99"
+		  from jat_sys_excel_temp_data
+		 where seq_id = #value#
+		 order by sheetindex, rowindex
+	</select>
+	<select id="ExcelUtil.getCheckDbrefrenceResult" parameterClass="map" resultClass="com.jatools.vo.util.ExcelRowData">
+		select a.rowindex as "rowIndex", a.col$columnIndex$ as "result"
+		  from jat_sys_excel_temp_data a
+		 where a.seq_id = #seqId#
+		   and a.sheetindex = #sheetIndex#
+		   and a.rowindex >= #startCheckIndex#
+		   and not exists (
+		       select b.$idFieldName$ from $tableName$ b
+		       where b.$nameFieldName$ = a.col$columnIndex$
+		 <isNotEmpty property="queryCondition"> and $queryCondition$</isNotEmpty>
+		   )
+	</select>
+	<update id="ExcelUtil.convertDbrefrenceToId" parameterClass="map">
+		update jat_sys_excel_temp_data a
+		   set a.col$columnIndex$ = (
+		   		select b.$idFieldName$ from $tableName$ b where b.$nameFieldName$ = a.col$columnIndex$
+				<isNotEmpty property="queryCondition"> and $queryCondition$</isNotEmpty>
+		   )
+		 where a.seq_id = #seqId#
+		   and a.sheetindex = #sheetIndex#
+		   and a.rowindex >= #startCheckIndex#
+	</update>
+	<delete id="ExcelUtil.deleteTitleRows" parameterClass="map">
+	<![CDATA[delete jat_sys_excel_temp_data a where a.seq_id = #seqId# and a.rowindex < #startCheckIndex#]]>
+	</delete>
+	<select id="ExcelUtil.printExcelData" parameterClass="string" resultClass="java.util.HashMap">
+		select * from jat_sys_excel_temp_data a where a.seq_id = #value#
+	</select>
+</sqlMap>

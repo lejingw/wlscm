@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveCostcoef">
+    <!-- 获取分页数据 -->
+	<select id="MoveCostcoef.getPageData" resultClass="com.jatools.vo.move.MoveCostcoef" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.coef_id as "coefId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId",
+				a.coef_way as "coefWay", a.coef as "coef", a.create_id as "createId", a.create_date as "createDate", 
+				a.update_id as "updateId", a.update_date as "updateDate", a.status as "status"
+			from jat_move_costcoef a where 1=1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.item_class_id, a.orna_class_id, a.coef_way, a.coef_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MoveCostcoef.getTotalCount" resultClass="int">
+		select count(1) from jat_move_costcoef a where 1=1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+    <!-- 保存头表 -->
+    <insert id="MoveCostcoef.saveMoveCostcoef" parameterClass="com.jatools.vo.move.MoveCostcoef">
+    	<selectKey resultClass="string" keyProperty="coefId" type="pre">
+			select jat_move_costcoef_seq.nextval as coefId from dual
+		</selectKey>
+		insert into jat_move_costcoef(coef_id, item_class_id, orna_class_id, coef_way, coef, create_id, create_date, update_id, update_date, status, memo)
+		values(#coefId#, #itemClassId#, #ornaClassId#, #coefWay#, #coef#, #createId#, #createDate#, #updateId#, #updateDate#, #status#, #memo#)
+	</insert>
+	<update id="MoveCostcoef.updateMoveCostcoef" parameterClass="com.jatools.vo.move.MoveCostcoef">
+		update jat_move_costcoef a set a.item_class_id = #itemClassId#, a.orna_class_id = #ornaClassId#,
+			a.coef_way = #coefWay#, a.coef = #coef#,
+			a.update_id = #updateId#, update_date = #updateDate#, a.memo = #memo#
+		where a.coef_id = #coefId#
+	</update>
+	<select id="MoveCostcoef.getMoveCostcoef" parameterClass="string" resultClass="com.jatools.vo.move.MoveCostcoef">
+		select a.coef_id as "coefId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId",
+				a.coef_way as "coefWay", a.coef as "coef", a.create_id as "createId", a.create_date as "createDate", 
+				a.update_id as "updateId", a.update_date as "updateDate", a.status as "status", a.memo as "memo"
+		from jat_move_costcoef a where a.coef_id = #coefId#
+	</select>
+	<select id="MoveCostcoef.getOrnaClassByItemClassIdForSlt" parameterClass="map" resultClass="com.jatools.vo.util.SelectorOption">
+		select a.orna_class_id as "value", a.orna_class_dsc as "text"
+		  from jas_bd_orna_class a, jas_bd_itemclass_ornaclass b
+		 where a.orna_class_id = b.orna_class_id
+		   and b.item_class_id = #itemClassId#
+		   and a.archiveflag = '0'
+		   and b.ARCHIVEFLAG = '0'
+		   and not exists (select 1
+		          from jat_move_costcoef c
+		         where c.orna_class_id = a.orna_class_id
+		  <isNotEmpty property="coefId"><![CDATA[and c.coef_id <> #coefId#]]></isNotEmpty>)
+		 order by a.sort
+	</select>
+	<delete id="MoveCostcoef.deleteMoveCostcoef" parameterClass="string">
+		delete jat_move_costcoef a where a.coef_id = #value#
+	</delete>
+	<select id="MoveCostcoef.checkRepeat" resultClass="int" parameterClass="map">
+		select count(1) from jat_move_costcoef a where a.item_class_id = #itemClassId# and a.orna_class_id = #ornaClassId#
+		  <isNotEmpty property="coefId"><![CDATA[and a.coef_id <> #coefId#]]></isNotEmpty>
+	</select>
+</sqlMap>

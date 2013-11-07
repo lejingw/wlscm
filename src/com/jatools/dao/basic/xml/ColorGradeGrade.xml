@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ColorGradeGrade">
+	<typeAlias alias="ColorGradeGrade" type="com.jatools.vo.basic.ColorGradeGrade"/>
+	<resultMap class="ColorGradeGrade" id="result">
+		<result property="id" column="id"/>
+		<result property="gradeId" column="GRADE_ID"/>
+		<result property="colorGradeId" column="COLOR_GRADE_ID"/>
+		<result property="status" column="STATUS"/>
+		<result property="memo" column="MEMO"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+	</resultMap>
+	<sql id="ColorGradeGrade.Columns.all">
+		id,GRADE_ID,COLOR_GRADE_ID,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="ColorGradeGrade.getColorGradeGradeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="ColorGradeGrade.Columns.all"/> from JAT_BASIC_COLOR_GRADE_GRADE a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+			order by a.GRADE_ID desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="ColorGradeGrade.getColorGradeGradeToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_COLOR_GRADE_GRADE a where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+	</select>
+	<!-- findById -->
+	<select id="ColorGradeGrade.getColorGradeGradeById" resultClass="ColorGradeGrade" parameterClass="string" resultMap="result">
+		select <include refid="ColorGradeGrade.Columns.all"/> from JAT_BASIC_COLOR_GRADE_GRADE a where a.id = #value#
+	</select>
+	<!--  -->
+	<select id="ColorGradeGrade.getColorGradeGrade" resultMap="result" parameterClass="ColorGradeGrade">
+		select <include refid="ColorGradeGrade.Columns.all"/> from JAT_BASIC_COLOR_GRADE_GRADE c 
+			where c.COLOR_GRADE_ID = #colorGradeId#
+		<isNotEmpty prepend="and" property="id"> c.id !=#id# </isNotEmpty>
+	</select>
+	<!-- 保存数据 -->
+	<insert id="ColorGradeGrade.saveColorGradeGrade" parameterClass="ColorGradeGrade">
+		<selectKey keyProperty="id" type="pre">
+			select JAT_COLOR_GRADE_GRADE_SEQ.nextval as id from dual
+		</selectKey>
+		insert into JAT_BASIC_COLOR_GRADE_GRADE(
+			id,GRADE_ID,COLOR_GRADE_ID,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID)
+			values(#id#,#gradeId#,#colorGradeId#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="ColorGradeGrade.updateColorGradeGrade" parameterClass="ColorGradeGrade">
+		update JAT_BASIC_COLOR_GRADE_GRADE a set 
+			a.GRADE_ID = #gradeId#,
+			a.COLOR_GRADE_ID = #colorGradeId#,
+			a.STATUS = #status#,
+			a.MEMO = #memo#,
+			a.CREATE_DATE = #createDate#,
+			a.CREATE_ID = #createId#,
+			a.UPDATE_DATE = #updateDate#,
+			a.UPDATE_ID = #updateId#
+		 where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="ColorGradeGrade.deleteColorGradeGrade" parameterClass="string">
+		delete JAT_BASIC_COLOR_GRADE_GRADE a where a.id = #value#
+	</delete>
+</sqlMap>

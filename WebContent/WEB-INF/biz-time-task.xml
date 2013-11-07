@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans default-autowire="byName">
+	<!-- ======================================================================== -->
+	<!--  存放在每个机器工作的任务相关Spring配置。该任务需要在每个机器上都运行-->
+	<!-- ======================================================================== -->
+	
+	
+	
+</beans>

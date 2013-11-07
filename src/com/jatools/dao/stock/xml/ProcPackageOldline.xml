@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcPackageOldline">
+	<typeAlias alias="ProcPackageOldline" type="com.jatools.vo.stock.ProcPackageOldline" />
+	
+	<resultMap id="result" class="ProcPackageOldline" >
+		<result property="lineid" column="lineid"/>
+		<result property="billid" column="billid"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="styleitemclass" column="styleitemclass"/>
+		<result property="stylemiddleclass" column="stylemiddleclass"/>
+		<result property="styleornaclass" column="styleornaclass"/>
+		<result property="styleId" column="style_id"/>
+		<result property="alaysisId" column="alaysis_id"/>
+		<result property="ornaCode" column="orna_code"/>
+		<result property="ornaBarcode" column="orna_barcode"/>
+		<result property="ornaDsc" column="orna_dsc"/>
+		<result property="unitId" column="unit_id"/>
+		<result property="nowQty" column="now_qty"/>
+		<result property="allQty" column="all_qty"/>
+		<result property="grains" column="grains"/>
+		<result property="mainWeight" column="main_weight"/>
+		<result property="partWeight" column="part_weight"/>
+		<result property="isMutiPart" column="is_muti_part"/>
+		<result property="isDblLabel" column="is_dbl_label"/>
+		<result property="posCost" column="pos_cost"/>
+		<result property="posMoney" column="pos_money"/>
+		<result property="isPsale" column="is_psale"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+		<result property="inivCost" column="iniv_cost"/>
+		<result property="colorId" column="color_id"/>
+		<result property="colorName" column="color_name"/>
+		<result property="mainShapeId" column="main_shape_id"/>
+		<result property="mainShapeName" column="main_shape_name"/>
+		<result property="newVal" column="new_val"/>
+	</resultMap>
+	
+	<resultMap id="result2" class="ProcPackageOldline" extends="result">
+		<result property="styleName" column="stylename"/>
+		<result property="bigGraph" column="isbiggraph"/>
+	</resultMap>
+	
+	<sql id="ProcPackageOldline_columns_all">
+		lineid, billid, item_class_id, orna_class_id, styleitemclass, 
+		stylemiddleclass, styleornaclass, style_id, alaysis_id, orna_code, orna_barcode, 
+		orna_dsc, unit_id, now_qty, all_qty, grains, main_weight, part_weight, is_muti_part, 
+		is_dbl_label, pos_cost, pos_money, is_psale, status, memo, create_date, create_id, 
+		update_date, update_id, iniv_cost, color_id, main_shape_id, new_val
+    </sql>
+    <sql id="ProcPackageOldline_columns_2">
+    	a.lineid, a.billid, a.item_class_id, a.orna_class_id, a.styleitemclass, a.stylemiddleclass, a.styleornaclass, 
+    	a.style_id, a.alaysis_id, a.orna_code, a.orna_barcode, a.orna_dsc, a.unit_id, a.now_qty, a.all_qty, a.grains, 
+    	a.main_weight, a.part_weight, a.is_muti_part, a.is_dbl_label, a.pos_cost, a.pos_money, a.is_psale, a.status, 
+    	a.memo, a.create_date, a.create_id, a.update_date, a.update_id, a.iniv_cost, a.color_id, a.main_shape_id, 
+    	a.new_val, c.stylename, c.isbiggraph
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="ProcPackageOldline.getProcPackageOldlinePageData" resultMap="result" parameterClass="map">
+		select <include refid="ProcPackageOldline_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="ProcPackageOldline_columns_all"/>  from jat_proc_package_oldline a 
+			where 1 = 1
+			<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+			order by a.lineid DESC
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcPackageOldline.getProcPackageOldlineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_package_oldline a
+		where 1 = 1
+		<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="ProcPackageOldline.saveProcPackageOldline" parameterClass="ProcPackageOldline">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PROC_PACKAGE_OLDLINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_proc_package_oldline(<include refid="ProcPackageOldline_columns_all"/>)
+		 values(
+		 #lineid#, #billid#, #itemClassId#, #ornaClassId#, #styleitemclass#, 
+		 #stylemiddleclass#, #styleornaclass#, #styleId#, #alaysisId#, #ornaCode#, #ornaBarcode#, 
+		 #ornaDsc#, #unitId#, #nowQty#, #allQty#, #grains#, #mainWeight#, #partWeight#, #isMutiPart#, 
+		 #isDblLabel#, #posCost#, #posMoney#, #isPsale#, #status#, #memo#, #createDate#, #createId#, 
+		 #updateDate#, #updateId#, #inivCost#, #colorId#, #mainShapeId#, #newVal#)
+    </insert>
+    <sql id="ProcPackageOldline_color_id">
+		(select b.item_value from jat_sys_dict_item b where a.color_id = b.item_key and b.entry_code='diacolor') as color_name
+	</sql>
+	<sql id="ProcPackageOldline_main_shap_id">
+		(select b.item_value from jat_sys_dict_item b where a.main_shape_id = b.item_key and b.entry_code='diashape') as main_shape_name
+	</sql>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcPackageOldline.getProcPackageOldline" resultClass="ProcPackageOldline" resultMap="result" parameterClass="string">
+    	select <include refid="ProcPackageOldline_columns_all"/>,
+    		<include refid="ProcPackageOldline_color_id"/>,
+    		<include refid="ProcPackageOldline_main_shap_id"/>
+    	from jat_proc_package_oldline a where a.lineid = #value#
+    </select>
+    
+     <!-- 根据单号获取记录对象 -->
+    <select id="ProcPackageOldline.getProcPackageOldlineList" resultClass="ProcPackageOldline" resultMap="result2" parameterClass="string">
+    	select <include refid="ProcPackageOldline_columns_2"/>,
+    		<include refid="ProcPackageOldline_color_id"/>,
+    		<include refid="ProcPackageOldline_main_shap_id"/> 
+    	from jat_proc_package_oldline a 
+    	left join jas_bd_style c on a.style_id = c.styleid
+    	where a.billid = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="ProcPackageOldline.updateProcPackageOldline" parameterClass="ProcPackageOldline">
+		update jat_proc_package_oldline a set 
+		a.item_class_id = #itemClassId#,
+		a.orna_class_id = #ornaClassId#,
+		a.style_id = #styleId#,
+		a.alaysis_id = #alaysisId#,
+		a.orna_code = #ornaCode#,
+		a.orna_barcode = #ornaBarcode#,
+		a.orna_dsc = #ornaDsc#,
+		a.unit_id = #unitId#,
+		a.now_qty = #nowQty#,
+		a.all_qty = #allQty#,
+		a.grains = #grains#,
+		a.main_weight = #mainWeight#,
+		a.part_weight = #partWeight#,
+		a.is_muti_part = #isMutiPart#,
+		a.is_dbl_label = #isDblLabel#,
+		a.pos_cost = #posCost#,
+		a.pos_money = #posMoney#,
+		a.is_psale = #isPsale#,
+		a.memo = #memo#,
+		a.update_date = #updateDate#,
+		a.update_id = #updateId#,
+		a.iniv_cost = #inivCost#,
+		a.color_id = #colorId#,
+		a.main_shape_id = #mainShapeId#,
+		a.new_val = #newVal#
+		where a.lineid = #lineid#
+	</update>
+	<delete id="ProcPackageOldline.deleteProcPackageOldline" parameterClass="string">
+		delete from jat_proc_package_oldline a where a.lineid = #value#
+	</delete>
+	
+	<delete id="ProcPackageOldline.deleteProcPackageOldlineByBillid" parameterClass="string">
+		delete from jat_proc_package_oldline a where a.billid = #value#
+	</delete>
+	
+	
+	<!-- 出库事物 -->
+	<insert id="ProcPackageOldline.outStockInsertTrans" parameterClass="map">
+		insert into  jat_mater_trans 
+		(
+		      TRANS_ID,
+		      ORG_ID,STOCK_ID,ITEM_CLASS_ID,ORNA_CLASS_ID,STYLEITEMCLASS,
+		      STYLEMIDDLECLASS,STYLEORNACLASS,STYLE_ID,ALAYSIS_ID,ORNA_CODE,ORNA_BARCODE,
+		      ORNA_DSC,UNIT_ID,NOW_QTY,ALL_QTY,GRAINS,POS_COST,POS_MONEY,TRANS_FLAG,
+		      TRANS_SOURCE_BILL,TRANS_SOURCE_NO,TRANS_SOURCE_TYPE,TRANS_FINANCE,
+		      TRANS_DATE,TRANS_COST,TRANS_MONEY,TRANS_QTY,IS_PSALE,ORNA_CODE_SOURCE	,
+		      CREATE_DATE	,CREATE_ID	
+		
+		) select 
+		      jat_mater_trans_seq.nextval,
+		      b.org_id as ORG_ID, b.stock_id as STOCK_ID, a.item_class_id as ITEM_CLASS_ID,a.orna_class_id as ORNA_CLASS_ID,a.styleitemclass as STYLEITEMCLASS,
+		      a.stylemiddleclass as STYLEMIDDLECLASS,a.styleornaclass as STYLEORNACLASS,a.style_id as STYLE_ID,a.alaysis_id as ALAYSIS_ID,a.orna_code as ORNA_CODE,a.orna_barcode as ORNA_BARCODE, 
+		      a.orna_dsc as ORNA_DSC,a.unit_id as UNIT_ID,a.now_qty as NOW_QTY,a.all_qty as ALL_QTY,a.grains as GRAINS,a.pos_cost as POS_COST,a.pos_money as POS_MONEY,-1,
+		      #transSourceBill#, b.billno as TRANS_SOURCE_NO, null, #transFinance#,
+		      b.dodate as TRANS_DATE,a.pos_cost as TRANS_COST,a.pos_money as TRANS_MONEY,a.all_qty as TRANS_QTY,a.is_psale as IS_PSALE,a.orna_code as ORNA_CODE_SOURCE,
+		      #createDate#, #userId#
+		  from jat_proc_package_oldline a
+		  	left join jat_proc_package_head b on a.billid = b.billid
+		  where a.lineid = #lineid#
+	</insert>
+</sqlMap>

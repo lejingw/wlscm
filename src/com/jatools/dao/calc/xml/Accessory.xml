@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Accessory">
+	<typeAlias alias="Accessory" type="com.jatools.vo.calc.Accessory"/>
+	<resultMap class="Accessory" id="result">
+	<result property="id" column="id"/>
+		<result property="accessoryId" column="ACCESSORY_ID"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<sql id="Accessory.Columns.all">
+		id,ACCESSORY_ID,COEFFICIENT,createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="Accessory.getAccessoryAllPageData" resultMap="result" parameterClass="map">
+	select * from (select rownum rownum_ , AA.* from (
+			select <include refid="Accessory.Columns.all"/> from jat_calc_accessory_coefficient a where 1=1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+			order by a.id desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="Accessory.getAccessoryToalCount" resultClass="int">
+		select count(1) from jat_calc_accessory_coefficient a where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+	</select>
+	<!-- findById -->
+	<select id="Accessory.getAccessoryById" resultClass="Accessory" parameterClass="string" resultMap="result">
+		select <include refid="Accessory.Columns.all"/> from jat_calc_accessory_coefficient a where a.id = #value#
+	</select>
+	<!--  -->
+	<select id="Accessory.getAccessory" resultMap="result" parameterClass="Accessory">
+		select <include refid="Accessory.Columns.all"/> from jat_calc_accessory_coefficient c 
+			where c.accessory_id = #accessoryId#
+		<isNotEmpty prepend="and" property="id"> c.id !=#id# </isNotEmpty>
+	</select>
+	<!-- 保存数据 -->
+	<insert id="Accessory.saveAccessory" parameterClass="Accessory">
+		<selectKey keyProperty="id" type="pre">
+			select jat_calc_acc_coefficient_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_accessory_coefficient(
+			id,ACCESSORY_ID,COEFFICIENT,CREATEDATE,CREATEUSERID,UPDATEDATE,UPDATEUSERID)
+			values(#id#,#accessoryId#,#coefficient#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="Accessory.updateAccessory" parameterClass="Accessory">
+		update jat_calc_accessory_coefficient a set 
+			a.ACCESSORY_ID = #accessoryId#,
+			a.COEFFICIENT = #coefficient#,
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="Accessory.deleteAccessory" parameterClass="string">
+		delete jat_calc_accessory_coefficient a where a.id = #value#
+	</delete>
+</sqlMap>

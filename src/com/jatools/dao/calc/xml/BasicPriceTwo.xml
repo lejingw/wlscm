@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="BasicPriceTwo">
+	<typeAlias alias="BasicPriceTwo" type="com.jatools.vo.calc.BasicPriceTwo"/>
+	<resultMap class="BasicPriceTwo" id="result">
+		<result property="billid" column="bill_id"/>
+		<result property="basicprice" column="BASIC_PRICE"/>
+		
+		<result property="createdate" column="createdate"/>
+		<result property="createuserid" column="CREATEUSERID"/>
+		<result property="updatedate" column="updatedate"/>
+		<result property="updateuserid" column="UPDATEUSERID"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	<resultMap class="BasicPriceTwo" id="result1">
+		<result property="basicprice" column="BASIC_PRICE"/>
+	</resultMap>
+	<sql id="BasicPriceTwo.Columns.all">
+		bill_id,BASIC_PRICE,createdate,CREATEUSERID,updatedate,UPDATEUSERID,status
+	</sql>
+	<!-- 分页查询 -->
+	<select id="BasicPriceTwo.getBasicPriceTwoAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="BasicPriceTwo.Columns.all"/> from jat_calc_basic_price_two a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		 	 order by a.BASIC_PRICE
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="BasicPriceTwo.getBasicPriceTwoToalCount" resultClass="int">
+		select count(1) from jat_calc_basic_price_two a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<!-- findById -->
+	<select id="BasicPriceTwo.getBasicPriceTwoById" resultClass="BasicPriceTwo" parameterClass="string" resultMap="result">
+		select <include refid="BasicPriceTwo.Columns.all"/> from jat_calc_basic_price_two a where a.bill_id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="BasicPriceTwo.saveBasicPriceTwo" parameterClass="BasicPriceTwo">
+		<selectKey keyProperty="billid" type="pre">
+			select jat_calc_basic_price_two_seq.nextval as billid from dual
+		</selectKey>
+		insert into jat_calc_basic_price_two(
+			bill_id,BASIC_PRICE,createdate,CREATEUSERID,updatedate,UPDATEUSERID,status)
+			values(#billid#,#basicprice#,#createdate#,#createuserid#,#updatedate#,#updateuserid#,#status#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="BasicPriceTwo.updateBasicPriceTwo" parameterClass="BasicPriceTwo">
+		update jat_calc_basic_price_two a set 
+			a.basic_price = #basicprice#,
+			a.status = #status#,
+			a.createdate = #createdate#,
+			a.CREATEUSERID = #createuserid#,
+			a.updatedate = #updatedate#,
+			a.updateuserid = #updateuserid# 
+			where a.bill_id = #billid#
+	</update>
+	<!-- 删除 -->
+	<delete id="BasicPriceTwo.deleteBasicPriceTwo" parameterClass="string">
+		delete jat_calc_basic_price_two a where a.bill_id = #value#
+	</delete>
+	<!-- 获取主配石市场价 -->
+	<select id="BasicPriceTwo.getBasicPriceTwo" resultClass="BasicPriceTwo" parameterClass="BasicPriceTwo" resultMap="result">
+		select <include refid="BasicPriceTwo.Columns.all"/> from jat_calc_basic_price_two a where 
+			a.BASIC_PRICE = #basicprice# 
+			<isNotEmpty prepend="and" property="billid"> a.bill_id!=#billid# </isNotEmpty>
+	</select>
+	<select id="BasicPriceTwo.getTwoPrice"  resultMap="result1" parameterClass="string" >
+		select basic_price
+		  from jat_calc_basic_price_two t
+		 group by t.basic_price
+		 order by abs(t.basic_price - #value#),t.basic_price desc
+	</select>
+</sqlMap>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PurEmpArticleType">
+	<select id="PurEmpArticleType.getPurEmpArticleTypePageData" parameterClass="map" resultClass="com.jatools.vo.basic.PurEmpArticleType">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.id as "id", a.pur_emp_id as "purEmpId", a.article_type_id as "articleTypeId", a.create_id as "createId", a.create_date as "createDate", a.status as "status"
+			from jat_basic_puremp_articletype a left join jas_bd_emp b on a.pur_emp_id = b.empid
+			where a.status = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			and exists(select 1 from jas_bd_emp b where a.pur_emp_id = b.empid and b.archiveflag = '0')
+			order by b.empname, a.pur_emp_id, a.article_type_id, a.id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PurEmpArticleType.getPurEmpArticleTypeTotalCount" resultClass="int">
+		select count(1) from jat_basic_puremp_articletype a where a.status = 1
+		and exists(select 1 from jas_bd_emp b where a.pur_emp_id = b.empid and b.archiveflag = '0')
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+    
+    <select id="PurEmpArticleType.getOrgs" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	<isEqual property="empFlag" compareValue="1">
+	    	select a.article_type_id as "value", a.article_type_dsc as "text"
+			  from jas_bd_articletype a
+			 where exists (select 1
+			          from jat_basic_puremp_articletype b
+			         where b.pur_emp_id = #purEmpId#
+			           and b.article_type_id = a.article_type_id)
+			 order by a.sort
+    	</isEqual>
+    	<isNotEqual property="empFlag" compareValue="1">
+	    	select a.empid as "value", a.empname as "text"
+			  from jas_bd_emp a
+			 where a.archiveflag = '0' and exists (select 1
+			          from jat_basic_puremp_articletype b
+			         where b.article_type_id = #purEmpId#
+			           and b.pur_emp_id = a.empid)
+			 order by a.empname
+    	</isNotEqual>
+    </select>
+    <!-- 保存采购员商品类别 -->
+    <insert id="PurEmpArticleType.savePurEmpArticleType" parameterClass="com.jatools.vo.basic.PurEmpArticleType">
+    	<selectKey keyProperty="id" type="pre" resultClass="string">
+    		select jat_puremp_articletype_seq.nextval as id from dual
+    	</selectKey>
+    	insert into jat_basic_puremp_articletype(id, pur_emp_id, article_type_id, status, create_date, create_id)
+		values(#id#, #purEmpId#, #articleTypeId#, #status#, #createDate#, #createId#)
+    </insert>
+    <!-- 删除采购员商品类别 -->
+    <delete id="PurEmpArticleType.deletePurEmpArticleType" parameterClass="string">
+    	delete jat_basic_puremp_articletype a where a.id = #value#
+    </delete>
+    <!-- 根据调入组织删除采购员商品类别 -->
+    <delete id="PurEmpArticleType.deletePurEmpArticleTypeByOrgid" parameterClass="map">
+    	delete jat_basic_puremp_articletype a where
+    	<isEqual property="empFlag" compareValue="1">a.pur_emp_id = #purEmpId#</isEqual>
+    	<isNotEqual property="empFlag" compareValue="1">a.article_type_id = #purEmpId#</isNotEqual>
+    </delete>
+</sqlMap>

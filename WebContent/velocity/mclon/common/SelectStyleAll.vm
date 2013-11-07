@@ -1,0 +1,294 @@
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js",
+	"$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js",
+	"$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.exedit-3.0.js",
+	"$StringUtil.getContextPath()/dwr/interface/BdCommonDwr.js",
+	"$StringUtil.getContextPath()/js/basic/selectStyle.js",
+	"$StringUtil.getContextPath()/dwr/interface/PriceHeadDwr.js"])
+#set($iniv = $form.iniv)
+#if($form.multiFlag)
+#end
+<script>
+var start=1;
+var limit=15;
+var totalCount=0;
+var tn;
+</script>
+<table style='width:100%;height:100%;' border="1">
+	<tr>
+		<td valign="top" style='width:220px;' rowspan="2">
+			<div id="myZTree" class="ztree" style="height:455px;overflow-y:auto;"></div>
+		</td>
+		<td valign="top">
+			<table class='list'>
+                <thead>
+					<th>款式列表</th>
+				</thead>
+				<tbody id="tb11">
+                </tbody>
+			</table>
+		</td>
+	</tr>
+    <tr>
+		<td colspan="2">
+			<script>
+            	createToolbar( start, limit, totalCount);
+            </script>
+		</td>
+	</tr>
+</table>
+<script>
+//商品类别、大类、小类、款式大类、款式中类、款式小类
+function onExpand(event, treeId, treeNode) {
+	treeNode.queryFlag = true;
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	if(0 == treeNode.type){
+		BdCommonDwr.getItemClassForSlt(treeNode.id, function(datas){
+    		if("$!form.itemClassId"==""){
+				for(var i=0;i<datas.length;i++){
+					zTree.addNodes(treeNode, {
+        				id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+        				isParent:true,
+        				name:datas[i].text,
+    					type:1,
+        				queryFlag : false
+        			});
+				}
+    		}else{
+				for(var i=0;i<datas.length;i++){
+					if("$form.itemClassId"==datas[i].value){
+    					zTree.addNodes(treeNode, {
+            				id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+            				isParent:true,
+            				name:datas[i].text,
+        					type:1,
+            				queryFlag : false
+            			});
+					}
+				}
+			}
+    	});
+	}else if(1 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getOrnaClassByItemClassIdForSlt(tmp[1], function(datas){
+    		if("$!form.ornaClassId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:2,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.ornaClassId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:2,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    	});
+	}else if(2 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleItemClassForSlt(tmp[1], tmp[2], function(datas){
+    		if("$!form.styleItemId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:3,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+    				if("$!form.styleItemId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:3,
+        					queryFlag : false
+        				});
+            		}
+				}
+    		}
+    	});
+	}else if(3 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleMiddleClassForSlt(tmp[1], tmp[2],tmp[3], function(datas){
+			if("$!form.styleMiddleId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:4,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.styleMiddleId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:4,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    		
+    	});
+	}else if(4 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleOrnaClassForSlt(tmp[1], tmp[2], tmp[3],tmp[4], function(datas){
+			if("$!form.styleOrnaId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:false,
+    					name:datas[i].text,
+    					type:5,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.styleOrnaId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:false,
+        					name:datas[i].text,
+        					type:5,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    	});
+	}
+}
+function onClick(event, treeId, treeNode){
+	start=1;
+	limit=15;
+	totalCount=0;
+	tn = treeNode;
+    loadStylePage(start,limit);
+}
+function loadStylePage(s,l){
+	var values = tn.id.split(",");
+	BdCommonDwr.getStyleByCalcWin(values[1],values[2],values[3],
+    		values[4],values[5],s,l,function(datas){//加载款式
+			var styleLines = $n("delline");
+			for ( var i = (styleLines.length-1); i >=0 ; i--) {
+				$("tb11").deleteRow(i);
+			}
+			if(datas!=null&&datas.pager!=null){
+				var data = datas.pager.pageData;
+				var picUrl = datas.stylePicUrl;
+				for(var i=0;i<data.length;){
+					var f1="<table><tr><input type='hidden' name='delline'/>";
+					for(var j=i;j<(i+5);j++){
+						if(j==data.length)
+							break;
+						f1+="<td><table>"+
+        						"<tr><td><input type='radio' value='"+data[j].styleId+"' name='chk' onclick=\"clickRow('"+data[j].styleId+"','"+data[j].styleName+"')\"/><a href='javascript:viewStyle("+data[j].styleId+")'>"+data[j].styleName+"</a></td></tr>"+
+            					"<tr><td><img src='"+picUrl+data[j].issmallgraph+"' width='120' height='80'/></td></tr>"+
+    						"</table></td>";
+					}
+					f1+="</tr></table>";
+        			insertRow("tb11",[f1],false);
+					i+=5;
+    			}
+				start = datas.pager.start;
+				limit = datas.pager.limit;
+				totalCount = datas.pager.totalCount;
+				
+				countToolbar();
+			}
+    	});
+}
+function clickRow(styleid,stylename){
+	parent.loadSelectStyleData(styleid,stylename);
+	parent.closePrintWin();
+}
+jQuery(function(){
+	//checkTable('tb11', 'check11', 'chk11', false,clickRow);
+	var setting = {
+		view: {
+			selectedMulti: false
+		},
+		edit: {
+			enable: true,
+			showRemoveBtn: false,
+			showRenameBtn: false
+		},
+		data: {
+			keep: {
+				parent:true,
+				leaf:true
+			},
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			//beforeClick: beforeClick,
+			//beforeCollapse: beforeCollapse,
+			//beforeExpand: beforeExpand,
+			//onCollapse: onCollapse,
+			onExpand: onExpand,
+			onClick: onClick
+		}
+	};
+	var zNodes =[];
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, zNodes);
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	
+	BdCommonDwr.getArticleTypeForSlt(function(datas){
+		for(var i=0;i<datas.length;i++){
+    		zTree.addNodes(null, {
+				id:datas[i].value,
+				pId:0,
+				isParent:true,
+				name:datas[i].text,
+				type:0,
+				queryFlag : false
+			});
+		}
+	});
+});
+function checkSubNodes(tree, node, flag){
+	tree.checkNode(node, flag);
+	var childs = node.childs;
+	if(!childs)	return ;
+	for(var i=0;i<childs.length;i++){
+		 checkSubNodes(tree, childs[i], flag);
+	}
+}
+function checkAllNodes(flag){
+	
+}
+</script>

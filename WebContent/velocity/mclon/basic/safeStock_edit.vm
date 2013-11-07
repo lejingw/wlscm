@@ -1,0 +1,195 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/SafeStockDwr.js"])
+#set($rightCode = '08012202')
+	
+<form id='frm' action="safeStock.vm" method="post">
+	<input type="hidden" id="safeId" value="$!{form.safeStock.safeId}"/>
+    <table class="title">
+    	<tr><td>总部安全库存</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, $rightCode, '1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式大类</td>
+			<td class='body2'>
+				<select id="styleItemClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>款式中类</td>
+			<td class='body2'>
+				<select id="styleMiddleClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>款式小类</td>
+			<td class='body2'>
+				<select id="styleOrnaClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式</td>
+			<td class='body2'>
+				<select id="styleId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>库存标准</td>
+			<td class='body2'>
+				<input type='text' id='safeNum' dataType="Double" value="$!{form.safeStock.safeNum}" msg="不能为空，且必须为数字类型">$StringUtil.star()
+			</td>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' readonly value="保存">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="3">
+				<input type="text" id="memo" style="width:90%;" value="$!{form.safeStock.memo}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+function changeItemClass(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+function changeOrnaClass(){
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+	});
+	//获取款式大类
+	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("styleItemClassId", data, null, null, true, true);
+	});
+}
+/**
+ *　改变款式大类
+ */
+function changeStyleItemClassId(){
+	//获取款式中类
+	BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+		addOptions("styleMiddleClassId", data, null, null, true, true);
+	});
+}
+/**
+ *　改变款式中类
+ */
+function changeStyleMiddleClassId(){
+	//获取款式小类
+	BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+		addOptions("styleOrnaClassId", data, null, null, true, true);
+	});
+}
+/**
+ *　改变款式小类
+ */
+function changeStyleOrnaClassId(){
+	//获取款式
+	BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true);
+	});
+}
+/*
+function changeAnalysis(){
+	BdCommonDwr.getStyleForSlt2(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true);
+	});
+}
+*/
+function saveform(){
+	if(!Validator.Validate($("frm"),3)){
+		return ;
+	}
+	confirm("确定保存?", function(){
+    	SafeStockDwr.saveSafeStock({
+    			safeId:jQuery("#safeId").val(),
+    			itemClassId:jQuery("#itemClassId").val(),
+    			ornaClassId:jQuery("#ornaClassId").val(),
+    			analysisId:jQuery("#analysisId").val(),
+				styleItemClassId:jQuery("#styleItemClassId").val(),
+				styleMiddleClassId:jQuery("#styleMiddleClassId").val(),
+				styleOrnaClassId:jQuery("#styleOrnaClassId").val(),
+    			styleId:jQuery("#styleId").val(),
+    			safeNum:jQuery("#safeNum").val(),
+    			memo:jQuery("#memo").val()
+    		}, function(data){
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+    				window.location = "safeStock.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnToList").click(function(){window.location = "safeStock.vm";});
+	
+	jQuery("#itemClassId").change(changeItemClass);
+	jQuery("#ornaClassId").change(changeOrnaClass);
+//	jQuery("#analysisId").change(changeAnalysis);
+	jQuery("#styleItemClassId").change(changeStyleItemClassId);
+	jQuery("#styleMiddleClassId").change(changeStyleMiddleClassId);
+	jQuery("#styleOrnaClassId").change(changeStyleOrnaClassId);
+	
+
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+    	if("$!form.safeStock.safeId"){
+   			selectOption("itemClassId", "$!form.safeStock.itemClassId");
+			BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+        		addOptions("ornaClassId", data, null, null, true, true, "$!form.safeStock.ornaClassId");
+				if("$!form.safeStock.ornaClassId"){
+					BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                		addOptions("analysisId", data, null, null, true, true, "$!form.safeStock.analysisId");
+                	});
+                	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                		addOptions("styleItemClassId", data, null, null, true, true, "$!form.safeStock.styleItemClassId");
+						if("$!form.safeStock.styleItemClassId"){
+							BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+                        		addOptions("styleMiddleClassId", data, null, null, true, true, "$!form.safeStock.styleMiddleClassId");
+								if("$!form.safeStock.styleMiddleClassId"){
+									BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+                                		addOptions("styleOrnaClassId", data, null, null, true, true, "$!form.safeStock.styleOrnaClassId");
+										if("$!form.safeStock.styleOrnaClassId"){
+											BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+                                        		addOptions("styleId", data, null, null, true, true, "$!form.safeStock.styleId");
+                                        	});
+										}
+                                	});
+								}
+                        	});
+						}
+                	});
+				}
+        	});
+		}
+	});
+})
+</script>

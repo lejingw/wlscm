@@ -1,0 +1,159 @@
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+	<input type='hidden' name='firstFlag' value="1"/>
+    <table class="title">
+    	<tr><td>报表管理【手工调配在途量】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<!--<input type='button' value='高级查询' class='btn' id='btnSearch1'>-->
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">
+		       	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08050201','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08050201','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>调出组织</td>
+			<td class='body2'>
+				<input type='hidden' id="outOrgId" name='outOrgId' value="">
+				<input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='text' id="outOrgName" name='outOrgName' value="" readonly class="target" onclick="showOutSelectOrgWin()">
+			</td>
+			<td class='body1'>调入组织</td>
+			<td class='body2'>
+				<input type='hidden' id="inOrgId" name='inOrgId' value="">
+				<input type='text' id="inOrgName" name='inOrgName' value="" readonly class="target" onclick="showInSelectOrgWin()">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name='itemClassId'  value="" onchange="changeOrnaClassId()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId"  value="" onchange="changeOrnaClass()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" name='analysisId'  value="" >$StringUtil.emptyOption()</select></td>
+		<td>
+    </table>
+	<div class='scroll2'>
+        <table class='list' style='width:1600px;'>
+        	<thead>
+    			<tr>
+					<th>调出组织</th>
+					<th>调入组织</th>
+                    <th>大类 </th>
+    				<th>小类</th>			
+    				<th>分析范围</th>
+
+    				<th>款式大类</th>
+    				<th>款式中类</th>
+    				<th>款式小类</th>
+    				<th>款式</th>
+    				<th>计量单位</th>
+					<th>尺寸</th>
+					<th>成色</th>
+					<th>色级</th>    				
+    				<th>净度</th>
+    				<th>分配未到店数量</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+			#foreach($map in $form.list)
+    			<tr>
+					<td>$!map.OUT_ORG_NAME</td>
+					<td>$!map.IN_ORG_NAME</td>
+					<td>$!map.ITEM_CLASS_NAME</td>
+					<td>$!map.ORNA_CLASS_NAME</td>		
+    			    <td>$!map.ANALYSIS_NAME</td>				
+    				
+    				<td>$!map.STYLE_ITEM_CLASS</td>
+    				<td>$!map.STYLE_MIDDLE_CLASS</td>
+    				<td>$!map.STYLE_ORNA_CLASS</td>
+    				<td>$!HtmlUtil.printStyle("$!map.STYLE_ID", $!map.STYLE_NAME, $!map.ISBIGGRAPH)</td>
+					<td>$!map.UNIT_ID</td>
+					<td>$!map.SIZE_ID</td>
+					<td>$!map.QUALITY_ID</td>
+					<td>$!map.MAIN_COLOR_GRADE_ID</td>
+					<td>$!map.CLEAN_ID</td>
+    				<td>$!map.COUNTS</td>
+    				
+    			</tr>
+			#end
+			</tbody>
+        </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+	
+function setnull(){
+	jQuery("#outOrgId").val("");
+	jQuery("#inOrgId").val("");
+	}
+	
+//显示库存组织选择窗口
+function showOutSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#outOrgId").val(idArr.join(","));
+			jQuery("#outOrgName").val(nameArr.join(","));
+		}, null, null, true, "$!form.condition.outOrgId");
+}
+function showInSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#inOrgId").val(idArr.join(","));
+			jQuery("#inOrgName").val(nameArr.join(","));
+		}, null, null, true, "$!form.condition.inOrgId");
+}
+
+/**
+ * 改变大类
+ */
+function changeOrnaClassId(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true,"$!form.condition.ornaClassId");
+		changeOrnaClass();
+	});
+}
+/**
+ *　改变小类
+ */
+function changeOrnaClass(){
+	//获取分析范围
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true,"$!form.condition.analysisId");
+	});
+};
+
+jQuery(function(){
+	initExportExcel("exportToExcel", exportListToExcel);
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true,"$!form.condition.itemClassId");
+		changeOrnaClassId()
+	});
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#outOrgId").val("$!form.condition.outOrgId");
+	jQuery("#inOrgId").val("$!form.condition.inOrgId");
+	jQuery("#outOrgName").val("$!BdCommon.getOrgName($!form.condition.outOrgId)");
+	jQuery("#inOrgName").val("$!BdCommon.getOrgName($!form.condition.inOrgId)");
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+</script>

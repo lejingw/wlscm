@@ -1,0 +1,112 @@
+<form id='frm' action="labelTagImport.vm" method="post">
+	#set($labelTagImport = $!form.importHead)
+	#set($lines = $!form.lines)
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="headid" name="headid" value="$!{labelTagImport.headid}"/>
+    <table class="title">
+    	<tr><td>标签申请单详情</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' readonly value="$!labelTagImport.billno">
+			</td>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{labelTagImport.orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($labelTagImport.orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status" name='status' readonly value="$!DictUtil.getValue('status', $!labelTagImport.status)">
+			</td>
+			<td class='body1'>件数合计：</td>	
+			<td class='body2'>
+				<input type='text' id="counts" name='counts' readonly value="$!labelTagImport.counts">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>创建人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{labelTagImport.createid}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!labelTagImport.createid)" readonly  >
+			</td>
+			<td class='body1'>创建时间：</td>	
+			<td class='body2'>
+				<input type='text' id="createDate" name='createDate'  value="$!labelTagImport.createdate" readonly  >
+			</td>
+			<td class='body1'>修改人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="updateId" name='updateId' value="$!{labelTagImport.updateid}">
+				<input type='text' id="updateName" name='updateName'  value="$!BdCommon.getUserName($!labelTagImport.updateid)" readonly>
+			</td>
+			<td class='body1'>修改时间：</td>	
+			<td class='body2'>
+				<input type='text' id="updateDate" name='updateDate'  value="$!labelTagImport.updatedate" readonly >
+			</td>
+		</tr>
+    </table>
+	<input type="hidden" value="" name="deleteIds" id="deleteIds"/>
+	<div class="scroll2">
+	<table class='list' style="width:1000px" id="tb_line_id">
+    	<thead>
+			<tr>
+				<th></th>
+				<th width="120px">饰品编码</th>
+				<th width="120px">新饰品名称</th>
+				<th width="80px">新基础价</th>
+				<th width="80px">新金额</th>
+        		<th width="80px">新特殊工费</th>
+				<th >更新原因</th>
+				<th >分单说明</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $lines)
+			<tr>
+				<td></td>
+				<td><input type='text' style='width:120px;' name='ornaCode' value="$!line.ornaCode" readonly dataType="Require" msg="不能为空" /></td>
+				<td><input type='text' style='width:120px;' name='newOrnaName' value="$!line.newOrnaName" readonly /></td>
+				<td><input type='text' style='width:100px;' name='newBasicPrice' value="$!line.newBasicPrice" readonly onblur="checkField()"/></td>
+				<td><input type='text' style='width:100px;' name='newAmount' value="$!line.newAmount" readonly onblur="checkField()"/></td>
+				<td><input type="text" style='width:100px;' name="newSpecialWorkPrice" value="$!line.newSpecialWorkPrice" readonly onblur="checkField()"/></td>
+				<td><input type='text' style='width:180px;' name='updateReason' value="$!line.updateReason" readonly /></td>
+				<td><input type='text' style='width:180px;' name='groupNo' value="$!line.groupNo" readonly </td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+</form>
+<script>
+function changeSeq(tblId){
+	var len = $(tblId).rows.length;
+	for(var i=0; i<len; i++){
+		$(tblId).rows[i].cells[0].innerHTML = len-i;
+	}
+}
+
+function setValues(){
+	var dw = jQuery(document).width();
+	if(dw > 1000){
+		jQuery("#tb_line_id").css("width", dw+"px");
+	}
+}
+
+jQuery(function(){
+	altRowCSS("tbl");
+	jQuery("#deleteIds").val("");
+	setValues();
+	jQuery("#btnToList").click(function(){
+		window.location = "labelTagImport.vm";
+	});
+	checkReview();
+	changeSeq("tbl");
+})
+
+</script>

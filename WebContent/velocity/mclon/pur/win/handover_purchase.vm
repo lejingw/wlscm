@@ -1,0 +1,141 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" name="frm" method="post" action="handover.vm">
+#set($cond = $form.condition)
+#set($billno = $!cond.get('billno'))
+#set($startDate = $!cond.get('startDate'))
+#set($endDate = $!cond.get('endDate'))
+
+<input type="button" value="筛选" id="btnFilter"/>
+<input type="hidden" id="user_action" name="user_action" value = "getPurchaseList"/>
+<div id="queryDiv">
+	<table class="control"><!-- 控制按钮 -->
+		<tr>
+			<td>
+				<input type='button' value='确定' id='btnQueryOk'>
+				<input type='button' value='重置' id='btnQueryReset'>
+				<input type='button' value='取消' id='btnQueryCancel'>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class="body1">单据编号</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' value="$!billno" >
+			</td>
+			<td class="body1"></td>
+			<td class='body2'>
+			</td>
+		</tr>
+		<tr>
+			<td class="body1">业务时间始</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+			</td>
+			<td class="body1">业务时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+			</td>
+        </tr>
+    </table>
+</div>
+<table class='list'>
+	<thead>
+		<tr>
+			<th width='20px'><input type='checkbox' id='chkall'/></th>
+			<th>采购单号</th>
+			<th>单据类型</th>
+			<th>业务类型</th>
+			<th>业务时间</th>
+			<th>购物结束日期</th>
+			<th>状态</th>
+        </tr>
+    </thead>
+	<tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>$!map.billno</td>
+				<td>$!DictUtil.getValue('purbilltype', $!map.billType)</td>
+				<td>$!DictUtil.getValue('purbiztype', $!map.bizType)</td>
+				<td>$!map.dodate</td>
+				<td>$!map.orderEndDate
+    				<input type='hidden' name='headid' value="$!map.headid" />
+					<input type='hidden' name='bill_no' value="$!map.billno" />
+					<input type='hidden' name='bizType' value="$!map.bizType" />
+				</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+			</tr>
+		#end
+    	</tbody>
+</table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+	
+<script >
+jQuery(function(){
+	initQuery("btnFilter", "btnQueryCancel");
+	initCalendarArr(["startDate", "endDate"]);
+	checkTable('tbl', 'chkall', 'chk', true);
+	jQuery("#btnQueryOk").click(search);
+	jQuery("#btnQueryReset").click(reset);
+});
+
+function search(){
+	jQuery("#frm").submit();
+}
+
+function reset(){
+	jQuery("#billno").val("");
+	jQuery("#startDate").val("");
+	jQuery("#endDate").val("");
+}
+
+function getValues(){
+	var idxs = getSelectIndexs("chk");
+	if(idxs != -1){
+		var billTypes = [],
+			list = [],
+			headids = "",
+			billnos = "";
+		for(var i=0; i<idxs.length;i++){
+    		var headid = $n("headid")[idxs[i]].value,
+    			billno = $n("bill_no")[idxs[i]].value,
+    			bizType = $n("bizType")[idxs[i]].value;
+			if(headids){
+				headids = headids + "," + headid;
+			} else {
+				headids = headid;
+			}
+			if(billnos){
+				billnos = billnos + "," + billno;
+			} else {
+				billnos = billno;
+			}
+			if(!list.contains(bizType)){
+				list.push(bizType);
+			}
+		}
+		 if(list.length <=0){
+		 	alert("请选择采购单");
+			return false;
+		 }
+		if(list.length > 1){
+			alert("只允许选择一种业务类型");
+			return false;
+		}
+		var result = {
+			headids	: headids,
+			billnos	: billnos,
+			bizType	: list[0]
+		};
+		return result;
+	} else {
+		alert("请先选择采购单");
+		return false;
+	}
+}
+</script>

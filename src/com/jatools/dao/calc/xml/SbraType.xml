@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SbraType">
+	<typeAlias alias="SbraTypeHead" type="com.jatools.vo.calc.SbraTypeHead" />
+	<typeAlias alias="SbraTypeLine" type="com.jatools.vo.calc.SbraTypeLine"/>
+	<typeAlias alias="Quality" type="com.jatools.vo.bd.Quality"/>
+	
+	<resultMap id="headResult" class="SbraTypeHead">
+		<result property="id" column="id"/>
+		<result property="sbraType" column="SBRA_TYPE"/>
+		<result property="archiveFlag" column="ARCHIVEFLAG"/>
+		<result property="isFee" column="IS_FEE"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<resultMap id="lineResult" class="SbraTypeLine">
+		<result property="id" column="id"/>
+		<result property="sbraTypeId" column="SBRA_TYPE_ID"/>
+		<result property="qualityId" column="QUALITY_ID"/>
+	</resultMap>
+	<resultMap class="Quality" id="qualityResult">
+		<result property="qualityId" column="QUALITY_ID"/>
+		<result property="qualityName" column="QUALITY_DSC"/>
+	</resultMap>
+	
+	<sql id="SbraType.columnsall">
+		id, SBRA_TYPE, ARCHIVEFLAG, IS_FEE,createdate,CREATEUSERID,updatedate,UPDATEUSERID,COEFFICIENT
+    </sql>
+    <sql id="Quality.column">
+    	q.QUALITY_ID,q.QUALITY_DSC
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="SbraType.getPageData" resultMap="headResult" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="SbraType.columnsall"/> from jat_calc_sbra_type a where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.id desc 
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="SbraType.getTotalCount" resultClass="int">
+		select count(1) from jat_calc_sbra_type a where 1 = 1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+    </select>
+    
+    <!-- 保存头表 -->
+    <insert id="SbraType.saveSbraTypeHead" parameterClass="SbraTypeHead">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_sbra_type_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_sbra_type(id, SBRA_TYPE,COEFFICIENT, ARCHIVEFLAG, IS_FEE, createdate,CREATEUSERID,updatedate,UPDATEUSERID)
+		values(#id#,#sbraType#,#coefficient#,#archiveFlag#,#isFee#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+    <!-- 保存行表 -->
+	<insert id="SbraType.saveSbraTypeLineList" parameterClass="SbraTypeLine">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_sbra_type_line_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_sbra_type_line(id, SBRA_TYPE_ID, QUALITY_ID)
+		values(#id#,#sbraTypeId#,#qualityId#)
+	</insert>
+	
+	
+    <!-- 修改头表 -->
+	<update id="SbraType.updateSbraTypeHead" parameterClass="SbraTypeHead">
+		update jat_calc_sbra_type a set a.SBRA_TYPE=#sbraType#,a.COEFFICIENT=#coefficient#, a.ARCHIVEFLAG=#archiveFlag#, a.IS_FEE=#isFee#, 
+		a.createdate=#createDate#, a.CREATEUSERID=#createUserId#, a.updatedate=#updateDate#, a.UPDATEUSERID=#updateUserId#
+		where a.id = #id#
+	</update>
+	
+	<!-- 获取头表 -->
+	<select id="SbraType.getSbraTypeHead" resultMap="headResult" parameterClass="string">
+		select <include refid="SbraType.columnsall"/>, rownum as rownum_ from jat_calc_sbra_type a where a.id=#value#
+	</select>
+	<!-- 获取行表 -->
+	<select id="SbraType.getSbraTypeLineList" resultMap="lineResult" parameterClass="string">
+		select a.id, a.SBRA_TYPE_ID, a.QUALITY_ID from jat_calc_sbra_type_line a where a.SBRA_TYPE_ID=#value#
+	</select>
+	
+	<!-- 删除头表 -->
+	<delete id="SbraType.deleteSbraTypeHead" parameterClass="string">
+		delete jat_calc_sbra_type a where a.id = #value#
+	</delete>
+    <!-- 删除行表 -->
+	<delete id="SbraType.deleteSbraTypeLineByHeadid" parameterClass="string">
+		delete jat_calc_sbra_type_line a where a.SBRA_TYPE_ID = #value#
+	</delete>
+	<!-- 获取所有未封存的配件类型 -->
+	<select id="SbraType.getSbraTypeHeadList" parameterClass="string" resultMap="headResult">
+		select <include refid="SbraType.columnsall"/> from jat_calc_sbra_type a where a.ARCHIVEFLAG!=1 
+	</select>
+	<!-- 获取配件类型下的材质 -->
+	<select id="SbraType.getSbraTypeLineSelectList" parameterClass="string" resultMap="qualityResult">
+		select <include refid="Quality.column"/> from  JAS_BD_QUALITY q left join jat_calc_sbra_type_line l
+		on q.QUALITY_ID = l.QUALITY_ID where l.SBRA_TYPE_ID=#value#
+	</select>
+</sqlMap>

@@ -1,0 +1,307 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+"$StringUtil.getContextPath()/dwr/interface/ProdAccountDwr.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>货品台账#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    		#set($cond = $form.condition)
+    		#set($billno = $!cond.get('billno'))
+    		#set($orgId = $!cond.get('orgId'))
+    		#set($startDate = $!cond.get('startDate'))
+    		#set($endDate = $!cond.get('endDate'))
+			#set($verdorId = $!cond.get('verdorId'))
+			#set($articleId = $!cond.get('articleId'))
+			#set($itemClassId = $!cond.get('itemClassId'))
+			#set($status = $!cond.get('status'))
+			#set($dotype = $!cond.get('dotype'))
+			#set($createId = $!cond.get('createId'))
+			#set($isChecked = $!cond.get('isChecked'))
+			#set($ornaCode = $!cond.get('ornaCode'))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '0802090601','1')>
+				<input type='button' value='高级查询' class='btn' id='btnSearch2' $RightUtil.able($session, '0802090601','1')>
+				<input type='checkbox' id='allBill' name="allBill" onchange="showAllBill(this)" #if("$!status" == "all")checked#end/>显示所有单据
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '0802090601','2')>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+				<td class="body1">创建人</td>
+    			<td class="body2">
+					<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+					<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+				</td>
+    		</tr>
+			<tr>
+				<td class="body1">业务类型</td>
+    			<td class='body2'>
+					<select id="dotype" name='dotype'  value="$!{dotype}" >
+						<option value="">全部</option>
+						<option value="-1">交接单</option>
+						<option value="1">委外发料</option>
+					</select>
+    			</td>
+				<td class="body1">供应商</td>
+    			<td class='body2'>
+    				<select id="verdorId" name='verdorId'  value="$!{verdorId}" >$StringUtil.emptyOption()</select>
+    			</td>
+			</tr>
+			<tr>
+				<td class="body1">饰品编号</td>
+    			<td class='body2'>
+    				<input type='text' id="ornaCode" name='ornaCode' value="$!ornaCode" >
+    			</td>
+				<td class="body1"></td>
+    			<td class='body2'></td>
+			</tr>
+			<tr>
+				<td class="body1">商品类别</td>
+    			<td class='body2'>
+    				<select id="articleId" name='articleId'  value="$!{articleId}" >$StringUtil.emptyOption()</select>
+    			</td>
+				<td class="body1">大类</td>
+    			<td class='body2'>
+    				<select id="itemClassId" name='itemClassId'  value="$!{itemClassId}" >$StringUtil.emptyOption()</select>
+    			</td>
+			</tr>
+			<tr>
+				<td class="body1">完成核销</td>
+    			<td class='body2'>
+    				<select id="isChecked" name='isChecked'  value="$!{isChecked}" >$StringUtil.emptyOption()</select>
+    			</td>
+				<td class="body1">状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status'  value="$!{status}" >
+						$StringUtil.emptyOption()
+						<option value="all">所有单据</option>
+						<option value="2">记账</option>
+						<option value="12">已引用</option>
+					</select>
+    			</td>
+			</tr>
+			<tr>
+    			<td class="body1">业务时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">业务时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+	<div class="scroll">
+    <table class='list' style="width:2200px;">
+    	<thead>
+			<tr>
+				<th width='35px'>序号</th>
+				<th width="60px">状态</th>
+                <th width="120px">来源单据编号<br>(查看核销记录)</th>
+				<th width="120px">来源单据类型</th>
+        		<th width="90px">来源业务<br>类型</th>
+				<th width="180px">组织(新建结算单)</th>
+				<th width="180px">供应商</th>
+				<th width="100px">饰品编码</th>
+				<th width="90px">原料类型</th>
+				<th width="90px">商品类别</th>
+				<th width="90px">大类</th>
+				<th width="90px">单据时间</th>
+				<th width="60px">数量</th>
+				<th width="100px">已核销数量</th>
+				<th width="100px">未核销数量</th>
+				<th width="100px">锁定数量</th>
+				<th width="60px">核销完成</th>
+        		<th width="90px">创建人</th>
+        		<th width="120px">创建时间</th>
+				<th width="90px">修改人</th>
+        		<th width="120px">修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td>$velocityCounter
+                        <input type="hidden" name="list_bill_code" value="$!map.billType">
+                        <input type="hidden" name="list_bill_no" value="$!map.billNo">
+                </td>
+				<td style="color:blue;">$!DictUtil.getValue('status', "$!map.status")</td>
+				<td><a href='javascript:toFindCashList($!{map.prId});'>$!map.billNo</a></td>
+				<td>$!DictUtil.getValue('billcode', $!map.billType)</td>
+				<td>#if($!map.dotype==-1)交接单#else委外发料#end</td>
+				<td>
+                    <a href='javascript:createCashHead("$!{map.prId}")'>$!BdCommon.getOrgName($!map.orgId)</a>
+				</td>
+				<td><input type='text' readonly class='none' value="$!BdCommon.getVendorName($!map.voderId)" style='width:180px;'></td>
+				<td>$!map.memo</td>
+				<td>$!map.materialTypeName</td>
+				<td>$!map.articleTypeDsc</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!map.billDate</td>
+				<td>$!map.billNums</td>
+				<td>$!map.cashNums</td>
+				<td>$!map.noNums</td>
+				<td>$!map.userNums</td>
+				<td style="color:blue;">$!DictUtil.getValue("yesorno", $!map.isChecked)</td>
+				#set($createId = $!map.createId)
+				<td>$!BdCommon.getUserName("$!createId")</td>
+				<td>$!map.createDate
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="payId" value="$!map.payId"/>
+				</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!map.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#status").val("$!status");
+	jQuery("#dotype").val("$!dotype");
+	ProdAccountDwr.getVendorList(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!verdorId");
+		changeVendor("$!articleId", "$!itemClassId");
+	});
+	DictDwr.getDictsForSlt("yesorno", function(data){
+		addOptions("isChecked",  data, null, null, true, true, "$!isChecked");
+	});
+}
+
+function changeVendor(articleId, itemClassId){
+	var vendorId = jQuery("#verdorId").val();
+	ProdAccountDwr.getArticleList(vendorId, function(data){
+		addOptions("articleId",  data, null, null, true, true, articleId);
+		changeArticle(itemClassId);
+	});
+}
+function changeArticle(itemClassId){
+	var articleId = jQuery("#articleId").val();
+	ProdAccountDwr.getItemClassList(articleId, function(data){
+		addOptions("itemClassId",  data, null, null, true, true, itemClassId);
+	});
+}
+
+function disableDeleteBtn(checked, index){
+	jQuery("#btnDelete").attr("disabled", true);
+	if(checked ){
+		if($n("status_list")[index].value==="1"){
+			jQuery("#btnDelete").attr("disabled", false);
+		}
+	}
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', false, null, function(index){
+        viewSrcBillWin("", $n("list_bill_no")[index].value, $n("list_bill_code")[index].value);
+    });
+	initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("HPTZ01", "frm", "btnSearch2");
+	jQuery("#verdorId").change(function(){
+		changeVendor("", "");
+	});
+	jQuery("#articleId").change(function(){
+		changeArticle("");
+	});
+
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+		jQuery("#status").val("");
+		jQuery("#createName").val("");
+		jQuery("#createId").val("");
+		jQuery("#articleId").val("");
+		jQuery("#isChecked").val("");
+		jQuery("#itemClassId").val("");
+		jQuery("#ornaCode").val("");
+	});
+});
+
+function showAllBill(obj) {
+	if(obj.checked){
+		jQuery("#status").val("all");
+	} else {
+		jQuery("#status").val("");
+	}
+	jQuery("#frm").submit();
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+function toFindCashList(prId){
+	var _iframeId = "findCashListIframe";
+	var options = {
+		title : '单据结算列表',
+		contentType : 'iframe',
+		iframeId : _iframeId,
+		width : 800,
+		height : 300,
+		okBtnName : '确定',
+		closeable:true,
+		boxid:'winDiv',
+		onok : function(box) {
+			box.close();
+		},
+		oncancel : function(box) {
+			box.close();
+		}
+	};
+	var url = ctxPath + '/pur/cash/prodAccount.vm?user_action=doFindCashList&prId='+prId;
+	jQuery.weeboxs.open(url, options);
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+
+
+function createCashHead(prId){
+	ProdAccountDwr.checkProdAccount(prId, function(data){
+		if(data){
+			window.location = ctxPath + '/pur/cash/cashHead.vm?user_action=doNewCash&prId='+prId;
+		} else {
+            alert("<font color='red'>此单据无法创建结算单。</font><br>[确保台账 未被引用，未核销完成并且未核销数量大于0]");
+		}
+	});
+}
+</script>

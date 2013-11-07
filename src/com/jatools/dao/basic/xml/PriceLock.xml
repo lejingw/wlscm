@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PriceLock">
+    <!-- 获取分页数据 -->
+	<select id="PriceLock.getPriceLockPageData" resultClass="com.jatools.vo.basic.PriceLockHead" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid as "headid", a.billno as "billno", a.org_id as "orgId", a.lock_flag as "lockFlag",
+				a.sum_count as "sumCount", a.lock_reason as "lockReason", a.create_id as "createId", a.create_date as "createDate",
+				a.update_id as "updateId", a.update_date as "updateDate", a.status as "status"
+			from jat_basic_price_lock_head a
+			where a.org_id = #orgId#
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 5]]></isNotEqual>
+			order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PriceLock.getPriceLockTotalCount" resultClass="int">
+		select count(1) from jat_basic_price_lock_head a where a.org_id = #orgId#
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+		<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 5]]></isNotEqual>
+    </select>
+    <select id="PriceLock.getPriceLockHead" parameterClass="string" resultClass="com.jatools.vo.basic.PriceLockHead">
+    	select a.headid as "headid", a.org_id as "orgId", a.billno as "billno", a.lock_flag as "lockFlag", a.lock_reason as "lockReason",
+				a.sum_count as "sumCount", a.create_id as "createId", a.create_date as "createDate",
+				a.update_id as "updateId", a.update_date as "updateDate", a.status as "status"
+		from jat_basic_price_lock_head a where a.headid = #value#
+    </select>
+    <select id="PriceLock.getPriceLockLine" parameterClass="string" resultClass="com.jatools.vo.basic.PriceLockLine">
+    	select a.lineid as "lineid", a.headid as "headid", a.orna_code as "ornaCode", a.bar_code as "barCode", a.orna_dsc as "ornaDsc",
+			a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.style_id as "styleId", b.stylename as "styleName", b.isbiggraph as "bigGraph",
+			a.basic_price as "basicPrice", a.pos_money as "posMoney", all_weight as "allWeight", main_weight as "mainWeight",
+			part_weight as "partWeight", color_grade_id as "colorGradeId", clean_id as "cleanId", a.status as "status"
+		from jat_basic_price_lock_line a left join jas_bd_style b on a.style_id = b.styleid where a.headid = #value#
+		order by a.orna_code
+    </select>
+    <select id="PriceLock.getMaterActiveInfo" parameterClass="map" resultClass="com.jatools.vo.basic.PriceLockLine">
+    	select a.orna_code as "ornaCode", a.orna_barcode as "barCode", a.orna_dsc as "ornaDsc", a.item_class_id as "itemClassId",
+			a.orna_class_id as "ornaClassId", a.style_id as "styleId", b.stylename as "styleName", b.isbiggraph as "bigGraph",
+			a.basic_price as "basicPrice", a.pos_amount as "posMoney", a.all_qty as "allWeight",
+            a.main_weight as "mainWeight", a.part_weight as "partWeight", a.main_color_grade_id as "colorGradeId",
+            a.clean_id as "cleanId", a.org_id as "orgId", a.state as "status", a.is_lock as "lockFlag", a.sale_unit_id as "unitId"
+		from ic_mater_active a left join jas_bd_style b on a.style_id = b.styleid
+		where <isEqual property="ornaFlag" compareValue="1"> a.orna_code = #code#</isEqual>
+		<isNotEqual property="ornaFlag" compareValue="1"> a.orna_barcode = #code#</isNotEqual>
+    </select>
+	<insert id="PriceLock.savePriceLockHead" parameterClass="com.jatools.vo.basic.PriceLockHead">
+		<selectKey keyProperty="headid" type="pre" resultClass="string">
+			select jat_basic_price_lock_head_seq.nextval from dual
+		</selectKey>
+		insert into jat_basic_price_lock_head(headid, billno, org_id, create_id, create_date, update_id, update_date, status, lock_flag, lock_reason, sum_count)
+		values(#headid#, #billno#, #orgId#, #createId#, #createDate#, #updateId#, #updateDate#, #status#, #lockFlag#, #lockReason#, #sumCount#)
+	</insert>
+	<insert id="PriceLock.savePriceLockLine" parameterClass="map">
+		insert into jat_basic_price_lock_line(lineid, headid, orna_code, orna_dsc, item_class_id, orna_class_id, style_id, basic_price, pos_money, all_weight, main_weight, part_weight, color_grade_id, clean_id, status)
+		select jat_basic_price_lock_line_seq.nextval, #headid#, a.orna_code, a.orna_dsc, a.item_class_id, a.orna_class_id, a.style_id, a.basic_price, a.pos_amount, a.all_qty, a.main_weight, a.part_weight, a.main_color_grade_id, a.clean_id, 1
+		from ic_mater_active a where a.orna_code = #ornaCode#
+	</insert>
+	<update id="PriceLock.updatePriceLockHead" parameterClass="com.jatools.vo.basic.PriceLockHead">
+		update jat_basic_price_lock_head a
+		set a.lock_flag = #lockFlag#, a.lock_reason = #lockReason#, a.sum_count = #sumCount#, a.update_id = #updateId#, a.update_date = #updateDate#, a.status = #status#
+		where a.headid = #headid#
+	</update>
+	<delete id="PriceLock.deletePriceLockHead" parameterClass="string">
+		delete jat_basic_price_lock_head a where a.headid = #value#
+	</delete>
+	<delete id="PriceLock.deletePriceLockLineByHeadid" parameterClass="string">
+		delete jat_basic_price_lock_line a where a.headid = #value#
+	</delete>
+	<delete id="PriceLock.deletePriceLockLineByOrnaCode" parameterClass="map">
+		delete jat_basic_price_lock_line a where a.headid = #headid# and a.orna_code = #ornaCode#
+	</delete>
+	<update id="PriceLock.updatePriceLockHeadStatus" parameterClass="map">
+		update jat_basic_price_lock_head a set a.update_id = #userid#, a.update_date = #date#, a.status = #status#
+		where a.headid = #headid#
+	</update>
+    <!-- 
+	<select id="PriceLock.getPriceLockHead" parameterClass="string" resultClass="com.jatools.vo.basic.PriceLockHeadHead">
+		select a.rece_id as "receId", a.rece_user as "receUser", a.create_date as "createDate", a.create_id as "createId", a.update_date as "updateDate", a.update_id as "updateId", a.status as "status"
+  			from jat_basic_express_receuser a where a.status = 1
+			and a.org_id = #value# order by a.rece_user, a.rece_id
+	</select>
+	<select id="PriceLock.getPriceLockLine" parameterClass="string" resultClass="com.jatools.vo.basic.PriceLockLine">
+		select a.rece_id as "receId", a.rece_user as "receUser", a.create_date as "createDate", a.create_id as "createId", a.update_date as "updateDate", a.update_id as "updateId", a.status as "status"
+  			from jat_basic_express_receuser a where a.status = 1
+			and a.org_id = #value# order by a.rece_user, a.rece_id
+	</select>
+	 -->
+	 
+	<sql id="PriceLock.queryColumns">
+	   nvl(a.is_lock, 0) as "lockFlag",
+       a.org_id as "orgId",
+       a.item_class_id as "itemClassId",
+       a.orna_class_id as "ornaClassId",
+       a.alaysis_id as "analysisId",
+       b.summarydescription as "analysisName",
+       c.styleitemclass as "styleItemClassId",
+       c.stylemiddleclass as "styleMiddleClassId",
+       c.styleornaclass as "styleOrnaClassId",
+       a.style_id as "styleId",
+       c.stylename as "styleName",
+       c.isbiggraph as "bigGraph",
+       a.orna_code as "ornaCode",
+       a.orna_dsc as "ornaDsc",
+       a.sale_unit_id as "unitId",
+       a.now_qty as "nowQty",
+       a.all_qty as "allQty",
+       a.stone_total_num as "stoneTotalNum",
+       a.pos_amount as "posAmount",
+       a.main_weight as "mainWeight",
+       a.part_weight as "partWeight",
+       a.state as "status"
+	</sql>
+	<sql id="PriceLock.queryPriceLockPageDataCD">
+		where a.stock_id=1 and a.sale_unit_id=612
+			<isNotEmpty property="orgId" prepend="and">  a.org_id in($orgId$) </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+   			<isNotEmpty property="styleItemClassId" prepend="and">  c.STYLEITEMCLASS = #styleItemClassId# </isNotEmpty>
+   			<isNotEmpty property="styleOrnaClassId" prepend="and">  c.STYLEORNACLASS = #styleOrnaClassId# </isNotEmpty>
+   			<isNotEmpty property="styleMiddleClassId" prepend="and">  c.STYLEMIDDLECLASS = #styleMiddleClassId# </isNotEmpty>
+			<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+			<isNotEmpty property="posAmountStart" prepend="and"> <![CDATA[a.pos_amount >= #posAmountStart#]]></isNotEmpty>
+			<isNotEmpty property="posAmountEnd" prepend="and"> <![CDATA[a.pos_amount <= #posAmountEnd#]]></isNotEmpty>
+			<isNotEmpty property="barCode" prepend="and"> <![CDATA[a.orna_barcode <= #barCode#]]></isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and"> <![CDATA[a.orna_code <= #ornaCode#]]></isNotEmpty>
+			<isEqual property="lockFlag" compareValue="1" prepend="and"> nvl(a.is_lock, 0) = 1</isEqual>
+			<isEqual property="lockFlag" compareValue="0" prepend="and"> nvl(a.is_lock, 0) = 0</isEqual>
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="PriceLock.queryPriceLockPageData" resultClass="com.jatools.vo.basic.PriceLockItem" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="PriceLock.queryColumns"/>
+			from ic_mater_active a left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+				left join jas_bd_style c on a.style_id = c.STYLEID
+			<include refid="PriceLock.queryPriceLockPageDataCD"/>
+			order by a.orna_code
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="PriceLock.queryPriceLockTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from ic_mater_active a left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+				left join jas_bd_style c on a.style_id = c.STYLEID
+		<include refid="PriceLock.queryPriceLockPageDataCD"/>
+	</select>
+</sqlMap>

@@ -1,0 +1,229 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【代销明细查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>	
+				<input type='reset' value='重置' class='btn' id='btnReset'>				
+
+  	        	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08051401','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08051401','2')>
+                &nbsp;&nbsp;[<label style="color: red; ">数据截止到昨天</label>]
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>时间起</td>
+			<td class='body2'>	<input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='text' id="startDate" name='startDate' value="">
+			</td>
+				<td class='body1'>时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+			<td class='body1'>交接单号</td>
+			<td class='body2'>
+				<input type='text' id="handoverno" name='handoverno' value="">
+            </td>
+		</tr>
+		<tr>
+			<td class='body1'>供应商</td>
+			<td class='body2'>
+				<input type='hidden' id='vendorId' name="vendorId" value="">
+				<input type='text' id='vendorName' value="" readonly class='target' ondblclick="showVendorWin()">
+			</td>
+            <td class='body1'>工厂款号</td>
+            <td class='body2'>
+                <input type='text' id='factoryStyleId' name="factoryStyleId" value="" >
+            </td>
+            <td class='body1'>工厂编码</td>
+            <td class='body2'>
+                <input type='text' id='factoryOrnaCode' name="factoryOrnaCode" value="" >
+            </td>
+		</tr>
+    </table>
+	<div class='scroll2'>
+    <table class='list' style='width:2500px;'>
+    	<thead>
+			<tr>
+				<th >供应商</th>
+                <th>组织</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>分析范围</th>
+				<th>款式大类</th>
+				<th>款式中类</th>
+				<th>款式小类</th>
+				<th>款式名称</th>
+				<th>主题名称</th>
+				<th>钻石品质</th>
+				<th>材质</th>
+				<th>颜色</th>
+				<th>净度</th>
+				<th >总重</th>
+				<th>主石重</th>
+				<th>配石重</th>
+				<th>手寸</th>
+				<th>入库日期</th>
+				<th>到店日期</th>
+				<th>销售方式</th>
+				<th>标价</th>
+				<th>成交价</th>
+				<th>折扣</th>
+				<th>商品编码</th>
+				<th>销售日期</th>
+				<th>销售年月</th>
+				<th>工厂款号</th>
+				<th>工厂编码</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+			    <td nowrap>$!map.CUSTNAME</td>
+				<td>$!map.ORG_NAME</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.ANALYSIS_ARANGE_CODE</td>
+				<td>$!map.STYLEITEMNAME</td>
+				<td>$!map.STYLEMIDDLENAME</td>
+				<td>$!map.STYLEORNANAME</td>
+				<td>$!HtmlUtil.printStyle("$!map.STYLEID", $!map.STYLENAME, $!map.ISBIGGRAPH)</td>
+				<td>$!map.THEME_NAME</td>
+				<td>$!map.PINGZ</td>
+				<td>$!map.QUALITY_DSC</td>
+				<td>$!map.COLORGRADE</td>
+				<td>$!map.CLEANNAME</td>
+				<td>$!map.TOTAL_WEIGHT</td>
+				<td>$!map.MAIN_WEIGHT</td>
+				<td>$!map.PART_WEIGHT</td>
+				<td>$!map.SIZE_NAME</td>
+				<td>$!map.STORAGEDATE</td>
+				<td>$!map.TOSHOPDATE</td>
+				<td>$!map.UNITNAME</td>
+				<td>$!map.RECEIVABLE_AMOUNT</td>				
+				<td>$!map.RECEIVED_AMOUNT</td>
+				<td>$!map.DEDUCT_AMOUNT</td>
+				<td>$!map.ORNA_CODE</td>
+				<td>$!map.TRANS_DATE</td>
+				<td>$!map.TRANS_YM</td>
+				<td>$!map.FACTORY_STYLE_ID</td>
+				<td>$!map.FACTORY_ORNA_CODE</td>
+			</tr>
+		#end	
+		
+		#foreach($map in $form.listSum)
+			<tr>
+				<td>合计</td>
+			    <td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			    <td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>			
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_TOTAL_WEIGHT</td>
+				<td>$!map.SUM_MAIN_WEIGHT</td>
+				<td>$!map.SUM_PART_WEIGHT</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_RECEIVABLE_AMOUNT</td>				
+				<td>$!map.SUM_RECEIVED_AMOUNT</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+                <td></td>
+                <td></td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		jQuery("#vendorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#vendorId").val());
+}
+function setValues(){
+    altRowCSS("tbl");
+	jQuery("#vendorId").val("$!form.condition.vendorId");
+	jQuery("#vendorName").val("$!BdCommon.getVendorName($!{form.condition.vendorId})");
+	jQuery("#startDate").val("$!form.condition.startDate");	
+	jQuery("#endDate").val("$!form.condition.endDate");
+	jQuery("#handoverno").val("$!form.condition.handoverno");
+    jQuery("#factoryStyleId").val("$!form.condition.factoryStyleId");
+    jQuery("#factoryOrnaCode").val("$!form.condition.factoryOrnaCode");
+}	
+	
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+	newCalendar();
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+</script>

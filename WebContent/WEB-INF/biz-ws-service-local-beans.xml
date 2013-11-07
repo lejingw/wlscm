@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans default-autowire="byName">
+    
+    <!-- 模拟远程进入审批 -->
+    <bean id="enterReviewRemoteService" class="com.jatools.ws.review.impl.EnterReviewRemoteServiceImpl"></bean>
+    <bean class="org.codehaus.xfire.spring.remoting.XFireExporter">
+        <property name="serviceFactory" ref="xfire.serviceFactory"/>
+        <property name="xfire" ref="xfire"/>
+        <property name="serviceBean" ref="enterReviewRemoteService"/>
+        <property name="serviceClass" value="com.jatools.ws.review.EnterReviewRemoteService"/>
+    </bean>
+	
+    <!-- 模拟远程查看审批记录 -->
+    <bean id="viewReviewLogRemoteService" class="com.jatools.ws.review.impl.ViewReviewLogRemoteServiceImpl"></bean>
+    <bean class="org.codehaus.xfire.spring.remoting.XFireExporter">
+        <property name="serviceFactory" ref="xfire.serviceFactory"/>
+        <property name="xfire" ref="xfire"/>
+        <property name="serviceBean" ref="viewReviewLogRemoteService"/>
+        <property name="serviceClass" value="com.jatools.ws.review.ViewReviewLogRemoteService"/>
+    </bean>
+    
+    <!-- 发布审批结束调用服务 -->
+    <bean id="reviewOverRemoteService" class="com.jatools.ws.review.impl.ReviewOverRemoteServiceImpl"></bean>
+    <bean class="org.codehaus.xfire.spring.remoting.XFireExporter">
+        <property name="serviceFactory" ref="xfire.serviceFactory"/>
+        <property name="xfire" ref="xfire"/>
+        <property name="serviceBean" ref="reviewOverRemoteService"/>
+        <property name="serviceClass" value="com.jatools.ws.review.ReviewOverRemoteService"/>
+    </bean>
+    
+    <!-- 发布刷新缓存服务 -->
+    <bean id="refreshCacheRemoteService" class="com.jatools.ws.review.impl.RefreshCacheRemoteServiceImpl"></bean>
+    <bean class="org.codehaus.xfire.spring.remoting.XFireExporter">
+        <property name="serviceFactory" ref="xfire.serviceFactory"/>
+        <property name="xfire" ref="xfire"/>
+        <property name="serviceBean" ref="refreshCacheRemoteService"/>
+        <property name="serviceClass" value="com.jatools.ws.review.RefreshCacheRemoteService"/>
+    </bean>
+    
+</beans>

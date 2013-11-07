@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MovePack">
+	<sql id="MovePack.getMovePackPageDataCD">
+		where a.bill_type = #billType# and a.jm_flag = #jmFlag# and ((a.in_org_id = #orgId# and (a.status = 5 or a.status = 10)) or exists
+        	(select 1 from jas_bd_emp_org b where b.orgid = a.out_org_id and b.empid = #userId#))
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 10]]></isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="MovePack.getMovePackPageData" parameterClass="map" resultClass="com.jatools.vo.move.MovePackHead">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid as "headid", a.billno as "billno", a.express_mode as "expressMode", a.express_no as "expressNo",
+       			a.express_charge as "expressCharge", a.express_premium as "expressPremium", a.express_money as "expressMoney",
+				a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.sum_count as "sumCount", a.plan_end_date as "planEndDate", a.gross_weight as "grossWeight",
+				a.receive_emp_id as "receiveEmpId", a.receive_date as "receiveDate", a.create_date as "createDate", a.create_id as "createId",
+				a.update_date as "updateDate", a.update_id as "updateId", a.status as "status", a1.bill_no as "saleEstimateNo"
+			<isEqual property="jmFlag" compareValue="1">
+				, decode(a.jm_flag, 1, (select wm_concat(d.estimate_no) from jat_move_pack_line c, jat_move_head d where c.headid = a.headid and c.bill_id = d.headid), null) as "estimateNos"
+			</isEqual>
+			from jat_move_pack_head a left join jms_estimate_sale_express a1 on a1.express_id = a.headid
+			<include refid="MovePack.getMovePackPageDataCD"/>
+			order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+    <select id="MovePack.getMovePackTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_move_pack_head a left join jms_estimate_sale_express a1 on a1.express_id = a.headid 
+		<include refid="MovePack.getMovePackPageDataCD"/>
+    </select>
+    
+    <select id="MovePack.getMoveBillInfo" parameterClass="map" resultClass="com.jatools.vo.move.MovePackLine">
+    	select a.headid as "billId", a.billno as "billNo", a.create_id as "billUserId",
+			a.sum_count as "billCount", a.sum_cost as "billCost", a.out_org_id  as "outOrgId", a.in_org_id  as "inOrgId", a.status as "status", a.bill_type  as "moveBillType",
+            a.estimate_no || nvl2(a.red_estimate_no, '-' || a.red_estimate_no, '') as "estimateNo"
+		from jat_move_head a where a.billno = #moveNo# and a.jm_flag = #jmFlag# and a.bill_type in (1,2,3)
+    </select>
+    <select id="MovePack.getFixBillInfo" parameterClass="string" resultClass="com.jatools.vo.move.MovePackLine">
+    	select a.id as "billId", a.no as "billNo", a.create_user_id as "billUserId", a.out_fix_num as "billCount", 0 as "billCost", a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.state as "status"
+		from jas_pos_bill_fix_flitting a where a.no = #value#
+    </select>
+    <select id="MovePack.getHandoverBillInfo" parameterClass="string" resultClass="com.jatools.vo.move.MovePackLine">
+    	select a.billid as "billId", a.billno as "billNo", a.create_id as "billUserId", a.is_pack as "isPack",
+			a.sum_num as "billCount", a.sum_money as "billCost", a.org_id as "outOrgId", null as "inOrgId", a.status as "status"
+		from jat_pur_handover_head a where a.billno = #value#
+    </select>
+    <select id="MovePack.getProcChangeBillInfo" parameterClass="string" resultClass="com.jatools.vo.move.MovePackLine">
+    	select a.billid    as "billId",
+		       a.billno    as "billNo",
+		       a.create_id as "billUserId",
+		       a.is_pack   as "isPack",
+		       a.sum_count as "billCount",
+		       a.sum_cost  as "billCost",
+		       a.org_id    as "outOrgId",
+		       null        as "inOrgId",
+		       a.status    as "status"
+		  from jat_proc_change_head a
+		 where a.billno = #value#
+    </select>
+    <select id="MovePack.checkMoveBillStatusAvail" parameterClass="map" resultClass="string">
+    	<![CDATA[select a.billno from jat_move_head a where a.status<>5 and a.headid in ($value$)]]>
+    </select>
+    <!-- 保存调拨单 -->
+    <insert id="MovePack.saveMovePackHead" parameterClass="com.jatools.vo.move.MovePackHead">
+    	<selectKey keyProperty="headid" resultClass="string" type="pre">
+    		select jat_move_pack_head_seq.nextval as "headid" from dual
+    	</selectKey>
+    	insert into jat_move_pack_head(headid, billno, dodate, bill_type, out_org_id, in_org_id, receive_date, receive_emp_id,
+			express_mode, express_no, plan_end_date, gross_weight, send_user_id, send_org_id, rece_user_ids, rece_org_id,
+			sum_count, sum_cost, memo, create_date, create_id, update_date, update_id, status, jm_flag, express_charge, express_premium, express_money, cash_flag)
+		values(#headid#, #billno#, #dodate#, #billType#, #outOrgId#, #inOrgId#, #receiveDate#, #receiveEmpId#,
+			#expressMode#, #expressNo#, #planEndDate#, #grossWeight#, #sendUserId#, #sendOrgId#, #receUserIds#, #receOrgId#,
+			#sumCount#, #sumCost#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #status#, #jmFlag#, #expressCharge#, #expressPremium#, #expressMoney#, #cashFlag#)
+    </insert>
+    <update id="MovePack.updateMovePackHead" parameterClass="com.jatools.vo.move.MovePackHead">
+    	update jat_move_pack_head a set a.in_org_id = #inOrgId#, a.dodate = #dodate#, a.express_mode = #expressMode#, a.express_no = #expressNo#, a.plan_end_date = #planEndDate#,
+    		a.gross_weight = #grossWeight#, a.sum_count = #sumCount#, a.sum_cost = #sumCost#, a.rece_user_ids = #receUserIds#,
+    		a.memo = #memo#, a.update_date = #updateDate#, a.update_id = #updateId#, status = #status#,
+    		express_charge = #expressCharge#, express_premium = #expressPremium#, express_money = #expressMoney#
+		where a.headid = #headid#
+    </update>
+    <insert id="MovePack.saveMovePackLine" parameterClass="com.jatools.vo.move.MovePackLine">
+    	<selectKey keyProperty="lineid" resultClass="string" type="pre">
+    		select jat_move_pack_line_seq.nextval as "lineid" from dual
+    	</selectKey>
+    	insert into jat_move_pack_line(lineid, headid, bill_id, bill_no, bill_user_id, bill_count, bill_cost, create_date, create_id, status)
+		values(#lineid#, #headid#, #billId#, #billNo#, #billUserId#, #billCount#, #billCost#, #createDate#, #createId#, #status#)
+    </insert>
+    <delete id="MovePack.deleteMovePackLine" parameterClass="string">
+		delete jat_move_pack_line a where a.headid = #value#
+    </delete>
+    <delete id="MovePack.deleteMovePackHead" parameterClass="string">
+    	delete jat_move_pack_head a where a.headid = #value#
+    </delete>
+    <delete id="MovePack.deleteMovePackLineByBillId" parameterClass="map">
+		delete jat_move_pack_line a where a.headid = #headid# and a.bill_id = #billId#
+    </delete>
+    <select id="MovePack.getMovePackLine" parameterClass="string" resultClass="com.jatools.vo.move.MovePackLine">
+    	select a.lineid as "lineid", a.bill_id as "billId", a.bill_no as "billNo", a.bill_user_id as "billUserId", b.empname as "billUserName",
+			a.bill_count as "billCount", a.bill_cost as "billCost",
+            c.estimate_no || nvl2(c.red_estimate_no, '-' || c.red_estimate_no, '') as "estimateNo"
+  		from jat_move_pack_line a left join jas_bd_emp b on a.bill_user_id = b.empid left join jat_move_head c on a.bill_id = c.headid
+         where a.headid = #value#
+		order by a.bill_id
+    </select>
+    <select id="MovePack.getMovePackHead" parameterClass="string" resultClass="com.jatools.vo.move.MovePackHead">
+    	select a.headid as "headid", a.billno as "billno", a.bill_type as "billType", a.create_id as "createId", a.gross_weight as "grossWeight",
+			a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.express_mode as "expressMode", a.express_no as "expressNo", a.dodate as "dodate",
+			a.plan_end_date as "planEndDate", a.sum_count as "sumCount", a.sum_cost as "sumCost",
+			a.send_org_id as "sendOrgId", a.send_user_id as "sendUserId", a.rece_org_id as "receOrgId", a.rece_user_ids as "receUserIds",
+			a.receive_emp_id as "receiveEmpId", a.receive_date as "receiveDate", a.memo as "memo", a.status as "status", a.jm_flag as "jmFlag",
+			a.express_charge as "expressCharge", a.express_premium as "expressPremium", a.express_money as "expressMoney", a.cash_flag as "cashFlag",
+			a1.bill_no as "saleEstimateNo"
+		from jat_move_pack_head a left join jms_estimate_sale_express a1 on a1.express_id = a.headid
+		where a.headid = #value#
+    </select>
+    <update id="MovePack.updateMovePackHeadStatus" parameterClass="map">
+    	update jat_move_pack_head a set a.status = #status#, a.update_date = #date#, a.update_id = #userid#
+    	<isEqual property="reviewFlag" compareValue="1">, a.check_date = #date#, a.check_id = #userid#</isEqual>
+    	where a.headid = #headid#
+    </update>
+    <select id="MovePack.getPackNoByBillno" parameterClass="map" resultClass="string">
+    	select a.billno from jat_move_pack_head a, jat_move_pack_line b where a.headid = b.headid
+			and a.bill_type = #billType# and a.jm_flag = #jmFlag# and b.bill_no = #billno#
+		<isNotEmpty property="headid"><![CDATA[ and a.headid <> #headid#]]></isNotEmpty>
+    </select>
+    <select id="MovePack.checkBillStatusAvail" parameterClass="map" resultClass="string">
+    	select a.billno from jat_move_pack_head a, jat_move_pack_line b where a.headid = b.headid and a.bill_type = #billType# and a.jm_flag = #jmFlag#
+    		and b.bill_id in ($billids$)
+    	<isNotEmpty property="headid"><![CDATA[ and a.headid <> #headid#]]></isNotEmpty>
+    </select>
+    <select id="MovePack.checkBillStatusAvail2" parameterClass="map" resultClass="string">
+    	<![CDATA[select a.billno from jat_move_head a where a.jm_flag = #jmFlag# and a.headid in ($billids$) and a.bill_type = #billType# and a.status <> #status#]]>
+    </select>
+    <update id="MovePack.receiveMovePack" parameterClass="map">
+	    update jat_move_pack_head a set a.receive_date = #date#, a.receive_emp_id = #userid#, a.status = #status#
+		where a.headid = #headid#
+    </update>
+	<parameterMap class="map" id="MovePack.updateFixBillPackNoPM">
+		<parameter property="headid"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="status"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="expressNo"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="result"		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+	</parameterMap>
+	<procedure id="MovePack.updateFixBillPackNo" parameterMap="MovePack.updateFixBillPackNoPM">
+		<![CDATA[{call wl_scm.expressno_update(?,?,?,?)}]]>
+	</procedure>
+	<update id="MovePack.updateMoveBillStatusAndPackNo" parameterClass="map">
+		update jat_move_head a
+		<isNotEmpty property="packNo"> set a.status = 17, a.pack_id = #packId#, a.pack_no = #packNo#</isNotEmpty>
+		<isEmpty property="packNo"> set a.status = 5, a.pack_id = null, a.pack_no = null</isEmpty>
+		 where exists (select 1 from jat_move_pack_line b where b.headid = #packId# and b.bill_id = a.headid)
+	</update>
+	<update id="MovePack.updateReceUserIds" parameterClass="map">
+		update jat_move_pack_head a
+		   set a.rece_user_ids = #receUserIds#,
+		       a.update_date   = #date#,
+		       a.update_id     = #userid#
+		 where a.headid = #headid#
+	</update>
+	<update id="MovePack.updateExpress" parameterClass="map">
+		update jat_move_pack_head a
+		   set a.express_charge		= #expressCharge#,
+		       a.express_premium	= #expressPremium#,
+		       a.express_money		= #expressMoney#
+		 where a.headid = #headid#
+	</update>
+</sqlMap>

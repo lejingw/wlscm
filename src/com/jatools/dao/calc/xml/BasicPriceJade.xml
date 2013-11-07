@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="BasicPriceJade">
+	<typeAlias alias="BasicPriceJade" type="com.jatools.vo.calc.BasicPriceJade"/>
+	<resultMap class="BasicPriceJade" id="result">
+		<result property="billid" column="bill_id"/>
+		<result property="itemclassid" column="ITEM_CLASS_ID"/>
+		<result property="startprice" column="START_PRICE"/>
+		<result property="endprice" column="END_PRICE"/>
+		<result property="bigprice" column="BIG_PRICE"/>
+		<result property="smallprice" column="SMALL_PRICE"/>
+		<result property="decimalnum" column="DECIMAL_NUM"/>
+		
+		<result property="createdate" column="createdate"/>
+		<result property="createuserid" column="CREATEUSERID"/>
+		<result property="updatedate" column="updatedate"/>
+		<result property="updateuserid" column="UPDATEUSERID"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	<sql id="BasicPriceJade.Columns.all">
+		bill_id,item_class_id,START_PRICE,END_PRICE,BIG_PRICE,SMALL_PRICE,DECIMAL_NUM,createdate,CREATEUSERID,updatedate,UPDATEUSERID,status
+	</sql>
+	<!-- 分页查询 -->
+	<select id="BasicPriceJade.getBasicPriceJadeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="BasicPriceJade.Columns.all"/> from jat_calc_basic_price_jade a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		 	 order by a.item_class_id , a.START_PRICE
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="BasicPriceJade.getBasicPriceJadeToalCount" resultClass="int">
+		select count(1) from jat_calc_basic_price_jade a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<!-- findById -->
+	<select id="BasicPriceJade.getBasicPriceJadeById" resultClass="BasicPriceJade" parameterClass="string" resultMap="result">
+		select <include refid="BasicPriceJade.Columns.all"/> from jat_calc_basic_price_jade a where a.bill_id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="BasicPriceJade.saveBasicPriceJade" parameterClass="BasicPriceJade">
+		<selectKey keyProperty="billid" type="pre">
+			select jat_calc_basic_price_jade_seq.nextval as billid from dual
+		</selectKey>
+		insert into jat_calc_basic_price_jade(
+			bill_id,item_class_id,START_PRICE,END_PRICE,BIG_PRICE,SMALL_PRICE,DECIMAL_NUM,createdate,CREATEUSERID,updatedate,UPDATEUSERID,status)
+			values(#billid#,#itemclassid#,#startprice#,#endprice#,#bigprice#,#smallprice#,#decimalnum#,
+			#createdate#,#createuserid#,#updatedate#,#updateuserid#,#status#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="BasicPriceJade.updateBasicPriceJade" parameterClass="BasicPriceJade">
+		update jat_calc_basic_price_jade a set 
+			a.ITEM_CLASS_ID = #itemclassid#,
+			a.START_PRICE = #startprice#,
+			a.END_PRICE = #endprice#,
+			a.big_PRICE = #bigprice#,
+			a.SMALL_PRICE = #smallprice#,
+			a.DECIMAL_NUM = #decimalnum#,
+			a.status = #status#,
+			a.createdate = #createdate#,
+			a.CREATEUSERID = #createuserid#,
+			a.updatedate = #updatedate#,
+			a.updateuserid = #updateuserid# 
+			where a.bill_id = #billid#
+	</update>
+	<!-- 删除 -->
+	<delete id="BasicPriceJade.deleteBasicPriceJade" parameterClass="string">
+		delete jat_calc_basic_price_jade a where a.bill_id = #value#
+	</delete>
+	<!-- 获取主配石市场价 -->
+	<select id="BasicPriceJade.getBasicPriceJade" resultClass="BasicPriceJade" parameterClass="BasicPriceJade" resultMap="result">
+		select <include refid="BasicPriceJade.Columns.all"/> from jat_calc_basic_price_jade a where 
+			a.ITEM_CLASS_ID = #itemclassid# and
+			<![CDATA[ a.START_PRICE <= #startprice# and a.END_PRICE > #startprice# ]]> 
+			<isNotEmpty prepend="and" property="billid"> a.bill_id!=#billid# </isNotEmpty>
+	</select>
+</sqlMap>

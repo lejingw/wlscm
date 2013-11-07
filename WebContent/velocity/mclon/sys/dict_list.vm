@@ -1,0 +1,87 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/MoveSalecoefDwr.js"])
+#set($cond = $form.condition)
+<form id="frm" method="post">
+	<input type='hidden' name='entryType' value='$!form.entryType'/>
+    <table class="title">
+    	<tr><td>#if($!form.entryType=='2')业务 #else 系统 #end 数据字典 #if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' value='删除' class='btn' onclick="deleteBillnoRule()">
+				<input type='button' value='查询' class='btn' id='btnQuery'>
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+        		<th>状态</th>
+                <th>编码</th>
+        		<th>名称</th>
+        		<th>说明</th>
+        		<th>创建时间</th>
+        		<th>创建人</th>
+        		<th>更新时间</th>
+        		<th>更新人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.entryCode}'/></td>
+				<td>$!DictUtil.getValue('status',$!{map.status})</td>
+				<td><a href="javascript:toEditPage('$!{map.entryCode}');">$!{map.entryCode}</a></td>
+				<td>$!{map.entryName}</td>
+				<td>$!{map.memo}</td>
+				<td>$!{map.createDate}</td>
+				<td>$!BdCommon.getUserName($!{map.createId})</td>
+				<td>$!{map.updateDate}</td>
+				<td>$!BdCommon.getUserName($!{map.updateId})</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null,function(index){
+		window.location = "dict.vm?user_action=toEdit&entryType=$!{form.entryType}&entryCode=" + $n("chk")[index].value;
+	});
+	//初始化查询div common_query.js中定义默认已经引入
+    initQuery2("DICT01", "frm", "btnQuery");
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "dict.vm?user_action=toAdd&entryType=$!{form.entryType}";
+	});
+});
+function toEditPage(entryCode){
+	window.location = "dict.vm?user_action=toEdit&entryType=$!{form.entryType}&entryCode=" + entryCode;
+}
+function deleteBillnoRule(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var entryCode = $n("chk")[index].value;
+	confirm("确定删除?", function(){
+		DictDwr.deleteDictEntry(entryCode, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+        			window.location = "dict.vm?entryType=$!form.entryType";
+				});
+			}
+		});
+	});
+}
+</script>

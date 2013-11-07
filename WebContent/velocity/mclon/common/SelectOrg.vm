@@ -1,0 +1,79 @@
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js", "$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js"])
+
+#if($form.multiFlag)
+<input type="button" value="全选" class='btn' onclick="checkAllNodes(true)"/>
+#end
+<input type="button" value="清空" class='btn' onclick="checkAllNodes(false)"/>
+<div id="myZTree" class="ztree"></div>
+<script>
+//供外部调用的取值方法
+function getValues(){
+	var idArr = [], nameArr = [];
+	var objArr = [];
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	var nodes = zTree.getCheckedNodes(true);
+	for(var i=0;i<nodes.length;i++){
+		idArr.push(nodes[i].id);
+		nameArr.push(nodes[i].name);
+		objArr.push({orgId:nodes[i].id, orgName:nodes[i].name});
+	}
+	return [idArr, nameArr, objArr];
+}
+jQuery(document).ready(function(){
+	//checkbox多选时，采用的配置
+    var checkCfg = {enable:true, chkboxType:{'Y':'','N':''}};
+	//radiobox单选时，采用的配置
+    var radioCheckCfg = {enable:true, chkboxType:{'Y':'','N':''},chkStyle:'radio',radioType:'all'};
+    var setting = {
+    	view: {selectedMulti: false},
+    	check: $!form.multiFlag?checkCfg:radioCheckCfg,//多选和单选采用不同的配置
+    	data: {simpleData: {enable: true}},
+		callback: {//当单据树节点时，选中或取消勾选状态
+			"onClick": function(event, treeId, treeNode){
+				var flag = treeNode.checked;
+				if(!$!form.multiFlag){
+					checkAllNodes(false);
+				}
+    			jQuery.fn.zTree.getZTreeObj(treeId).checkNode(treeNode, !flag);
+			}
+		}
+    };
+	//静态数据
+    var nodeDataArr =[
+    	#foreach($param in ${form.dataMap.keySet()})
+    		{id:$param, pId:${form.dataMap.get($param).parentId}, name:'${form.dataMap.get($param).orgName}' #if(0 == ${form.dataMap.get($param).parentId}), open: true #end #if(1 == ${form.dataMap.get($param).nocheck}), nocheck:true #end},
+        #end
+		null
+    ];
+	nodeDataArr.pop();
+	//初始化tree
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, nodeDataArr);
+	
+	//勾选上次已经选择的数据
+	var selectedValues = "$!form.selectedValues".split(",");
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	for(var i=0;i<selectedValues.length;i++){
+		if(selectedValues[i]){
+    		var node = zTree.getNodeByParam("id", selectedValues[i]);
+			zTree.checkNode(node, true);
+		}
+	}
+});
+function checkSubNodes(tree, node, flag){
+	tree.checkNode(node, flag);
+	var childs = node.childs;
+	if(!childs)	return ;
+	for(var i=0;i<childs.length;i++){
+		 checkSubNodes(tree, childs[i], flag);
+	}
+}
+function checkAllNodes(flag){
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	var allNodes = zTree.getNodes();
+	for(var i=0;i<allNodes.length;i++){
+		checkSubNodes(zTree, allNodes[i], flag);
+	}
+}
+</script>

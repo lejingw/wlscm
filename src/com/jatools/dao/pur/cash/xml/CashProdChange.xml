@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashProdChange">
+	<typeAlias alias="CashProdChange" type="com.jatools.vo.pur.cash.CashProdChange" />
+	
+	<resultMap class="CashProdChange" id="CashProdChange.result">
+		<result property = "chaId"        column = "cha_id"        />
+		<result property = "billNo"       column = "bill_no"       />
+		<result property = "billDate"     column = "bill_date"     />
+		<result property = "orgId"        column = "org_id"        />
+		<result property = "voderId"      column = "voder_id"      />
+		<result property = "dotype"       column = "dotype"        />
+		<result property = "materialType" column = "material_type" />
+		<result property = "billType"     column = "bill_type"     />
+		<result property = "itemClassId"  column = "item_class_id" />
+		<result property = "chaNums"      column = "cha_nums"      />
+		<result property = "status"       column = "status"        />
+		<result property = "memo"         column = "memo"          />
+		<result property = "createDate"   column = "create_date"   />
+		<result property = "createId"     column = "create_id"     />
+		<result property = "updateDate"   column = "update_date"   />
+		<result property = "updateId"     column = "update_id"     />
+		<result property = "cashUnit"     column = "cash_unit"     />
+		<result property = "ornaCode"     column = "orna_code"     />
+		<result property = "articleTypeDsc" column = "article_type_dsc" />
+	</resultMap>
+	
+	<sql id="CashProdChange_columns">
+		cha_id, bill_no, bill_date, org_id, voder_id, dotype, material_type, bill_type, item_class_id, cha_nums, status, memo, create_date, create_id, update_date, update_id, cash_unit, orna_code
+	</sql>
+	<sql id="CashProdChange_columns_other">
+		(
+    		select e.article_type_dsc 
+    		from jas_bd_articletype e
+				left join jas_bd_item_class b on b.article_type_id = e.article_type_id
+			where b.item_class_id = a.item_class_id
+		) as article_type_dsc
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="CashProdChange.getCashProdChangePageData" resultMap="CashProdChange.result" parameterClass="map">
+		select <include refid="CashProdChange_columns"/>, article_type_dsc from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="CashProdChange_columns"/>, <include refid="CashProdChange_columns_other"/> from jat_cash_prod_change a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="billType" prepend="and"> a.bill_type = #billType# </isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.bill_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="CashProdChange.getCashProdChangeTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_prod_change a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="billType" prepend="and"> a.bill_type = #billType# </isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="CashProdChange.saveCashProdChange" parameterClass="CashProdChange">
+    	<selectKey resultClass="string" keyProperty="chaId" type="pre">
+			select JAT_CASH_PROD_CHANGE_SEQ.nextval as "chaId" from dual
+		</selectKey>
+		insert into jat_cash_prod_change(<include refid="CashProdChange_columns"/>)
+		 values(
+		 	#chaId#, #billNo#, #billDate#, #orgId#, #voderId#, #dotype#, #materialType#, #billType#, #itemClassId#, #chaNums#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #cashUnit#, #ornaCode#
+		 )
+    </insert>
+    
+    <select id="CashProdChange.getCashProdChange" parameterClass="string" resultMap="CashProdChange.result">
+		select <include refid="CashProdChange_columns"/>, <include refid="CashProdChange_columns_other"/> from jat_cash_prod_change a 
+		where 1=1
+			and a.cha_id = #value#
+	</select>
+
+    <select id="CashProdChange.getCashProdChangeByBillno" parameterClass="string" resultMap="CashProdChange.result">
+		select <include refid="CashProdChange_columns"/>, <include refid="CashProdChange_columns_other"/> from jat_cash_prod_change a
+		where 1=1
+			and a.bill_no = #value#
+	</select>
+	
+	<update id="CashProdChange.updateCashProdChange" parameterClass="CashProdChange">
+		update jat_cash_prod_change a set 
+			a.bill_date     = #billDate#,
+			a.org_id        = #orgId#,
+			a.voder_id      = #voderId#,
+			a.dotype        = #dotype#,
+			a.material_type = #materialType#,
+			a.bill_type     = #billType#,
+			a.item_class_id = #itemClassId#,
+			a.cha_nums      = #chaNums#,
+			a.status        = #status#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#,
+			a.cash_unit		= #cashUnit#,
+			a.orna_code		= #ornaCode#
+		where a.cha_id = #chaId# 
+	</update>
+	
+	<delete id="CashProdChange.deleteCashProdChange" parameterClass="string">
+		delete from jat_cash_prod_change a where a.cha_id = #value# 
+	</delete>
+	
+	<update id="CashProdChange.updateCashProdChangeStatus" parameterClass="map">
+		update jat_cash_prod_change a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.cha_id = #chaId# 
+	</update>
+	
+	<insert id="CashProdChange.insertProdAccountbyChaId" parameterClass="map">
+		insert into jat_cash_prod_account (
+	        pr_id, 
+	        bill_type, bill_no, bill_date, org_id, dotype, voder_id, material_type, 
+	        item_class_id, cash_unit, bill_nums, cash_nums, no_nums, is_checked, status, 
+	        create_date, create_id, update_date, update_id, memo
+	    ) select 
+	        JAT_CASH_PROD_ACCOUNT_SEQ.nextval, 
+	        'FT', a.bill_no, a.bill_date, a.org_id, a.bill_type as dotype, a.voder_id, a.material_type, 
+	        a.item_class_id, a.cash_unit, a.cha_nums as bill_nums , 0, a.cha_nums as noNums, 0, 2, 
+	        #createDate# , #userId#, #updateDate#, #userId#, orna_code as memo
+	    from  jat_cash_prod_change a 
+	    where 
+	      a.cha_id = #chaId#
+	</insert>
+</sqlMap>

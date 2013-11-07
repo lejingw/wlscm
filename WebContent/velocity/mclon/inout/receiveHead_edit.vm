@@ -1,0 +1,195 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/js/inout/receive.js?t=201210152229.js",
+"$StringUtil.getContextPath()/dwr/interface/ReceiveDwr.js?t=201210152229.js",
+"$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+	
+<form id='frm' action="receive.vm" method="post">
+	#set($receiveHead = $!form.receiveHead)
+	#set($lines = $!form.lines)
+	#if($StringUtil.isBlank($!receiveHead.billno))
+		#set($billno = "自动生成")
+		#set($orgId = $StringUtil.getOrgId($session))
+		#set($dodate = $DateUtil.getCurrentDate10())
+		#set($statusName = "保存")
+		#set($status = "1")
+		#set($createDate = $DateUtil.getCurrentDate10())
+		#set($createId = $StringUtil.getUserId($session))
+	#else
+		#set($billno = $receiveHead.billno)
+		#set($orgId = $receiveHead.orgId)
+		#set($dodate = $receiveHead.dodate)
+		#set($statusName = $!DictUtil.getValue('status', $!{receiveHead.status}))
+		#set($status = $!{receiveHead.status})
+		#set($createDate = $receiveHead.createDate)
+		#set($createId = $!receiveHead.createId)
+	#end
+	
+	#set($enableSave = false)
+	#set($disable = false)
+	#set($isSaved = false)
+	#set($enableCheck = false)
+	#set($enableCashCheck = false)
+	#set($enableReverse = false)
+	#if($StringUtil.isNotBlank($status))
+		#if($status == "1")
+			#set($enableSave = true)
+			#set($isSaved = true)
+			#set($enableCheck = true)
+			#if($!receiveHead)
+				#set($enableAccount = true)
+			#end
+		#elseif($status == "5")
+			#set($enableCashCheck = true)
+		#elseif("$status" == "8")
+			#set($enableReverse = true)
+		#end
+	#end
+	#if($receiveHead)
+		#set($disable = true)
+	#end
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="billid" name="billid" value="$!{receiveHead.billid}"/>
+    <table class="title">
+    	<tr><td>收票单详情</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' #if(!$enableSave)disabled#end class='btn' id='btnAdd' $RightUtil.able($session, '08070102','1')>
+				<input type='button' value='保存' #if(!$enableSave)disabled#end class='btn' id='btnSave' $RightUtil.able($session, '08070102','2')>
+				<input type='button' value='记账' #if(!$enableCheck)disabled#end class='btn' id='btnCheck' $RightUtil.able($session, '08070102','3')>
+				<input type='button' value='撤销' #if(!$enableReverse)disabled#end class='btn' id='btnReverse' $RightUtil.able($session, '08070102','5')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08070102','4')>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' readonly value="$!billno">
+			</td>
+			<td class='body1'>单据日期：</td>
+			<td class='body2'>
+				<input type='text' id="dodate" name='dodate' readonly #if(!$isSaved)disabled#end value="$!{dodate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status" name='status' readonly value="$!statusName">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>供应商：</td>
+			<td class='body2'>
+				#*<select id="verdorId" name="verdorId" #if($disable)disabled#end dataType="Require" value="$!receiveHead.vendorId"  msg="不能为空" >
+					$StringUtil.emptyOption()
+                </select>$StringUtil.star()*#
+				<input type='hidden' id='verdorId' name="verdorId" value="$!receiveHead.vendorId">
+				<input type='text' id='vendorName' value="$!BdCommon.getVendorName($!receiveHead.vendorId)" #if($disable)disabled#end readonly class='target' ondblclick="showVendorWin()" dataType="Require" msg="不能为空">
+				$!StringUtil.star()
+			</td>
+			<td class='body1'>发票号码：</td>
+			<td class='body2' colspan="5">
+				<input type='text' id="invoiceNo" name='invoiceNo' #if(!$!isSaved)readonly#end value="$!receiveHead.invoiceNo" style="width:500px;" dataType="Require" msg="不能为空">$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>发票日期：</td>	
+			<td class='body2'>
+				<input type='text' id="invoiceDate" name='invoiceDate' #if(!$!isSaved)disabled#end value="$!receiveHead.invoiceDate" dataType="Require" msg="不能为空" >
+				$StringUtil.star()
+			</td>
+			<td class='body1'>发票金额：</td>	
+			<td class='body2'>
+				<input type='text' id="invoiceMoney" name='invoiceMoney' readonly value="$!receiveHead.invoiceMoney" dataType="Require" msg="不能为空" >
+				$StringUtil.star()
+			</td>
+			<td class='body1'>备注：</td>	
+			<td class='body2' colspan="3">
+				<input type='text' id="memo" name='memo' #if(!$!isSaved)readonly#end value="$!receiveHead.memo" style="width:300px;">
+			</td>
+		</tr>
+    </table>
+	<input type="hidden" value="" name="deleteIds" id="deleteIds"/>
+	<div class="scroll2">
+	<table class='list' style="width:1500px;">
+    	<thead>
+			<tr>
+				<th></th>
+				<th>交接单号</th>
+				<th>大类</th>
+                <th>交接计量</th>
+				<th>交接数量</th>
+        		<th>单价</th>
+        		<th>金额</th>
+				<th>税率</th>
+				<th>税额</th>
+				<th>价税合计</th>
+				<th>备注</th>
+				<th width='60px'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $lines)
+			<tr>
+				<td></td>
+				<td>$!line.handNo</td>
+				<td>$!BdCommon.getItemClassDesc($!line.itemClassId)</td>
+				<td><select name='unitNo' dataType='Require'  msg='不能为空' #if(!$!isSaved)disabled#end></select></td>
+				<td><input type='text' name='handNum' value="$!line.handNum" #if(!$!isSaved)readonly#end style="width:120px;" onblur="checkField()"/></td>
+				<td><input type="text" name="price" value="$!line.price" readonly class="none" style="width:120px;"/></td>
+				<td><input type="text" name="moneys" value="$!line.moneys" readonly class="none" style="width:120px;"/></td>
+				<td><input type="text" name="tax" value="$!line.tax" #if(!$!isSaved)readonly#end dataType="Require" msg="不能为空" style="width:80px;" onblur="checkField()"/></td>
+				<td><input type="text" name="taxMoney" value="$!line.taxMoney" readonly class="none" style="width:120px;"/></td>
+				<td><input type="text" name="allMoney" value="$!line.allMoney" #if(!$!isSaved)readonly#end style="width:120px;" dataType="Require" msg="不能为空"  onblur="checkField()"/></td>
+				<td><input type="text" name="lineMemo" value="$!line.memo" #if(!$!isSaved)readonly#end/></td>
+				<td><input type='button' value='删除' #if(!$!isSaved)disabled#end style='width:60px;' onclick='deleteLineRow(this)'/>
+    				<input type='hidden' name='lineid' value="$!line.lineid" />
+    				<input type='hidden' name='itemClassId' value="$!line.itemClassId" />
+    				<input type='hidden' name='handUnit' value="$!line.handUnit" />
+					<input type='hidden' name='handNo' value="$!line.handNo" />
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+</form>
+
+<script>
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		jQuery("#verdorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#verdorId").val());
+}
+
+function setValues(){
+	/*BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!receiveHead.vendorId");
+	});
+	*/
+	setHandUnit();
+}
+
+jQuery(function(){
+	initCalendar("invoiceDate");
+	initCalendar("dodate");
+	setValues();
+	jQuery("#deleteIds").val("");
+	jQuery("#btnAdd").click(addRow);
+	jQuery("#btnSave").click(saveForm);
+	jQuery("#btnCheck").click(closeBill);
+	jQuery("#btnReverse").click(reverseBill);
+	jQuery("#btnToList").click(function(){
+		window.location = "receive.vm";
+	});
+	altRowCSS('tbl');
+	checkReview();
+	changeSeq("tbl");
+})
+
+</script>

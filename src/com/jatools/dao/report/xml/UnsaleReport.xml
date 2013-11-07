@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="UnsaleReport">
+	<typeAlias alias="UnsaleReport" type="com.jatools.vo.report.UnsaleReport" />
+	
+	<sql id="UnsaleReport_column_1">
+		a.orna_code          as "ornaCode",
+		a.orna_dsc           as "ornaDsc",
+		a.stock_id           as "stockId",
+		a.org_id             as "orgId",
+		a.groups             as "groups",
+		a.style_id           as "styleId",
+		a.now_qty            as "nowQty",
+		a.all_qty            as "allQty",
+		a.item_class_id      as "itemClassId",
+		a.orna_class_id      as "ornaClassId",
+		a.alaysis_id         as "alaysisId",
+		a.quality_id         as "qualityId",
+		a.sale_unit_id       as "saleUnitId",
+		a.state              as "state",
+		a.basic_price        as "basicPrice",
+		a.real_unit_cost     as "realUnitCost",
+		a.pos_amount         as "posAmount",
+		a.real_total_cost    as "realTotalCost",
+		a.storagedate        as "storagedate",
+		a.toshopdate         as "toshopdate",
+		a.main_weight        as "mainWeight",
+		a.part_weight        as "partWeight",
+		a.stone_now_num      as "stoneNowNum",
+		a.special_work_price as "specialWorkPrice",
+		a.material_type      as "materialType",
+		c.STYLENAME          as "stylename",
+		f.SUMMARYDESCRIPTION as "alaysisName",
+		c.isbiggraph		 as "bigGraph",
+		to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.toshopdate, 0,10), 'yyyy-mm-dd') as "shopAge",
+       	to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.storagedate,0,10), 'yyyy-mm-dd') as "comAge",
+       	g.item_value as "cleanName",
+       	h.item_value as "mainGradeName"
+	</sql>
+	<sql id="UnsaleReport_column_2">
+		"ornaCode", "ornaDsc", "stockId", "orgId", "groups", "styleId", "nowQty", "allQty", "itemClassId", 
+		"ornaClassId", "alaysisId", "qualityId", "saleUnitId", "state", "basicPrice", "realUnitCost", "posAmount", 
+		"realTotalCost", "storagedate", "toshopdate", "mainWeight", "partWeight", "stoneNowNum", "specialWorkPrice", 
+		"materialType", 
+		"stylename", "alaysisName","bigGraph",
+		"shopAge", "comAge",
+		"cleanName", "mainGradeName"
+	</sql>
+    <!-- 获取分页数据 -->
+	<select id="UnsaleReport.getUnsaleReportPageData" resultClass="UnsaleReport" parameterClass="map">
+		select <include refid="UnsaleReport_column_2"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="UnsaleReport_column_1"/>
+			from ic_mater_active a
+			left join jat_basic_unsale_orna b   on a.item_class_id = b.item_class_id
+			left join jas_bd_style c    on a.style_id = c.STYLEID
+			left join jas_bd_analysis_arange f on a.alaysis_id = f.ANALYSIS_ARANGE_ID
+			left join jat_sys_dict_item g on a.clean_id = g.item_key and g.entry_code='diaclean'
+			left join jat_sys_dict_item h on a.main_color_grade_id = h.item_key and h.entry_code='diacolorgrade'
+			where 1 = 1
+			<![CDATA[ 
+			and ((a.basic_price is not null and a.basic_price >= b.money_str and a.basic_price < b.money_end) 
+		    or 
+		    (a.basic_price is null and 0 >= b.money_str and 0 < b.money_end)) ]]>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id in ($orgId$) </isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and"> a.orna_code like '%$ornaCode$%' </isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and"> a.stock_id = #stockId# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id in ($itemClassId$) </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id in ($ornaClassId$) </isNotEmpty>
+			<isNotEmpty property="styleId" prepend="and"> a.style_id in ($styleId$) </isNotEmpty>
+			<isNotEmpty property="styleItemClass" prepend="and"> c.styleitemclass in ($styleItemClass$) </isNotEmpty>
+			<isNotEmpty property="styleMiddleClass" prepend="and"> c.stylemiddleclass in ($styleMiddleClass$) </isNotEmpty>
+			<isNotEmpty property="styleOrnaClass" prepend="and"> c.styleornaclass in ($styleOrnaClass$) </isNotEmpty>
+			<isNotEmpty property="qualityId" prepend="and"> a.quality_id in ($qualityId$) </isNotEmpty>
+			<isNotEmpty property="analysisId" prepend="and"> a.alaysis_id in ($analysisId$) </isNotEmpty>
+			<isNotEmpty property="themeId" prepend="and"> 
+				exists (select 1 from jas_bd_style m where a.style_id=m.STYLEID and m.THEME_ID in ($themeId$)) 
+			</isNotEmpty>
+			<isNotEmpty property="status" prepend="and">
+				<isEqual property="status" compareValue="1"><!-- 淘汰周期 -->
+				((c.ISOUT = 1 and (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.storagedate,0,10), 'yyyy-mm-dd')) > b.unfash_cycle) 
+			      or
+			     (c.ISOUT = 0 and (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.storagedate,0,10), 'yyyy-mm-dd')) > b.unfash_uncycle))
+				</isEqual>
+				<isEqual property="status" compareValue="0"><!-- 流转周期 -->
+					<![CDATA[ (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.toshopdate,0,10), 'yyyy-mm-dd')) > b.flow_cycle ]]>
+				</isEqual>
+			</isNotEmpty>
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="UnsaleReport.getUnsaleReportTotalCount" resultClass="int" parameterClass="map">
+    	select count(1)
+		  from ic_mater_active a
+		  <isNotEmpty property="status" >
+			<isEqual property="status" compareValue="1">
+		  , jas_bd_style c
+		  	</isEqual>
+		  </isNotEmpty>
+		 where 1 = 1
+		  <isNotEmpty property="status" prepend="and">
+			<isEqual property="status" compareValue="1">
+		 a.style_id = c.styleid
+		 	</isEqual>
+		 </isNotEmpty>
+		   and exists
+		 (select 1 from jat_basic_unsale_orna b
+	         where <![CDATA[((nvl(a.basic_price, 0) >= b.money_str and nvl(a.basic_price, 0) < b.money_end))]]>
+	           and a.item_class_id = b.item_class_id
+	           <isNotEmpty property="status" prepend="and">
+					<isEqual property="status" compareValue="1"><!-- 淘汰周期 -->
+					((c.ISOUT = 1 and (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.storagedate,0,10), 'yyyy-mm-dd')) > b.unfash_cycle) 
+				      or
+				     (c.ISOUT = 0 and (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.storagedate,0,10), 'yyyy-mm-dd')) > b.unfash_uncycle))
+					</isEqual>
+					<isEqual property="status" compareValue="0"><!-- 流转周期 -->
+						<![CDATA[ (to_date('$curDate$', 'yyyy-mm-dd') - to_date(substr(a.toshopdate,0,10), 'yyyy-mm-dd')) > b.flow_cycle ]]>
+					</isEqual>
+				</isNotEmpty>
+		 )
+		<isNotEmpty property="orgId" prepend="and"> a.org_id in ($orgId$) </isNotEmpty>
+		<isNotEmpty property="ornaCode" prepend="and"> a.orna_code like '%$ornaCode$%' </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and"> a.stock_id = #stockId# </isNotEmpty>
+		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id in ($itemClassId$) </isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id in ($ornaClassId$) </isNotEmpty>
+		<isNotEmpty property="styleId" prepend="and"> a.style_id in ($styleId$) </isNotEmpty>
+		<isNotEmpty property="styleItemClass" prepend="and"> c.styleitemclass in ($styleItemClass$) </isNotEmpty>
+		<isNotEmpty property="styleMiddleClass" prepend="and"> c.stylemiddleclass in ($styleMiddleClass$) </isNotEmpty>
+		<isNotEmpty property="styleOrnaClass" prepend="and"> c.styleornaclass in ($styleOrnaClass$) </isNotEmpty>
+		<isNotEmpty property="qualityId" prepend="and"> a.quality_id in ($qualityId$) </isNotEmpty>
+		<isNotEmpty property="analysisId" prepend="and"> a.alaysis_id in ($analysisId$) </isNotEmpty>
+		<isNotEmpty property="themeId" prepend="and"> 
+			exists (select 1 from jas_bd_style m where a.style_id=m.STYLEID and m.THEME_ID in ($themeId$)) 
+		</isNotEmpty>
+    </select>
+    
+    <!-- ================根据大类、小类获取款式大类=================== -->
+	<select id="UnsaleReport.getStyleItemClass" resultClass="com.jatools.vo.bd.StyleItemClass" parameterClass="map">
+		select a.item_class_id as "itemClassId", a.item_class_name as "itemClassDesc" 
+		from jas_bd_style_item_class a 
+		where a.archiveflag = 0 
+			and exists (
+				select 1 from jas_bd_styleitemclass_itemorna b, jas_bd_itemclass_ornaclass c 
+				where b.archiveflag = 0 and c.archiveflag = 0 
+					and c.id = b.itemornaid and a.item_class_id = b.styleitemclassid
+					<isNotEmpty property="itemClassId" prepend="and"> c.item_class_id in ($itemClassId$) </isNotEmpty>
+					<isNotEmpty property="ornaClassId" prepend="and"> c.orna_class_id in ($ornaClassId$) </isNotEmpty>
+			) order by a.item_class_code
+	</select>
+	
+	<!-- ================根据大类小类款式大类获取款式中类=================== -->
+	<select id="UnsaleReport.getStyleMiddleClass" resultClass="com.jatools.vo.bd.StyleMiddleClass" parameterClass="map">
+	    select a.middle_class_id   as "middleClassId",
+	           a.middle_class_name as "middleClassDesc"
+	      from jas_bd_style_middle_class a
+	     where exists (select 1
+	              from jas_bd_itemclass_middleclass b
+	             where a.middle_class_id = b.middle_class_id
+	               and b.archiveflag = '0'
+	               	<isNotEmpty property="itemClassId" prepend="and"> b.item_class_id in ( $itemClassId$) </isNotEmpty>
+					<isNotEmpty property="ornaClassId" prepend="and"> b.orna_class_id in ($ornaClassId$) </isNotEmpty>
+					<isNotEmpty property="styleItemClassId" prepend="and"> b.style_item_class_id in ($styleItemClassId$) </isNotEmpty>
+	              )
+	       and a.archiveflag = '0'
+	     order by a.middle_class_code
+	</select>
+	
+	<!-- ================根据大类小类款式大类款式中类获取款式小类=================== -->
+	<select id="UnsaleReport.getStyleOrnaClass" resultClass="com.jatools.vo.bd.StyleOrnaClass" parameterClass="map">
+	    select a.orna_class_id   as "ornaClassId",
+	           a.orna_class_name as "ornaClassDesc"
+	      from jas_bd_style_orna_class a
+	     where exists (select 1
+	              from jas_bd_middleclass_ornaclass b
+	             where a.orna_class_id = b.style_orna_class_id
+	               and b.archiveflag = '0'
+	               <isNotEmpty property="itemClassId" prepend="and"> b.item_class_id in ( $itemClassId$) </isNotEmpty>
+				   <isNotEmpty property="ornaClassId" prepend="and"> b.orna_class_id in ($ornaClassId$) </isNotEmpty>
+				   <isNotEmpty property="styleMiddleClassId" prepend="and"> b.middle_class_id in ($styleMiddleClassId$) </isNotEmpty>
+	             )
+	       and a.archiveflag = '0'
+	     order by a.orna_class_code
+	</select>
+	<!-- ================根据大类小类款式大类、款式中类、款式小类获取款式=================== -->
+	
+	<select id="UnsaleReport.getStyle" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+		select a.styleid, a.stylename  from jas_bd_style a
+		where a.isarchive = '0'
+		<isNotEmpty property="itemClassId" prepend="and"> a.itemclassid in ( $itemClassId$) </isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and"> a.ornaclassid in ($ornaClassId$) </isNotEmpty>
+		<isNotEmpty property="styleItemClassId" prepend="and"> a.styleitemclass in ($styleItemClassId$) </isNotEmpty>
+		<isNotEmpty property="styleMiddleClassId" prepend="and"> a.stylemiddleclass in ($styleMiddleClassId$) </isNotEmpty>
+		<isNotEmpty property="styleOrnaClassId" prepend="and"> a.styleornaclass in ($styleOrnaClassId$) </isNotEmpty>
+	</select>
+	
+	<!-- ================根据大类小类获取分析范围=================== -->
+	<select id="UnsaleReport.getAnalysis" resultClass="com.jatools.vo.bd.Analysis" parameterClass="map">
+		select 
+			a.ANALYSIS_ARANGE_ID as "analysisId",
+			a.SUMMARYDESCRIPTION as "analysisDesc"
+		from jas_bd_analysis_arange a
+		where a.ARCHIVEFLAG='0'
+			and a.ITEM_CLASS_ID in ( $itemClassId$)
+			and a.ORNA_CLASS_ID  in ($ornaClassId$)
+	</select>
+	
+	<!-- ================根据大类小类获取分析范围=================== -->
+	<select id="UnsaleReport.getTheme" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select 
+			a.THEME_ID as "value",
+			a.THEME_NAME as "text"
+		  from jas_pl_bd_style_theme a
+		 where a.archiveflag = '0'
+		 <isNotEmpty property="styleId" prepend="and">
+		 	 exists(select 1 from jas_bd_style b where a.THEME_ID=b.THEME_ID and b.STYLEID in ($styleId$))
+		 </isNotEmpty>
+		 order by a.theme_name
+	</select>
+</sqlMap>

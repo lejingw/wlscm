@@ -1,0 +1,322 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/MaterInivDwr.js",
+"$StringUtil.getContextPath()/dwr/interface/PriceHeadDwr.js",
+"$StringUtil.getContextPath()/js/stock/materIniv_List.js",
+"$StringUtil.getContextPath()/script/mclon/ZeroClipboard/ZeroClipboard.js",
+"$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+
+<div id="printDiv">
+    <form id="print" method="post" target="_blank"  action="$StringUtil.getContextPath()/velocity/mclon/common/printLabelJson.jsp">
+    	<input type="hidden" id="printData" name="LIST_FOR_BARCODE_JSON"/>
+    	<input type="hidden" id="printPt" name="pt"/>
+    	<input type="hidden" id="printParams" name="params"/>
+    </form>
+</div>
+<form id="myForm" method="post" action="materIniv.vm">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>单品入库#if($!form.message)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end</td></tr>
+            </td>
+        </tr>
+    </table>
+	<div id="queryDiv">
+        <table class="control">
+        	<tr>
+        		<td>
+        			<input type='button' value='确定' id='btnQueryOk'>
+        			<input type='button' value='重置' id='btnQueryReset'>
+        			<input type='button' value='取消' id='btnQueryCancel'>
+        		</td>
+        	</tr>
+        </table>
+        <table class='content'>
+        	<tr>
+        		<td class="body1">饰品编号</td>
+        		<td class='body2'><input type='text' id='wlCode' name='wlCode' value="$!{form.condition.wlCode}"/></td>
+        		<td class="body1">入库类型</td>
+        		<td class='body2'>
+					<select id="caclType" name="caclType">
+						<option value="">--请选择--</option>
+						<option value="1">素金入库单</option>
+						<option value="2">钻石入库单</option>
+						<option value="3">裸石入库单</option>
+                    </select>
+        	</tr>
+			<tr>
+        		<td class="body1">交接编号</td>
+        		<td class='body2'><input type='text' id='handoverBillId' name='handoverBillId' value="$!{form.condition.handoverBillId}"/></td>
+        		<td class="body1">人员</td>
+        		<td class='body2'>
+    				<input type='hidden' id="orgId" name='orgId' value="$StringUtil.getOrgId($session)">
+					<input type='hidden' id='createId' name="createId" >
+					<input type='text' id='createName' readonly class="target" ondblclick="showSelectUserWin()" >
+				</td>
+        	</tr>
+			<tr>
+        		<td class="body1">大类</td>
+        		<td class='body2'>
+					<select id="itemClassId" name="itemClassId" onchange="loadOrna()"></select>
+				</td>
+        		<td class="body1">小类</td>
+        		<td class='body2'>
+					<select id="ornaClassId" name="ornaClassId"></select>
+                </td>
+        	</tr>
+			<tr>
+    			<td class="body1">供应商</td>
+        		<td class='body2'>
+    				<select id="verdorName" name='verdorName'></select>
+                </td>
+				<td class="body1">核价编号</td>
+        		<td class='body2'>
+					<input type='text' id='calcpriceNo' name='calcpriceNo' value="$!{form.condition.calcpriceNo}"/>
+				</td>
+        	</tr>
+			<tr>
+        		<td class="body1">创建启始时间</td>
+        		<td class='body2'><input type='text' id='beginTime' name='beginTime' value="$!{form.condition.beginTime}"/></td>
+    			<td class="body1">创建结束时间</td>
+        		<td class='body2'><input type='text' id='endTime' name='endTime' value="$!{form.condition.endTime}"/></td>
+            </tr>
+			<tr>
+        		<td class="body1">启始重量</td>
+        		<td class='body2'><input type='text' id='beginWeight' name='beginWeight' value="$!{form.condition.beginWeight}"/></td>
+    			<td class="body1">截止重量</td>
+        		<td class='body2'><input type='text' id='endWeight' name='endWeight' value="$!{form.condition.endWeight}"/></td>
+            </tr>
+        </table>
+    </div>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='素金入库单' class='btn' id='btnAdd1'  onclick="save(1)" $RightUtil.able($session, '08060101','1')>
+				<input type='button' value='钻石入库单' class='btn' id='btnAdd2' onclick="save(2)" $RightUtil.able($session, '08060101','2')>
+				<input type='button' value='裸石入库单' class='btn' id='btnAdd3'  onclick="save(3)" $RightUtil.able($session, '08060101','3')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' $RightUtil.able($session, '08060101','4')>
+				<input type='button' value='高级查询' class='btn' id='btnQueryShow1' $RightUtil.able($session, '08060101','4')>
+				<input type='button' value='标签打印' class='btn' id="printBtn" $RightUtil.able($session, '08060101','5')>
+				<input type='button' value='删除' class='btn' id='deleteLine' onclick='deleteMaterIniv()' $RightUtil.able($session, '08060101','6')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08060101','7')>
+				<select id="selectLabel" name="selectLabel" onchange="changeLabelType()" >
+					<option #if($!{form.condition.selectLabel}=='') selected #end value="">--请选择--</option>
+					<option #if($!{form.condition.selectLabel}=='1') selected #end value="1">普通标签</option>
+					<option #if($!{form.condition.selectLabel}=='2') selected #end value="2">物流标签</option>
+                </select>
+                <input type='checkbox' id='stateId' name="stateId" onchange="executeQuery()" >显示所有状态</input>
+				<!--<select id="stateId" name="stateId" onchange="executeQuery()">
+					<option value="1">保存</option>
+					<option value="2">已入库</option>
+					<option value="3">全部</option>
+				</select>-->
+				<input type='button' value='关联定做单号' class='btn' onclick="showdz()" id='dz1'  $RightUtil.able($session, '08060101','8')>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+	    <table class='list' style="width:2350px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width='60px'>状态</th>
+				<th width='120px'>交接单号</th>
+                <th width='120px'>饰品编码</th>
+				<th width='90px'>单据类型</th>
+				<th width='180px'>组织</th>
+        		<th width='90px'>大类</th>
+				<th width='90px'>小类</th>
+				<th width='120px'>饰品名称</th>
+				<th width='120px'>核价单号</th>
+				<th width='90px'>材质</th>
+				<th width='90px'>成本单价</th>
+				<th width='210px'>供应商</th>
+				<th width='90px'>饰品总重</th>
+				<th width='90px'>基础价</th>
+				<th width='90px'>是否双标签</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.id}'/>$velocityCounter
+					<input type='hidden' name='state' value='$!{map.state}'/>
+					<input type='hidden' name='allowInivType' value='$!{map.allowInivType}'/>
+					<input type='hidden' name='inivOrg' value='$!{map.inivOrg}'/>
+				</td>
+				<td>$!DictUtil.getValue('status', $!map.state)</td>
+				<td>$!map.srcBillNo</td>
+                <td><a href='javascript:toEditPage($!{map.id},$!{map.allowInivType});'>$!map.ornaCode</a></td>
+				<td>$!DictUtil.getValue('inivtype', $!map.allowInivType)</td>
+                <td>$!BdCommon.getOrgName($!map.inivOrg)</td>
+				<td>$BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!map.ornaName</td>
+				<td>$!map.calcpriceNo</td>
+				<td>$!BdCommon.getQualityName($!map.qualityId)</td>
+				<td>$!map.costPrice</td>
+				<td>$!BdCommon.getVendorName($!map.venderId)</td>
+				<td>$!map.allQty</td>
+				<td>$!map.basicPrice</td>
+				<td>$!DictUtil.getValue('yesorno', $!map.isDblLabel)</td>
+				<td>$!map.createdate</td>
+				<td>$!BdCommon.getUserName($!map.createuserid)</td>
+				<td>$!map.updatedate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('myForm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+checkAll('chkall','chk',true);
+/**
+ * 查询
+ */
+
+function changeButtons(check,i){
+	var index = getSelectIndexs('chk');
+	if(index.length==1){
+		jQuery("#deleteLine").removeAttr("disabled");
+	}else{
+		jQuery("#deleteLine").attr("disabled", "disabled");
+	}
+	if(jQuery("#selectLabel").val()!=""){
+    	if(index.length>0){
+    		jQuery("#printBtn").removeAttr("disabled");
+    	}
+	}
+	if(index.length==0){
+		jQuery("#deleteLine").attr("disabled", "disabled");
+		jQuery("#printBtn").attr("disabled", "disabled");
+	}
+}
+function executeQuery(){
+	if(!isDecimal(jQuery("#beginWeight").val())&&""!=jQuery("#beginWeight").val()){
+		alert('启始重量必须为数字');
+		return;
+	}if(!isDecimal(jQuery("#endWeight").val())&&""!=jQuery("#endWeight").val()){
+		alert('截止重量必须为数字');
+		return;
+	}if(parseFloat(jQuery("#beginWeight").val())>=jQuery("#endWeight").val()
+		&&""!=jQuery("#endWeight").val()&&""!=jQuery("#beginWeight").val()){
+		alert('截止重量必须大于启始重量');
+		return;
+	}
+	if(""!=jQuery("#beginTime").val()&&""!=jQuery("#endTime").val()){
+		var dateTime = new Date();
+		var d1 = (jQuery("#beginTime").val()+"").split('-');
+		var d2 = (jQuery("#endTime").val()+"").split('-');
+		var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+		var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+		if(date1>date2){
+			alert('时间止必须大于时间始');
+			return;
+		}
+	}
+	jQuery("#myForm").submit();
+}
+function resetQuery(){
+	jQuery("#wlCode").val('');
+	jQuery("#caclType").val('');
+	jQuery("#stateId").val("");
+	jQuery("#verdorName").val("");
+	jQuery("#itemClassId").val("");
+	jQuery("#ornaClassId").val("");
+	jQuery("#calcpriceNo").val("");
+	jQuery("#beginTime").val("");
+	jQuery("#endTime").val("");
+	jQuery("#handoverBillId").val("");
+	jQuery("#createId").val("");
+	jQuery("#createName").val("");
+	jQuery("#beginWeight").val("");
+	jQuery("#endWeight").val("");
+	
+}
+function save(inivType){
+	window.location = "materIniv.vm?user_action=toAddMaterIniv&inivType="+inivType;
+}
+function loadOrna(){
+	var itemClassId = jQuery("#itemClassId").val(); 
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(itemClassId,function(data){
+		addOptions("ornaClassId", data, null, null, true, true,"$!{form.condition.ornaClassId}");
+	});	
+}
+jQuery(function(){
+	initCalendarArr(["beginTime", "endTime"]);
+	checkTable('tbl', 'chkall', 'chk', true,changeButtons, function(index){
+	var org = $n("inivOrg")[index+1].value;
+	if(org=="$StringUtil.getOrgId($session)")
+		window.location = "materIniv.vm?user_action=toEditMaterIniv&id=" + $n("chk")[index].value+"&inivType="+$n("allowInivType")[index+1].value;
+	else
+		alert("不是本组织不能查看");
+	});
+	initQuery("btnQueryShow", "btnQueryCancel");
+	initQuery2("RK01", 'myForm', 'btnQueryShow1');
+	jQuery("#btnQueryOk").click(executeQuery);
+	jQuery("#btnQueryReset").click(resetQuery);
+	jQuery("#caclType").val("$!{form.condition.caclType}");
+	jQuery("#createId").val("$!{form.condition.createId}");
+	jQuery("#createName").val("$!BdCommon.getUserName($!{form.condition.createId})");
+	jQuery("#beginWeight").val("$!{form.condition.beginWeight}");
+	jQuery("#endWeight").val("$!{form.condition.endWeight}");
+	jQuery("#stateId")[0].checked= "$!form.condition.stateId"=="on"?true:false;
+		
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorName", data, null, null, true, true,"$!{form.condition.verdorName}");
+	});
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true,"$!{form.condition.itemClassId}");
+	});
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt("$!{form.condition.itemClassId}",function(data){
+		addOptions("ornaClassId", data, null, null, true, true,"$!{form.condition.ornaClassId}");
+	});
+	var ckpt = jQuery("#ckpt");
+	var ckwl = jQuery("#ckwl");
+	var ckjg = jQuery("#ckjg");
+	var printBtn = jQuery("#printBtn");
+	changeButtons(false,0);
+	initLabelPrint("printBtn", getPrintPageUrl);
+});
+
+/**
+ * 标签打印
+ */
+function getPrintPageUrl(){
+	var index = getSelectIndexs('chk');
+	if(index.length==0){
+		alert("请选择要打印的记录");
+		return ;
+	}
+	var ids = [] ;
+	for(var i=0; i<index.length; i++){
+		ids.push($n("chk")[index[i]].value);
+	}
+	var selectLabel = jQuery("#selectLabel").val();
+	var pt = selectLabel;
+	var params = "-"+selectLabel;
+	var url = ctxPath + '/stock/materIniv.vm?user_action=printLabels&billid='+ids.toString()+"&pt="+pt+"&params="+params;
+	return url;
+}
+function toEditPage(id,inivType){
+	var index = getSelectIndexs('chk');
+	var org = $n("inivOrg")[index[0]].value;
+	if(org=="$StringUtil.getOrgId($session)")
+		window.location = "materIniv.vm?user_action=toEditMaterIniv&id=" + id+"&inivType="+inivType;
+	else
+		alert("不是本组织不能查看");
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+</script>

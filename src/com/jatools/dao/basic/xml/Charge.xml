@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Charge">
+	<typeAlias alias="Charge" type="com.jatools.vo.basic.Charge" />
+	
+	<resultMap id="result" class="Charge">
+		<result property="chargeId" column="charge_id"/>
+		<result property="weightStr" column="weight_str"/>
+		<result property="weightEnd" column="weight_end"/>
+		<result property="chargeVal" column="charge_val"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+	</resultMap>
+	<sql id="Charge_columns_all">
+		charge_id, weight_str, weight_end, charge_val, 
+		status, memo, create_date, create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="Charge.getChargePageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="Charge_columns_all"/> from jat_basic_charge a order by a.weight_str
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="Charge.getChargeTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_charge a
+		where 1 = 1
+		<isNotEmpty property="weightStr" prepend="and"> a.weight_str >= #weightStr#</isNotEmpty>
+		<isNotEmpty property="weightEnd" prepend="and"> <![CDATA[a.weight_end <= #weightEnd#]]></isNotEmpty>
+    </select>
+    <!-- 保存数据 -->
+    <insert id="Charge.saveCharge" parameterClass="Charge">
+    	<selectKey resultClass="string" keyProperty="chargeId" type="pre">
+			select JAT_BASIC_CHARGE_SEQ.nextval as chargeId from dual
+		</selectKey>
+		insert into jat_basic_charge(charge_id, weight_str, weight_end, charge_val,	status, memo, create_date, create_id, update_date, update_id)
+		 values(#chargeId#, #weightStr#, #weightEnd#, #chargeVal#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="Charge.getCharge" resultClass="Charge" resultMap="result" parameterClass="string">
+    	select <include refid="Charge_columns_all"/> from jat_basic_charge a where a.charge_id = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="Charge.updateCharge" parameterClass="Charge">
+		update jat_basic_charge a set 
+			a.weight_str = #weightStr#, a.weight_end = #weightEnd#, a.charge_val = #chargeVal#,
+			a.memo = #memo#, 
+			a.update_date = #updateDate#, a.update_id = #updateId#
+		where a.charge_id = #chargeId#
+	</update>
+	<delete id="Charge.deleteCharge" parameterClass="string">
+		delete jat_basic_charge a where a.charge_id = #value#
+	</delete>
+	
+	<select id="Charge.checkWeightStr" parameterClass="map" resultClass="int">
+		select  count(*) from jat_basic_charge a
+		where <![CDATA[a.weight_str <= #weightStr#]]> and a.weight_end > #weightStr#
+		<isNotEmpty prepend="and" property="chargeId">
+			<![CDATA[a.charge_id <> #chargeId#]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="Charge.checkWeightEnd" parameterClass="map" resultClass="int">
+		select  count(*) from jat_basic_charge a
+		where <![CDATA[a.weight_str < #weightEnd#]]> and a.weight_end >= #weightEnd#
+		<isNotEmpty prepend="and" property="chargeId">
+			<![CDATA[a.charge_id <> #chargeId#]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

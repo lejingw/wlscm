@@ -1,0 +1,1683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CalcPrice">
+	<typeAlias alias="PriceHead" type="com.jatools.vo.calc.PriceHead"/>
+	<typeAlias alias="PriceAccLine" type="com.jatools.vo.calc.PriceAccLine"/>
+	<typeAlias alias="PriceAcsLine" type="com.jatools.vo.calc.PriceAcsLine"/>
+	<typeAlias alias="PriceSbraLine" type="com.jatools.vo.calc.PriceSbraLine"/>
+	<typeAlias alias="PriceStoneLine" type="com.jatools.vo.calc.PriceStoneLine"/>
+	<typeAlias alias="MaterNoActive" type="com.jatools.vo.stock.MaterNoActive"/>
+	<typeAlias alias="MaterActive" type="com.jatools.vo.stock.MaterActive"/>
+	<resultMap class="PriceHead" id="resultList">
+		<result property="id"  column="id" />
+		<result property="no"  column="no" />
+		<result property="wlCode"  column="WL_CODE" />
+		<result property="handoverNo"  column="HANDOVER_NO" />
+		<result property="caclType"  column="CACL_TYPE" />
+		<result property="vender"  column="vender" />
+		<result property="itemClassId"  column="ITEM_CLASS_ID" />
+		<result property="ornaClassId"  column="ORNA_CLASS_ID" />
+		<result property="qualityId"  column="QUALITY_ID" />
+		<result property="isDoubleLabel"  column="IS_DOUBLE_LABEL" /> 
+		<result property="allNumber"  column="ALLNUMBER" /> 
+		<result property="allWeight"  column="ALL_WEIGHT" /> 
+		<result property="basicPrice"  column="BASIC_PRICE" /> 
+		<result property="state"  column="STATE" />
+		<result property="updateDate"  column="UPDATEDATE" />
+		<result property="createUserId"  column="CREATEUSERID" />
+		<result property="createDate"  column="CREATEDATE" />
+		<result property="handoverName"  column="HANDOVER_NAME" />
+	</resultMap>
+	<resultMap class="PriceHead" id="reaultHead">
+		<result property="id"                            column="ID"                             /> 
+		<result property="no"                            column="NO"                             /> 
+		<result property="orgId"                         column="ORG_ID"                         /> 
+		<result property="handoverNo"                    column="HANDOVER_NO"                    /> 
+		<result property="vender"                        column="VENDER"                         /> 
+		<result property="itemClassId"                   column="ITEM_CLASS_ID"                  /> 
+		<result property="ornaClassId"                   column="ORNA_CLASS_ID"                  /> 
+		<result property="qualityId"                     column="QUALITY_ID"                    /> 
+		<result property="colorId"                       column="COLOR_ID"                       /> 
+		<result property="cleanId"                       column="CLEAN_ID"                       /> 
+		<result property="colorGreadId"                  column="COLORGRADE_ID"                  /> 
+		<result property="dmShapeId"                     column="DM_SHAPE_ID"                    /> 
+		<result property="isNolineCalc"                  column="IS_NOLINE_CALC"                 /> 
+		<result property="isOldornaIniv"                 column="IS_OLDORNA_INIV"                /> 
+		<result property="feeTax"                        column="FEE_TAX"                        /> 
+		<result property="feeWidthoutTaxUnitPrice"       column="FEE_WIDTHOUT_TAX_UNIT_PRICE"    /> 
+		<result property="feeWidthoutTaxPrice"           column="FEE_WIDTHOUT_TAX_PRICE"         /> 
+		<result property="feeWidthTaxPrice"              column="FEE_WIDTH_TAX_PRICE"            /> 
+		<result property="feeMarketPrice"                column="FEE_MARKET_PRICE"               /> 
+		<result property="selfMadeTax"                   column="SELF_MADE_TAX"                  /> 
+		<result property="selfMadeWidthoutTaxPrice"      column="SELF_MADE_WIDTHOUT_TAX_PRICE"   /> 
+		<result property="selfMadeWidthTaxprice"         column="SELF_MADE_WIDTH_TAXPRICE"       /> 
+		<result property="selfMadeMarketPrice"           column="SELF_MADE_MARKET_PRICE"         /> 
+		<result property="allNumber"                     column="ALLNUMBER"                      /> 
+		<result property="mainNumber"                    column="MAIN_NUMBER"                    /> 
+		<result property="mainWeight"                    column="MAIN_WEIGHT"                    /> 
+		<result property="mainWidthoutTaxPrice"          column="MAIN_WIDTHOUT_TAX_PRICE"        /> 
+		<result property="mainWidthTaxPrice"             column="MAIN_WIDTH_TAX_PRICE"           /> 
+		<result property="mainMarketPrice"               column="MAIN_MARKET_PRICE"              /> 
+		<result property="secondNumber"                  column="SECOND_NUMBER"                  /> 
+		<result property="secondWeight"                  column="SECOND_WEIGHT"                  /> 
+		<result property="secondWidthoutTaxPrice"        column="SECOND_WIDTHOUT_TAX_PRICE"      /> 
+		<result property="secondWidthTaxPrice"           column="SECOND_WIDTH_TAX_PRICE"         /> 
+		<result property="secondMarketPrice"             column="SECOND_MARKET_PRICE"            /> 
+		<result property="sbraCoefficient"               column="SBRA_COEFFICIENT"               /> 
+		<result property="sbraWeight"                    column="SBRA_WEIGHT"                    /> 
+		<result property="sbraWidthoutTaxPrice"          column="SBRA_WIDTHOUT_TAX_PRICE"        /> 
+		<result property="sbraWidthTaxPrice"             column="SBRA_WIDTH_TAX_PRICE"           /> 
+		<result property="sbraMarketPrice"               column="SBRA_MARKET_PRICE"              /> 
+		<result property="acsWidthoutTaxPrice"           column="ACS_WIDTHOUT_TAX_PRICE"         /> 
+		<result property="acsWidthTaxPrice"              column="ACS_WIDTH_TAX_PRICE"            /> 
+		<result property="acsMarketPrice"                column="ACS_MARKET_PRICE"               /> 
+		<result property="ncoefficient"                  column="NCOEFFICIENT"                   /> 
+		<result property="styleId"                       column="STYLE_ID"                       /> 
+		<result property="allWidthoutTaxPrice"           column="ALL_WIDTHOUT_TAX_PRICE"         /> 
+		<result property="allWidthTaxPrice"              column="ALL_WIDTH_TAX_PRICE"            /> 
+		<result property="allMarketPrice"                column="ALL_MARKET_PRICE"               /> 
+		<result property="basicPrice"                    column="BASIC_PRICE"                    /> 
+		<result property="taxCoefficient"                column="TAX_COEFFICIENT"                /> 
+		<result property="allWeight"                     column="ALL_WEIGHT"                     /> 
+		<result property="secondDsc"                     column="SECOND_DSC"                     /> 
+		<result property="state"                         column="STATE"                          /> 
+		<result property="updateDate"                    column="UPDATEDATE"                     /> 
+		<result property="createUserId"                  column="CREATEUSERID"                   /> 
+		<result property="createDate"                    column="CREATEDATE"                     /> 
+		<result property="caclType"                      column="CACL_TYPE"                      /> 
+		<result property="factoryFeeType"                column="FACTORY_FEE_TYPE"               /> 
+		<result property="otherCoefficient"              column="OTHER_COEFFICIENT"              /> 
+		<result property="styleItemId"                   column="STYLE_ITEM_ID"                  /> 
+		<result property="styleMiddleId"                 column="STYLE_MIDDLE_ID"                /> 
+		<result property="styleOrnaclassId"              column="STYLE_ORNACLASS_ID"             /> 
+		<result property="themeCoefficient"              column="THEME_COEFFICIENT"              /> 
+		<result property="priceWithCoefficient"          column="PRICE_WITH_COEFFICIENT"         /> 
+		<result property="feeWithCoefficient"            column="FEE_WITH_COEFFICIENT"           /> 
+		<result property="allmoneyWithCoefficient"       column="ALLMONEY_WITH_COEFFICIENT"      /> 
+		<result property="mainPriceWithCoefficient"      column="MAIN_PRICE_WITH_COEFFICIENT"    /> 
+		<result property="secondPriceWithCoefficient"    column="SECOND_PRICE_WITH_COEFFICIENT"  /> 
+		<result property="acsPriceWithCoefficient"       column="ACS_PRICE_WITH_COEFFICIENT"     /> 
+		<result property="sbraPriceWithCoefficient"      column="SBRA_PRICE_WITH_COEFFICIENT"    /> 
+		<result property="factoryStyleId"                column="FACTORY_STYLE_ID"               /> 
+		<result property="lpFee"                         column="LP_FEE"                         /> 
+		<result property="mainZsPrice"                   column="MAIN_ZS_PRICE"                  /> 
+		<result property="secondZsPrice"                 column="SECOND_ZS_PRICE"                /> 
+		<result property="mainStoneXqFee"                column="MAIN_STONE_XQ_FEE"              /> 
+		<result property="secondStoneXqDee"              column="SECOND_STONE_XQ_FEE"            /> 
+		<result property="wlCode"                        column="WL_CODE"                        /> 
+		<result property="outGoodsBillNo"                column="OUT_GOODS_BILL_NO"              /> 
+		<result property="accWithoutTax"                 column="ACC_WITHOUT_TAX"                /> 
+		<result property="accWithTax"                    column="ACC_WITH_TAX"                   /> 
+		<result property="accMarketPrice"                column="ACC_MARKET_PRICE"               /> 
+		<result property="accPriceWithCoefficient"       column="ACC_PRICE_WITH_COEFFICIENT"     /> 
+		<result property="sbraStyleId"                   column="SBRA_STYLE_ID"                  /> 
+		<result property="sbraColorId"                   column="SBRA_COLOR_ID"                  /> 
+		<result property="isDoubleLabel"                 column="IS_DOUBLE_LABEL"                /> 
+		<result property="labelId"                       column="LABEL_ID"                       /> 
+		<result property="ornaBarCode"                   column="ORNA_BAR_CODE"                  /> 
+		<result property="avgWeight"                     column="AVG_WEIGHT"                     /> 
+		<result property="verificationFlag"              column="VERIFICATION_FLAG"              /> 
+		<result property="specialWorkPrice"              column="SPECIAL_WORK_PRICE"             /> 
+		<result property="newGoldPrice"                  column="NEW_GOLD_PRICE"                 /> 
+		<result property="stoneCoeff"                    column="STONE_COEFF"                    /> 
+		<result property="actTradeinFee"                 column="ACT_TRADEIN_FEE"                /> 
+		<result property="tradeinFee"                    column="TRADEIN_FEE"                    />
+		<result property="analysisArangeId"              column="ANALYSIS_ARANGE_ID"         />  
+		<result property="handoverName"              	 column="HANDOVER_NAME"             />
+		<result property="hlevel"              	 column="HLEVEL"             />
+		<result property="inivFlag"              	 column="INIV_FLAG"             />
+		<result property="basicPriceCoefficient"      	 column="BASIC_PRICE_COEFFICIENT"             />         
+		<result property="identId"          column="IDENT_ID" />          
+		<result property="hrdCert"          column="HRD_CERT" />          
+		<result property="giaCert"          column="GIA_CERT" />          
+		<result property="igiCert"          column="IGI_CERT" />          
+		<result property="agsCert"          column="AGS_CERT" />    
+		<result property="colorGreadIdxq"          column="COLORGRADE_ID_XQ" />          
+		<result property="cleanIdxq"          column="CLEAN_ID_XQ" />
+		<result property="isConsignment"          column="IS_CONSIGNMENT" />    
+		<result property="updateBasicPrice"          column="UPDATE_BASIC_PRICE" />
+		<result property="basicPriceOld"          column="BASIC_PRICE_OLD" />
+		
+	</resultMap>
+	<resultMap class="PriceStoneLine" id="reslutStone">
+		<result property="id" column="ID" />                                        
+		<result property="headId" column="HEAD_ID" />                               
+		<result property="isMainStone" column="IS_MAIN_STONE" />                    
+		<result property="luodanCode" column="LUODAN_CODE" />                       
+		<result property="stoneNums" column="STONE_NUMS" />                         
+		<result property="stoneWeight" column="STONE_WEIGHT" />                     
+		<result property="withotTaxPrice" column="WITHOUT_TAX_PRICE" />             
+		<result property="withoutTaxAllMoney" column="WITHOUT_TAX_ALLMONEY" />      
+		<result property="stoneTax" column="STONE_TAX" />
+		<result property="withTaxAllMoney" column="WITH_TAX_ALLMONEY" />            
+		<result property="marketPrice" column="MARKET_PRICE" />                     
+		<result property="marketAllMoney" column="MARKET_ALLMONEY" />               
+		<result property="updateDate" column="UPDATEDATE" />                        
+		<result property="createUserId" column="CREATEUSERID" />                    
+		<result property="createDate" column="CREATEDATE" />                        
+		<result property="stoneType" column="STONE_TYPE" />                         
+		<result property="stoneSpec" column="STONE_SPEC" />                         
+		<result property="stoneCoefficient" column="STONE_COEFFICIENT" />           
+		<result property="priceWithCoefficient" column="PRICE_WITH_COEFFICIENT" />  
+		<result property="colorId" column="COLOR_ID" />                             
+		<result property="cleanId" column="CLEAN_ID" />                             
+		<result property="colorGreadId" column="COLORGRADE_ID" />                        
+		<result property="dmShapeId" column="DM_SHAPE_ID" />                        
+		<result property="cutId" column="CUT_ID" />                                 
+		<result property="isMainInfo" column="IS_MAIN_INFO" />                      
+		<result property="feeType" column="FEE_TYPE" />                             
+		<result property="certificatePrice" column="CERTIFICATE_PRICE" />           
+		<result property="factoryNuleCode" column="FACTORY_NULE_CODE" />            
+		<result property="privateType" column="PRIVATE_TYPE" />            
+		<result property="stoneItemClassId" column="STONE_ITEM_CLASS_ID" />                     
+	</resultMap>
+	
+	<resultMap class="PriceSbraLine" id="resultSbra">
+		<result property="id"  column="ID" />                              
+		<result property="headId"  column="HEAD_ID" />                               
+		<result property="sbraWeight"  column="SBRA_WEIGHT" />                    
+		<result property="sbraWithoutTaxPrice"  column="SBRA_WITHOUT_TAX_PRICE" />
+		<result property="sbraWithoutTaxmoney"  column="SBRA_WITHOUT_TAX_MONEY" />
+		<result property="sbraTax"  column="SBRA_TAX" />
+		<result property="sbraWithTaxMoney"  column="SBRA_WITH_TAX_MONEY" />      
+		<result property="sbraMarketPrice"  column="SBRA_MARKET_PRICE" />          
+		<result property="sbraMarketAllMoney"  column="SBRA_MARKET_ALLMONEY" />                 
+		<result property="isInlayHalfProduct"  column="IS_INLAY_HALF_PRODUCT" />                
+		<result property="halfProductPrice"  column="HALF_PRODUCT_PRICE" />                     
+		<result property="updateDate"  column="UPDATEDATE" />                          
+		<result property="createUserId"  column="CREATEUSERID" />          
+		<result property="createDate"  column="CREATEDATE" />                        
+		<result property="sbraCoefficient"  column="SBRA_COEFFICIENT" />             
+		<result property="priceWithCoefficient"  column="PRICE_WITH_COEFFICIENT" />  
+		<result property="styleId"  column="STYLE_ID" />                             
+		<result property="qualityId"  column="QUALITY_ID" />                         
+		<result property="materCode"  column="MATER_CODE" />                         
+		<result property="privateType"  column="PRIVATE_TYPE" />                     
+		<result property="goldLostPercent"  column="GOLD_LOST_PERCENT" />            
+		<result property="goldLostWeight"  column="GOLD_LOST_WEIGHT" />                         
+		<result property="goldAllweight"  column="GOLD_ALL_WEIGHT" />                           	
+	</resultMap>
+	<resultMap class="PriceAcsLine" id="resultAcs">
+		<result property="id"  column="ID"   />                                         
+		<result property="headId"  column="HEAD_ID"   />                                
+		<result property="acsType"  column="ACS_TYPE"   />                              
+		<result property="acsWeight"  column="ACS_WEIGHT"   />                          
+		<result property="acsQuantity"  column="ACS_QUANTITY"   />                      
+		<result property="acsWithoutTaxPrice"  column="ACS_WITHOUT_TAX_PRICE"   />      
+		<result property="acsWithoutTaxMoney"  column="ACS_WITHOUT_TAX_MONEY"   />      
+		<result property="acsTax"  column="ACS_TAX"   />                                
+		<result property="acsWithTaxMoney"  column="ACS_WITH_TAX_MONEY"   />            
+		<result property="acsMarketAllMoney"  column="ACS_MARKET_ALLMONEY"   />         
+		<result property="updateDate"  column="UPDATEDATE"   />                         
+		<result property="createUserId"  column="CREATEUSERID"   />                     
+		<result property="createDate"  column="CREATEDATE"   />                         
+		<result property="otherCoefficient"  column="OTHER_COEFFICIENT"   />            
+		<result property="priceWithCoefficient"  column="PRICE_WITH_COEFFICIENT"   />   
+		<result property="styleId"  column="STYLE_ID"   />                              
+		<result property="qualityId"  column="QUALITY_ID"   />                          
+		<result property="acsCode"  column="ACS_CODE"   />                              
+		<result property="privateType"  column="PRIVATE_TYPE"   />       
+	</resultMap>
+	<resultMap class="PriceAccLine" id="resultAcc">
+		<result property="id" column="ID" /> 
+		<result property="headId" column="HEAD_ID" />  
+		<result property="accId" column="ACC_ID" />  
+		<result property="accWithoutTaxCost" column="ACC_WITHOUT_TAX_COST" />  
+		<result property="accTax" column="ACC_TAX" />           
+		<result property="accWithTaxCost" column="ACC_WITH_TAX_COST" />  
+		<result property="accMarketPrice" column="ACC_MARKET_PRICE" />   
+		<result property="accCoefficient" column="ACC_COEFFICIENT" />  
+		<result property="priceWithCoefficient" column="PRICE_WITH_COEFFICIENT" />  
+		<result property="verificationFlag" column="VERIFICATION_FLAG" />  
+	</resultMap>
+	<sql id="PriceHead.column.all">
+		ID,                           
+		NO,                           
+		ORG_ID,                       
+		HANDOVER_NO,                  
+		VENDER,                       
+		ITEM_CLASS_ID,                
+		ORNA_CLASS_ID,                
+		QUALITY_ID,                   
+		COLOR_ID,                     
+		CLEAN_ID,                     
+		COLORGRADE_ID,                
+		DM_SHAPE_ID,                  
+		IS_NOLINE_CALC,               
+		IS_OLDORNA_INIV,              
+		FEE_TAX,                      
+		FEE_WIDTHOUT_TAX_UNIT_PRICE,  
+		FEE_WIDTHOUT_TAX_PRICE,       
+		FEE_WIDTH_TAX_PRICE,          
+		FEE_MARKET_PRICE,             
+		SELF_MADE_TAX,                
+		SELF_MADE_WIDTHOUT_TAX_PRICE, 
+		SELF_MADE_WIDTH_TAXPRICE,     
+		SELF_MADE_MARKET_PRICE,       
+		ALLNUMBER,                    
+		MAIN_NUMBER,                  
+		MAIN_WEIGHT,                  
+		MAIN_WIDTHOUT_TAX_PRICE,      
+		MAIN_WIDTH_TAX_PRICE,         
+		MAIN_MARKET_PRICE,            
+		SECOND_NUMBER,                
+		SECOND_WEIGHT,                
+		SECOND_WIDTHOUT_TAX_PRICE,    
+		SECOND_WIDTH_TAX_PRICE,       
+		SECOND_MARKET_PRICE,          
+		SBRA_COEFFICIENT,             
+		SBRA_WEIGHT,                  
+		SBRA_WIDTHOUT_TAX_PRICE,      
+		SBRA_WIDTH_TAX_PRICE,         
+		SBRA_MARKET_PRICE,            
+		ACS_WIDTHOUT_TAX_PRICE,       
+		ACS_WIDTH_TAX_PRICE,          
+		ACS_MARKET_PRICE,             
+		NCOEFFICIENT,                 
+		STYLE_ID,                     
+		ALL_WIDTHOUT_TAX_PRICE,       
+		ALL_WIDTH_TAX_PRICE,          
+		ALL_MARKET_PRICE,             
+		BASIC_PRICE,                  
+		TAX_COEFFICIENT,              
+		ALL_WEIGHT,                   
+		SECOND_DSC,                   
+		STATE,                        
+		UPDATEDATE,                   
+		CREATEUSERID,                 
+		CREATEDATE,                   
+		CACL_TYPE,                    
+		FACTORY_FEE_TYPE,             
+		OTHER_COEFFICIENT,            
+		STYLE_ITEM_ID,                
+		STYLE_MIDDLE_ID,              
+		STYLE_ORNACLASS_ID,           
+		THEME_COEFFICIENT,            
+		PRICE_WITH_COEFFICIENT,       
+		FEE_WITH_COEFFICIENT,         
+		ALLMONEY_WITH_COEFFICIENT,    
+		MAIN_PRICE_WITH_COEFFICIENT,  
+		SECOND_PRICE_WITH_COEFFICIENT,
+		ACS_PRICE_WITH_COEFFICIENT,   
+		SBRA_PRICE_WITH_COEFFICIENT,  
+		FACTORY_STYLE_ID,             
+		LP_FEE,                       
+		MAIN_ZS_PRICE,                
+		SECOND_ZS_PRICE,              
+		MAIN_STONE_XQ_FEE,            
+		SECOND_STONE_XQ_FEE,          
+		WL_CODE,                      
+		OUT_GOODS_BILL_NO,            
+		ACC_WITHOUT_TAX,              
+		ACC_WITH_TAX,                 
+		ACC_MARKET_PRICE,             
+		ACC_PRICE_WITH_COEFFICIENT,   
+		SBRA_STYLE_ID,                
+		SBRA_COLOR_ID,                
+		IS_DOUBLE_LABEL,              
+		LABEL_ID,                     
+		ORNA_BAR_CODE,                
+		AVG_WEIGHT,                   
+		VERIFICATION_FLAG,            
+		SPECIAL_WORK_PRICE,           
+		NEW_GOLD_PRICE,               
+		STONE_COEFF,                  
+		ACT_TRADEIN_FEE,              
+		TRADEIN_FEE,                  
+		ANALYSIS_ARANGE_ID,
+		HANDOVER_NAME,
+		HLEVEL,
+		INIV_FLAG,
+		BASIC_PRICE_COEFFICIENT,       
+		IDENT_ID ,           
+		HRD_CERT ,           
+		GIA_CERT ,           
+		IGI_CERT ,           
+		AGS_CERT ,
+		COLORGRADE_ID_XQ,          
+		CLEAN_ID_XQ,
+		IS_CONSIGNMENT,
+		UPDATE_BASIC_PRICE,
+		BASIC_PRICE_OLD	
+	</sql>
+	<sql id="PriceStone.column.all">
+		ID,                                         
+		HEAD_ID,                                   
+		IS_MAIN_STONE,                        
+		LUODAN_CODE,                           
+		STONE_NUMS,                             
+		STONE_WEIGHT,                         
+		WITHOUT_TAX_PRICE,                 
+		WITHOUT_TAX_ALLMONEY,          
+		STONE_TAX,                            
+		WITH_TAX_ALLMONEY,                
+		MARKET_PRICE,                         
+		MARKET_ALLMONEY,                   
+		UPDATEDATE,                            
+		CREATEUSERID,                        
+		CREATEDATE,                            
+		STONE_TYPE,                             
+		STONE_SPEC,                             
+		STONE_COEFFICIENT,               
+		PRICE_WITH_COEFFICIENT,      
+		COLOR_ID,                                 
+		CLEAN_ID,                                 
+		COLORGRADE_ID,                            
+		DM_SHAPE_ID,                            
+		CUT_ID,                                     
+		IS_MAIN_INFO,                          
+		STONE_THEME_COEFFICIENT,    
+		FEE_TYPE,                                 
+		CERTIFICATE_PRICE,               
+		FACTORY_NULE_CODE,                
+		PRIVATE_TYPE,
+		STONE_ITEM_CLASS_ID
+	</sql>
+	<sql id="PriceSbra.column.all">
+		ID,                                      
+		HEAD_ID,                             
+		SBRA_WEIGHT,                     
+		SBRA_WITHOUT_TAX_PRICE, 
+		SBRA_WITHOUT_TAX_MONEY, 
+	 	SBRA_TAX,                           
+		SBRA_WITH_TAX_MONEY,       
+		SBRA_MARKET_PRICE,          
+		SBRA_MARKET_ALLMONEY,    
+		IS_INLAY_HALF_PRODUCT,   
+		HALF_PRODUCT_PRICE,        
+		UPDATEDATE,                      
+		CREATEUSERID,                  
+		CREATEDATE,                      
+		SBRA_COEFFICIENT,           
+	    PRICE_WITH_COEFFICIENT,
+	  	STYLE_ID,                           
+	    QUALITY_ID,                       
+	    MATER_CODE,                       
+		PRIVATE_TYPE,                   
+		GOLD_LOST_PERCENT,          
+		GOLD_LOST_WEIGHT,            
+		GOLD_ALL_WEIGHT
+	</sql>
+	<sql id="PriceAcs.column.all">
+		ID,                                      
+		HEAD_ID,                             
+		ACS_TYPE,                           
+		ACS_WEIGHT,                       
+		ACS_QUANTITY,                   
+		ACS_WITHOUT_TAX_PRICE,   
+		ACS_WITHOUT_TAX_MONEY,   
+	    ACS_TAX,                             
+		ACS_WITH_TAX_MONEY,         
+		ACS_MARKET_ALLMONEY,      
+		UPDATEDATE,                      
+		CREATEUSERID,                  
+		CREATEDATE,                      
+		OTHER_COEFFICIENT,         
+		PRICE_WITH_COEFFICIENT,
+		STYLE_ID,                           
+		QUALITY_ID,                       
+		ACS_CODE,                           
+		PRIVATE_TYPE
+	</sql>
+	<sql id="PriceAcc.column.all">
+		ID, 
+		HEAD_ID,                             
+		ACC_ID,  
+		ACC_WITHOUT_TAX_COST,     
+		ACC_TAX,                             
+		ACC_WITH_TAX_COST,           
+		ACC_MARKET_PRICE,            
+		ACC_COEFFICIENT,             
+		PRICE_WITH_COEFFICIENT,
+		VERIFICATION_FLAG   
+	</sql>
+	<sql id="PriceHead.column.list">
+		id,no, WL_CODE, HANDOVER_NO,CACL_TYPE, vender, ITEM_CLASS_ID, ORNA_CLASS_ID, QUALITY_ID, IS_DOUBLE_LABEL, 
+		ALLNUMBER, ALL_WEIGHT, BASIC_PRICE, STATE,UPDATEDATE,CREATEUSERID,CREATEDATE,HANDOVER_NAME
+    </sql>
+    <sql id="PriceHead.pageWhere">
+    		<isNotEmpty property="wlCode" prepend="and"> a.wl_code like '%$wlCode$%' </isNotEmpty>
+			<isNotEmpty property="handoverNo" prepend="and"> a.HANDOVER_NAME like '%$handoverNo$%' </isNotEmpty>
+			<isNotEmpty property="caclType" prepend="and">  a.cacl_type = #caclType# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="calcpriceNo" prepend="and"> a.no like '%$calcpriceNo$%' </isNotEmpty>
+			<isNotEmpty property="verdorName" prepend="and"> a.vender = #verdorName# </isNotEmpty>
+			<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ a.createdate >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ a.createdate <= #endTime#]]> </isNotEmpty>
+		   	<isNotEmpty property="createId" prepend="and">  a.createuserid = #createId# </isNotEmpty>
+			<isNotEqual compareValue="on" property="stateId" prepend="and"> a.state=1 </isNotEqual>
+			<isEqual compareValue="1" property="selectLabel"  prepend="and"> a.IS_DOUBLE_LABEL=0 </isEqual>
+			<isEqual compareValue="2" property="selectLabel" prepend="and"> a.IS_DOUBLE_LABEL=1 </isEqual>
+			<isEqual compareValue="3" property="selectLabel" prepend="and"> a.IS_DOUBLE_LABEL=1 </isEqual>
+		   	<isNotEmpty property="basicPrice" prepend="and">  a.BASIC_PRICE = #basicPrice# </isNotEmpty>
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="PriceHead.getPageData" resultMap="resultList" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="PriceHead.column.list"/> from JAT_CALC_PRICE_HEAD a where 1 = 1 and a.ORG_ID=#orgId#
+			<include refid="PriceHead.pageWhere"/>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by  a.id desc ,a.wl_code desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="PriceHead.getTotalCount" resultClass="int" >
+		select count(1) from JAT_CALC_PRICE_HEAD  a where 1 = 1 
+			<include refid="PriceHead.pageWhere"/>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by  a.id desc ,a.wl_code desc
+	</select>
+	<!-- 获取头表 -->
+	<select id="PriceHead.PriceHeadById" resultMap="reaultHead" parameterClass="string">
+		select <include refid="PriceHead.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_HEAD a where a.id=#value#
+	</select>
+	<!-- 获取头表 -->
+	<select id="PriceHead.PriceHeadByNo" resultMap="reaultHead" parameterClass="string">
+		select <include refid="PriceHead.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_HEAD a where a.no=#value#
+	</select>
+	<!-- 获取石头行表 -->
+	<select id="PriceHead.PriceStoneByHeadId" resultMap="reslutStone" parameterClass="string">
+		select <include refid="PriceStone.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_STONE_LINE a where a.HEAD_ID=#value#
+	</select>
+	<!-- 获取托架行表 -->
+	<select id="PriceHead.PriceSbraByHeadId" resultMap="resultSbra" parameterClass="string">
+		select <include refid="PriceSbra.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_SBRA_LINE a where a.HEAD_ID=#value#
+	</select>
+	<!-- 获取配件行表 -->
+	<select id="PriceHead.PriceAcsByHeadId" resultMap="resultAcs" parameterClass="string">
+		select <include refid="PriceAcs.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_ACS_LINE a where a.HEAD_ID=#value#
+	</select>
+	<!-- 获取辅料行表 -->
+	<select id="PriceHead.PriceAccByHeadId" resultMap="resultAcc" parameterClass="string">
+		select <include refid="PriceAcc.column.all"/>, rownum as rownum_ from JAT_CALC_PRICE_ACC_LINE a where a.HEAD_ID=#value#
+	</select>
+	<!-- 删除头表 -->
+	<delete id="PriceHead.deleteHeadById" parameterClass="string">
+		delete JAT_CALC_PRICE_HEAD a where a.id = #value#
+	</delete>
+	<!-- 删除acc行表 -->
+	<delete id="PriceHead.deleteAccLineById" parameterClass="string">
+		delete JAT_CALC_PRICE_ACC_LINE a where a.HEAD_ID = #value#
+	</delete>
+	<!-- 删除acs行表 -->
+	<delete id="PriceHead.deleteAcsLineById" parameterClass="string">
+		delete JAT_CALC_PRICE_ACS_LINE a where a.HEAD_ID = #value#
+	</delete>
+	<!-- 删除sbra行表 -->
+	<delete id="PriceHead.deleteSbraLineById" parameterClass="string">
+		delete JAT_CALC_PRICE_SBRA_LINE a where a.HEAD_ID = #value#
+	</delete>
+	<!-- 删除stone行表 -->
+	<delete id="PriceHead.deleteStoneLineById" parameterClass="string">
+		delete JAT_CALC_PRICE_STONE_LINE a where a.HEAD_ID = #value#
+	</delete>
+	<!-- 添加head -->
+	<insert id="PriceHead.saveHead" parameterClass="PriceHead">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_head_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_price_head(
+			id,                                  
+			NO,                                  
+			ORG_ID,                              
+			HANDOVER_NO,                         
+			VENDER,                              
+			ITEM_CLASS_ID,                       
+			ORNA_CLASS_ID,                       
+			QUALITY_ID,                          
+			COLOR_ID,                            
+			CLEAN_ID,                            
+			COLORGRADE_ID,                       
+			DM_SHAPE_ID,                         
+			IS_NOLINE_CALC,                      
+			IS_OLDORNA_INIV,                     
+			FEE_TAX,                             
+			FEE_WIDTHOUT_TAX_UNIT_PRICE,         
+			FEE_WIDTHOUT_TAX_PRICE,              
+			FEE_WIDTH_TAX_PRICE,                 
+			FEE_MARKET_PRICE,                    
+			SELF_MADE_TAX,                       
+			SELF_MADE_WIDTHOUT_TAX_PRICE,        
+			SELF_MADE_WIDTH_TAXPRICE,            
+			SELF_MADE_MARKET_PRICE,              
+			ALLNUMBER,                           
+			MAIN_NUMBER,                         
+			MAIN_WEIGHT,                         
+			MAIN_WIDTHOUT_TAX_PRICE,             
+			MAIN_WIDTH_TAX_PRICE,                
+			MAIN_MARKET_PRICE,                   
+			SECOND_NUMBER,                       
+			SECOND_WEIGHT,                       
+			SECOND_WIDTHOUT_TAX_PRICE,           
+			SECOND_WIDTH_TAX_PRICE,              
+			SECOND_MARKET_PRICE,                 
+			SBRA_COEFFICIENT,                    
+			SBRA_WEIGHT,                         
+			SBRA_WIDTHOUT_TAX_PRICE,             
+			SBRA_WIDTH_TAX_PRICE,                
+			SBRA_MARKET_PRICE,                   
+			ACS_WIDTHOUT_TAX_PRICE,              
+			ACS_WIDTH_TAX_PRICE,                 
+			ACS_MARKET_PRICE,                    
+			NCOEFFICIENT,                        
+			STYLE_ID,                            
+			ALL_WIDTHOUT_TAX_PRICE,              
+			ALL_WIDTH_TAX_PRICE,                 
+			ALL_MARKET_PRICE,                    
+			BASIC_PRICE,                         
+			TAX_COEFFICIENT,                     
+			ALL_WEIGHT,                          
+			SECOND_DSC,                          
+			STATE,                               
+			UPDATEDATE,                          
+			CREATEUSERID,                        
+			CREATEDATE,                          
+			CACL_TYPE,                           
+			FACTORY_FEE_TYPE,                    
+			OTHER_COEFFICIENT,                   
+			STYLE_ITEM_ID,                       
+			STYLE_MIDDLE_ID,                     
+			STYLE_ORNACLASS_ID,                  
+			THEME_COEFFICIENT,                   
+			PRICE_WITH_COEFFICIENT,              
+			FEE_WITH_COEFFICIENT,                
+			ALLMONEY_WITH_COEFFICIENT,           
+			MAIN_PRICE_WITH_COEFFICIENT,         
+			SECOND_PRICE_WITH_COEFFICIENT,       
+			ACS_PRICE_WITH_COEFFICIENT,          
+			SBRA_PRICE_WITH_COEFFICIENT,         
+			FACTORY_STYLE_ID,                    
+			LP_FEE,                              
+			MAIN_ZS_PRICE,                       
+			SECOND_ZS_PRICE,                     
+			MAIN_STONE_XQ_FEE,                   
+			SECOND_STONE_XQ_FEE,                 
+			WL_CODE,                             
+			OUT_GOODS_BILL_NO,                   
+			ACC_WITHOUT_TAX,                     
+			ACC_WITH_TAX,                        
+			ACC_MARKET_PRICE,                    
+			ACC_PRICE_WITH_COEFFICIENT,          
+			SBRA_STYLE_ID,                       
+			SBRA_COLOR_ID,                       
+			IS_DOUBLE_LABEL,                     
+			LABEL_ID,                            
+			ORNA_BAR_CODE,                       
+			AVG_WEIGHT,                          
+			VERIFICATION_FLAG,                   
+			SPECIAL_WORK_PRICE,                  
+			NEW_GOLD_PRICE,                      
+			STONE_COEFF,                         
+			ACT_TRADEIN_FEE,                     
+			TRADEIN_FEE,                         
+			ANALYSIS_ARANGE_ID,
+			color_grade_grade_id ,
+    		clean_grade_id ,
+    		HANDOVER_NAME,
+    		HLEVEL,
+    		INIV_FLAG,
+    		BASIC_PRICE_COEFFICIENT,       
+			IDENT_ID ,           
+			HRD_CERT ,           
+			GIA_CERT ,           
+			IGI_CERT ,           
+			AGS_CERT ,
+			COLORGRADE_ID_XQ,          
+			CLEAN_ID_XQ,
+			IS_CONSIGNMENT,
+			UPDATE_BASIC_PRICE,
+			BASIC_PRICE_OLD
+		)
+		values(
+			#id#,                            
+			#no#,                            
+			#orgId#,                         
+			#handoverNo#,                    
+			#vender#,                        
+			#itemClassId#,                   
+			#ornaClassId#,                   
+			#qualityId#,                     
+			#colorId#,                       
+			#cleanId#,                       
+			#colorGreadId#,                  
+			#dmShapeId#,                     
+			#isNolineCalc#,                  
+			#isOldornaIniv#,                 
+			#feeTax#,                        
+			#feeWidthoutTaxUnitPrice#,       
+			#feeWidthoutTaxPrice#,           
+			#feeWidthTaxPrice#,              
+			#feeMarketPrice#,                
+			#selfMadeTax#,                   
+			#selfMadeWidthoutTaxPrice#,      
+			#selfMadeWidthTaxprice#,         
+			#selfMadeMarketPrice#,           
+			#allNumber#,                     
+			#mainNumber#,                    
+			#mainWeight#,                    
+			#mainWidthoutTaxPrice#,          
+			#mainWidthTaxPrice#,             
+			#mainMarketPrice#,               
+			#secondNumber#,                  
+			#secondWeight#,                  
+			#secondWidthoutTaxPrice#,        
+			#secondWidthTaxPrice#,           
+			#secondMarketPrice#,             
+			#sbraCoefficient#,               
+			#sbraWeight#,                    
+			#sbraWidthoutTaxPrice#,          
+			#sbraWidthTaxPrice#,             
+			#sbraMarketPrice#,               
+			#acsWidthoutTaxPrice#,           
+			#acsWidthTaxPrice#,              
+			#acsMarketPrice#,                
+			#ncoefficient#,                  
+			#styleId#,                       
+			#allWidthoutTaxPrice#,           
+			#allWidthTaxPrice#,              
+			#allMarketPrice#,                
+			#basicPrice#,                    
+			#taxCoefficient#,                
+			#allWeight#,                     
+			#secondDsc#,                     
+			#state#,                         
+			#updateDate#,                    
+			#createUserId#,                  
+			#createDate#,                    
+			#caclType#,                      
+			#factoryFeeType#,                
+			#otherCoefficient#,              
+			#styleItemId#,                   
+			#styleMiddleId#,                 
+			#styleOrnaclassId#,              
+			#themeCoefficient#,              
+			#priceWithCoefficient#,          
+			#feeWithCoefficient#,            
+			#allmoneyWithCoefficient#,       
+			#mainPriceWithCoefficient#,      
+			#secondPriceWithCoefficient#,    
+			#acsPriceWithCoefficient#,       
+			#sbraPriceWithCoefficient#,      
+			#factoryStyleId#,                
+			#lpFee#,                         
+			#mainZsPrice#,                   
+			#secondZsPrice#,                 
+			#mainStoneXqFee#,                
+			#secondStoneXqDee#,              
+			#wlCode#,                        
+			#outGoodsBillNo#,                
+			#accWithoutTax#,                 
+			#accWithTax#,                    
+			#accMarketPrice#,                
+			#accPriceWithCoefficient#,       
+			#sbraStyleId#,                   
+			#sbraColorId#,                   
+			#isDoubleLabel#,                 
+			#labelId#,                       
+			#ornaBarCode#,                   
+			#avgWeight#,                     
+			#verificationFlag#,              
+			#specialWorkPrice#,              
+			#newGoldPrice#,                  
+			#stoneCoeff#,                    
+			#actTradeinFee#,                 
+			#tradeinFee#,                    
+			#analysisArangeId#,
+			(select cgg.grade_id from jat_basic_color_grade_grade cgg  where  cgg.color_grade_id=#colorGreadId#),
+			(select cg.grade_id from jat_basic_clean_grade cg where cg.clean_id = #cleanId#),
+			#handoverName#,
+			#hlevel#,
+			#inivFlag#,
+			#basicPriceCoefficient#,      
+			#identId#,          
+			#hrdCert#,          
+			#giaCert#,          
+			#igiCert#,          
+			#agsCert#, 
+			#colorGreadIdxq#,          
+			#cleanIdxq#,
+			#isConsignment#,
+			#updateBasicPrice#,
+			#basicPriceOld#
+		)
+	</insert>
+	
+	<insert id="PriceHead.saveStone" parameterClass="PriceStoneLine">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_stone_line_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_price_stone_line (
+			id,                                         
+			HEAD_ID,                                   
+			IS_MAIN_STONE,                        
+			LUODAN_CODE,                           
+			STONE_NUMS,                             
+			STONE_WEIGHT,                         
+			WITHOUT_TAX_PRICE,                 
+			WITHOUT_TAX_ALLMONEY,          
+			STONE_TAX,                            
+			WITH_TAX_ALLMONEY,                
+			MARKET_PRICE,                         
+			MARKET_ALLMONEY,                             
+			STONE_TYPE,                             
+			STONE_SPEC,                             
+			STONE_COEFFICIENT,               
+			PRICE_WITH_COEFFICIENT,      
+			COLOR_ID,                                 
+			CLEAN_ID,                                 
+			COLORGRADE_ID,                            
+			DM_SHAPE_ID,                            
+			CUT_ID,                                     
+			IS_MAIN_INFO,                          
+			STONE_THEME_COEFFICIENT,    
+			FEE_TYPE,                                 
+			CERTIFICATE_PRICE,               
+			FACTORY_NULE_CODE,                
+			PRIVATE_TYPE,
+			STONE_ITEM_CLASS_ID
+		)values(
+			#id#,                    
+			#headId#,                
+			#isMainStone#,           
+			#luodanCode#,            
+			#stoneNums#,             
+			#stoneWeight#,           
+			#withotTaxPrice#,        
+			#withoutTaxAllMoney#,    
+			#stoneTax#,              
+			#withTaxAllMoney#,       
+			#marketPrice#,           
+			#marketAllMoney#,            
+			#stoneType#,             
+			#stoneSpec#,             
+			#stoneCoefficient#,      
+			#priceWithCoefficient#,  
+			#colorId#,               
+			#cleanId#,               
+			#colorGreadId#,          
+			#dmShapeId#,             
+			#cutId#,                 
+			#isMainInfo#,
+			#stoneThemeCoefficient#,            
+			#feeType#,               
+			#certificatePrice#,      
+			#factoryNuleCode#,       
+			#privateType#,
+			#stoneItemClassId# 
+		)
+	</insert>
+	
+	<insert id="PriceHead.saveSbra" parameterClass="PriceSbraLine">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_sbra_line_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_price_sbra_line (
+			id,                                      
+			HEAD_ID,                             
+			SBRA_WEIGHT,                     
+			SBRA_WITHOUT_TAX_PRICE, 
+			SBRA_WITHOUT_TAX_MONEY, 
+		 	SBRA_TAX,                           
+			SBRA_WITH_TAX_MONEY,       
+			SBRA_MARKET_PRICE,          
+			SBRA_MARKET_ALLMONEY,    
+			<!-- IS_INLAY_HALF_PRODUCT,   --> 
+			HALF_PRODUCT_PRICE,                      
+			SBRA_COEFFICIENT,           
+		    PRICE_WITH_COEFFICIENT,
+		  	STYLE_ID,                           
+		    QUALITY_ID,                       
+		    MATER_CODE,                       
+			PRIVATE_TYPE,                   
+			GOLD_LOST_PERCENT,          
+			GOLD_LOST_WEIGHT,            
+			GOLD_ALL_WEIGHT
+		)values(
+			#id#,                  
+			#headId#,              
+			#sbraWeight#,          
+			#sbraWithoutTaxPrice#, 
+			#sbraWithoutTaxmoney#, 
+			#sbraTax#,             
+			#sbraWithTaxMoney#,    
+			#sbraMarketPrice#,     
+			#sbraMarketAllMoney#,  
+			<!--  #isInlayHalfProduct#,     -->
+			#halfProductPrice#,          
+			#sbraCoefficient#,     
+			#priceWithCoefficient#,
+			#styleId#,             
+			#qualityId#,           
+			#materCode#,           
+			#privateType#,         
+			#goldLostPercent#,     
+			#goldLostWeight#,      
+			#goldAllweight#    
+		)
+	</insert>
+	<insert id="PriceHead.saveAcs" parameterClass="PriceAcsLine">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_acs_line_seq.nextval as id from dual
+		</selectKey>
+			insert into jat_calc_price_acs_line (
+				id,                                      
+				HEAD_ID,                             
+				ACS_TYPE,                           
+				ACS_WEIGHT,                       
+				ACS_QUANTITY,                   
+				ACS_WITHOUT_TAX_PRICE,   
+				ACS_WITHOUT_TAX_MONEY,   
+			    ACS_TAX,                             
+				ACS_WITH_TAX_MONEY,         
+				ACS_MARKET_ALLMONEY,                       
+				OTHER_COEFFICIENT,         
+				PRICE_WITH_COEFFICIENT,
+				STYLE_ID,                           
+				QUALITY_ID,                       
+				ACS_CODE,                           
+				PRIVATE_TYPE
+			)values(
+				#id#,                  
+				#headId#,              
+				#acsType#,             
+				#acsWeight#,           
+				#acsQuantity#,         
+				#acsWithoutTaxPrice#,  
+				#acsWithoutTaxMoney#,  
+				#acsTax#,              
+				#acsWithTaxMoney#,     
+				#acsMarketAllMoney#,          
+				#otherCoefficient#,    
+				#priceWithCoefficient#,
+				#styleId#,             
+				#qualityId#,           
+				#acsCode#,             
+				#privateType# 
+			)
+	</insert>
+	<insert id="PriceHead.saveAcc" parameterClass="PriceAccLine">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_acc_line_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_price_acc_line (
+			ID, 
+			HEAD_ID,                             
+			ACC_ID,  
+			ACC_WITHOUT_TAX_COST,     
+			ACC_TAX,                             
+			ACC_WITH_TAX_COST,           
+			ACC_MARKET_PRICE,            
+			ACC_COEFFICIENT,             
+			PRICE_WITH_COEFFICIENT,
+			VERIFICATION_FLAG   
+		)values(
+			#id#,                    
+			#headId#,                
+			#accId#,                 
+			#accWithoutTaxCost#,     
+			#accTax#,                
+			#accWithTaxCost#,        
+			#accMarketPrice#,        
+			#accCoefficient#,        
+			#priceWithCoefficient#,  
+			#verificationFlag#
+		)
+	</insert>
+	<update id="PriceHead.updateHead" parameterClass="PriceHead">
+		update jat_calc_price_head set                              
+					NO=                           #no#,                            
+					ORG_ID=                       #orgId#,                         
+					HANDOVER_NO=                  #handoverNo#,                    
+					VENDER=                       #vender#,                        
+					ITEM_CLASS_ID=                #itemClassId#,                   
+					ORNA_CLASS_ID=                #ornaClassId#,                   
+					QUALITY_ID=                   #qualityId#,                     
+					COLOR_ID=                     #colorId#,                       
+					CLEAN_ID=                     #cleanId#,                       
+					COLORGRADE_ID=                #colorGreadId#,                  
+					DM_SHAPE_ID=                  #dmShapeId#,                     
+					IS_NOLINE_CALC=               #isNolineCalc#,                  
+					IS_OLDORNA_INIV=              #isOldornaIniv#,                 
+					FEE_TAX=                      #feeTax#,                        
+					FEE_WIDTHOUT_TAX_UNIT_PRICE=  #feeWidthoutTaxUnitPrice#,       
+					FEE_WIDTHOUT_TAX_PRICE=       #feeWidthoutTaxPrice#,           
+					FEE_WIDTH_TAX_PRICE=          #feeWidthTaxPrice#,              
+					FEE_MARKET_PRICE=             #feeMarketPrice#,                
+					SELF_MADE_TAX=                #selfMadeTax#,                   
+					SELF_MADE_WIDTHOUT_TAX_PRICE= #selfMadeWidthoutTaxPrice#,      
+					SELF_MADE_WIDTH_TAXPRICE=     #selfMadeWidthTaxprice#,         
+					SELF_MADE_MARKET_PRICE=       #selfMadeMarketPrice#,           
+					ALLNUMBER=                    #allNumber#,                     
+					MAIN_NUMBER=                  #mainNumber#,                    
+					MAIN_WEIGHT=                  #mainWeight#,                    
+					MAIN_WIDTHOUT_TAX_PRICE=      #mainWidthoutTaxPrice#,          
+					MAIN_WIDTH_TAX_PRICE=         #mainWidthTaxPrice#,             
+					MAIN_MARKET_PRICE=            #mainMarketPrice#,               
+					SECOND_NUMBER=                #secondNumber#,                  
+					SECOND_WEIGHT=                #secondWeight#,                  
+					SECOND_WIDTHOUT_TAX_PRICE=    #secondWidthoutTaxPrice#,        
+					SECOND_WIDTH_TAX_PRICE=       #secondWidthTaxPrice#,           
+					SECOND_MARKET_PRICE=          #secondMarketPrice#,             
+					SBRA_COEFFICIENT=             #sbraCoefficient#,               
+					SBRA_WEIGHT=                  #sbraWeight#,                    
+					SBRA_WIDTHOUT_TAX_PRICE=      #sbraWidthoutTaxPrice#,          
+					SBRA_WIDTH_TAX_PRICE=         #sbraWidthTaxPrice#,             
+					SBRA_MARKET_PRICE=            #sbraMarketPrice#,               
+					ACS_WIDTHOUT_TAX_PRICE=       #acsWidthoutTaxPrice#,           
+					ACS_WIDTH_TAX_PRICE=          #acsWidthTaxPrice#,              
+					ACS_MARKET_PRICE=             #acsMarketPrice#,                
+					NCOEFFICIENT=                 #ncoefficient#,                  
+					STYLE_ID=                     #styleId#,                       
+					ALL_WIDTHOUT_TAX_PRICE=       #allWidthoutTaxPrice#,           
+					ALL_WIDTH_TAX_PRICE=          #allWidthTaxPrice#,              
+					ALL_MARKET_PRICE=             #allMarketPrice#,                
+					BASIC_PRICE=                  #basicPrice#,                    
+					TAX_COEFFICIENT=              #taxCoefficient#,                
+					ALL_WEIGHT=                   #allWeight#,                     
+					SECOND_DSC=                   #secondDsc#,                     
+					STATE=                        #state#,                         
+					UPDATEDATE=                   #updateDate#,                    
+					CREATEUSERID=                 #createUserId#,                  
+					CREATEDATE=                   #createDate#,                    
+					CACL_TYPE=                    #caclType#,                      
+					FACTORY_FEE_TYPE=             #factoryFeeType#,                
+					OTHER_COEFFICIENT=            #otherCoefficient#,              
+					STYLE_ITEM_ID=                #styleItemId#,                   
+					STYLE_MIDDLE_ID=              #styleMiddleId#,                 
+					STYLE_ORNACLASS_ID=           #styleOrnaclassId#,              
+					THEME_COEFFICIENT=            #themeCoefficient#,              
+					PRICE_WITH_COEFFICIENT=       #priceWithCoefficient#,          
+					FEE_WITH_COEFFICIENT=         #feeWithCoefficient#,            
+					ALLMONEY_WITH_COEFFICIENT=    #allmoneyWithCoefficient#,       
+					MAIN_PRICE_WITH_COEFFICIENT=  #mainPriceWithCoefficient#,      
+					SECOND_PRICE_WITH_COEFFICIENT=#secondPriceWithCoefficient#,    
+					ACS_PRICE_WITH_COEFFICIENT=   #acsPriceWithCoefficient#,       
+					SBRA_PRICE_WITH_COEFFICIENT=  #sbraPriceWithCoefficient#,      
+					FACTORY_STYLE_ID=             #factoryStyleId#,                
+					LP_FEE=                       #lpFee#,                         
+					MAIN_ZS_PRICE=                #mainZsPrice#,                   
+					SECOND_ZS_PRICE=              #secondZsPrice#,                 
+					MAIN_STONE_XQ_FEE=            #mainStoneXqFee#,                
+					SECOND_STONE_XQ_FEE=          #secondStoneXqDee#,              
+					WL_CODE=                      #wlCode#,                        
+					OUT_GOODS_BILL_NO=            #outGoodsBillNo#,                
+					ACC_WITHOUT_TAX=              #accWithoutTax#,                 
+					ACC_WITH_TAX=                 #accWithTax#,                    
+					ACC_MARKET_PRICE=             #accMarketPrice#,                
+					ACC_PRICE_WITH_COEFFICIENT=   #accPriceWithCoefficient#,       
+					SBRA_STYLE_ID=                #sbraStyleId#,                   
+					SBRA_COLOR_ID=                #sbraColorId#,                   
+					IS_DOUBLE_LABEL=              #isDoubleLabel#,                 
+					LABEL_ID=                     #labelId#,                       
+					ORNA_BAR_CODE=                #ornaBarCode#,                   
+					AVG_WEIGHT=                   #avgWeight#,                     
+					VERIFICATION_FLAG=            #verificationFlag#,              
+					SPECIAL_WORK_PRICE=           #specialWorkPrice#,              
+					NEW_GOLD_PRICE=               #newGoldPrice#,                  
+					STONE_COEFF=                  #stoneCoeff#,                    
+					ACT_TRADEIN_FEE=              #actTradeinFee#,                 
+					TRADEIN_FEE=                  #tradeinFee#,                    
+					ANALYSIS_ARANGE_ID=           #analysisArangeId#,
+					color_grade_grade_id = (select cgg.grade_id from jat_basic_color_grade_grade cgg  where cgg.color_grade_id=#colorGreadId#),
+   					clean_grade_id = (select cg.grade_id from jat_basic_clean_grade cg where cg.clean_id = #cleanId#),
+   					HANDOVER_NAME=                  #handoverName#,
+   					HLEVEL=							#hlevel#,
+   					INIV_FLAG=						#inivFlag#,
+   					BASIC_PRICE_COEFFICIENT=		#basicPriceCoefficient#,
+					IDENT_ID=          #identId#,          
+					HRD_CERT=          #hrdCert#,          
+					GIA_CERT=          #giaCert#,          
+					IGI_CERT=          #igiCert#,          
+					AGS_CERT=          #agsCert#,         
+					COLORGRADE_ID_XQ=          #colorGreadIdxq#,          
+					CLEAN_ID_XQ=          #cleanIdxq#,
+					IS_CONSIGNMENT=          #isConsignment#,
+					UPDATE_BASIC_PRICE=          #updateBasicPrice#,
+					BASIC_PRICE_OLD=          #basicPriceOld#
+					where id=#id#   
+	</update>
+	<!-- 获取入库核价交接单分页数据  decode(value,'CM','普通','其它')-->
+	<select id="PriceHead.getHandoerCalcListPage" resultClass="com.jatools.vo.pur.HandoverHead" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select ph.BILLID           	"billid",
+			       ph.BILLNO           	"billno",
+			       ph.VERDOR_ID       	"verdorId",
+			       ph.DOTYPE			"dotype",
+			       ph.source_type		"sourceType",
+			       ph.STATUS			"status",
+			       ph.CREATE_DATE		"createDate",
+			       ph.IS_PSALE			"isPsale",
+			       ph.material_id		"materialId"
+			  from JAT_PUR_HANDOVER_HEAD ph
+              inner join jas_bd_cust c on ph.verdor_id = c.custid 
+			 where exists (select pl.*
+			          from JAT_PUR_HANDOVER_LINE pl
+			         where pl.BILLID = ph.BILLID
+			           and exists (select distinct ic.item_class_id
+			                           from JAS_BD_ITEM_CLASS ic
+			                          where ic.item_class_id = pl.item_class_id
+			                          <isEqual property="type" prepend="and" compareValue="1"> 1=1 
+	                          	  		  <isEqual property="ininvTypeId" prepend="and" compareValue="1"> ic.ininvtypeid = #ininvTypeId# </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="3">
+				                          	 ic.ininvtypeid = 2 and
+				                          	 ic.ARTICLE_TYPE_ID not in  (0,265)
+				                          </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="2">
+				                          	 ic.ininvtypeid = 2 and
+				                          	 ic.ARTICLE_TYPE_ID in  (0,265)
+				                          </isEqual>
+			                          </isEqual>
+			                          <isEqual property="type" prepend="and" compareValue="2">
+			                          		ic.ininvtypeid = #ininvTypeId#
+			                          </isEqual>
+			                            )) 
+			   <![CDATA[ and ((ph.STATUS = 10 and ph.SOURCE_TYPE='CM') or (ph.STATUS = 5 and ph.SOURCE_TYPE<>'CM')) ]]> 
+			   and ph.ORG_ID = #orgId# 
+		   	<isNotEmpty property="verdorName" prepend="and"> ph.verdor_id=#verdorName# </isNotEmpty>
+		   	<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ ph.create_date >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ ph.create_date <= #endTime#]]> </isNotEmpty>
+		   	 order by ph.billid desc
+		 )AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取入库核价交接单分页数条数 -->
+	<select id="PriceHead.getHandoerCalcListPageTotalCount" resultClass="int" >
+		select count(1)
+			  from JAT_PUR_HANDOVER_HEAD ph
+              inner join jas_bd_cust c on ph.verdor_id = c.custid 
+			 where exists (select pl.*
+			          from JAT_PUR_HANDOVER_LINE pl
+			         where pl.BILLID = ph.BILLID
+			           and exists (select distinct ic.item_class_id
+			                           from JAS_BD_ITEM_CLASS ic
+			                          where ic.item_class_id = pl.item_class_id
+			                          <isEqual property="type" prepend="and" compareValue="1"> 1=1 
+	                          	  		  <isEqual property="ininvTypeId" prepend="and" compareValue="1"> ic.ininvtypeid = #ininvTypeId# </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="3">
+				                          	 ic.ininvtypeid = 2 and
+				                          	 ic.ARTICLE_TYPE_ID not in  (0,265)
+				                          </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="2">
+				                          	 ic.ininvtypeid = 2 and
+				                          	 ic.ARTICLE_TYPE_ID in  (0,265)
+				                          </isEqual>
+			                          </isEqual>
+			                          <isEqual property="type" prepend="and" compareValue="2">
+			                          		ic.ininvtypeid = #ininvTypeId#
+			                          </isEqual>
+			                            )) 
+			   <![CDATA[ and ((ph.STATUS = 10 and ph.SOURCE_TYPE='CM') or (ph.STATUS = 5 and ph.SOURCE_TYPE<>'CM')) ]]>
+			   and ph.ORG_ID = #orgId# 
+		   	<isNotEmpty property="verdorName" prepend="and"> ph.verdor_id=#verdorName# </isNotEmpty>
+		   	<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ ph.create_date >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ ph.create_date <= #endTime#]]> </isNotEmpty>
+		   	 order by ph.billid desc
+	</select>
+	<!-- ================核价交接单列表=================== -->
+	<select id="BdCommon.getHandoerCalcList" resultClass="com.jatools.vo.pur.HandoverHead" parameterClass="map">
+		select ph.BILLID           "billid",
+		       ph.BILLNO           "billno",
+		       ph.VERDOR_ID       "verdorId",
+		       ph.DOTYPE			"dotype",
+		       ph.STATUS			"status",
+		       ph.CREATE_DATE		"createDate"
+		  from JAT_PUR_HANDOVER_HEAD ph
+		 where exists (select pl.*
+		          from JAT_PUR_HANDOVER_LINE pl
+		         where pl.BILLID = ph.BILLID
+		           and exists (select distinct ic.item_class_id
+		                           from JAS_BD_ITEM_CLASS ic
+		                          where ic.item_class_id = pl.item_class_id
+		                            and ic.ininvtypeid = #ininvTypeId#)) 
+		   and ph.STATUS = 10
+		   and ph.ORG_ID = #orgId#
+	</select>
+	<!-- 交接单取交接单行表下指定的入库核价类型的大类 -->
+	<select id="BdCommon.getHandoerItemClassByHeadId" resultClass="com.jatools.vo.bd.ItemClass" parameterClass="map">
+		select i.item_class_id "itemClassId", i.item_class_dsc "itemClassDesc" from JAT_PUR_HANDOVER_HEAD h 
+	       inner join JAT_PUR_HANDOVER_LINE l on h.billid = l.billid
+	       inner join JAS_BD_ITEM_CLASS i on l.item_class_id = i.item_class_id
+	       where h.billid = #headId# 
+	       <isNotEmpty property="articleTypeId" prepend="and"> i.ARTICLE_TYPE_ID = #articleTypeId# </isNotEmpty>
+	       <isEqual property="type" prepend="and" compareValue="1"> 1=1 
+	                          	  		  <isEqual property="ininvTypeId" prepend="and" compareValue="1"> i.ininvtypeid = #ininvTypeId# </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="3">
+				                          	 i.ininvtypeid = 2 and
+				                          	 i.ARTICLE_TYPE_ID not in  (0,265)
+				                          </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="2">
+				                          	 i.ininvtypeid = 2 and
+				                          	 i.ARTICLE_TYPE_ID in  (0,265)
+				                          </isEqual>
+			                          </isEqual>
+			                          <isEqual property="type" prepend="and" compareValue="2">
+			                          		i.ininvtypeid = #ininvTypeId#
+			                          </isEqual>
+	</select>
+	<!-- 交接单取交接单行表下指定的入库核价类型的商品类型 -->
+	<select id="BdCommon.getArticleTypeClassByHeadId" resultClass="com.jatools.vo.bd.ArticleType" parameterClass="map">
+		select distinct(a.ARTICLE_TYPE_ID) "articleTypeId", a.ARTICLE_TYPE_DSC "articleTypeDesc" from JAT_PUR_HANDOVER_HEAD h 
+		       inner join JAT_PUR_HANDOVER_LINE l on h.billid = l.billid 
+		       inner join JAS_BD_ITEM_CLASS i on l.item_class_id = i.item_class_id
+	         inner join jas_bd_articletype a on i.ARTICLE_TYPE_ID = a.ARTICLE_TYPE_ID
+	         where h.billid = #headId# 
+	        <isNotEmpty property="itemClassId" prepend="and"> i.item_class_id = #itemClassId# </isNotEmpty>
+	        <isEqual property="type" prepend="and" compareValue="1"> 1=1 
+	                          	  		  <isEqual property="ininvTypeId" prepend="and" compareValue="1"> i.ininvtypeid = #ininvTypeId# </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="3">
+				                          	 i.ininvtypeid = 2 and
+				                          	 i.ARTICLE_TYPE_ID not in  (0,265)
+				                          </isEqual>
+				                          <isEqual property="ininvTypeId" prepend="and" compareValue="2">
+				                          	 i.ininvtypeid = 2 and
+				                          	 i.ARTICLE_TYPE_ID in  (0,265)
+				                          </isEqual>
+			                          </isEqual>
+			                          <isEqual property="type" prepend="and" compareValue="2">
+			                          		i.ininvtypeid = #ininvTypeId#
+			                          </isEqual>
+	</select>
+	<!-- 大小类，供应商下的款式   (select  nvl(max(v.TO_STYLE_ID),'') from  JAS_VE_STYLE_VENDER  v where v.STYLE_ID = s.STYLEID and v.CUST_ID = #custId#) "note",-->
+	<select id="BdCommon.getStyleByCalc" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			 select s.styleid          "styleId",
+				       s.stylename||decode(s.ISARCHIVE,1,'(已封存)','')        "styleName",
+				       s.itemclassid      "itemclassid",
+	       			   s.ornaclassid      "ornaclassid",
+				       s.styleitemclass   "styleitemclass",
+				       s.stylemiddleclass "stylemiddleclass",
+				       s.styleornaclass   "styleornaclass",
+				       v.TO_STYLE_ID	  "note", 
+	           		   s.IS_SPECIALCHARGE "isSpecialCharge",
+				       s.STYLENO		  "styleno",
+				       s.CREATEDATE 	  "createdate",
+				       s.STYLECODE		  "stylecode",
+				       s.ISBIGGRAPH 	  "isbiggraph",
+				       s.ISSMALLGRAPH	  "issmallgraph"
+				  from jas_bd_style s inner join JAS_VE_STYLE_VENDER v
+                  on s.STYLEID = v.STYLE_ID and v.CUST_ID = #custId# 
+				 where  s.itemclassid in (select pl.item_class_id
+				                           from JAT_PUR_HANDOVER_HEAD ph
+				                          inner join JAT_PUR_HANDOVER_LINE pl
+				                             on pl.billid = ph.billid
+				                          inner join jas_bd_item_class i 
+				                             on i.item_class_id = pl.item_class_id
+				                          where ph.billid = #pid# and i.ininvtypeid = #type#)
+				<isNotEmpty property="itemClassId" prepend="and"> s.itemclassid = #itemClassId# </isNotEmpty>
+		       	<isNotEmpty property="ornaClassId" prepend="and"> s.ornaclassid = #ornaClassId# </isNotEmpty>
+		       	<isNotEmpty property="styleItemId" prepend="and"> s.styleitemclass = #styleItemId# </isNotEmpty>
+		       	<isNotEmpty property="styleMiddleId" prepend="and"> s.stylemiddleclass = #styleMiddleId# </isNotEmpty>
+		       	<isNotEmpty property="styleOrnaId" prepend="and"> s.styleornaclass = #styleOrnaId# </isNotEmpty>
+		       	order by s.stylename
+		)AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="BdCommon.getStyleByCalcTotalCount" resultClass="int">
+	 	select count(1)
+				  from jas_bd_style s inner join JAS_VE_STYLE_VENDER v
+                  on s.STYLEID = v.STYLE_ID and v.CUST_ID = #custId#  
+				 where  s.itemclassid in (select pl.item_class_id
+				                           from JAT_PUR_HANDOVER_HEAD ph
+				                          inner join JAT_PUR_HANDOVER_LINE pl
+				                             on pl.billid = ph.billid
+				                          inner join jas_bd_item_class i 
+				                             on i.item_class_id = pl.item_class_id
+				                          where ph.billid = #pid# and i.ininvtypeid = #type#)
+				<isNotEmpty property="itemClassId" prepend="and"> s.itemclassid = #itemClassId# </isNotEmpty>
+		       	<isNotEmpty property="ornaClassId" prepend="and"> s.ornaclassid = #ornaClassId# </isNotEmpty>
+		       	<isNotEmpty property="styleItemId" prepend="and"> s.styleitemclass = #styleItemId# </isNotEmpty>
+		       	<isNotEmpty property="styleMiddleId" prepend="and"> s.stylemiddleclass = #styleMiddleId# </isNotEmpty>
+		       	<isNotEmpty property="styleOrnaId" prepend="and"> s.styleornaclass = #styleOrnaId# </isNotEmpty>
+		       	order by s.stylename
+	</select>
+	<!-- and v.ISMAINVENDER =1  -->
+	<select id="BdCommon.getStyleByToStyle" resultClass="com.jatools.vo.bd.Style" parameterClass="map">
+			select t.styleid          "styleId",
+			       t.stylename        "styleName",
+			       t.itemclassid      "itemclassid",
+			       t.ornaclassid      "ornaclassid",
+			       t.styleitemclass   "styleitemclass",
+			       t.stylemiddleclass "stylemiddleclass",
+			       t.styleornaclass   "styleornaclass",
+			       t.is_specialcharge "isSpecialCharge",
+			       v.to_style_id      "note",
+			       t.THEME_COEFFICIENT	 "themeCoefficient",
+			       t.iscm			  "iscm",
+			       t.ARTICLETYPEID	  "articletypeid",
+				   t.saleanalyst	  "saleanalyst",
+			       t.ISCUSTOMIZE	  "iscustomize",
+			       t.ISSUCHINDA		  "issuchinda",
+                   t.SUMMARYID as "summaryid"
+			  from JAS_VE_STYLE_VENDER v
+			 inner join jas_bd_style t
+			    on v.style_id = t.styleid
+			   and t.itemclassid = #itemClassId#
+			   and t.ornaclassid = #ornaClassId#
+			   and v.cust_id = #custId#
+			   and v.to_style_id = #toStyle#
+			   and t.ISARCHIVE=0 
+			   and rowNum = 1
+	</select>
+	<!-- 入库获取核价单 -->
+	<select id="PriceHead.loadPriceByIniv" resultMap="reaultHead" parameterClass="map">
+		select <include refid="PriceHead.column.all"/> from JAT_CALC_PRICE_HEAD a 
+			where a.handover_no = #handoverBillId# and a.state = 1 
+			<isEqual property="inivType" compareValue="1" prepend="and">
+				 a.cacl_type in(1,4) 
+			</isEqual>
+			<isEqual property="inivType" compareValue="2" prepend="and">
+				 a.cacl_type in(2,3) 
+			</isEqual>
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId# </isNotEmpty>
+	       	<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId# </isNotEmpty>
+	       	<isNotEmpty property="styleId" prepend="and"> a.style_id = #styleId# </isNotEmpty>
+	       	 or a.id = #id#
+	</select>
+	<!-- 入库获取核价单分页 -->
+	<select id="PriceHead.loadPriceByInivPage" resultMap="reaultHead" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="PriceHead.column.all"/> from JAT_CALC_PRICE_HEAD a 
+			where a.handover_no = #handoverBillId# and a.state = 1 
+			<isEqual property="inivType" compareValue="1" prepend="and">
+				 a.cacl_type in(1,4) 
+			</isEqual>
+			<isEqual property="inivType" compareValue="2" prepend="and">
+				 a.cacl_type in(2,3,4) 
+			</isEqual>
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId# </isNotEmpty>
+	       	<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId# </isNotEmpty>
+	        <isNotEmpty property="no" prepend="and"> a.no like '%$no$%' </isNotEmpty>
+	        <isNotEmpty property="wlCode" prepend="and"> a.wl_code like '%$wlCode$%' </isNotEmpty>
+		   	<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ a.createdate >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ a.createdate <= #endTime#]]> </isNotEmpty>
+		 	or a.id = #id# order by a.id desc
+	      )AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取入库核价交接单分页数条数 -->
+	<select id="PriceHead.loadPriceByInivPageTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from JAT_CALC_PRICE_HEAD a 
+			where a.handover_no = #handoverBillId# and a.state = 1 
+			<isEqual property="inivType" compareValue="1" prepend="and">
+				 a.cacl_type in(1,4) 
+			</isEqual>
+			<isEqual property="inivType" compareValue="2" prepend="and">
+				 a.cacl_type in(2,3,4) 
+			</isEqual>
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId# </isNotEmpty>
+	       	<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId# </isNotEmpty>
+	        <isNotEmpty property="no" prepend="and"> a.no like '%$no$%' </isNotEmpty>
+	        <isNotEmpty property="wlCode" prepend="and"> a.wl_code like '%$wlCode$%' </isNotEmpty>
+		   	<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ a.createdate >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ a.createdate <= #endTime#]]> </isNotEmpty>
+		 	or a.id = #id# order by a.id desc
+	</select>
+	<select id="Pricehead.getBasicPriceCoefficient" resultClass="string" parameterClass="map" >
+		select max(c.coefficient) from jat_basic_price_coefficient c 
+	       where c.item_class_id = #itemClassId#
+	       and c.orna_class_id = #ornaClassId#
+	       <isNotEmpty property="hlevel" prepend="and"> c.hlevel = #hlevel# </isNotEmpty>
+	       <isNotEmpty property="alaysisId" prepend="and"> c.alaysis_id = #alaysisId# </isNotEmpty>
+	       <isEmpty property="hlevel" prepend="and"> c.alaysis_id is null </isEmpty>
+	       <isEmpty property="alaysisId" prepend="and"> c.hlevel is null </isEmpty>
+	</select>
+	<!-- 根据编码取非现有量数据 -->
+	<select id="Pricehead.getMaterNoActiveByOrnaCode" resultClass="MaterNoActive" parameterClass="string">
+		select m.main_shape_id "mainShapeId",
+	           m.color_id "colorId",
+	           m.clean_id "cleanId",
+	           m.MAIN_COLOR_GRADE_ID "mainColorGradeId",
+	           m.cut_id "cutId",
+	           m.REAL_TOTAL_COST "realTotalCost",
+	           m.cost_unit "costUnit",
+	           m.all_qty "allQty",
+	           m.hrd_cert "hrdCert",
+	           m.gia_cert "giaCert",
+	           m.igi_cert "igiCert",
+               m.STONE_NOW_NUM  "stoneNowNum",
+               m.item_class_id "itemClassId",
+               m.SUPPLIER_ID "supplierId",
+               m.INIV_COST "inivCost"
+	      from ic_mater_noactive m
+	     where m.orna_code = #value#
+	</select>
+	<!-- 根据编码取现有量数据 -->
+	<select id="Pricehead.getMaterActiveByOrnaCode" resultClass="MaterActive" parameterClass="string">
+		select m.main_shape_id "mainShapeId",
+	           m.color_id "colorId",
+	           m.clean_id "cleanId",
+	           m.MAIN_COLOR_GRADE_ID "mainColorGradeId",
+	           m.cut_id "cutId",
+	           m.REAL_TOTAL_COST "realTotalCost",
+	           m.cost_unit "costUnit",
+	           m.all_qty "allQty",
+	           m.hrd_cert "hrdCert",
+	           m.gia_cert "giaCert",
+	           m.igi_cert "igiCert",
+               m.STONE_NOW_NUM  "stoneNowNum",
+               m.item_class_id "itemClassId",
+               m.SUPPLIER_ID "supplierId",
+               m.INIV_COST "inivCost"
+	      from ic_mater_active m
+	     where m.orna_code = #value#
+	</select>
+	<!-- 获取证书价格 -->
+	<select id="PriceHead.getCalcCertPrice" resultClass="string" parameterClass="map">
+		select max(p.cert_price)
+		  from jat_basic_cert_price p
+		 where p.item_class_id = #itemClassId#
+		   <![CDATA[ and p.weight_str <= #num# and p.weight_end > #num# ]]>
+	</select>
+	<!-- 获取钻石核价石头系数 -->
+	<select id="PriceHead.getCalcStoneMainCoefficient" resultClass="string" parameterClass="map">
+		select max(p.coefficient)
+		  from JAT_CALC_STONEMAIN_COEFFICIENT p
+		 where p.item_class_id = #itemClassId#
+		  <![CDATA[ and p.weight_str <= #num# and p.weight_end > #num# ]]>
+	</select>
+	<select id="PriceHead.getMainStoneLineByHeadId" resultMap="reslutStone" parameterClass="string">
+		select <include refid="PriceStone.column.all"/> from jat_calc_price_stone_line l where l.head_id = #headId#  
+		   and l.stone_type = 1 
+		   and l.PRIVATE_TYPE = 1
+		   and Rownum = 1
+		   order by l.stone_weight desc
+	</select>
+	<select id="PriceHead.getInivCode" resultClass="string" parameterClass="string">
+		select e.in_stock_code from  jas_bd_emp e where e.empid = #userId#
+	</select>
+	<select id="PriceHead.getCaclCode" resultClass="string" parameterClass="string">
+		select e.NUCLEAR_CODE from  jas_bd_emp e where e.empid = #userId#
+	</select>
+	<select id="PriceHead.getDZcode" resultClass="com.jatools.vo.pur.PurchaseHead" parameterClass="map">
+		select h.billno "billno", h.headid "headid", h.org_id "orgId", h.create_date "createDate"
+	      from JAT_PUR_PURCHASE_HEAD h, jat_pur_handover_head ph
+	     where h.bill_type = 2
+	       and ph.billid = #billid#
+	       and instr(','||ph.source_id||',',','||h.headid||',') > 0
+	</select>
+	<select id="PriceHead.getUnitPrice" resultClass="string" parameterClass="map">
+		select max(c.unit_price)
+		  from jat_pur_handover_child c
+		 where exists (select 1
+		          from jat_pur_handover_line l
+		         where c.lineid = l.lineid
+		           and l.billid = #headId#
+		           and l.item_class_id = #itemClassId#)
+		   and c.alaysis_id = #alaysisId#
+	</select>
+	<!-- 查询台账未使用量
+		select nvl(sum(a.No_Nums), 0) -
+		       nvl((select sum(B.STONE_NUMS)
+		          from JAT_CALC_PRICE_STONE_LINE b
+		         where b.VERIFICATION_FLAG = 0
+		           <![CDATA[ and b.id <> #id# ]]>
+		           and A.MEMO = B.LUODAN_CODE), 0) "noNums",
+		           a.voder_id "voderId"
+		  from JAT_CASH_PROD_ACCOUNT a
+		 where a.dotype = 1
+		   and a.memo = #no#
+		   and a.status = 2
+		   group by a.memo, a.voder_id
+	 -->
+	<select id="PriceHead.getZUNums" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="map">
+		select (nvl(sum(a.no_nums),0) - nvl(sum(a.user_nums),0)
+       		+nvl((select sum(u.user_nums) from jat_cash_prod_user u where u.source_id = #id#),0)) "noNums",
+			       a.voder_id "voderId"
+			  from JAT_CASH_PROD_ACCOUNT a
+			 where a.memo = #no#
+			   and a.status = 2
+			   and a.dotype = 1
+			   and a.IS_CHECKED = 0
+			 group by a.memo, a.voder_id
+	</select>
+	<!-- 饰品编码找台账 -->
+	<select id="PriceHead.getAccountByCode" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="string">
+		select a.pr_id "prId",a.memo "memo",a.NO_NUMS "noNums",a.user_nums "userNums"
+			  from JAT_CASH_PROD_ACCOUNT a
+			 where a.memo = #value#
+			   and a.status = 2
+			   and a.dotype = 1
+			   and a.IS_CHECKED = 0
+	</select>
+	<select id="PriceHead.getProdUseraNumBySid" resultClass="string" parameterClass="string">
+		select sum(u.user_nums) from jat_cash_prod_user u where u.source_id = #value#
+	</select>
+	<!-- 删除台账孙表 -->
+	<delete id="PriceHead.deleteUserById" parameterClass="string">
+		delete jat_cash_prod_user u where u.source_id = #value#
+	</delete>
+	<!-- 修改台账使用量 -->
+	<delete id="PriceHead.updateUserNumsById" parameterClass="string">
+		update jat_cash_prod_account a
+		   set a.user_nums = (a.user_nums -
+		                     (select sum(u.user_nums)
+		                         from jat_cash_prod_user u
+		                        where u.pr_id = a.pr_id))
+		 where a.pr_id in
+		       (select u.pr_id from jat_cash_prod_user u where u.source_id = #value#)
+	</delete>
+	<!-- 添加台账孙表 -->
+	<insert id="PriceHead.saveAccountUser"  parameterClass="com.jatools.vo.out.CashProdUser">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_calc_price_acc_line_seq.nextval as id from dual
+		</selectKey>
+		insert into JAT_CASH_PROD_USER (
+			ID, 
+			pr_ID,                             
+			ORNA_NO,  
+			USER_NUMS,     
+			SOURCE_TYPE,                             
+			SOURCE_ID,           
+			STATE,            
+			CREATE_DATE,             
+			CREATE_ID,
+			UPDATE_DATE,
+			UPDATE_ID   
+		)values(
+			#id#,                    
+			#prId#,                
+			#ornaNo#,                 
+			#userNums#,     
+			#sourceType#,                
+			#sourceId#,        
+			#state#,        
+			#createDate#,        
+			#createId#,  
+			#updateDate#,
+			#updateId#
+		)
+	</insert>
+	<select id="PriceHead.getStoneNum" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="map">
+	   select a.bill_no billNo,
+		       a.DOTYPE dotype,
+		       (select g.SUMMARYDESCRIPTION
+		          from jat_mater_iniv v
+		         inner join jas_bd_analysis_arange g
+		            on v.analysis_arange_id = g.ANALYSIS_ARANGE_ID
+		         where v.orna_code = a.memo) articleTypeDsc,
+		       nvl(sum(a.BILL_NUMS), 0) billNums,
+		       nvl((select sum(B.STONE_NUMS)
+		             from JAT_CALC_PRICE_STONE_LINE b
+		            where b.VERIFICATION_FLAG = 0
+		              and A.MEMO = B.LUODAN_CODE),
+		           0) cashNums,
+		       nvl((select sum(B.STONE_NUMS)
+		             from JAT_CALC_PRICE_STONE_LINE b
+		            where b.VERIFICATION_FLAG = 1
+		              and A.MEMO = B.LUODAN_CODE),
+		           0) noNums,
+		       nvl((select sum(t.bill_nums)
+		             from jat_cash_prod_account t
+		            where t.bill_type = 'TL'
+		              and a.memo = t.memo),
+		           0) billType,
+                sum(nvl(a.no_nums, 0) - nvl(a.user_nums, 0))  cashUnit
+		  from JAT_CASH_PROD_ACCOUNT a
+		 where a.dotype = 1
+		   and a.memo = #ornaCode#
+		<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+		 group by a.memo, a.bill_no, a.DOTYPE
+	</select>
+	<select id="Pricehead.getPriceStoneNum" resultClass="PriceStoneLine" parameterClass="map">
+		select h.no luodanCode,
+		        h.wl_code stoneItemClassId,
+		        decode(m.state, '', '-1', m.state) feeType,
+		        b.stone_weight stoneWeight,
+		        B.STONE_NUMS stoneNums,
+		        h.state createUserId,
+		        b.verification_flag privateType
+		   from JAT_CALC_PRICE_STONE_LINE b
+		  inner join Jat_Calc_Price_Head h
+		     on h.id = b.head_id
+		   left join jat_mater_iniv m
+		     on h.wl_code = m.orna_code
+		  where b.LUODAN_CODE = #ornaCode#
+		<isNotEmpty property="verdorId" prepend="and"> h.vender = #verdorId# </isNotEmpty>
+		  order by h.no desc
+	</select>
+	<select id="PriceHead.getVendorCoefficient" resultClass="string" parameterClass="map">
+		select  nvl(max(v.coef),1) from JAT_BASIC_VENDOR_COEF v where v.vendor_id =#venderId# and v.status =1
+	</select>
+	<select id="PriceHead.getSpecialChargeNum" resultClass="com.jatools.vo.calc.SpecialCharge" parameterClass="string">
+		select c.charge_id chargeId,
+		       c.weight_str weightStr,
+		       c.weight_end weightEnd,
+		       c.charge_unit chargeUnit,
+		       c.charge_float chargeFloat,
+		       c.charge_money chargeMoney 
+		from JAT_BASIC_SPECIAL_CHARGE c  
+		     <![CDATA[ where c.weight_str<= #value# and c.weight_end > #value# ]]>
+	</select>
+    <select id="PriceHead.getVerdorChargeNum" resultClass="string" parameterClass="map">
+		select count(1) from JAT_BASIC_VERDOR_CHARGE v 
+       		where v.verdor_id = #verdorId# and v.style_id = #styleId#
+	</select>
+	<select id="PriceHead.getTLCodeById" resultClass="com.jatools.vo.stock.MaterIniv" parameterClass="map" >
+		select l.orna_no ornaCode from Jat_Proc_Exit_Line l where l.billid = #billid#
+		<isNotEmpty property="ornaCode" prepend="and"> l.orna_no like '%$ornaCode$%'</isNotEmpty>
+	</select>
+	<select id="PriceHead.getLTXTCodeById" resultClass="com.jatools.vo.stock.MaterIniv" parameterClass="map" >
+		select l.orna_code ornaCode from jat_proc_change_line l where l.billid = #billid#
+		<isNotEmpty property="ornaCode" prepend="and"> l.orna_code like '%$ornaCode$%'</isNotEmpty>
+	</select>
+	<select id="PriceHead.getMaterInivCountByWlCode" resultClass="string" parameterClass="string">
+		select count(1) from jat_mater_iniv t where t.orna_code = #value#
+	</select>
+	<update id="PriceHead.updateMaterInivCustomizeNoByWlCode" parameterClass="map">
+		update jat_mater_iniv m set m.CUSTOMIZE_NO = #dzCode# where m.orna_code = #wlCode#
+	</update>
+	<update id="PriceHead.updateMaterActionCustomizeNoByWlCode" parameterClass="map">
+		update ic_mater_active m set m.CUSTOMIZE_NO = #dzCode# where m.orna_code = #wlCode#
+	</update>
+	
+	<update id="PriceHead.updateStone" parameterClass="PriceStoneLine">
+		update jat_calc_price_stone_line a
+		set            
+			a.IS_MAIN_STONE           = #isMainStone#,          
+			a.LUODAN_CODE             = #luodanCode#,           
+			a.STONE_NUMS              = #stoneNums#,            
+			a.STONE_WEIGHT            = #stoneWeight#,          
+			a.WITHOUT_TAX_PRICE       = #withotTaxPrice#,       
+			a.WITHOUT_TAX_ALLMONEY    = #withoutTaxAllMoney#,   
+			a.STONE_TAX               = #stoneTax#,             
+			a.WITH_TAX_ALLMONEY       = #withTaxAllMoney#,      
+			a.MARKET_PRICE            = #marketPrice#,          
+			a.MARKET_ALLMONEY         = #marketAllMoney#,       
+			a.STONE_TYPE              = #stoneType#,            
+			a.STONE_SPEC              = #stoneSpec#,            
+			a.STONE_COEFFICIENT       = #stoneCoefficient#,     
+			a.PRICE_WITH_COEFFICIENT  = #priceWithCoefficient#, 
+			a.COLOR_ID                = #colorId#,              
+			a.CLEAN_ID                = #cleanId#,              
+			a.COLORGRADE_ID           = #colorGreadId#,         
+			a.DM_SHAPE_ID             = #dmShapeId#,            
+			a.CUT_ID                  = #cutId#,                
+			a.IS_MAIN_INFO            = #isMainInfo#,           
+			a.STONE_THEME_COEFFICIENT = #stoneThemeCoefficient#,
+			a.FEE_TYPE                = #feeType#,              
+			a.CERTIFICATE_PRICE       = #certificatePrice#,     
+			a.FACTORY_NULE_CODE       = #factoryNuleCode#,      
+			a.PRIVATE_TYPE            = #privateType#,          
+			a.STONE_ITEM_CLASS_ID     = #stoneItemClassId#  
+		where     
+			a.id = #id#
+	</update>
+	
+	<update id="PriceHead.updateSbra" parameterClass="PriceSbraLine">
+		update jat_calc_price_sbra_line a 
+		set         
+			a.SBRA_WEIGHT            = #sbraWeight#,          
+			a.SBRA_WITHOUT_TAX_PRICE = #sbraWithoutTaxPrice#, 
+			a.SBRA_WITHOUT_TAX_MONEY = #sbraWithoutTaxmoney#, 
+			a.SBRA_TAX               = #sbraTax#,             
+			a.SBRA_WITH_TAX_MONEY    = #sbraWithTaxMoney#,    
+			a.SBRA_MARKET_PRICE      = #sbraMarketPrice#,     
+			a.SBRA_MARKET_ALLMONEY   = #sbraMarketAllMoney#,  
+			a.HALF_PRODUCT_PRICE     = #halfProductPrice#,    
+			a.SBRA_COEFFICIENT       = #sbraCoefficient#,     
+			a.PRICE_WITH_COEFFICIENT = #priceWithCoefficient#,
+			a.STYLE_ID               = #styleId#,             
+			a.QUALITY_ID             = #qualityId#,           
+			a.MATER_CODE             = #materCode#,           
+			a.PRIVATE_TYPE           = #privateType#,         
+			a.GOLD_LOST_PERCENT      = #goldLostPercent#,     
+			a.GOLD_LOST_WEIGHT       = #goldLostWeight#,      
+			a.GOLD_ALL_WEIGHT        = #goldAllweight#     
+		where a.id = #id#
+	</update>
+	
+	<update id="PriceHead.updateAcs" parameterClass="PriceAcsLine">
+		update jat_calc_price_acs_line a
+		set            
+			a.ACS_TYPE               = #acsType#,             
+			a.ACS_WEIGHT             = #acsWeight#,           
+			a.ACS_QUANTITY           = #acsQuantity#,         
+			a.ACS_WITHOUT_TAX_PRICE  = #acsWithoutTaxPrice#,  
+			a.ACS_WITHOUT_TAX_MONEY  = #acsWithoutTaxMoney#,  
+			a.ACS_TAX                = #acsTax#,              
+			a.ACS_WITH_TAX_MONEY     = #acsWithTaxMoney#,     
+			a.ACS_MARKET_ALLMONEY    = #acsMarketAllMoney#,   
+			a.OTHER_COEFFICIENT      = #otherCoefficient#,    
+			a.PRICE_WITH_COEFFICIENT = #priceWithCoefficient#,
+			a.STYLE_ID               = #styleId#,             
+			a.QUALITY_ID             = #qualityId#,           
+			a.ACS_CODE               = #acsCode#,             
+			a.PRIVATE_TYPE           = #privateType#          
+		where a.id = #id#
+	</update>
+	
+	<update id="PriceHead.updateAcc" parameterClass="PriceAccLine">
+		update jat_calc_price_acc_line a
+		set           
+			a.ACC_ID                 = #accId#,               
+			a.ACC_WITHOUT_TAX_COST   = #accWithoutTaxCost#,   
+			a.ACC_TAX                = #accTax#,              
+			a.ACC_WITH_TAX_COST      = #accWithTaxCost#,      
+			a.ACC_MARKET_PRICE       = #accMarketPrice#,      
+			a.ACC_COEFFICIENT        = #accCoefficient#,      
+			a.PRICE_WITH_COEFFICIENT = #priceWithCoefficient#,
+			a.VERIFICATION_FLAG      = #verificationFlag#  
+		where a.ID = #id#
+	</update>
+	
+	<delete id="PriceHead.deleteStoneLineByLineId" parameterClass="string">
+		delete JAT_CALC_PRICE_STONE_LINE a where a.id = #value#
+	</delete>
+	
+	<delete id="PriceHead.deleteSbraLineByLineId" parameterClass="string">
+		delete JAT_CALC_PRICE_SBRA_LINE a where a.id = #value#
+	</delete>
+	
+	<delete id="PriceHead.deleteAcsLineByLineId" parameterClass="string">
+		delete JAT_CALC_PRICE_ACS_LINE a where a.id = #value#
+	</delete>
+	
+	<delete id="PriceHead.deleteAccLineByLineId" parameterClass="string">
+		delete JAT_CALC_PRICE_ACC_LINE a where a.id = #value#
+	</delete>
+	
+	<insert id="PriceHead.insertProdAccountUser" parameterClass="map">
+		insert into jat_cash_prod_user (
+		ID, PR_ID, ORNA_NO, USER_NUMS, SOURCE_TYPE, SOURCE_ID, STATE, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID
+		) values (
+		jat_cash_prod_user_seq.nextval, #prId#, #ornaCode#, #userNum#, 'HJ', #lineId#, 1, #createDate#, #createId#, #updateDate#, #updateId#
+		)
+	</insert>
+</sqlMap>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CleanGrade">
+	<typeAlias alias="CleanGrade" type="com.jatools.vo.basic.CleanGrade"/>
+	<resultMap class="CleanGrade" id="result">
+		<result property="id" column="id"/>
+		<result property="gradeId" column="GRADE_ID"/>
+		<result property="cleanId" column="CLEAN_ID"/>
+		<result property="status" column="STATUS"/>
+		<result property="memo" column="MEMO"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+	</resultMap>
+	<sql id="CleanGrade.Columns.all">
+		id,GRADE_ID,CLEAN_ID,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="CleanGrade.getCleanGradeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="CleanGrade.Columns.all"/> from Jat_Basic_Clean_Grade a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+			order by a.GRADE_ID desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="CleanGrade.getCleanGradeToalCount" resultClass="int">
+		select count(1) from Jat_Basic_Clean_Grade a where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+	</select>
+	<!-- findById -->
+	<select id="CleanGrade.getCleanGradeById" resultClass="CleanGrade" parameterClass="string" resultMap="result">
+		select <include refid="CleanGrade.Columns.all"/> from Jat_Basic_Clean_Grade a where a.id = #value#
+	</select>
+	<!--  -->
+	<select id="CleanGrade.getCleanGrade" resultMap="result" parameterClass="CleanGrade">
+		select <include refid="CleanGrade.Columns.all"/> from Jat_Basic_Clean_Grade c 
+			where c.CLEAN_ID = #cleanId#
+		<isNotEmpty prepend="and" property="id"> c.id !=#id# </isNotEmpty>
+	</select>
+	<!-- 保存数据 -->
+	<insert id="CleanGrade.saveCleanGrade" parameterClass="CleanGrade">
+		<selectKey keyProperty="id" type="pre">
+			select JAT_BASIC_CLEAN_GRADE_SEQ.nextval as id from dual
+		</selectKey>
+		insert into Jat_Basic_Clean_Grade(
+			id,GRADE_ID,CLEAN_ID,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID)
+			values(#id#,#gradeId#,#cleanId#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="CleanGrade.updateCleanGrade" parameterClass="CleanGrade">
+		update Jat_Basic_Clean_Grade a set 
+			a.GRADE_ID = #gradeId#,
+			a.CLEAN_ID = #cleanId#,
+			a.STATUS = #status#,
+			a.MEMO = #memo#,
+			a.CREATE_DATE = #createDate#,
+			a.CREATE_ID = #createId#,
+			a.UPDATE_DATE = #updateDate#,
+			a.UPDATE_ID = #updateId#
+		 where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="CleanGrade.deleteCleanGrade" parameterClass="string">
+		delete Jat_Basic_Clean_Grade a where a.id = #value#
+	</delete>
+</sqlMap>

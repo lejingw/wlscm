@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SaleChangeLabel">
+	<typeAlias alias="SaleChangeLabel" type="com.jatools.vo.basic.SaleChangeLabel" />
+		
+	<sql id="SaleChangeLabel_columns_all">
+		changelabel_id, changelabel_reason, note, create_id, create_date, update_date, update_id, isincreaseamount, isupdatecauses, label_kind, isbasic_price, special_work_price, status
+    </sql>
+    
+    <sql id="SaleChangeLabel_result_column">
+    	"changelabelId", "changelabelReason", "note", "createuserid", "createdate", "updatedate", "updateuserid", "isincreaseamount", "isupdatecauses", "labelKind", "isbasicPrice", "specialWorkPrice", "status"
+    </sql>
+    
+    <sql id="SaleChangeLabel_result_column_as">
+    	changelabel_id     as "changelabelId"     ,
+		changelabel_reason as "changelabelReason" ,
+		note               as "note"              ,
+		create_id          as "createuserid"      ,
+		create_date        as "createdate"        ,
+		update_date        as "updatedate"        ,
+		update_id          as "updateuserid"      ,
+		isincreaseamount   as "isincreaseamount"  ,
+		isupdatecauses     as "isupdatecauses"    ,
+		label_kind         as "labelKind"         ,
+		isbasic_price      as "isbasicPrice"      ,
+		special_work_price as "specialWorkPrice"  ,
+		status			   as "status"
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="SaleChangeLabel.getSaleChangeLabelPageData" resultClass="SaleChangeLabel" parameterClass="map">
+		select <include refid="SaleChangeLabel_result_column"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="SaleChangeLabel_result_column_as"/> from jat_basic_sale_changelabel a 
+			where 1 = 1
+			<isNotEmpty property="changelabelReason" prepend="and">  a.changelabel_reason like '%$changelabelReason$%' </isNotEmpty>
+			order by a.create_date desc
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="SaleChangeLabel.getSaleChangeLabelTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_sale_changelabel a
+		where 1 = 1
+			<isNotEmpty property="changelabelReason" prepend="and">  a.changelabel_reason like '%$changelabelReason$%' </isNotEmpty>
+	</select>
+	
+	
+    <!-- 保存数据 -->
+    <insert id="SaleChangeLabel.saveSaleChangeLabel" parameterClass="SaleChangeLabel">
+    	<selectKey resultClass="string" keyProperty="changelabelId" type="pre">
+			select JAT_BASIC_SALE_CHANGELBL_SEQ.nextval as changelabelId from dual
+		</selectKey>
+		insert into jat_basic_sale_changelabel (<include refid="SaleChangeLabel_columns_all"/>)
+		values(
+			#changelabelId#, #changelabelReason#, #note#, #createuserid#, #createdate#, #updatedate#, #updateuserid#, #isincreaseamount#, 
+			#isupdatecauses#, #labelKind#, #isbasicPrice#, #specialWorkPrice#, #status#
+		)
+    </insert>
+    
+    <!-- 根据id获取记录对象 -->
+    <select id="SaleChangeLabel.getSaleChangeLabel" resultClass="SaleChangeLabel"  parameterClass="string">
+    	select <include refid="SaleChangeLabel_result_column_as"/> from jat_basic_sale_changelabel a where a.changelabel_id = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="SaleChangeLabel.updateSaleChangeLabel" parameterClass="SaleChangeLabel">
+		update jat_basic_sale_changelabel a 
+		set 
+			a.changelabel_reason = #changelabelReason#,
+			a.note               = #note#,
+			a.update_date        = #updatedate#,
+			a.update_id          = #updateuserid#,
+			a.isincreaseamount   = #isincreaseamount#,
+			a.isupdatecauses     = #isupdatecauses#,
+			a.label_kind         = #labelKind#,
+			a.isbasic_price      = #isbasicPrice#,
+			a.special_work_price = #specialWorkPrice#,
+			a.status			 = #status#
+		where a.changelabel_id = #changelabelId#
+	</update>
+	
+	<delete id="SaleChangeLabel.deleteSaleChangeLabel" parameterClass="string">
+		delete jat_basic_sale_changelabel a where a.changelabel_id = #value#
+	</delete>
+	
+	<select id="SaleChangeLabel.isExistsChangeLabel" parameterClass="SaleChangeLabel" resultClass="int">
+		select count(1) from jat_basic_sale_changelabel a
+		where a.changelabel_reason = #changelabelReason#
+		<isNotEmpty property="changelabelId" prepend="and"> <![CDATA[a.changelabel_id <> #changelabelId#]]> </isNotEmpty>
+	</select>
+</sqlMap>

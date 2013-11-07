@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PtCharge">
+	<typeAlias alias="PtCharge" type="com.jatools.vo.basic.PtCharge" />
+	
+	<resultMap id="result" class="PtCharge">
+		<result property="chargeId" column="charge_id"/>
+		<result property="weightStr" column="weight_str"/>
+		<result property="weightEnd" column="weight_end"/>
+		<result property="chargeUnit" column="charge_unit"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+	</resultMap>
+	<sql id="PtCharge_columns_all">
+		charge_id, weight_str, weight_end, charge_unit, 
+		status, memo, create_date, create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="PtCharge.getPtChargePageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="PtCharge_columns_all"/> from Jat_Basic_Ptspecial_Charge a order by a.weight_str
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PtCharge.getPtChargeTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from Jat_Basic_Ptspecial_Charge a
+		where 1 = 1
+		<isNotEmpty property="weightStr" prepend="and"> a.weight_str >= #weightStr#</isNotEmpty>
+		<isNotEmpty property="weightEnd" prepend="and"> <![CDATA[a.weight_end <= #weightEnd#]]></isNotEmpty>
+    </select>
+    <!-- 保存数据 -->
+    <insert id="PtCharge.savePtCharge" parameterClass="PtCharge">
+    	<selectKey resultClass="string" keyProperty="chargeId" type="pre">
+			select JAT_BASIC_PTSPECIAL_CHARGE_SEQ.nextval as chargeId from dual
+		</selectKey>
+		insert into Jat_Basic_Ptspecial_Charge(charge_id, weight_str, weight_end, charge_unit,	status, memo, create_date, create_id, update_date, update_id)
+		 values(#chargeId#, #weightStr#, #weightEnd#, #chargeUnit#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="PtCharge.getPtCharge" resultClass="PtCharge" resultMap="result" parameterClass="string">
+    	select <include refid="PtCharge_columns_all"/> from Jat_Basic_Ptspecial_Charge a where a.charge_id = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="PtCharge.updatePtCharge" parameterClass="PtCharge">
+		update Jat_Basic_Ptspecial_Charge a set 
+			a.weight_str = #weightStr#, a.weight_end = #weightEnd#, a.charge_unit = #chargeUnit#,
+			a.memo = #memo#, 
+			a.update_date = #updateDate#, a.update_id = #updateId#
+		where a.charge_id = #chargeId#
+	</update>
+	<delete id="PtCharge.deletePtCharge" parameterClass="string">
+		delete Jat_Basic_Ptspecial_Charge a where a.charge_id = #value#
+	</delete>
+	
+	<select id="PtCharge.checkWeightStr" parameterClass="map" resultClass="int">
+		select  count(*) from Jat_Basic_Ptspecial_Charge a
+		where <![CDATA[a.weight_str <= #weightStr#]]> and a.weight_end > #weightStr#
+		<isNotEmpty prepend="and" property="chargeId">
+			<![CDATA[a.charge_id <> #chargeId#]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="PtCharge.checkWeightEnd" parameterClass="map" resultClass="int">
+		select  count(*) from Jat_Basic_Ptspecial_Charge a
+		where <![CDATA[a.weight_str < #weightEnd#]]> and a.weight_end >= #weightEnd#
+		<isNotEmpty prepend="and" property="chargeId">
+			<![CDATA[a.charge_id <> #chargeId#]]>
+		</isNotEmpty>
+	</select>
+</sqlMap>

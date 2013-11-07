@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://192.168.1.12:8080/legacy/services/ReviewWebService" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://192.168.1.12:8080/legacy/services/ReviewWebService" xmlns:intf="http://192.168.1.12:8080/legacy/services/ReviewWebService" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="urn:ReviewWebService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema targetNamespace="urn:ReviewWebService" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="reviewBean">
+    <sequence>
+     <element name="callBackUrl" nillable="true" type="xsd:string"/>
+     <element name="deptId" nillable="true" type="xsd:long"/>
+     <element name="execOrgId" nillable="true" type="xsd:long"/>
+     <element name="fieldValue" nillable="true" type="xsd:anyType"/>
+     <element name="financeOrgId" nillable="true" type="xsd:long"/>
+     <element name="htmlUrl" nillable="true" type="xsd:string"/>
+     <element name="moduleCode" nillable="true" type="xsd:string"/>
+     <element name="operId" nillable="true" type="xsd:long"/>
+     <element name="operMethodValues" nillable="true" type="xsd:anyType"/>
+     <element name="reviewBillId" nillable="true" type="xsd:long"/>
+     <element name="reviewBillNo" nillable="true" type="xsd:string"/>
+     <element name="reviewType" nillable="true" type="xsd:long"/>
+     <element name="typeControlValue" nillable="true" type="xsd:string"/>
+     <element name="userId" nillable="true" type="xsd:long"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="doEnterReviewRequest">
+
+      <wsdl:part name="in0" type="tns1:reviewBean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getReviewLogPageDataRequest">
+
+      <wsdl:part name="in0" type="xsd:long"/>
+
+      <wsdl:part name="in1" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getReviewLogPageDataResponse">
+
+      <wsdl:part name="getReviewLogPageDataReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="doEnterReviewResponse">
+
+      <wsdl:part name="doEnterReviewReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="ReviewWebServiceEntryImpl">
+
+      <wsdl:operation name="doEnterReview" parameterOrder="in0">
+
+         <wsdl:input message="impl:doEnterReviewRequest" name="doEnterReviewRequest"/>
+
+         <wsdl:output message="impl:doEnterReviewResponse" name="doEnterReviewResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getReviewLogPageData" parameterOrder="in0 in1">
+
+         <wsdl:input message="impl:getReviewLogPageDataRequest" name="getReviewLogPageDataRequest"/>
+
+         <wsdl:output message="impl:getReviewLogPageDataResponse" name="getReviewLogPageDataResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="ReviewWebServiceSoapBinding" type="impl:ReviewWebServiceEntryImpl">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="doEnterReview">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="doEnterReviewRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://impl.util.wf.service.is.mclon.cn" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="doEnterReviewResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://192.168.1.12:8080/legacy/services/ReviewWebService" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getReviewLogPageData">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getReviewLogPageDataRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://impl.util.wf.service.is.mclon.cn" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getReviewLogPageDataResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://192.168.1.12:8080/legacy/services/ReviewWebService" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="ReviewWebServiceEntryImplService">
+
+      <wsdl:port binding="impl:ReviewWebServiceSoapBinding" name="ReviewWebService">
+
+         <wsdlsoap:address location="http://192.168.1.12:8080/legacy/services/ReviewWebService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

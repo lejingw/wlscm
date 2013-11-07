@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashProdAccountDao">
+	<typeAlias alias="CashProd" type="com.jatools.vo.out.CashProdAccount" />
+	
+	<resultMap id="result" class="CashProd">
+		<result property = "prId"          column = "pr_id"         />
+		<result property = "billType"      column = "bill_type"     />
+		<result property = "billNo"        column = "bill_no"       />
+		<result property = "billDate"      column = "bill_date"     />
+		<result property = "orgId"         column = "org_id"        />
+		<result property = "dotype"        column = "dotype"        />
+		<result property = "voderId"       column = "voder_id"      />
+		<result property = "materialType"  column = "material_type" />
+		<result property = "itemClassId"   column = "item_class_id" />
+		<result property = "cashUnit"      column = "cash_unit"     />
+		<result property = "billNums"      column = "bill_nums"     />
+		<result property = "cashNums"      column = "cash_nums"     />
+		<result property = "noNums"        column = "no_nums"       />
+		<result property = "userNums"      column = "user_nums"       />
+		<result property = "isChecked"     column = "is_checked"    />
+		<result property = "status"        column = "status"        />
+		<result property = "memo"          column = "memo"          />
+		<result property = "createDate"    column = "create_date"   />
+		<result property = "createId"      column = "create_id"     />
+		<result property = "updateDate"    column = "update_date"   />
+		<result property = "updateId"      column = "update_id"     />
+		<result property = "materialTypeName" column = "material_type_name"/>
+		<result property = "articleTypeDsc" column = "article_type_dsc"/>
+	</resultMap>
+	<sql id="CashProdAccount_columns_all">
+		pr_id, bill_type, bill_no, bill_date, org_id, dotype, voder_id, material_type, 
+		item_class_id, cash_unit, bill_nums, cash_nums, no_nums, is_checked, status, memo, 
+		create_date, create_id, update_date, update_id
+    </sql>
+    <sql id="CashProdAccount_material_type_column">
+    	(select d.item_value from jat_sys_dict_item d where  d.entry_code='materialtype' and d.item_key = a.material_type) as material_type_name,
+    	(
+    		select e.article_type_dsc 
+    		from jas_bd_articletype e
+				left join jas_bd_item_class b on b.article_type_id = e.article_type_id
+			where b.item_class_id = a.item_class_id
+		) as article_type_dsc
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="CashProdAccount.getCashProdAccountPageData" resultMap="result" parameterClass="map">
+		select <include refid="CashProdAccount_columns_all"/>, 
+				material_type_name, article_type_dsc, user_nums from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="CashProdAccount_columns_all"/>,
+			<include refid="CashProdAccount_material_type_column"/>, user_nums from jat_cash_prod_account a 
+			where 1 = 1
+			<isNotEmpty property="billno" prepend="and">  a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and">  a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="isChecked" prepend="and"> a.is_checked = #isChecked# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and">  a.memo = #ornaCode# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and">  a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status# </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="articleId" prepend="and">
+				exists (
+                   select 1 from jas_bd_articletype e left join jas_bd_item_class b on b.article_type_id = e.article_type_id
+                     where b.item_class_id = a.item_class_id and e.ARTICLE_TYPE_ID = #articleId#
+                )
+			</isNotEmpty>
+			<isNotEmpty property="isProdProd" prepend="and">  a.no_nums > 0 and user_nums = 0 </isNotEmpty><!-- 供料转料查询使用 -->
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.pr_id DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="CashProdAccount.getCashProdAccountTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_prod_account a
+		where 1 = 1
+		<isNotEmpty property="billno" prepend="and">  a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and">  a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and">  a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+		<isNotEmpty property="ornaCode" prepend="and">  a.memo = #ornaCode# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and">  a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="isChecked" prepend="and"> a.is_checked = #isChecked# </isNotEmpty>
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]> </isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="articleId" prepend="and">
+			exists (
+                select 1 from jas_bd_articletype e left join jas_bd_item_class b on b.article_type_id = e.article_type_id
+                  where b.item_class_id = a.item_class_id and e.ARTICLE_TYPE_ID = #articleId#
+            )
+		</isNotEmpty>
+		<isNotEmpty property="isProdProd" prepend="and">  a.no_nums > 0 </isNotEmpty><!-- 供料转料查询使用 -->
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+    <!-- 保存数据 -->
+    <insert id="CashProdAccount.saveCashProdAccount" parameterClass="CashProd">
+    	<selectKey resultClass="string" keyProperty="prId" type="pre">
+			select JAT_CASH_PROD_ACCOUNT_SEQ.nextval as prId from dual
+		</selectKey>
+		insert into jat_cash_prod_account(<include refid="CashProdAccount_columns_all"/>)
+		 values(
+		 	#prId#, #billType#, #billNo#, #billDate#, #orgId#, #dotype#, #voderId#, #materialType#, 
+		 	#itemClassId#, #cashUnit#, #billNums#, #cashNums#, #noNums#, #isChecked#, #status#, 
+		 	#memo#, #createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    
+    <!-- 根据id获取记录对象 -->
+    <select id="CashProdAccount.getCashProdAccount" resultClass="CashProd" resultMap="result" parameterClass="string">
+    	select <include refid="CashProdAccount_columns_all"/>, 
+    	<include refid="CashProdAccount_material_type_column"/>, user_nums from jat_cash_prod_account a where a.pr_id = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="CashProdAccount.updateCashProdAccount" parameterClass="CashProd">
+		update jat_cash_prod_account a set 
+			a.bill_type     = #billType#,
+			a.bill_no       = #billNo#,
+			a.bill_date     = #billDate#,
+			a.org_id        = #orgId#,
+			a.dotype        = #dotype#,
+			a.voder_id      = #voderId#,
+			a.material_type = #materialType#,
+			a.item_class_id = #itemClassId#,
+			a.cash_unit     = #cashUnit#,
+			a.bill_nums     = #billNums#,
+			a.cash_nums     = #cashNums#,
+			a.no_nums       = #noNums#,
+			a.is_checked    = #isChecked#,
+			a.status        = #status#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#
+		where a.pr_id = #prId#
+	</update>
+	<update id="CashProdAccount.updateCashProdAccountUserNums" parameterClass="CashProd">
+		update jat_cash_prod_account a set 
+			a.USER_NUMS     = #userNums#
+		where a.pr_id = #prId#
+	</update>
+	<delete id="CashProdAccount.deleteCashProdAccount" parameterClass="string">
+		delete from jat_cash_prod_account a where a.pr_id = #value#
+	</delete>
+	
+	<update id="CashProdAccount.modifyCashProdAccountChecked" parameterClass="map">
+		update jat_cash_prod_account a set
+			a.cash_nums = a.bill_nums, a.no_nums = 0,
+			a.is_checked = 1 ,a.update_date = #updateDate#, a.update_id = #userId#
+		where
+			a.bill_no = #billno# 
+			and a.is_checked = 0 
+			and a.item_class_id = #itemClassId#
+			and a.dotype = #dotype#
+			and a.material_type = #materialType#
+	</update>
+	
+	<select id="CashProdAccount.selectCashProdAccountCount" resultClass="int" parameterClass="map">
+		select count(*) from jat_cash_prod_account a 
+		where 1=1 
+			and a.bill_no = #billno# 
+			and a.is_checked = 0
+			and a.item_class_id = #itemClassId#
+			and a.dotype = #dotype#
+			and a.material_type = #materialType#
+	</select>
+	
+	<update id="CashProdAccount.modifyProdAccountStatus" parameterClass="map">
+		update jat_cash_prod_account a
+		set 
+			a.status = #status#, a.update_id = #updateId#, a.update_date = #updateDate#
+		where 1=1 
+			and a.pr_id = #prId#
+	</update>
+	
+	<select id="CashProdAccount.searchCashProdAccount" parameterClass="map" resultMap="result">
+		select <include refid="CashProdAccount_columns_all"/>, 
+				<include refid="CashProdAccount_material_type_column"/>,  user_nums
+		from jat_cash_prod_account a 
+		where 1=1
+			and a.memo = #ornaCode#
+			and a.is_checked = #isChecked#
+			and a.bill_no = #billno#
+	</select>
+	
+	
+	<select id="CashProdAccount.getCashListByPrid" parameterClass="string" resultClass="CashProd">
+		select 
+			c.pr_id 		as "prId",
+			c.bill_no 		as "srcBillNo",
+			c.bill_type		as "srcBilltype",
+			c.material_type as "materialType",
+			c.item_class_id as "itemClassId",
+			h.bill_no		as "cashBillNo",
+			b.cur_nums		as "cashNums",
+			h.update_date	as "cashDate",
+			d.item_value	as "materialTypeName",
+			f.article_type_dsc as "articleTypeDsc"
+		from jat_cash_line b
+		     left join jat_cash_line a on a.cash_id = b.cash_id and b.bill_type = 0-a.bill_type
+		     left join jat_cash_head h on h.cash_id = b.cash_id 
+		     left join jat_cash_prod_account c on b.pr_id = c.pr_id
+		     left join jat_sys_dict_item d on c.material_type = d.item_key and d.entry_code='materialtype'
+	         left join jas_bd_item_class e on c.item_class_id = e.item_class_id
+	         left join jas_bd_articletype f on e.article_type_id = f.article_type_id
+		where 1=1
+			and h.status = 8
+			and a.pr_id = #prId#
+	</select>
+	
+	<!-- 查询货品台账记录中的供应商 -->
+	<select id="CashProdAccount.getVendorList" resultClass="com.jatools.vo.util.SelectorOption">
+		select 
+			t.voder_id as "value",
+			b.CUSTNAME as "text"
+		from jat_cash_prod_account t
+			left join jas_bd_cust b on t.voder_id = b.CUSTID
+		where t.voder_id is not null
+		group by t.voder_id, b.CUSTNAME
+		order by b.CUSTNAME
+	</select>
+	<!-- 根据供应商查询商品类别 -->
+	<select id="CashProdAccount.getArticleList" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select 
+			d.ARTICLE_TYPE_ID as "value",
+			d.ARTICLE_TYPE_DSC as "text"
+		from jat_cash_prod_account a
+			left join jas_bd_item_class c on a.item_class_id = c.ITEM_CLASS_ID
+			left join jas_bd_articletype d on c.ARTICLE_TYPE_ID = d.ARTICLE_TYPE_ID
+		where a.item_class_id is not null
+		<isNotEmpty property="voderId" prepend="and"> a.voder_id = #voderId# </isNotEmpty>
+		group by d.ARTICLE_TYPE_ID, d.ARTICLE_TYPE_DSC
+		order by d.ARTICLE_TYPE_DSC
+	</select>
+	<!-- 根据商品类别查询大类 -->
+	<select id="CashProdAccount.getItemClassList" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select
+			a.item_class_id as "value",
+			b.ITEM_CLASS_DSC as "text"
+		from jat_cash_prod_account a
+			left join jas_bd_item_class b on a.item_class_id = b.ITEM_CLASS_ID
+		where a.item_class_id is not null 
+		<isNotEmpty property="articleId" prepend="and"> b.ARTICLE_TYPE_ID = #articleId# </isNotEmpty>
+		group by b.ITEM_CLASS_DSC, a.item_class_id
+		order by b.ITEM_CLASS_DSC
+	</select>
+	
+	
+	<select id="CashProdAccount.getMaterialTypeList" resultClass="com.jatools.vo.util.SelectorOption" >
+		select
+			a.material_type as "value",
+			d.item_value 	as "text"
+		from jat_cash_prod_account a
+			left join jat_sys_dict_item d on d.entry_code='materialtype' and d.item_key = a.material_type
+		where a.material_type is not null 
+		group by a.material_type, d.item_value
+		order by d.item_value
+	</select>
+	
+	<!-- 通过核价单行 删除台账使用量表数据 -->
+	<delete id="CashProdAccount.deleteAccountUserByPriceLineId" parameterClass="string">
+		delete from jat_cash_prod_user a where a.source_id = #value# and a.source_type = 'HJ'
+	</delete>
+	
+	<!-- 通过核价单行 减台账使用量段值 -->
+	<update id="CashProdAccount.subAccountUserNumByPriceLineId" parameterClass="string">
+		update jat_cash_prod_account a
+		set 
+			a.user_nums = a.user_nums - (select b.user_nums
+		                                      from jat_cash_prod_user b
+		                                     where b.source_id = #value#
+		                                       and b.source_type = 'HJ'
+		                                       and b.pr_id = a.pr_id)
+		 where exists (select 1
+		          from jat_cash_prod_user b
+		         where b.source_id = #value#
+		           and b.source_type = 'HJ'
+		           and b.pr_id = a.pr_id)
+	</update>
+	
+	<!-- 通过核价单行 增加台账使用量段值 -->
+	<update id="CashProdAccount.addAccountUserNumByPriceLineId" parameterClass="string">
+		update jat_cash_prod_account a
+		set 
+			a.user_nums = a.user_nums + (select b.user_nums
+		                                      from jat_cash_prod_user b
+		                                     where b.source_id = #value#
+		                                       and b.source_type = 'HJ'
+		                                       and b.pr_id = a.pr_id)
+		 where exists (select 1
+		          from jat_cash_prod_user b
+		         where b.source_id = #value#
+		           and b.source_type = 'HJ'
+		           and b.pr_id = a.pr_id)
+	</update>
+	<!-- 通过核价单头 删除台账使用量表数据 -->
+	<delete id="CashProdAccount.deleteAccountUserByPriceHeadId" parameterClass="string">
+		delete from jat_cash_prod_user a
+		where a.source_type = 'HJ'
+		  and exists (select 1
+		         from jat_calc_price_stone_line b
+		        where b.id = a.source_id
+		          and b.head_id = #value#)
+	</delete>
+	
+	<!-- 通过核价单头 减台账使用量段值 -->
+	<update id="CashProdAccount.subAccountUserNumByPriceHeadId" parameterClass="string">
+		update jat_cash_prod_account a
+		  set a.user_nums = a.user_nums - (select b.user_nums
+		                                     from jat_cash_prod_user b
+		                                    where exists (select 1
+		                                             from jat_calc_price_stone_line c
+		                                            where c.id = b.source_id
+		                                              and c.head_id = #value#)
+		                                      and b.source_type = 'HJ'
+		                                      and b.pr_id = a.pr_id)
+		where exists (select 1
+		         from jat_cash_prod_user b
+		        where exists (select 1
+		                 from jat_calc_price_stone_line c
+		                where c.id = b.source_id
+		                  and c.head_id = #value#)
+		          and b.source_type = 'HJ'
+		          and b.pr_id = a.pr_id)
+	</update>
+	
+	
+</sqlMap>

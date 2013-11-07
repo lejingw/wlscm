@@ -1,0 +1,162 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【其它交接单未关闭查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset'>					
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08050701','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08050701','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+	
+			<td class='body1'>时间起</td>
+			<td class='body2'>
+				<input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='text' id="startDate" name='startDate' value="$!{startDate}">
+			</td>
+				<td class='body1'>时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="$!{endDate}">
+			</td>
+			<td class='body1'>交接单号</td>
+			<td class='body2'>
+				<input type='text' id="billNo" name='billNo' value="$!{billNo}">
+            </td>
+		</tr>
+
+
+		
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+				<th>交接单号</th>
+				<th>创建日期</th>
+				<th>单据状态</th>
+				<th>入库统计</th>
+				<th>来源单据</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>			
+				<td>$!map.BILLNO</td>
+				<td>$!map.DODATE</td>
+				<td>$!map.STATE</td>
+		        <td><a href='javascript:showInstockWin("$!map.BILLID")'>入库统计</a></td>	
+				<td>$!map.SRC_BILLNAME</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#OrgId").val(idArr.join(","));
+			jQuery("#OrgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#OrgId").val());
+}
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+	
+	setValues();
+	newCalendar();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+
+function setValues(){
+	altRowCSS("tbl");
+	jQuery("#billNo").val("$!form.condition.billNo");
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+	
+}
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+/**
+ * 显示入库统计
+ */
+function showInstockWin(billid){
+	var _iframeId = "inStockIframe";
+	var options = {
+		title : '入库统计',
+		contentType : 'iframe',
+		iframeId : _iframeId,
+		width : 600,
+		height : 400,
+		okBtnName : '确定',
+		//cancelBtnName : '',
+		closeable:true,
+		boxid:'winDiv',
+		onok : function(box) {
+			box.close();
+		},
+		oncancel : function(box) {
+			box.close();
+		}
+	};
+	var url = ctxPath + '/stock/handover.vm?user_action=instockList&billid='+billid;
+	jQuery.weeboxs.open(url, options);
+}
+
+</script>

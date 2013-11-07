@@ -1,0 +1,74 @@
+<form id="frm" method="post">
+    <table class="title">
+    	<tr><td>组织快递接收人#if($null.isNull(${form.message}))[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' value='删除' class='btn' id='btnDelete'>
+				<input type='button' value='查询' class='btn' id="btnQueryShow">
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+        <table class='list'>
+        	<thead>
+    			<tr>
+                    <th width='20px'><input type='checkbox' id='chkall'/></th>
+            		<th>状态</th>
+                    <th>组织</th>
+                    <th>接收人员</th>
+            		<th>创建时间</th>
+            		<th>创建人</th>
+            		<th>修改时间</th>
+            		<th>修改人</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($map in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value="$!{map.orgId}"/></td>
+    				<td>$!DictUtil.getValue('status', $!map.status)</td>
+    				<td><a href="javascript:toEditPage('$!{map.orgId}');">$!BdCommon.getOrgName(${map.orgId})</a></td>
+    				<td>$BdCommon.getUserName($!map.receUser)</td>
+    				<td>$!map.createDate</td>
+    				<td>$BdCommon.getUserName($!map.createId)</td>
+    				<td>$!map.updateDate</td>
+    				<td>$BdCommon.getUserName($!map.updateId)</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true,null, function(index){
+	window.location = "expressReceuser.vm?user_action=toEdit&orgId=" + $n("chk")[index].value;
+	});
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "expressReceuser.vm?user_action=toAdd";
+	});
+	jQuery("#btnDelete").click(deleteBillnoRule);
+	initQuery2('01', "frm", 'btnQueryShow');
+});
+function toEditPage(orgId){
+	window.location = "expressReceuser.vm?user_action=toEdit&orgId=" + orgId;
+}
+function deleteBillnoRule(){
+	var idx = getSelectIndexs('chk');
+	if(idx.length<0){alert('请选择要删除的记录'); return ;}
+	var receIds = [];
+	for(var i=0, j=idx.length;i<j;i++){
+    	receIds.push($n("chk")[idx[i]].value);
+	}
+	confirm("确定删除?", function(){
+		window.location = "expressReceuser.vm?user_action=delete&receIds=" + receIds.join(',');
+	});
+}
+</script>

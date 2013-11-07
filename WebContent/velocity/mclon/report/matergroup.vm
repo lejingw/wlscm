@@ -1,0 +1,169 @@
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>	
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【饰品库数据】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>					
+
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">
+  	        	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08051801','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08051801','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>组织</td>
+			<td class='body2'><input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='hidden' id="OrgId" name='OrgId' value="">
+				<input type='text'  id="OrgName" name='OrgName' value="" readonly class="target" onclick="showSelectOrgWin()">
+			</td>
+
+			<td class='body1'>商品类别</td>
+			<td class='body2'>
+				<select id="articleTypeId" name='articleTypeId'  value="" onchange="changeArticleTypeId()">$StringUtil.emptyOption()</select></td>
+		</tr>
+		<tr>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name='itemClassId'  value="" onchange="changeOrnaClassId()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId"  value="" onchange="changeOrnaClass()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" name='analysisId'  value="" >$StringUtil.emptyOption()</select></td>
+		
+		</tr>
+		
+		
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th>组织</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>分析范围</th>
+				<th>件数</th>
+				<th>重量</th>
+				<th>金额</th>
+            </tr>
+        </thead>
+
+				
+		#foreach($map in $form.list)
+			<tr>
+			    <td>$!map.ORG_NAME</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.ANALYSIS_ARANGE_CODE</td>
+				<td>$!map.ALL_COUNT</td>
+				<td>$!map.ALL_QTY</td>
+				<td>$!map.POS_AMOUNT</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#OrgId").val(idArr.join(","));
+			jQuery("#OrgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#OrgId").val());
+}
+/**
+ * 改变商品类别
+ */
+function changeArticleTypeId(){
+	//获取大类
+	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+		changeOrnaClassId();
+	});
+}
+/**
+ * 改变大类
+ */
+function changeOrnaClassId(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+/**
+ *　改变小类
+ */
+function changeOrnaClass(){
+	//获取分析范围
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+	});
+	
+}
+function setnull(){
+	jQuery("#OrgId").val("");
+}
+
+function setValues(){
+    altRowCSS("tbl");
+
+	jQuery("#OrgId").val("$!form.condition.OrgId");
+	jQuery("#OrgName").val("$!BdCommon.getOrgName($!form.condition.OrgId)");
+
+	
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions("articleTypeId", data, null, null, true, true, "$!form.condition.articleTypeId");
+		if("$!form.condition.articleTypeId"){
+        	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+        		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+				if("$!form.condition.itemClassId"){
+        			BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+                		addOptions("ornaClassId", data, null, null, true, true, "$!form.condition.ornaClassId");
+        				if("$!form.condition.ornaClassId"){
+        					BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+                        		addOptions("ornaClassId", data, null, null, true, true, "$!form.condition.ornaClassId");
+            					if("$!form.condition.ornaClassId"){
+        							BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                                		addOptions("analysisId", data, null, null, true, true, "$!form.condition.analysisId");
+                                	});
+                                
+        						}
+                        	});
+        			
+        				}
+                	});
+				}
+        	});
+		}
+	});
+}
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+
+	
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

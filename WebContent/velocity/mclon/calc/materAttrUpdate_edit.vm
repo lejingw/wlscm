@@ -1,0 +1,520 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/materAttrUpdate.js?t=2012020711135.js", "$StringUtil.getContextPath()/dwr/interface/MaterAttrUpdateDwr.js"])
+
+#if($StringUtil.isBlank($!{form.u.billid}))
+		#set($billno = "自动生成")
+		#set($orgid = $StringUtil.getOrgId($session))
+		#set($status = "1")
+		#set($createdate = $DateUtil.getCurrentDate10())
+		#set($createid = $StringUtil.getUserId($session))
+	#else
+		#set($billno = $!{form.u.billno})
+		#set($orgid = $!{form.u.orgid})
+		#set($status = $!{form.u.status})
+		#set($createdate = $!{form.u.createdate})
+		#set($createid = $!{form.u.createid})
+		#set($tagtype = $!{form.u.tagtype})
+		#set($newtagtype = $!{form.u.newtagtype})
+		#set($rebate = $!{form.u.rebate})
+		#set($newrebate = $!{form.u.newrebate})
+		#set($rebatetype = $!{form.u.rebatetype})
+		#set($newrebatetype = $!{form.u.newrebatetype})
+		#set($rebateamount = $!{form.u.rebateamount})
+		#set($newrebateamount = $!{form.u.newrebateamount})
+		#set($partcontent = $!{form.u.partcontent})
+		#set($newrebateamount = $!{form.u.newpartcontent})
+		#set($cutwidescale = $!{form.u.cutwidescale})
+		#set($newcutwidescale = $!{form.u.newcutwidescale})
+		#set($cutdeepscale = $!{form.u.cutdeepscale})
+		#set($newcutdeepscale = $!{form.u.newcutdeepscale})
+		#set($stringworkprice = $!{form.u.stringworkprice})
+		#set($newstringworkprice = $!{form.u.newstringworkprice})
+		#set($specialworkprice = $!{form.u.specialworkprice})
+		#set($newspecialworkprice = $!{form.u.newspecialworkprice})
+		
+	#end
+<form id='frm' action="" method="post">
+	<input type="hidden" id="billid" value="$!{form.u.billid}"/>
+	<input type='hidden' id='status' readonly value="$!status" />
+	<input type='hidden' id='orgid' readonly value="$!orgid" />
+    <table class="title">
+    	<tr><td>饰品属性修改</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08021002','1')>
+				<input type='button' value='记帐' class='btn' id='btnJ' $RightUtil.able($session, '08021002','2')>
+				<input type='button' value='打印' class='btn' id="btnPrint" onclick="window.print()">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <div id="tab">
+    		<table class='content'>
+    			<tr>
+    				<td class='body1'>单据编码</td>
+    				<td class='body2'>
+						<input type='text' id='billno' readonly value="$!billno">
+					</td>
+    				<td class='body1'>饰品编码</td>
+    				<td class='body2'>
+						<input type='text' id='ornacode' onchange="loadCode('1')"  dataType="Require" msg="不能为空" value="$!form.u.ornacode" />$StringUtil.star()
+					</td>
+					<td class='body1'>饰品条码</td>
+    				<td class='body2'>
+						<input type='text' id='ornabarcode' onchange="loadCode('2')"  dataType="Require" msg="不能为空" value="$!form.u.ornabarcode" />$StringUtil.star()
+					</td>
+					<td class='body1'>组织</td>
+    				<td class='body2'>
+						<input type='text' id='orgName' readonly value="$!BdCommon.getOrgName($!orgid)"/>
+					</td>
+    			</tr>
+				
+				<tr>
+    				<td class='body1'>创建人</td>
+    				<td class='body2'>
+						<input type='text' id='createname' readonly value="$!BdCommon.getUserName($!createid)">
+					</td>
+					<td class='body1'>创建时间</td>
+    				<td class='body2'>
+						<input type='text' id='createdate' readonly value="$!createdate"/>
+					</td>
+					<td class='body1'>修改人</td>
+    				<td class='body2'>
+						<input type='text' id='createname' readonly value="$!BdCommon.getUserName($!form.u.updateid)">
+					</td>
+					<td class='body1'>修改时间</td>
+    				<td class='body2'>
+						<input type='text' id='updatedate' readonly value="$!form.u.updatedate"/>
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>折扣</td>
+    				<td class='body2'>
+						<input type='text'  id='rebate' disabled  value="$!rebate"  />
+					</td>
+    				<td class='body1'>新折扣</td>
+    				<td class='body2'>
+						<input type='text' id='newrebate' onchange="checkNum('newrebate')" msg='不能为空,且为数字类型' value="$!newrebate" />
+					</td>
+					<td class='body1'>折扣类型</td>
+    				<td class='body2'>
+						<input type='text' id='rebatetype' disabled value="$!rebatetype"/>
+					</td>
+					<td class='body1'>新折扣类型</td>
+    				<td class='body2'>
+						<input type='text' id='newrebatetype' onchange="checkNum('newrebatetype')"  value="$!newrebatetype"/>
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>折扣金额</td>
+    				<td class='body2'>
+						<input type='text' id="rebateamount" disabled value="$!rebateamount" />
+					</td>
+    				<td class='body1'>新折扣金额</td>
+    				<td class='body2'>
+						<input type='text' id="newrebateamount" onchange="checkNum('newrebateamount')"  msg='不能为空,且为数字类型' value="$!newrebateamount" />
+					</td>
+					<td class='body1'>标签类型</td>
+    				<td class='body2'>
+						<input type='text' id="tagtype" disabled value="$!tagtype" />
+					</td>
+    				<td class='body1'>新标签类型</td>
+    				<td class='body2'>
+						<input type='text' id="newtagtype" onchange="checkNum('newtagtype')"  value="$!newtagtype" />
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>红绳工费</td>
+    				<td class='body2'>
+						<input type='text' id='stringworkprice' disabled value="$!stringworkprice" />
+					</td>
+					<td class='body1'>新红绳工费</td>
+    				<td class='body2'>
+						<input type='text' id='newstringworkprice' onchange="checkNum('newstringworkprice')" msg='不能为空,且为数字类型'  value="$!newstringworkprice"/>
+					</td>
+					<td class='body1'>特殊工费</td>
+    				<td class='body2'>
+						<input type='text' id='specialworkprice' disabled value="$!specialworkprice" />
+					</td>
+					<td class='body1'>新特殊工费</td>
+    				<td class='body2'>
+						<input type='text' id='newspecialworkprice' onchange="checkNum('newspecialworkprice')" msg='不能为空,且为数字类型'  value="$!newspecialworkprice"/>
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>主石形状</td>
+    				<td class='body2'>
+						<select id="mainshapeid" disabled></select>
+					</td>
+					<td class='body1'>新主石形状</td>
+    				<td class='body2'>
+						<select id="newmainshapeid" ></select>
+					</td>
+					<td class='body1'>主石颜色</td>
+    				<td class='body2'>
+						<select id="colorid" disabled></select>
+					</td>
+					<td class='body1'>新主石颜色</td>
+    				<td class='body2'>
+						<select id="newcolorid" ></select>
+					</td>
+                </tr>
+				
+				<tr>
+					<td class='body1'>主石净度</td>
+    				<td class='body2'>
+						<select id="cleanid" disabled></select>
+					</td>
+					<td class='body1'>新主石净度</td>
+    				<td class='body2'>
+						<select id="newcleanid" ></select>
+					</td>
+					<td class='body1'>主石色级</td>
+    				<td class='body2'>
+						<select id="maincolorgradeid" disabled></select>
+					</td>
+					<td class='body1'>新主石色级</td>
+    				<td class='body2'>
+						<select id="newmaincolorgradeid" ></select>
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>切工</td>
+    				<td class='body2'>
+						<select id="cutid" disabled></select>
+					</td>
+					<td class='body1'>新主石切工</td>
+    				<td class='body2'>
+						<select id="newcutid" ></select>
+					</td>
+					<td class='body1'>切工台宽比</td>
+    				<td class='body2'>
+						<input type='text' id='cutwidescale' disabled  value="$!cutwidescale"  />
+					</td>
+    				<td class='body1'>新切工台宽比</td>
+    				<td class='body2'>
+						<input type='text' id='newcutwidescale'  value="$!newcutwidescale"  />
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>对称性</td>
+    				<td class='body2'>
+						<select id="symmetryid" disabled></select>
+					</td>
+					<td class='body1'>新对称性</td>
+    				<td class='body2'>
+						<select id="newsymmetryid" ></select>
+					</td>
+					<td class='body1'>切工台深比</td>
+    				<td class='body2'>
+						<input type='text' id='cutdeepscale' disabled  value="$!cutdeepscale"  />
+					</td>
+    				<td class='body1'>新切工台深比</td>
+    				<td class='body2'>
+						<input type='text' id='newcutdeepscale'  value="$!newcutdeepscale"  />
+					</td>
+    			</tr>
+				
+				<tr>
+					<td class='body1'>荧光</td>
+    				<td class='body2'>
+						<select id="fluorescenceid" disabled></select>
+					</td>
+					<td class='body1'>新荧光</td>
+    				<td class='body2'>
+						<select id="newfluorescenceid" ></select>
+					</td>
+					<td class='body1'>抛光</td>
+    				<td class='body2'>
+						<select id="polishineid" disabled></select>
+					</td>
+					<td class='body1'>新抛光</td>
+    				<td class='body2'>
+						<select id="newpolishineid" ></select>
+					</td>
+    			</tr>
+				<tr>
+					<td class='body1'>底尖</td>
+    				<td class='body2'>
+						<select id="vertexid" disabled></select>
+					</td>
+					<td class='body1'>新底尖</td>
+    				<td class='body2'>
+						<select id="newvertexid" ></select>
+					</td>
+					<td class='body1'>腰围</td>
+    				<td class='body2'>
+						<select id="waistlineid" disabled></select>
+					</td>
+					<td class='body1'>新腰围</td>
+    				<td class='body2'>
+						<select id="newwaistlineid" ></select>
+					</td>
+    			</tr>
+				
+                <tr>
+					<td class='body1'>佩戴对象</td>
+    				<td class='body2'>
+						<select id="wearid" disabled></select>
+					</td>
+					<td class='body1'>新佩戴对象</td>
+    				<td class='body2'>
+						<select id="newwearid" ></select>
+					</td>
+					<td class='body1'>托架颜色</td>
+    				<td class='body2'>
+						<select id="bracketcolorid" disabled></select>
+					</td>
+					<td class='body1'>新托架颜色</td>
+    				<td class='body2'>
+						<select id="newbracketcolorid" ></select>
+					</td>
+				</tr>
+                <tr>
+					<td class='body1'>配石内容</td>
+    				<td class='body2'>
+						<input type='text' readonly id='partcontent' disabled  value="$!partcontent"/>
+					</td>
+					<td class='body1'>新配石内容</td>
+    				<td class='body2'>
+						<input type='text' id='newpartcontent'  value="$!newpartcontent"/>
+					</td>
+					<td class='body1'>款式类别</td>
+    				<td class='body2'>
+						<select id="styletypeid" disabled></select>
+					</td>
+					<td class='body1'>新款式类别</td>
+    				<td class='body2'>
+						<select id="newstyletypeid" ></select>
+					</td>
+				</tr>
+				
+                <tr>
+					<td class='body1'>饰品状态</td>
+    				<td class='body2'>
+						<select id="ornastate" disabled>
+						<option value="">--请选择--</option>
+						<option value="900">有效</option>
+						<option value="901">保留</option>
+						</select>
+					</td>
+					<td class='body1'>新饰品状态</td>
+    				<td class='body2'>
+						<select id="newornastate" >
+						<option value="">--请选择--</option>
+						<option value="900">有效</option>
+						<option value="901">保留</option>
+						</select>
+					</td>
+					<td class='body1'>备注</td>
+    				<td class='body2'>
+						<input type='text' id='memo' value="$!form.u.memo"/>
+					</td>
+					<td class='body1'>修改原因</td>
+    				<td class='body2'>
+						<input type='text' id='updatereason' value="$!form.u.updatereason"/>
+					</td>
+				</tr>
+				
+				<tr>
+					<td class='body1'>是否双标签</td>
+    				<td class='body2'>
+						<input type='checkbox' id='isdbllabel' disabled  value="$!form.u.isdbllabel"/>
+					</td>
+					<td class='body1'>新是否双标签</td>
+    				<td class='body2'>
+						<input type='checkbox' id='newisdbllabel'  value="$!form.u.newisdbllabel"/>
+					</td>
+					<td class='body1'>是否多粒</td>
+    				<td class='body2'>
+						<input type='checkbox' id='ismutipart' disabled  value="$!form.u.ismutipart"/>
+					</td>
+					<td class='body1'>新是否多粒</td>
+    				<td class='body2'>
+						<input type='checkbox' id='newismutipart'  value="$!form.u.newismutipart"/>
+					</td>
+    			</tr>
+					<td class='body1'>生肖</td>
+    				<td class='body2'>
+						<select id="zodiac" disabled></select>
+					</td>
+					<td class='body1'>新生肖</td>
+    				<td class='body2'>
+						<select id="newzodiac" ></select>
+					</td>
+					<td class='body1'>状态</td>
+    				<td class='body2'>
+						<input type='text' id='statusName' disabled value="$!DictUtil.getValue('status', $!status)" />
+					</td>
+				</tr>
+					
+    		</table>
+</form>
+
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveMaterAttrUpdate("1");
+	});
+	jQuery("#btnJ").click(function(){
+    	saveMaterAttrUpdate("4");
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "materAttrUpdate.vm";
+	});
+	if($StringUtil.isBlank('$!form.u.billid')){
+		setValues();
+	}else{
+		jQuery("#ornastate").val("$!form.u.ornastate");
+		jQuery("#newornastate").val("$!form.u.newornastate");
+        jQuery("#ismutipart")[0].checked= "$!form.u.ismutipart"=="1"?true:false;
+        jQuery("#isdbllabel")[0].checked= "$!form.u.isdbllabel"=="1"?true:false;
+        jQuery("#newismutipart")[0].checked= "$!form.u.newismutipart"=="1"?true:false;
+        jQuery("#newisdbllabel")[0].checked= "$!form.u.newisdbllabel"=="1"?true:false;
+		setPageContent();
+	}
+	checkReview();
+	//佩戴对象
+	BdCommonDwr.getAllWear(function(data){
+		addOptions("wearid", data, null, null, true, true,"$!form.u.wearid");
+		loadUpdateMaterPeam("newwearid","$!form.u.wearid");
+	});
+	BdCommonDwr.getAllWear(function(data){
+		addOptions("newwearid", data, null, null, true, true,"$!form.u.newwearid");
+	});
+	//款式类别
+	DictDwr.getDictsForSlt("styletype", function(data){
+		addOptions("styletypeid", data, null, null, true, true,"$!form.u.styletypeid");
+		loadUpdateMaterPeam("newstyletypeid","$!form.u.styletypeid");
+	});
+	DictDwr.getDictsForSlt("styletype", function(data){
+		addOptions("newstyletypeid", data, null, null, true, true,"$!form.u.newstyletypeid");
+	});
+	//生肖	
+	DictDwr.getDictsForSlt("bornimg", function(data){
+		addOptions("zodiac", data, null, null, true, true,"$!form.u.zodiac");
+		loadUpdateMaterPeam("newzodiac","$!form.u.zodiac");
+	});
+	DictDwr.getDictsForSlt("bornimg", function(data){
+		addOptions("newzodiac", data, null, null, true, true,"$!form.u.newzodiac");
+	});
+	//红绳工费
+	//DictDwr.getDictsForSlt("stringworkprice", function(data){
+	//	addOptions("stringworkprice", data, null, null, true, true ,"$!form.u.stringworkprice");
+	//	loadUpdateMaterPeam("newstringworkprice","$!form.u.stringworkprice");
+	//});
+	//DictDwr.getDictsForSlt("stringworkprice", function(data){
+	//	addOptions("newstringworkprice", data, null, null, true, true ,"$!form.u.newstringworkprice");
+	//});
+	//形状
+	DictDwr.getDictsForSlt("diashape", function(data){
+		addOptions("mainshapeid", data, null, null, true, true,"$!form.u.mainshapeid");
+		loadUpdateMaterPeam("newmainshapeid","$!form.u.mainshapeid");
+	});
+	DictDwr.getDictsForSlt("diashape", function(data){
+		addOptions("newmainshapeid", data, null, null, true, true,"$!form.u.newmainshapeid");
+	});
+	//颜色
+	DictDwr.getDictsForSlt("diacolor", function(data){
+		addOptions("colorid", data, null, null, true, true,"$!form.u.colorid");
+		loadUpdateMaterPeam("newcolorid","$!form.u.colorid");
+	});
+	DictDwr.getDictsForSlt("diacolor", function(data){
+		addOptions("newcolorid", data, null, null, true, true,"$!form.u.newcolorid");
+	});
+	//净度
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("cleanid", data, null, null, true, true,"$!form.u.cleanid");
+		loadUpdateMaterPeam("newcleanid","$!form.u.cleanid");
+	});
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("newcleanid", data, null, null, true, true,"$!form.u.newcleanid");
+	});
+	//色级
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("maincolorgradeid", data, null, null, true, true,"$!form.u.maincolorgradeid");
+		loadUpdateMaterPeam("newmaincolorgradeid","$!form.u.maincolorgradeid");
+	});
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("newmaincolorgradeid", data, null, null, true, true,"$!form.u.newmaincolorgradeid");
+	});
+	//切工
+	DictDwr.getDictsForSlt("diacut", function(data){
+		addOptions("cutid", data, null, null, true, true,"$!form.u.cutid");
+		loadUpdateMaterPeam("newcutid","$!form.u.cutid");
+	});
+	DictDwr.getDictsForSlt("diacut", function(data){
+		addOptions("newcutid", data, null, null, true, true,"$!form.u.newcutid");
+	});
+	//萤光
+	DictDwr.getDictsForSlt("diafluor", function(data){
+		addOptions("fluorescenceid", data, null, null, true, true,"$!form.u.fluorescenceid");
+		loadUpdateMaterPeam("newfluorescenceid","$!form.u.fluorescenceid");
+	});
+	DictDwr.getDictsForSlt("diafluor", function(data){
+		addOptions("newfluorescenceid", data, null, null, true, true,"$!form.u.newfluorescenceid");
+	});
+	//抛光
+	DictDwr.getDictsForSlt("diapoli", function(data){
+		addOptions("polishineid", data, null, null, true, true,"$!form.u.polishineid");
+		loadUpdateMaterPeam("newpolishineid","$!form.u.polishineid");
+	});
+	DictDwr.getDictsForSlt("diapoli", function(data){
+		addOptions("newpolishineid", data, null, null, true, true,"$!form.u.newpolishineid");
+	});
+	//钻石底尖
+	DictDwr.getDictsForSlt("diavertex", function(data){
+		addOptions("vertexid", data, null, null, true, true,"$!form.u.vertexid");
+		loadUpdateMaterPeam("newvertexid","$!form.u.vertexid");
+	});
+	DictDwr.getDictsForSlt("diavertex", function(data){
+		addOptions("newvertexid", data, null, null, true, true,"$!form.u.newvertexid");
+	});
+	//主石腰围
+	DictDwr.getDictsForSlt("diawais", function(data){
+		addOptions("waistlineid", data, null, null, true, true,"$!form.u.waistlineid");
+		loadUpdateMaterPeam("newwaistlineid","$!form.u.waistlineid");
+	});
+	DictDwr.getDictsForSlt("diawais", function(data){
+		addOptions("newwaistlineid", data, null, null, true, true,"$!form.u.newwaistlineid");
+	});
+	//主石对称性
+	DictDwr.getDictsForSlt("diasymm", function(data){
+		addOptions("symmetryid", data, null, null, true, true,"$!form.u.symmetryid");
+		loadUpdateMaterPeam("newsymmetryid","$!form.u.symmetryid");
+	});
+	DictDwr.getDictsForSlt("diasymm", function(data){
+		addOptions("newsymmetryid", data, null, null, true, true,"$!form.u.newsymmetryid");
+	});
+	//净
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("cleanid", data, null, null, true, true,"$!form.u.cleanid");
+		loadUpdateMaterPeam("newcleanid","$!form.u.cleanid");
+	});
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("newcleanid", data, null, null, true, true,"$!form.u.newcleanid");
+	});
+	//色级
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("maincolorgradeid", data, null, null, true, true,"$!form.u.maincolorgradeid");
+		loadUpdateMaterPeam("newmaincolorgradeid","$!form.u.maincolorgradeid");
+	});
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("newmaincolorgradeid", data, null, null, true, true,"$!form.u.newmaincolorgradeid");
+	});
+	//托架颜色
+	DictDwr.getDictsForSlt("bracketcolor", function(data){
+		addOptions("bracketcolorid", data, null, null, true, true,"$!form.u.bracketcolorid");
+		loadUpdateMaterPeam("newbracketcolorid","$!form.u.bracketcolorid");
+	});
+	DictDwr.getDictsForSlt("bracketcolor", function(data){
+		addOptions("newbracketcolorid", data, null, null, true, true,"$!form.u.newbracketcolorid");
+	});
+	
+});
+</script>

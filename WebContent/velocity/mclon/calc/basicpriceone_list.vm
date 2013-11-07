@@ -1,0 +1,103 @@
+<form id="myForm" method="post">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<input type='hidden' name='id' id="id"/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>翠核价单基础价</td></tr>
+            </td>
+        </tr>
+    </table>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08061301','1')>
+				<input type='button' value='修改/查看' class='btn' onclick='toEditBasicPriceOwo()'  $RightUtil.able($session, '08061301','2')>
+				<input type='button' value='删除' class='btn' onclick='deleteLine()'  $RightUtil.able($session, '08061301','3')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' $RightUtil.able($session, '08061301','4')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()"  $RightUtil.able($session, '08061301','5')>
+				#if($!form.successfulFlag)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end
+			</td>
+		</tr>
+    </table>
+	    <div class="scroll">
+	    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width='90px'>大类</th>
+				<th width='90px'>小类</th>
+        		<th width='90px'>主石重量始</th>
+				<th width='90px'>主石重量止</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.billid}"/>$velocityCounter</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemclassid)</td>
+				<td>$BdCommon.getOrnaClassDesc($!map.ornaclassid)</td>
+				<td>$!map.startweight</td>
+				<td>$!map.endweight</td>
+				<td>$!map.createdate</td>
+				<td>$!BdCommon.getUserName($!map.createuserid)</td>
+				<td>$!map.updatedate</td>
+				<td>$!BdCommon.getUserName($!map.updateuserid)</td> 
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null, function(index){
+		window.location = "basicPriceOne.vm?user_action=toEditBasicPriceOne&id=" + $n("chk")[index].value;
+	});
+	initQuery2("HJO01", 'myForm', 'btnQueryShow');
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "basicPriceOne.vm?user_action=toEditBasicPriceOne";
+	});
+	
+});
+function toEditPage(id){
+	window.location = "basicPriceOne.vm?user_action=toEditBasicPriceOne&id=" + id;
+}
+function toEditBasicPriceOwo(id){
+	var index = getSelectIndexs('chk');
+	if(index.length!=1){
+		alert("请选择一行");
+		return;
+	}
+	var id = $n("chk")[index[0]].value;
+	window.location = "basicPriceOne.vm?user_action=toEditBasicPriceOne&id=" + id;
+}
+function deleteLine(){
+	var index = getSelectIndexs('chk');
+	if(index.length!=1){
+		alert("请选择一行");
+		return;
+	}
+	var id = $n("chk")[index[0]].value;
+	confirm("确定删除?", function(){
+		//window.location = "basicPriceOne.vm?user_action=deleteBasicPriceOne&id=" + id;
+		jQuery("#id").val(id);
+    	jQuery("#user_action").val("deleteBasicPriceOne");
+    	jQuery("#myForm").submit();
+    	jQuery("#user_action").val("");
+	});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#myForm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

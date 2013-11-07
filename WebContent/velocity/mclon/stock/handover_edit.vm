@@ -1,0 +1,364 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+                "$StringUtil.getContextPath()/dwr/interface/OtherHandoverDwr.js?201203201723.js",
+                "$StringUtil.getContextPath()/js/stock/handover.js?t=201207121536.js"])
+<style >
+	input.delrow{
+        cursor:pointer;
+        background-image:url($!StringUtil.getContextPath()/image/mclon/minus-btn.png);
+        background-repeat:no-repeat; 
+		border-style: solid;
+		color: white;
+		background-color: white;
+		border:0px;
+    }
+	input.analyz{
+        cursor:pointer;
+        background-image:url($!StringUtil.getContextPath()/image/mclon/sel.png);
+        background-repeat:no-repeat; 
+		border-style: solid;
+		color: white;
+		background-color: white;
+		border:0px;
+    }
+</style>
+<form id='frm' action="handover.vm" method="post">
+	#set($handoverHead = $form.handoverHead)
+	#set($lines = $form.lines)
+	
+	#if($StringUtil.isBlank($!handoverHead.billno))
+		#set($billno = "自动生成")
+		#set($orgId = $StringUtil.getOrgId($session))
+		#set($dodate = $DateUtil.getCurrentDate10())
+		#set($statusName = "保存")
+		#set($createDate = $DateUtil.getCurrentDate10())
+		#set($createId = $StringUtil.getUserId($session))
+		#set($status = "1")
+	#else
+		#set($billno = $handoverHead.billno)
+		#set($orgId = $handoverHead.orgId)
+		#set($dodate = $handoverHead.dodate)
+		#set($statusName = $!DictUtil.getValue('status', $!{handoverHead.status}))
+		#set($createDate = $handoverHead.createDate)
+		#set($createId = $!handoverHead.createId)
+		#set($status = $!handoverHead.status)
+	#end
+	
+	#if($handoverHead.sourceType)
+		#set($sourceType = $!handoverHead.sourceType)
+	#else
+		#set($sourceType = 'TT')
+	#end
+	#set($enableAdd = false)
+	#set($enableSave = false)
+	#set($enableCheck = false)
+	#set($enableClose = false)
+	#set($enablePrint = false)
+	#set($isSaved = false)
+	#set($enableStock = false)
+	#set($enableSaveLine = false)
+	#if($StringUtil.isNotBlank($status))
+		#if($status == "1")
+			#set($enableAdd = true)
+			#set($enableSave = true)
+			#set($isSaved = true)
+			#set($enableCheck = true)
+		#elseif($status == "5")##审批完成
+			#set($enableClose = true)
+			#set($enablePrint = true)
+			#set($enableSaveLine = true)
+		#elseif($status == "8")##关闭状态
+			#set($enablePrint = true)
+		#elseif($status == "9")##关闭状态
+			#set($enablePrint = true)
+		#end
+	#end
+	#if($handoverHead)
+		#set($enableStock = true)
+	#end
+	<script > var status = $!status;</script>
+	<input type="hidden" id="user_action" name="user_action" value="toEdit"/>
+	<input type="hidden" id="billid" name="billid" value="$!{handoverHead.billid}"/>
+    <table class="title">
+    	<tr><td>其他交接单详情页</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' #if(!$enableAdd)disabled#end class='btn' id='btnAddRow' $RightUtil.able($session, '08020702','1')>
+				<input type='button' value='保存' #if(!$enableSave)disabled#end class='btn' id='btnSave' $RightUtil.able($session, '08020702','2')>
+				<input type='button' value='审核' #if(!$enableCheck)disabled#end class='btn' id='btnCheck' $RightUtil.able($session, '08020702','3')>
+				<input type='button' value='关闭' #if(!$enableClose)disabled#end class='btn' id='btnClose' $RightUtil.able($session, '08020702','4')>
+				<input type='button' value='入库统计' class='btn' #if(!$enableStock)disabled#end id="btnStockSum" $RightUtil.able($session, '08020702','5')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08020702','6')>
+				#if($enableSaveLine)
+					<input type='button' value='修改行信息' class='btn' id="btnEditLine" onclick="editLine()" $RightUtil.able($session, '08020702','7')>
+				#end
+				<input type='button' value='行信息修改历史' class='btn' id="btnLineHistory" onclick="showLineHistory()" $RightUtil.able($session, '08020702','8')>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' readonly value="$!billno">
+			</td>
+			<td class='body1'>供应商：</td>
+			<td class='body2'>
+				##<select id="verdorId" name="verdorId" disabled  value="$!handoverHead.verdorId" msg="不能为空" >
+				##	$StringUtil.emptyOption()
+                ##</select>
+				<input type='hidden' id='verdorId' name="verdorId" value="$!handoverHead.verdorId">
+				<input type='text' id='vendorName' value="$!BdCommon.getVendorName($!handoverHead.verdorId)" #if($!isSaved)ondblclick="showVendorWin()" class='target'#end readonly   dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='hidden' id="status" name='status' readonly value="$!status">
+				<input type='text' id="statusName" name='statusName' readonly value="$!statusName">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>交接人员：</td>
+			<td class='body2'>
+				<input type='text' id="createName" name='createName' readonly value="$!BdCommon.getUserName($!createId)" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>单据时间：</td>
+			<td class='body2'>
+				<input type='text' id="dodate" name='dodate' readonly #if(!$isSaved)disabled#end value="$!{dodate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>创建人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{createId}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!createId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>创建时间：</td>
+			<td class='body2'>
+				<input type='text' id="createDate" readonly name='createDate' value="$!{createDate}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>业务类型：</td>	
+			<td class='body2'>
+				<select id="dotype" name="dotype" disabled value="$handoverHead.dotype" msg="不能为空" >
+					$StringUtil.emptyOption()
+				</select>
+			</td>
+			<td class='body1'>来源类型：</td>
+			<td class='body2'>
+				<input type='hidden' id="sourceType" name='sourceType' readonly value="$!sourceType">
+				<input type='text' id="sourceTypeName" name='sourceTypeName' readonly value="$!DictUtil.getValue('billcode', $!{sourceType})">
+			</td>
+			<td class='body1'>来源单号：</td>	
+			<td class='body2'>
+				<input type='hidden' id="sourceId" name='sourceId' readonly value="$!{handoverHead.sourceId}">
+				<input type='text' id="sourceNo" name='sourceNo' readonly value="$!{handoverHead.sourceNo}">
+				<img src="$!StringUtil.getContextPath()/image/mclon/sel.png" style="cursor:pointer;" alt="查看来源单据详情" onclick="showSourceBill()"/>
+			</td>
+			<td class='body1'>发货单号：</td>
+			<td class='body2'>
+				<input type='text' id="expressNo" name='expressNo' readonly value="$!{handoverHead.expressNo}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>接收人员：</td>	
+			<td class='body2'>
+				<input type='text' id="receUser" name='receUser' readonly value="$!BdCommon.getUserName($!{handoverHead.receUser})">
+			</td>
+			<td class='body1'>接收时间：</td>
+			<td class='body2'>
+				<input type='text' id="receDate" name='receDate' #if(!$!isSaved)disabled#end readonly value="$!{handoverHead.receDate}">
+			</td>
+			<td class='body1'>是否装箱：</td>	
+			<td class='body2'>
+				<select id="isPack" name="isPack" #if(!$!isSaved)disabled#end  value="$handoverHead.isPack" msg="不能为空" >
+					$StringUtil.emptyOption()
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</td>
+			<td class='body1'>装箱单号：</td>
+			<td class='body2'>
+				<input type='text' id="packNo" name='packNo' readonly value="$!{handoverHead.packNo}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>是否代销：</td>	
+			<td class='body2'>
+				<select id="isPsale" name="isPsale" #if(!$!isSaved)disabled#end  value="$handoverHead.isPsale" msg="不能为空" >
+					$StringUtil.emptyOption()
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</td>
+			<td class='body1'>总数量：</td>
+			<td class='body2'>
+				<input type='text' id="sumNum" name='sumNum' readonly value="$!{handoverHead.sumNum}">
+			</td>
+			<td class='body1'>总工费：</td>	
+			<td class='body2'>
+				<input type='text' id="sumCharge" name='sumCharge' readonly value="$!{handoverHead.sumCharge}">
+			</td>
+			<td class='body1'>总金额：</td>
+			<td class='body2'>
+				<input type='text' id="sumMoney" name='sumMoney' readonly value="$!{handoverHead.sumMoney}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>修改人员：</td>	
+			<td class='body2'>
+				<input type='text' id="modifyUser" name='modifyUser' readonly value="$!BdCommon.getUserName($!{handoverHead.updateId})">
+			</td>
+			<td class='body1'>修改时间：</td>
+			<td class='body2'>
+				<input type='text' id="modifyDate" name='modifyDate' readonly value="$!{handoverHead.updateDate}">
+			</td>
+			<td class='body1'>备注：</td>
+			<td class='body2' colspan="3">
+				<input type='text' id="memo" name='memo' style="width:90%;"  value="$!{handoverHead.memo}">
+			</td>
+		</tr>
+    </table>
+	<input type='hidden' id="deleteIds" name='deleteIds'  value=""/>
+	
+	<table class='list'>
+    	<thead>
+			<tr>
+				<th></th>
+				<th>大类</th>
+				<th>计量单位</th>
+				##<th>是否赠品</th>
+				<th>交接数量</th>
+                <th>单价</th>
+        		<th>合格数量</th>
+        		<th>合格金额</th>
+				<th width='60px'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $lines)
+			<tr>
+				<td></td>
+				<td><select name='itemClassId' dataType='Require' #if(!$!isSaved)disabled#end onchange="checkitemClass(this)" value='' msg='不能为空'></select>
+					<input type="button" name="itemBtn" value="" class="analyz" style="display:none;" onclick="showLineChild(this)"/>
+				</td>
+				<td>
+					<select name='unitNo' dataType='Require' #if(!$!isSaved)disabled#end value='' msg='不能为空'></select>
+				</td>
+				
+				<td><input type='text' name='hangNum' #if(!$!isSaved)readonly#end style='width:70px;' value="$!line.hangNum" onblur='checkField()' dataType='Require' msg='不能为空'></td>
+                <td><input type='text' name='hangPrice' #if(!$!isSaved)readonly#end style='width:70px;' value="$!line.hangPrice" onblur='checkField()' dataType='Require'  msg='不能为空'></td>
+				<td><input type='text' name='yesNum' readonly value="$!line.yesNum" style='width:70px;'></td>
+				<td><input type='text' name='yesMoney' readonly value="$!line.yesMoney" style='width:80px;'></td>
+				<td><input type='button' value='删除' #if(!$!isSaved || "$!sourceType" == "TL")disabled#end style='width:60px;' onclick='deleteHandoverRow(this,"tbl")'/>
+    				<input type='hidden' name='olditemClassId' value="$!line.itemClassId" />
+					<input type='hidden' name='oldUnitNo' value="$!line.unitNo" />
+					<input type='hidden' name='lineid' value="$!line.lineid" />
+					<input type='hidden' name='oldHangNum' value="$!line.hangNum" />
+					<input type="hidden" name="child_list" value=$!BdCommon.resetLineChild($!line.childList) />
+					<input type="hidden" name="delete_child_ids" value=''/>
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	<INPUT type="hidden" id="isMini" value="$!form.mini"/>
+	
+	<input type="hidden" id="deleteChildIds"/>
+	<div id="line_children_head" style="display:none;">
+		<table>
+        	<tr>
+        		<td>　总数：</td><td><input type="text" id="analysCount" readonly style="width:80px;"/></td>
+        	</tr>
+        </table>
+    	<table class='list' style="width:380px;">
+    		<thead>
+        		<tr>
+        			<th>分析范围</th>
+        			<th>数量</th>
+					<th>单价</th>
+					<th width="25px;"><a href="#if(!$isClosed)javascript:addChildRow();#else # #end"><img src='$!StringUtil.getContextPath()/image/mclon/add-btn.png' /></a></th>
+    			</tr>
+    		</thead>	
+    		<tbody id="line_children">
+    			
+            </tbody>
+    	</table>
+	</div>
+</form>
+<script>
+var sourceType = "$!sourceType";
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		var oldVerdor = jQuery("#verdorId").val(),
+			newVerdor = idArr.join(',');
+		jQuery("#verdorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#verdorId").val());
+}
+
+function setValues(){
+	/*BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!handoverHead.verdorId");
+	});*/
+	//jQuery("#dotype").val("$!handoverHead.dotype");
+	jQuery("#isPack").val("$!handoverHead.isPack");
+	jQuery("#isPsale").val("$!handoverHead.isPsale");
+	
+	var rowsLen = $("tbl").rows.length;
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		for(var k=0; k<rowsLen; k++) {
+			addOptions2("itemClassId", k,  data, null, null, true, true, $n("olditemClassId")[k].value);
+			if($n("olditemClassId")[k].value == "156"){
+				$n("itemBtn")[k].style.display = "";
+				$n("itemBtn")[k].disabled = false;
+			}
+		}
+	});
+	DictDwr.getDictsForSlt('purunit', function(data){
+		for(var m=0; m<rowsLen; m++) {
+			addOptions2("unitNo", m,  data, null, null, true, true, $n("oldUnitNo")[m].value);
+		}
+	});
+	DictDwr.getDictsForSlt('purbiztype', function(data){
+		addOptions("dotype", data, null, null, true, true, "$!handoverHead.dotype");
+	});
+}
+jQuery(function(){
+	initCalendar("dodate");
+	setValues();
+	jQuery("#deleteIds").val("");
+	jQuery("#btnAddRow").click(addRow);
+	jQuery("#btnSave").click(saveform);
+	jQuery("#btnCheck").click(checkHandover);
+	jQuery("#btnClose").click(closeBill);
+	jQuery("#btnStockSum").click(showInstockWin);
+	jQuery("#btnToList").click(function(){
+		window.location = "handover.vm";
+	});
+	checkReview();
+	
+	if($!form.mini){
+		jQuery("#btnPrint").css("display", "none");
+		jQuery("#btnToList").css("display", "none");
+	}
+	altRowCSS("tbl");
+	changeSeq("tbl");
+	
+	if(sourceType == "TL"){
+		jQuery("#vendorName").attr('disabled', true);
+		jQuery("#btnAddRow").attr('disabled', true);
+		var rowsLen = $("tbl").rows.length;
+		for(var i=0; i<rowsLen; i++){
+			$n("itemClassId")[i].disabled = true;
+			$n("unitNo")[i].disabled = true;
+			$n("hangNum")[i].readOnly = true;
+		}
+	}
+})
+
+</script>

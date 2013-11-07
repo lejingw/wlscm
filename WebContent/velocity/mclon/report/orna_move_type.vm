@@ -1,0 +1,186 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ajaxfileupload.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+	<input type='hidden' name='firstFlag' value="1"/>
+    <table class="title">
+    	<tr><td>报表管理【饰品调拨类型查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+		       	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08054001','1')>
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08054001','2')>
+			    <input type='button' value='导入excel' class='btn' id='importExcel' onclick="showImportWin()"  $RightUtil.able($session, '08054001','3')>
+			</td>
+		</tr>
+	</table>
+	<div class='scroll2'>
+        <table class='list' style='width:2500px;'>
+        	<thead>
+    			<tr>
+                    <th width='45px'></th>
+                    <th width="120px">饰品编码</th>
+                    <th width="120px">大类</th>
+                    <th width="120px">小类</th>
+                    <th width="90px">分析范围</th>
+                    <th width="120px">款式大类</th>
+                    <th width="120px">款式中类</th>
+                    <th width="120px">款式小类</th>
+                    <th width="120px">款式</th>
+                    <th width="90px">材质</th>
+                    <th width="60px">尺寸</th>
+                    <th width="90px">网店金额</th>
+                    <th width="90px">净度</th>
+                    <th width="90px">色级</th>
+                    <th width="120px">品质</th>
+                    <th width="90px">特殊工费</th>
+                    <th width="120px">到店日期</th>
+                    <th width="120px">入库日期</th>
+                    <th width="60px">高工艺</th>
+                    <th width="60px">调拨类型</th>
+                    <th width="60px">状态</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+			#foreach($map in $form.list)
+    			<tr>
+                    <td>$velocityCounter</td>
+                    <td>$!map.ORNA_CODE</td>
+                    <td>$!map.ITEM_CLASS_DSC</td>
+                    <td>$!map.ORNA_CLASS_DSC</td>
+                    <td>$!map.ANALYSIS_ARANGE_CODE</td>
+                    <td>$!map.STYLEITEMCLASSNAME</td>
+                    <td>$!map.STYLEMIDDLECLASSNAME</td>
+                    <td>$!map.STYLEORNACLASSNAME</td>
+                    <td>$!HtmlUtil.printStyle($!map.STYLE_ID, $!map.STYLENAME, $!map.ISBIGGRAPH)</td>
+                    <td>$!map.QUALITY_DSC</td>
+                    <td>$!map.SIZE_NAME</td>
+                    <td>$!map.POS_AMOUNT</td>
+                    <td>$!DictUtil.getValue('diaclean', $!map.CLEAN_ID)</td>
+                    <td>$!DictUtil.getValue('diacolorgrade', $!map.MAIN_COLOR_GRADE_ID)</td>
+                    <td>$!{DictUtil.getValue('gradelevel',$!map.COLOR_GRADE_GRADE_ID)}$!{DictUtil.getValue('gradelevel',$!map.CLEAN_GRADE_ID)}</td>
+                    <td>$!map.SPECIAL_WORK_PRICE</td>
+                    <td>$!map.TOSHOPDATE</td>
+                    <td>$!map.STORAGEDATE</td>
+                    <td>$!map.PRIVATE_TYPE</td>
+                    <td>$!map.MOVE_TYPE</td>
+                    <td>$!DictUtil.getValue('status', $!map.STATE)</td>
+    			</tr>
+			#end
+			#foreach($map in $form.listTotal)
+    			<tr>
+                    <td></td>
+					<td>合计</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>$!map.POS_AMOUNT</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>$!map.SPECIAL_WORK_PRICE</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+    			</tr>
+					#end
+			</tbody>
+        </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<div id="importExcelDiv" style="display:none;">
+    <form method="post">
+        <table class="control">
+            <tr>
+                <td>
+                    <input type='button' value='导入' onclick="ajaxFileUpload()" >
+                </td>
+            </tr>
+        </table>
+        <table class='content'>
+            <tr>
+                <td class='body1'>选择文件：</td>
+                <td class='body2'>
+                    <input name="excel_file" type="file" id="excel_file" style="background:#eeeeee;font:normal 12px Tahoma;width:220px;">
+                </td>
+            </tr>
+            <tr><td colspan="2">
+                <font style="color:red">
+                    注：请严格按照模板来导入，若没有模板点击
+                    <a href="/wlscm/velocity/mclon/report/template_orna_move_type.xls">这里</a>
+                    下载模板。
+            </td></tr>
+        </table>
+    </form>
+</div>
+<script>
+jQuery(function(){
+	initQuery2("OMT01", 'frm', 'btnSearch');
+    altRowCSS("tbl");
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+function showImportWin(){
+    jQuery("#importExcelDiv").dialog({
+        title:'导入Excel',
+        width:400,
+        height:150,
+        modal:true,
+        zIndex:1,
+        close:function(){
+               jQuery('#turnoverNumDiv').dialog('close');
+        }
+    });
+}
+
+function ajaxFileUpload() {
+    if(isNull(jQuery("#excel_file").val())){
+        alert("请选择上传文件");
+        return ;
+    }
+    confirm("确定要上传？", function(){
+        //showLayer(true);
+        var url = 'report.vm?user_action=importOrnaMoveType';
+        jQuery.ajaxFileUpload({
+            url : url, //需要链接到服务器地址
+            secureuri : false,
+            fileElementId : 'excel_file', //文件选择框的id属性
+            dataType : 'json', //服务器返回的格式，可以是json
+            success : function (data, status) {
+                //showLayer(false);
+                if(data.isSuccess === "true"){
+                    var msg = "上传成功";
+                    alert(msg, function(){
+                        jQuery("#frm").submit();
+                    });
+                } else {
+                    alert(data.msg);
+                }
+            },
+            error : function (data, status, e) {
+                //showLayer(false);
+                alert("上传失败");
+            }
+        });
+    });
+}
+</script>

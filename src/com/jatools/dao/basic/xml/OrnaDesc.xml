@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OrnaDesc">
+	<typeAlias alias="OrnaDesc" type="com.jatools.vo.basic.OrnaDesc" />
+	
+	<resultMap id="result" class="OrnaDesc">
+		<result property="ornadscId" column="ornadsc_id"/>
+		<result property="articleTypeId" column="article_type_id"/>	
+		<result property="qualityId" column="quality_id"/>
+		<result property="ornaDsc" column="orna_dsc"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createdate" column="createdate"/>
+		<result property="createid" column="createid"/>
+		<result property="updatedate" column="updatedate"/>
+		<result property="updateid" column="updateid"/>
+	</resultMap>
+	<sql id="OrnaDesc_columns_all">
+		ornadsc_id, article_type_id, item_class_id, orna_class_id, quality_id, orna_dsc, memo, createid, createdate, updatedate, updateid, status
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="OrnaDesc.getOrnaDescPageData" resultMap="result" parameterClass="map">
+		select <include refid="OrnaDesc_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="OrnaDesc_columns_all"/> from jat_basic_ornadsc a 
+			where 1 = 1
+			<isNotEmpty property="articleTypeId" prepend="and">  a.article_type_id = #articleTypeId# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="qualityId" prepend="and">  a.quality_id = #qualityId# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.article_type_id, a.item_class_id, a.orna_class_id, a.quality_id, a.orna_dsc
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	
+	</select>
+	<!-- 获取总条数 -->
+    <select id="OrnaDesc.getOrnaDescTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_ornadsc a
+		where 1 = 1
+			<isNotEmpty property="articleTypeId" prepend="and">  a.article_type_id = #articleTypeId# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="qualityId" prepend="and">  a.quality_id = #qualityId# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="OrnaDesc.saveOrnaDesc" parameterClass="OrnaDesc">
+    	<selectKey resultClass="string" keyProperty="ornadscId" type="pre">
+			select JAT_BASIC_ORNADSC_SEQ.nextval as ornadscId from dual
+		</selectKey>
+		insert into jat_basic_ornadsc (<include refid="OrnaDesc_columns_all"/>)
+		 values(
+		 	#ornadscId#, #articleTypeId#, #itemClassId#, #ornaClassId#, #qualityId#, #ornaDsc#, 
+		 	#memo#, #createid#, #createdate#, #updatedate#, #updateid#, #status#
+		 )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="OrnaDesc.getOrnaDesc" resultClass="OrnaDesc" resultMap="result" parameterClass="string">
+    	select <include refid="OrnaDesc_columns_all"/> from jat_basic_ornadsc a where a.ornadsc_id = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="OrnaDesc.updateOrnaDesc" parameterClass="OrnaDesc">
+		update jat_basic_ornadsc a 
+		set 
+			a.quality_id = #qualityId#, 
+			a.orna_dsc = #ornaDsc#,
+			a.article_type_id = #articleTypeId#, 
+			a.item_class_id = #itemClassId#, 
+			a.orna_class_id = #ornaClassId#, 
+			a.memo = #memo#, 
+			a.updatedate = #updatedate#, 
+			a.updateid = #updateid#
+		where a.ornadsc_id = #ornadscId#
+	</update>
+	<delete id="OrnaDesc.deleteOrnaDesc" parameterClass="string">
+		delete jat_basic_ornadsc a where a.ornadsc_id = #value#
+	</delete>
+	
+	<select id="OrnaDesc.selectOrnaDescCount" parameterClass="OrnaDesc" resultClass="int">
+		select count(1) from jat_basic_ornadsc a
+		where 1 = 1
+			and a.item_class_id = #itemClassId#
+			and a.orna_class_id = #ornaClassId#
+			and a.article_type_id = #articleTypeId#
+			<isNotEmpty property="qualityId" prepend="and"> a.quality_id = #qualityId# </isNotEmpty>
+			<isEmpty property="qualityId" prepend="and"> a.quality_id is null </isEmpty>
+			<isNotEmpty property="ornadscId" prepend="and"> <![CDATA[a.ornadsc_id <> #ornadscId#]]> </isNotEmpty>
+	</select>
+</sqlMap>

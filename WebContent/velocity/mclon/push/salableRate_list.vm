@@ -1,0 +1,253 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/SalableRateDwr.js"])
+<form id="frm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="title">
+    	<tr><td>畅销款比例</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' onclick="addBill()" $RightUtil.able($session, '08091001','1')>
+				<input type='button' value='修改' class='btn' onclick="editBill()" $RightUtil.able($session, '08091001','2')>
+				<input type='button' value='删除' class='btn' onclick="deleteBill()" $RightUtil.able($session, '08091001','3')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08091001','4')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' >
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+        <table class='list' style="width:1400px;">
+        	<thead>
+    			<tr>
+                    <th width='45px'><input type='checkbox' id='chkall'/></th>
+					<th width='180px'>区域</th>
+					<th width='150px'>畅销款铺货量比例</th>
+					<th width='150px'>畅销款周转量比例</th>
+					<th width='150px'>非畅销款铺货量比例</th>
+					<th width='150px'>非畅销款周转量比例</th>
+            		<th width='90px'>创建人</th>
+            		<th width='120px'>创建时间</th>
+            		<th width='90px'>修改人</th>
+            		<th width='120px'>修改时间</th>
+            		<th width='90px'>状态</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($item in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value='$!{item.regionId}'/>
+						<input type='hidden' name='hd_regionId' value='$!item.regionId'/>
+						<input type='hidden' name='hd_saleDisRate' value='$!item.saleDisRate'/>
+						<input type='hidden' name='hd_saleTurnRate' value='$!item.saleTurnRate'/>
+						<input type='hidden' name='hd_unsaleDisRate' value='$!item.unsaleDisRate'/>
+						<input type='hidden' name='hd_unsaleTurnRate' value='$!item.unsaleTurnRate'/>
+						$velocityCounter
+					</td>
+    				<td><a href='javascript:showEidtDialog($velocityCounter - 1);'>$!item.regionName</a></td>
+    				<td>$!item.saleDisRate</td>
+    				<td>$!item.saleTurnRate</td>
+    				<td>$!item.unsaleDisRate</td>
+    				<td>$!item.unsaleTurnRate</td>
+    				<td>$!BdCommon.getUserName($!item.createId)</td>
+    				<td>$!item.createDate</td>
+    				<td>$!BdCommon.getUserName($!item.updateId)</td>
+    				<td>$!item.updateDate</td>
+    				<td>$!DictUtil.getValue('status', $!item.status)</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<div id='sizeDiv' style="display:none;">
+	<form id='frm2'>
+        <table class="control">
+        	<tr>
+    			<td>
+    				<input type='button' value='保存' onclick="saveSalableRate()" $RightUtil.able($session, '08091002','1')>
+    				<input type='button' value='取消' onclick="jQuery('#sizeDiv').dialog('close');">
+    			</td>
+    		</tr>
+        </table>
+    	<table class='content'>
+    		<tr>
+        		<td class='body1'>区域</td>
+                <td class='body2'><select id='regionId' dataType="Require" msg="不能为空"></select></td>
+        	</tr>
+    		<tr>
+				<td class='body1'>畅销款铺货量比例(%)</td>
+                <td class='body2'><input type='text' id='saleDisRate' dataType="Double" msg="不能为空,且必须为数字类型" onchange="changeDisRate('saleDisRate')"></td>
+                <td class='body1'>畅销款周转量比例(%)</td>
+                <td class='body2'><input type='text' id='saleTurnRate' dataType="Double" msg="不能为空,且必须为数字类型" onchange="changeTurnRate('saleTurnRate')"></td>
+    		</tr>
+    		<tr>
+				<td class='body1'>非畅销款铺货量比例(%)</td>
+                <td class='body2'><input type='text' id='unsaleDisRate' dataType="Double" msg="不能为空,且必须为数字类型" onchange="changeDisRate('unsaleDisRate')"></td>
+                <td class='body1'>非畅销款周转量比例(%)</td>
+                <td class='body2'><input type='text' id='unsaleTurnRate' dataType="Double" msg="不能为空,且必须为数字类型" onchange="changeTurnRate('unsaleTurnRate')"></td>
+    		</tr>
+        </table>
+	</form>
+</div>
+<script>
+function changeDisRate(way){
+	if("saleDisRate" == way){
+    	if(!isDecimal(jQuery("#saleDisRate").val())){
+    		alert("畅销款铺货量比例必须为数字类型");
+			return false;
+    	}
+		var tmp = parseFloat(jQuery("#saleDisRate").val());
+    	if(tmp<0 || tmp>100){
+    		alert("畅销款铺货量比例必须在0至100之间");
+			return false;
+		}
+		jQuery("#unsaleDisRate").val(floatSub("100", tmp));
+	}else{
+    	if(!isDecimal(jQuery("#unsaleDisRate").val())){
+    		alert("非畅销款铺货量比例必须为数字类型");
+			return false;
+    	}
+		var tmp = parseFloat(jQuery("#unsaleDisRate").val());
+    	if(tmp<0 || tmp>100){
+    		alert("非畅销款铺货量比例必须在0至100之间");
+			return false;
+		}
+		jQuery("#saleDisRate").val(floatSub("100", tmp));
+	}
+	return true;
+}
+function changeTurnRate(way){
+	if("saleTurnRate" == way){
+    	if(!isDecimal(jQuery("#saleTurnRate").val())){
+    		alert("畅销款周转量比例必须为数字类型");
+			return false;
+    	}
+		var tmp = parseFloat(jQuery("#saleTurnRate").val());
+    	if(tmp<0 || tmp>100){
+    		alert("畅销款周转量比例必须在0至100之间");
+			return false;
+		}
+		jQuery("#unsaleTurnRate").val(floatSub("100", tmp));
+	}else{
+    	if(!isDecimal(jQuery("#unsaleTurnRate").val())){
+    		alert("非畅销款周转量比例必须为数字类型");
+			return false;
+    	}
+		var tmp = parseFloat(jQuery("#unsaleTurnRate").val());
+    	if(tmp<0 || tmp>100){
+    		alert("非畅销款周转量比例必须在0至100之间");
+			return false;
+		}
+		jQuery("#saleTurnRate").val(floatSub("100", tmp));
+	}
+	return true;
+}
+function showEidtDialog(index){
+	BdCommonDwr.getAllRegionForSlt(function(data){
+		addOptions('regionId', data, null, null, true, true, $n("hd_regionId")[index].value);
+	});
+	jQuery("#saleDisRate").val($n("hd_saleDisRate")[index].value);
+	jQuery("#saleTurnRate").val($n("hd_saleTurnRate")[index].value);
+	jQuery("#unsaleDisRate").val($n("hd_unsaleDisRate")[index].value);
+	jQuery("#unsaleTurnRate").val($n("hd_unsaleTurnRate")[index].value);
+	showSizeWin();
+}
+function showSizeWin(){
+	jQuery("#sizeDiv").dialog({
+			title:'畅销款比例设置',
+			width:800, 
+			height:300,
+			modal:true,
+			zIndex:1,
+			close:function(){
+				if(refreshFlag){
+            		window.location = "salableRate.vm";
+            	}else{
+                	jQuery('#sizeDiv').dialog('close');
+            	}
+			}
+		});
+}
+var refreshFlag = false;
+function addBill(){
+	BdCommonDwr.getAllRegionForSlt(function(data){
+		addOptions('regionId', data, null, null, true, true);
+	});
+	jQuery("#saleDisRate").val("");
+	jQuery("#saleTurnRate").val("");
+	jQuery("#unsaleDisRate").val("");
+	jQuery("#unsaleTurnRate").val("");
+	showSizeWin();
+}
+function editBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length != 1){
+		alert("请选择要修改的一条记录");
+		return ;
+	}
+	showEidtDialog(idxs[0]);
+}
+function deleteBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	confirm("确定删除?", function(){
+		showLayer(true);
+		var regionIdArr = [];
+		for(var i=0, j=idxs.length;i<j;i++){
+			regionIdArr.push($n("chk")[idxs[i]].value);
+		}
+    	SalableRateDwr.deleteSalableRate(regionIdArr, function(data){
+    		showLayer(false);
+    		alert(data?data:"删除成功", function(){
+    			if(!data){
+                	window.location = "salableRate.vm";
+    			}
+    		});
+    	});
+	});
+}
+function getSalableRate(){
+	return {
+		"regionId"			:jQuery("#regionId").val(),
+		"saleDisRate"		:jQuery("#saleDisRate").val(),
+		"saleTurnRate"		:jQuery("#saleTurnRate").val(),
+		"unsaleDisRate"		:jQuery("#unsaleDisRate").val(),
+		"unsaleTurnRate"	:jQuery("#unsaleTurnRate").val()
+	};
+}
+function saveSalableRate(){
+	if(!Validator.Validate($("frm2"),3))
+		return;
+	if(!changeDisRate("saleDisRate")){return ;}
+	if(!changeTurnRate("saleTurnRate")){return ;}
+	confirm("确定保存?", function(){
+		showLayer(true);
+    	SalableRateDwr.saveOrUpdateSalableRate(getSalableRate(), function(data){
+    		showLayer(false);
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+                	window.location = "salableRate.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+		showEidtDialog(index);
+	});
+	initQuery2('PSALABLERATE01', "frm", 'btnQueryShow');
+	resetWinSize();
+});
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

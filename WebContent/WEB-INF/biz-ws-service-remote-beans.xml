@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans default-autowire="byName">
+	
+	<bean id="enterReviewRemoteClient" class="org.codehaus.xfire.spring.remoting.XFireClientFactoryBean">
+		<property name="lookupServiceOnStartup" value="false"/>
+		<property name="serviceClass" value="com.jatools.ws.client.EnterReviewRemoteClient"/>
+		<property name="wsdlDocumentUrl" value="http://${local.address}${system.contextpath}${ws.local.enterReviewUrl}"/>
+		<property name="serviceFactory" ref="xfire.serviceFactory"/>
+		<property name="properties">
+			<props>
+				<prop key="http.timeout">5000</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="viewReviewLogRemoteClient" class="org.codehaus.xfire.spring.remoting.XFireClientFactoryBean">
+		<property name="lookupServiceOnStartup" value="false"/>
+		<property name="serviceClass" value="com.jatools.ws.client.ViewReviewLogRemoteClient"/>
+		<property name="wsdlDocumentUrl" value="http://${local.address}${system.contextpath}${ws.local.viewReviewLogUrl}"/>
+		<property name="serviceFactory" ref="xfire.serviceFactory"/>
+		<property name="properties">
+			<props>
+				<prop key="http.timeout">5000</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="reviewOverRemoteClient" class="org.codehaus.xfire.spring.remoting.XFireClientFactoryBean">
+		<property name="lookupServiceOnStartup" value="false"/>
+		<property name="serviceClass" value="com.jatools.ws.client.ReviewOverRemoteClient"/>
+		<property name="wsdlDocumentUrl" value="http://${local.address}${system.contextpath}${ws.local.reviewOverUrl}"/>
+		<property name="serviceFactory" ref="xfire.serviceFactory"/>
+		<property name="properties">
+			<props>
+				<prop key="http.timeout">5000</prop>
+			</props>
+		</property>
+	</bean>
+	<!--刷新加盟系统缓存
+	<bean id="refreshJmCacheRemoteClient" class="org.codehaus.xfire.spring.remoting.XFireClientFactoryBean">
+		<property name="lookupServiceOnStartup" value="false"/>
+		<property name="serviceClass" value="com.jatools.ws.client.RefreshJmCacheRemoteClient"/>
+		<property name="wsdlDocumentUrl" value="${ws.remote.refreshJmCacheUrl}"/>
+		<property name="serviceFactory" ref="xfire.serviceFactory"/>
+		<property name="properties">
+			<props>
+				<prop key="http.timeout">5000</prop>
+			</props>
+		</property>
+	</bean>
+	 -->
+	
+	<bean id="enterReviewWebService" class="com.jatools.ws.remote.impl.EnterReviewWebServiceImpl">
+		<property name="webServiceUrl" value="${ws.remote.enterReviewUrl}"></property>
+	</bean>
+	<bean id="viewReviewLogWebService" class="com.jatools.ws.remote.impl.ViewReviewLogWebServiceImpl">
+		<property name="webServiceUrl" value="${ws.remote.enterReviewUrl}"></property>
+	</bean>
+	<bean id="noticeToRefreshWebService" class="com.jatools.ws.remote.impl.NoticeToRefreshWebServiceImpl">
+		<property name="webServiceUrl" value="${ws.remote.noticeToRefreshUrl}"></property>
+	</bean>
+	
+	<bean id='workflowService' class='com.jatools.ws.remote.impl.WorkflowServiceImpl'>
+		<property name="callbackWebServiceUrl" value="http://${local.address}${system.contextpath}${ws.local.reviewOverUrl}"></property>
+	</bean>
+</beans>

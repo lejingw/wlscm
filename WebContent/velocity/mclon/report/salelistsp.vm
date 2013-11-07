@@ -1,0 +1,468 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+			<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【商品部销售明细查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">					
+	
+  	        	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08051301','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08051301','2')>
+                &nbsp;&nbsp;[<label style="color: red; ">数据截止到昨天</label>]
+			</td>
+		</tr>
+	</table>
+		<table class='content'>
+		<tr>
+			<td class='body1'>组织</td>
+			<td class='body2'>
+					<input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='hidden' id="OrgId" name='OrgId' value="">
+				<input type='hidden' id="UserId" name='UserId' value="$!StringUtil.getUserId($!session)">
+				<input type='text'  id="OrgName" name='OrgName' value="" readonly class="target" onclick="showSelectOrgWin()">
+			</td>
+			
+			<td class='body1'>商品类别</td>
+			<td class='body2'>
+				<select id="articleTypeId" name='articleTypeId'  value="" onchange="changeArticleTypeId()">$StringUtil.emptyOption()</select></td>
+		</tr>
+		<tr>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name='itemClassId'  value="" onchange="changeOrnaClassId()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId"  value="" onchange="changeOrnaClass()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" name='analysisId'  value="" >$StringUtil.emptyOption()</select></td>
+			<td class='body1'>款式大类</td>
+			<td class='body2'>
+				<select id="styleItemClassId" name='styleItemClassId'  value="" onchange="changeStyleItemClassId()">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式中类</td>
+			<td class='body2'>
+				<select id="styleMiddleClassId" name="styleMiddleClassId"  value="" onchange="changeStyleMiddleClassId()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式小类</td>
+			<td class='body2'>
+				<select id="styleOrnaClassId" name='styleOrnaClassId'  value="" onchange="changeStyleOrnaClassId()">$StringUtil.emptyOption()</select></td>
+			<td class='body1'>款式名称</td>
+			<td class='body2'>
+				<select id="styleId" name='styleId'  value="" >$StringUtil.emptyOption()</select><IMG src="$!StringUtil.getContextPath()/image/mclon/sel.png" alt="选择款式" onclick="showStyleWindow()"/>
+				<input type='hidden' id="sid" name='sid' value="">
+			</td>
+			<td class='body1'>主题名称</td>
+			<td class='body2'>
+				<select id="themeid" name="themeid"  value="" >$StringUtil.emptyOption()</select>
+			</td>		
+		</tr>
+		<tr>
+			<td class='body1'>钻石品质</td>
+			<td class='body2'>
+				<select id="diagrade" name='diagrade'  value="" >$StringUtil.emptyOption()</select></td>
+			<td class='body1'>色级</td>
+			<td class='body2'>
+				<select id="maincolorgradeid" name='maincolorgradeid'  value="" >$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>净度</td>
+			<td class='body2'>
+				<select id="cleanid" name="cleanid"  value="" >$StringUtil.emptyOption()</select>
+			</td>	
+			<td class='body1'>形状</td>
+			<td class='body2'>
+				<select id="shapeid" name="shapeid"  value="" >$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+				<tr>
+	
+			<td class='body1'>时间起</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="">
+			</td>
+				<td class='body1'>时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+			<td class='body1'>交接单号</td>
+			<td class='body2'>
+				<input type='text' id="handoverno" name='handoverno' value="">
+            </td>
+		</tr>
+
+			<td class='body1'>销售</td>
+			<td class='body2'>
+				<select id="transFlag" name='transFlag'  value="" >
+				<option value=''>--请选择--</option>
+				<option value='0'>销售</option>
+				<option value='1'>退回</option>
+				</select>
+			</td>
+			<td class='body1'>是否高工艺</td>
+			<td class='body2'>
+				<select id="privateType" name='privateType'  value="" >
+				<option value=''>--请选择--</option>
+				<option value='1'>是</option>
+				<option value='0'>否</option>
+				</select>	
+			</td>		
+		</tr>
+    </table>
+ 	<div class='scroll2'>
+        <table class='list' style='width:2500px;'>
+    	<thead>
+			<tr>
+				<th>销售</th>
+                <th>组织</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>分析范围</th>
+				<th>款式大类</th>
+				<th>款式中类</th>
+				<th>款式小类</th>
+				<th>款式名称</th>
+				<th>主题名称</th>
+				<th>钻石品质</th>
+				<th>材质</th>
+				<th>颜色</th>
+				<th>净度</th>
+				<th>总重</th>
+				<th>主石重</th>
+				<th>配石重</th>
+				<th>手寸</th>
+				<th>入库日期</th>
+				<th>到店日期</th>
+				<th>销售方式</th>
+				<th>标价</th>
+				<th>特殊工费</th>
+				<th>成交价</th>
+				<th>折扣</th>
+				<th>商品编码</th>
+			    <th>暂估成本</th>
+				<th>原成本</th>
+				<th>供应商</th>
+				<th>销售日期</th>
+				<th>销售年月</th>
+				<th>销售件数</th>
+				<th>退回件数</th>
+				<th>销售单号</th>
+				<th>销售人员</th>
+				<th>价格属性组</th>
+				<th>是否高工艺</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+				<td>$!map.TRANS_NAME</td>
+			    <td>$!map.ORG_NAME</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.ANALYSIS_ARANGE_CODE</td>
+				<td>$!map.STYLEITEMNAME</td>
+				<td>$!map.STYLEMIDDLENAME</td>
+				<td>$!map.STYLEORNANAME</td>
+				<td>$!HtmlUtil.printStyle("$!map.STYLEID", $!map.STYLENAME, $!map.ISBIGGRAPH)</td>
+				<td>$!map.THEME_NAME</td>
+				<td>$!map.PINGZ</td>
+				<td>$!map.QUALITY_DSC</td>
+				<td>$!map.COLORGRADE</td>
+				<td>$!map.CLEANNAME</td>			
+				<td>$!map.TOTAL_WEIGHT</td>
+				<td>$!map.MAIN_WEIGHT</td>
+				<td>$!map.PART_WEIGHT</td>
+				<td>$!map.SIZE_NAME</td>
+				<td>$!map.STORAGEDATE</td>
+				<td>$!map.TOSHOPDATE</td>
+				<td>$!map.UNITNAME</td>
+				<td>$!map.RECEIVABLE_AMOUNT</td>
+				<td>$!map.SPECIAL_WORK_PRICE</td>	
+				<td>$!map.RECEIVED_AMOUNT</td>
+				<td>$!map.DEDUCT_AMOUNT</td>
+				<td>$!map.ORNA_CODE</td>
+				<td>$!map.REAL_TOTAL_COST</td>
+				<td>$!map.INIV_COST</td>
+				<td>$!map.CUSTNAME</td>
+				<td>$!map.TRANS_DATE</td>
+				<td>$!map.TRANS_YM</td>
+				<td>$!map.SALE_NUM</td>
+				<td>$!map.BACK_NUM</td>
+				<td>$!map.SALENO</td>
+				<td>$!map.SALEUSER</td>
+				<td>$!map.PRICE_ATTR_GROUP</td>
+				<td>$!DictUtil.getValue('yesorno',$!map.PRIVATE_TYPE)</td>
+			</tr>
+		#end	
+		
+		
+		#foreach($map in $form.listSum)
+			<tr>
+				<td>合计</td>
+			    <td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			    <td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>			
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_TOTAL_WEIGHT</td>
+				<td>$!map.SUM_MAIN_WEIGHT</td>
+				<td>$!map.SUM_PART_WEIGHT</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_RECEIVABLE_AMOUNT</td>	
+				<td></td>
+				<td>$!map.SUM_RECEIVED_AMOUNT</td>
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_REAL_TOTAL_COST</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>$!map.SUM_SALE_NUM</td>
+				<td>$!map.SUM_BACK_NUM</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+    		jQuery("#OrgId").val(idArr.join(','));
+    		jQuery("#OrgName").val(nameArr.join(','));
+		}, null, null, true, jQuery("#OrgId").val(), "getCurrentOrgTree", {curUserId:"$StringUtil.getUserId($session)"});
+}
+/**
+ * 改变商品类别
+ */
+function changeArticleTypeId(){
+	//获取大类
+	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+		changeOrnaClassId();
+	});
+}
+/**
+ * 改变大类
+ */
+function changeOrnaClassId(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+/**
+ *　改变小类
+ */
+function changeOrnaClass(){
+	//获取分析范围
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+	});
+	//获取款式大类
+	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("styleItemClassId", data, null, null, true, true);
+		changeStyleItemClassId();
+	});
+}
+/**
+ *　改变款式大类
+ */
+function changeStyleItemClassId(){
+	//获取款式中类
+	BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+		addOptions("styleMiddleClassId", data, null, null, true, true);
+		changeStyleMiddleClassId();
+	});
+}
+/**
+ *　改变款式中类
+ */
+function changeStyleMiddleClassId(){
+	//获取款式小类
+	BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+		addOptions("styleOrnaClassId", data, null, null, true, true);
+		changeStyleOrnaClassId();
+	});
+}
+/**
+ *　改变款式小类
+ */
+function changeStyleOrnaClassId(){
+	//获取款式
+	BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true);
+	});
+}
+
+function setnull(){
+	jQuery("#OrgId").val("");
+}
+
+function setValues(){
+     altRowCSS("tbl");
+	jQuery("#OrgId").val("$!form.condition.OrgId");
+	jQuery("#OrgName").val("$!BdCommon.getOrgName($!form.condition.OrgId)");
+	
+	jQuery("#startDate").val("$!form.condition.startDate");	
+	jQuery("#endDate").val("$!form.condition.endDate");
+	
+	jQuery("#handoverno").val("$!form.condition.handoverno");
+	jQuery("#transFlag").val("$!form.condition.transFlag");
+    jQuery("#themeid").val("$!BdCommon.getStyleThemeName($!form.condition.themeid)");
+	
+	jQuery("#privateType").val("$!form.condition.privateType");
+	
+	jQuery("#sid").val("$!form.condition.sid");
+	if("$!form.condition.sid"){
+	  jQuery("#styleId").empty()
+	  jQuery("#styleId").prepend("<option value='$!form.condition.sid'>$!BdCommonDwr.getStyleName($!{form.condition.sid})</option>")
+	}
+	
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions("articleTypeId", data, null, null, true, true, "$!form.condition.articleTypeId");
+		if("$!form.condition.articleTypeId"){
+        	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+        		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+				if("$!form.condition.itemClassId"){
+        			BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+                		addOptions("ornaClassId", data, null, null, true, true, "$!form.condition.ornaClassId");
+						if("$!form.condition.ornaClassId"){
+							BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                        		addOptions("analysisId", data, null, null, true, true, "$!form.condition.analysisId");
+                        	});
+                        	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                        		addOptions("styleItemClassId", data, null, null, true, true, "$!form.condition.styleItemClassId");
+								if("$!form.condition.styleItemClassId"){
+									BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+                                		addOptions("styleMiddleClassId", data, null, null, true, true, "$!form.condition.styleMiddleClassId");
+										if("$!form.condition.styleMiddleClassId"){
+											BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+                                        		addOptions("styleOrnaClassId", data, null, null, true, true, "$!form.condition.styleOrnaClassId");
+												if("$!form.condition.styleOrnaClassId"){
+													BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+                                                		addOptions("styleId", data, null, null, true, true, "$!form.condition.styleId");
+                                                	});
+												}
+                                        	});
+										}
+                                	});
+								}
+                        	});
+						}
+                	});
+				}
+        	});
+		}
+	});
+}
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+	
+	DictDwr.getDictsForSlt("gradelevelname", function(data){
+		addOptions("diagrade", data, null, null, true, true, "$!{form.condition.diagrade}");
+	});
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("maincolorgradeid", data, null, null, true, true, "$!{form.condition.maincolorgradeid}");
+	});
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("cleanid", data, null, null, true, true, "$!{form.condition.cleanid}");
+	});
+	DictDwr.getDictsForSlt("diashape", function(data){
+		addOptions("shapeid", data, null, null, true, true, "$!{form.condition.shapeid}");
+	});
+	
+	BdCommonDwr.getAllStyleTheme(function(data){
+		addOptions('themeid', data, null, null, true, true, "$!form.condition.themeid");
+	});
+	
+	newCalendar();	
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+//选择款式树
+function showStyleWindow(){
+	printWin = selectStyle(function(id,name){}, null, null, false, null, "loadAllInivStyle",null);
+}
+//选择款式后回调 款式ID
+function loadSelectStyleData(styleId,styleName){ 
+    jQuery("#styleId").empty()
+	jQuery("#styleId").prepend("<option value='"+styleId+"'>"+styleName+"</option>")
+	jQuery("#sid").val(styleId);
+}
+var printWin = null;
+function closePrintWin(){
+	if(printWin!=null)
+		printWin.close();
+}
+</script>

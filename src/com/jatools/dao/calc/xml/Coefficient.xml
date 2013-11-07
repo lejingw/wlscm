@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Coefficient">
+	<typeAlias alias="Coefficient" type="com.jatools.vo.calc.Coefficient"/>
+	<resultMap class="Coefficient" id="result">
+		<result property="id" column="id"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="qualityId" column="QUALITY_ID"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		<result property="styleStandard" column="STYLE_STANDARD"/>
+		<result property="startWeight" column="START_WEIGHT"/>
+		<result property="endWeight" column="END_WEIGHT"/>
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<sql id="Coefficient.Columns.all">
+		id,item_class_id,quality_id,coefficient,style_standard,start_weight,end_weight,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<sql id="Coefficient.Columns.allM">
+		id,item_class_id,quality_id,max(coefficient),style_standard,start_weight,end_weight,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="Coefficient.getCoefficientAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="Coefficient.Columns.all"/> from jat_calc_coefficient a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+		 	 order by a.item_class_id , a.quality_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="Coefficient.getCoefficientToalCount" resultClass="int">
+		select count(1) from jat_calc_coefficient a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+	</select>
+	<!-- findById -->
+	<select id="Coefficient.getCoefficientById" resultClass="Coefficient" parameterClass="string" resultMap="result">
+		select <include refid="Coefficient.Columns.all"/> from jat_calc_coefficient a where a.id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="Coefficient.saveCoefficient" parameterClass="Coefficient">
+		<selectKey keyProperty="id" type="pre">
+			select jat_calc_coefficient_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_coefficient(
+			id,ITEM_CLASS_ID,QUALITY_ID,COEFFICIENT,STYLE_STANDARD,START_WEIGHT,END_WEIGHT,CREATEDATE,CREATEUSERID,UPDATEDATE,UPDATEUSERID)
+			values(#id#,#itemClassId#,#qualityId#,#coefficient#,#styleStandard#,#startWeight#,
+			#endWeight#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="Coefficient.updateCoefficient" parameterClass="Coefficient">
+		update jat_calc_coefficient a set 
+			a.ITEM_CLASS_ID = #itemClassId#,
+			a.QUALITY_ID = #qualityId#,
+			a.COEFFICIENT = #coefficient#,
+			a.STYLE_STANDARD = #styleStandard#,
+			a.START_WEIGHT = #startWeight#,
+			a.END_WEIGHT = #endWeight#,
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="Coefficient.deleteCoefficient" parameterClass="string">
+		delete jat_calc_coefficient a where a.id = #value#
+	</delete>
+	<!-- findById -->
+	<select id="Coefficient.getCoefficient" resultClass="com.jatools.vo.calc.Coefficient" parameterClass="Coefficient">
+		select max(a.coefficient) "coefficient" from jat_calc_coefficient a where 
+		a.ITEM_CLASS_ID = #itemClassId# and
+			a.QUALITY_ID = #qualityId# 
+			<isEqual prepend="and" property="type" compareValue="1">
+				<![CDATA[a.START_WEIGHT <= #startWeight# and a.END_WEIGHT > #startWeight# ]]>
+			</isEqual>
+			<isEqual prepend="and" property="type" compareValue="2">
+				<![CDATA[a.START_WEIGHT < #startWeight# and a.END_WEIGHT > #startWeight# ]]>
+			</isEqual>
+			<isNotEmpty prepend="and" property="id"> a.id!=#id# </isNotEmpty>
+			<isNotEqual prepend="and" property="styleStandard" compareValue="-1"> 1=1 
+				<isEqual prepend="and" property="itemClassId" compareValue="172"> 1=1 
+					<isNotEmpty prepend="and"  property="styleStandard"> a.style_standard=#styleStandard# </isNotEmpty>
+					<isEmpty prepend="and"  property="styleStandard"> a.style_standard is null </isEmpty>
+				</isEqual>
+				<isEqual prepend="and" property="itemClassId" compareValue="159"> 1=1 
+					<isNotEmpty prepend="and"  property="styleStandard"> a.style_standard=#styleStandard# </isNotEmpty>
+					<isEmpty prepend="and"  property="styleStandard"> a.style_standard is null </isEmpty>
+				</isEqual>
+			</isNotEqual>
+	</select>
+</sqlMap>

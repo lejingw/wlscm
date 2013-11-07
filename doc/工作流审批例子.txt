@@ -1,0 +1,14 @@
+工作流审批
+1、审批单据vo要实现com.jatools.common.intf.ReviewBill接口(如：com.jatools.vo.stock.ProcPackageHead)
+	获取单据编码、单据id、单据编号、页面url、dao在spring配置文件中的id
+
+2、在单据对应的mamager中注入com.jatools.ws.remote.WorkflowService（如：com.jatools.manager.stock.impl.ProcPackageHeadManagerImpl）
+
+3、在审核方法中调用WorkflowService的enterReview方法（如：com.jatools.manager.stock.impl.ProcPackageHeadManagerImpl 第294行）
+
+4、将单据对应的dao实现com.jatools.common.intf.ReviewActionIntf接口（如：com.jatools.dao.stock.impl.ProcPackageHeadDaoImpl）
+
+5、在单据信息展示页面，页面加载完成时调用checkReview()方法（在common.js中配置）
+   单据审批时，会展现单据信息，会在url上添加reviewflag=1参数
+
+6、在系统管理模块-》单据审批-》中进行审批

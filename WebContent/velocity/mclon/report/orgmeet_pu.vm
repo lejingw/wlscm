@@ -1,0 +1,136 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+		<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【推式下单门店满足率查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08053801','1')>
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08053801','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>到货结束时间起</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="">
+                <input type='hidden' id="Finds" name='Finds' value="0">
+			</td>
+				<td class='body1'>到货结束时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+			<td class='body1'>周期类型</td>
+			<td class='body2'>
+				<select id="CycleTypeId" name='CycleTypeId'  value="" >$StringUtil.emptyOption()</select></td>
+		</tr>
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+				<th>下单日期</th>
+				<th>最后到货日期</th>
+				<th>下单数量</th>
+				<th>到货数量</th>
+				<th>满足率</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+				<td>$!map.DEMAND_DATE</td>
+				<td>$!map.ORDER_END_DATE</td>
+				<td>$!map.DEMAND_NUMS</td>
+				<td>$!map.GET_NUMS</td>
+				<td>$!map.MEETS</td>
+			</tr>
+		#end
+			
+		#foreach($map in $form.listTotal)
+			<tr>
+				<td>总计</td>
+				<td></td>
+                <td>$!map.DEMAND_NUMS</td>
+                <td>$!map.GET_NUMS</td>
+				<td>$!map.TOTALMEETS</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+function setnull(){
+}
+
+function setValues(){
+    altRowCSS("tbl");
+	jQuery("#CycleTypeId").val("$!form.condition.CycleTypeId");
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+	
+}
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+	
+	BdCommonDwr.getAllCycleTypeForSlt(function(data){
+		addOptions('CycleTypeId', data, null, null, true, true, "$!form.condition.CycleTypeId");
+	});
+	newCalendar();
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

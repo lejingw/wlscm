@@ -1,0 +1,116 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/UnsaleOrnaDwr.js?t=201204011123.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>滞销商品规则#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08012601','1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08012601','2')/>
+				<input type='button' value='查询' class='btn' id='btnSearch2' $RightUtil.able($session, '08012601','3')/>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08012601','4')/>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+    <table class='list' style="width:1700px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall' /></th>
+                <th style='width:90px;'>大类</th>
+				<th style='width:70px;'>金额始</th>
+        		<th style='width:70px;'>金额止</th>
+        		<th style='width:200px;'>流转周期(天)--在店库龄</th>
+				<th style='width:200px;'>淘汰款式周期(天)--在司库龄</th>
+				<th style='width:200px;'>非淘汰款式周期(天)--在司库龄</th>
+				<th style='width:120px;'>备注</th>
+        		<th style='width:120px;'>创建时间</th>
+        		<th style='width:90px;'>创建人</th>
+        		<th style='width:120px;'>修改时间</th>
+        		<th style='width:90px;'>修改人</th>
+				<th style='width:60px;'>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td><a href="javascript:toEditPage($!{map.unsaleId});">$!BdCommon.getItemClassDesc($!map.itemClassId)</a></td>
+				<td>$!map.moneyStr</td>
+				<td>$!map.moneyEnd</td>
+				<td>$!map.flowCycle</td>
+				<td>$!map.unfashCycle</td>
+				<td>$!map.unfashUncycle</td>
+				<td><input type='text' readonly class='none' value="$!map.memo" style='width:120px;'></td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!DictUtil.getValue('status', $!map.status)
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="unsaleId" value="$!map.unsaleId"/>
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	var dw = jQuery(document).width();
+	if(dw > 1200){
+		jQuery(".list").css("width", dw+"px");
+	}
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+    	window.location = "unsaleOrna.vm?user_action=toEdit&unsaleId=" + $n("unsaleId")[index].value;
+    });
+	initQuery2("DWGZ01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "unsaleOrna.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deleteRow);
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+});
+
+function deleteRow(){
+	var idxs = getSelectIndexs("chk");
+	if(idxs.length <= 0){
+		alert("尚未选择要删除的行");
+	} else {
+		confirm("确定删除?", function(){
+			showLayer(true);
+			var unsaleIds = "";
+			for(var i=0; i<idxs.length;i++){
+				if(unsaleIds) unsaleIds = unsaleIds + ";" + $n("unsaleId")[idxs[i]].value;
+				else unsaleIds = $n("unsaleId")[idxs[i]].value;
+			}
+			UnsaleOrnaDwr.deleteUnsaleOrna(unsaleIds, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	});
+	}
+}
+function toEditPage(unsaleId){
+	window.location = "unsaleOrna.vm?user_action=toEdit&unsaleId=" + unsaleId;
+}
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

@@ -1,0 +1,340 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/SpecialDiamDwr.js",
+"$StringUtil.getContextPath()/script/mclon/ajaxfileupload.js"])
+#set($modelCode='0803011301')
+#set($queryCode='10')
+<form id="frm" action="specialDiam.vm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='添加' class='btn' onclick="addBill()" $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='修改' class='btn' onclick="editBill()" id='btnEdit' $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='删除' class='btn' onclick="deleteBill()" id="btnDelete" $RightUtil.able($session, $modelCode,'3')>
+				<input type='button' value='导入Excel' class='btn' id='' onclick="showImportWin()" $RightUtil.able($session, $modelCode,'4')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $modelCode,'5')>
+				<input type='button' value='查询' class='btn' id="btnQueryShow" $RightUtil.able($session, $modelCode,'6')>
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+    <table class='list' style='width:1200px;'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width='80px'>状态</th>
+                <th width='120px'>大类</th>
+                <th width='120px'>小类</th>
+                <th width='120px'>分析范围</th>
+                <th width='90px'>基础价起始</th>
+                <th width='90px'>基础价截止</th>
+                <th width='90px'>商场店价格</th>
+        		<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{item.billId}'/>
+						<input type='hidden' name='hd_itemClassId' value='$!item.itemClassId'/>
+						<input type='hidden' name='hd_ornaClassId' value='$!item.ornaClassId'/>
+						<input type='hidden' name='hd_analysisId' value='$!item.analysisId'/>
+						<input type='hidden' name='hd_startBasicPrice' value='$!item.startBasicPrice'/>
+						<input type='hidden' name='hd_endBasicPrice' value='$!item.endBasicPrice'/>
+						<input type='hidden' name='hd_storePrice' value='$!item.storePrice'/>
+					$velocityCounter
+				</td>
+				<td>$!DictUtil.getValue('status', $!item.status)</td>
+				<td><a href='javascript:showEidtDialog($velocityCounter - 1);'>$!BdCommon.getItemClassDesc($!item.itemClassId)</a></td>
+				<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+				<td>$!item.analysisName</td>
+				<td>$!item.startBasicPrice</td>
+				<td>$!item.endBasicPrice</td>
+				<td>$!item.storePrice</td>
+				<td>$!item.createDate</td>
+				<td>$!BdCommon.getUserName($!item.createId)</td>
+				<td>$!item.updateDate</td>
+				<td>$!BdCommon.getUserName($!item.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<div id='gradeDiv' style="display:none;">
+	<form id='frm2'>
+    	<input type='hidden' id='billId'>
+        <table class="control">
+        	<tr>
+    			<td>
+    				<input type='button' value='保存' onclick="saveSpecialDiam()" $RightUtil.able($session, '0803011302','1')>
+    				<input type='button' value='保存并复制' onclick="saveSpecialDiamAndCopy()" $RightUtil.able($session, '0803011302','2')>
+    				<input type='button' value='取消' onclick="jQuery('#gradeDiv').dialog('close');">
+    			</td>
+    		</tr>
+        </table>
+		<table class='content'>
+			<tr>
+                <td class='body1'>大类</td>
+                <td class='body2'><select id='itemClassId' onchange="changeOrnaClassId()" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+                <td class='body1'>小类</td>
+                <td class='body2'><select id='ornaClassId' onchange="changeOrnaClass()" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+			</tr>
+			<tr>
+                <td class='body1'>分析范围</td>
+                <td class='body2'><select id='analysisId' dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select></td>
+			</tr>
+			<tr>
+                <td class='body1'>基础价起始</td>
+                <td class='body2'><input type='text' id='startBasicPrice' dataType="Money" msg="不能为空，且为金额类型"></td>
+                <td class='body1'>基础价截止</td>
+                <td class='body2'><input type='text' id='endBasicPrice' dataType="Money" msg="不能为空，且为金额类型"></td>
+			</tr>
+			<tr>
+                <td class='body1'>商场店价格</td>
+                <td class='body2'><input type='text' id='storePrice' dataType="Money" msg="不能为空，且为金额类型"></td>
+			</tr>
+        </table>
+	</form>
+</div>
+<div id="importExcelDiv" style="display:none;">
+	<form method="post">
+        <table class="control">
+        	<tr>
+    			<td>
+    				<input type='button' value='导入' onclick="ajaxFileUpload()" >
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+        	<tr>
+    			<td class='body1'>选择文件：</td>
+    			<td class='body2'>
+    				<input name="excel_file" type="file" id="excel_file" style="background:#eeeeee;font:normal 12px Tahoma;width:220px;"> 
+    			</td>
+    		</tr>
+            <tr><td colspan="2">
+    				<font style="color:red">
+    					注：请严格按照模板来导入，若没有模板点击
+    					<a href="/wlscm/velocity/mclon/move/template_specialDiam.xls">这里</a>
+    					下载模板。
+    		</td></tr>
+        </table>
+    </form>
+</div>
+
+<script>
+/**
+ * 改变大类
+ */
+function changeOrnaClassId(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+/**
+ *　改变小类
+ */
+function changeOrnaClass(){
+	//获取分析范围
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+	});
+}
+function addBill(){
+	selectOption('itemClassId', "");
+	selectOption('ornaClassId', "");
+	selectOption('analysisId', "");
+	jQuery("#startBasicPrice").val("")
+	jQuery("#endBasicPrice").val("")
+	jQuery("#storePrice").val("")
+	showGradeWin();
+}
+var refreshFlag = false;
+function showGradeWin(){
+	jQuery("#gradeDiv").dialog({
+			title:'特价钻石价格设置',
+			width:600, 
+			height:300,
+			modal:true,
+			zIndex:1,
+			close:function(){
+				if(refreshFlag){
+            		window.location = "specialDiam.vm";
+            	}else{
+                	jQuery('#gradeDiv').dialog('close');
+            	}
+			}
+		});
+}
+function showEidtDialog(index){
+	jQuery("#billId").val($n("chk")[index].value);
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, $n("hd_itemClassId")[index].value);
+		BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data2){
+    		addOptions("ornaClassId", data2, null, null, true, true, $n("hd_ornaClassId")[index].value);
+        	//获取分析范围
+        	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data3){
+        		addOptions("analysisId", data3, null, null, true, true,  $n("hd_analysisId")[index].value);
+			});
+    	});
+	});
+	jQuery("#startBasicPrice").val($n("hd_startBasicPrice")[index].value);
+	jQuery("#endBasicPrice").val($n("hd_endBasicPrice")[index].value);
+	jQuery("#storePrice").val($n("hd_storePrice")[index].value);
+	showGradeWin();
+}
+function editBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length != 1){
+		alert("请选择要修改的一条记录");
+		return ;
+	}
+	showEidtDialog(idxs[0]);
+}
+function deleteBill(){
+	var idxs = getSelectIndexs('chk');
+	if(idxs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	confirm("确定删除?", function(){
+		showLayer(true);
+		var billIdArr = [];
+		for(var i=0, j=idxs.length;i<j;i++){
+			billIdArr.push($n("chk")[idxs[i]].value);
+		}
+    	SpecialDiamDwr.deleteSpecialDiam(billIdArr, function(data){
+    		showLayer(false);
+    		alert(data?data:"删除成功", function(){
+    			if(!data){
+                	window.location = "specialDiam.vm";
+    			}
+    		});
+    	});
+	});
+}
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function getSpecialDiam(){
+	return {
+		"billId"			:jQuery("#billId").val(),
+		"itemClassId"		:jQuery("#itemClassId").val(),
+		"ornaClassId"		:jQuery("#ornaClassId").val(),
+		"analysisId"		:jQuery("#analysisId").val(),
+		"startBasicPrice"	:jQuery("#startBasicPrice").val(),
+		"endBasicPrice"		:jQuery("#endBasicPrice").val(),
+		"storePrice"		:jQuery("#storePrice").val()
+	};
+}
+function checkValid(){
+	if(parseFloat(jQuery("#startBasicPrice").val())>parseFloat(jQuery("#endBasicPrice").val())){
+    	alert("础价起始 不能大于 基础价截止");
+    	return false;
+	}
+	return true;
+}
+function saveSpecialDiam(){
+	if(!Validator.Validate($("frm2"),3))
+		return;
+	if(!checkValid())	return false;
+	confirm("确定保存?", function(){
+		showLayer(true);
+    	SpecialDiamDwr.saveOrUpdateSpecialDiam(getSpecialDiam(), function(data){
+    		showLayer(false);
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+                	window.location = "specialDiam.vm";
+    			}
+    		});
+    	});
+	});
+}
+function saveSpecialDiamAndCopy(){
+	if(!Validator.Validate($("frm2"),3))
+		return;
+	if(!checkValid())	return false;
+	confirm("确定保存?", function(){
+		showLayer(true);
+    	SpecialDiamDwr.saveOrUpdateSpecialDiam(getSpecialDiam(), function(data){
+    		showLayer(false);
+    		alert(data?data:"保存并复制成功", function(){
+    			if(!data){
+					jQuery("#billId").val("");
+					refreshFlag = true;//页面需要刷新
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+		showEidtDialog(index);
+	});
+	
+	initQuery2('${queryCode}', "frm", 'btnQueryShow');
+	resetWinSize();
+	
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+});
+function showImportWin(){
+	jQuery("#importExcelDiv").dialog({
+			title:'导入Excel',
+			width:400, 
+			height:150,
+			modal:true,
+			zIndex:1,
+			close:function(){
+				if(refreshFlag){
+            		window.location = "specialDiam.vm";
+            	}else{
+                	jQuery('#turnoverNumDiv').dialog('close');
+            	}
+			}
+		});
+}
+function ajaxFileUpload() {
+	if(isNull(jQuery("#excel_file").val())){
+		alert("请选择上传文件");
+		return ;
+	}
+	confirm("确定要上传？", function(){
+		//showLayer(true);
+		var url = 'specialDiam.vm?user_action=importExcel';
+		jQuery.ajaxFileUpload({
+			url : url, //需要链接到服务器地址
+			secureuri : false,
+			fileElementId : 'excel_file', //文件选择框的id属性
+			dataType : 'json', //服务器返回的格式，可以是json
+			success : function (data, status) {
+				//showLayer(false);
+				if(data.isSuccess === "true"){
+					var msg = "上传成功";
+					alert(msg, function(){
+						window.location = "specialDiam.vm";
+					});
+				} else {
+					alert(data.msg);
+				}
+			},
+			error : function (data, status, e) {
+				//showLayer(false);
+				alert("上传失败");
+			}
+		});
+	});
+}
+
+</script>

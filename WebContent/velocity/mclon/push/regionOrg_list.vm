@@ -1,0 +1,47 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/DisplayStandardDwr.js"])
+
+<form id="frm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="title">
+    	<tr><td>畅销款陈列组织类别</td></tr>
+    </table>
+	<!--
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' >
+			</td>
+		</tr>
+    </table>
+	-->
+	<div class="scroll">
+        <table class='list'>
+        	<thead>
+    			<tr>
+                    <th width='45px'><input type='checkbox' id='chkall'/></th>
+					<th width='120px'>区域名称</th>
+            		<th width='180px'>组织</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($item in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value='$!{item.headid}'/>
+						$velocityCounter
+					</td>
+    				<td>$!item.regionName</td>
+    				<td>$!item.orgName</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+	//	showEidtDialog(index);
+	});
+	resetWinSize();
+});
+</script>

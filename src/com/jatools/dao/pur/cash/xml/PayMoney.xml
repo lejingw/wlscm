@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PayMoney">
+	<typeAlias alias="PayMoney" type="com.jatools.vo.pur.cash.PayMoney" />
+	
+	<resultMap class="PayMoney" id="PayMoney.result">
+		<result property = "payId"    column = "pay_id"     />
+		<result property = "billNo"     column = "bill_no"      />
+		<result property = "billDate"  column = "bill_date"  />
+		<result property = "orgId"   column = "org_id"   />
+		<result property = "voderId"   column = "voder_id"   />
+		<result property = "payMoney"   column = "pay_money"   />
+		<result property = "lessMoney"   column = "less_money"   />
+		<result property = "status"   column = "status"   />
+		<result property = "memo"   column = "memo"   />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId"   column = "create_id"   />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId"   column = "update_id"   />
+		
+	</resultMap>
+	
+	<sql id="PayMoney_columns">
+		pay_id, bill_no, bill_date, org_id, voder_id, pay_money, less_money, status, memo, create_date, create_id, update_date, update_id
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="PayMoney.getPayMoneyPageData" resultMap="PayMoney.result" parameterClass="map">
+		select <include refid="PayMoney_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="PayMoney_columns"/>  from jat_cash_pay_money a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.bill_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="PayMoney.getPayMoneyTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_pay_money a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="PayMoney.savePayMoney" parameterClass="PayMoney">
+    	<selectKey resultClass="string" keyProperty="payId" type="pre">
+			select JAT_CASH_PAY_MONEY_SEQ.nextval as "payId" from dual
+		</selectKey>
+		insert into jat_cash_pay_money(<include refid="PayMoney_columns"/>)
+		 values(
+		 	#payId#, #billNo#, #billDate#, #orgId#, #voderId#, #payMoney#, #lessMoney#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    
+    <select id="PayMoney.getPayMoney" parameterClass="string" resultMap="PayMoney.result">
+		select <include refid="PayMoney_columns"/> from jat_cash_pay_money a 
+		where 1=1
+			and a.pay_id = #value#
+	</select>
+	
+	<update id="PayMoney.updatePayMoney" parameterClass="PayMoney">
+		update jat_cash_pay_money a set 
+			a.bill_date   = #billDate#,
+			a.org_id      = #orgId#,
+			a.voder_id    = #voderId#,
+			a.pay_money   = #payMoney#,
+			a.less_money   = #lessMoney#,
+			a.status      = #status#,
+			a.memo        = #memo#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#
+		where a.pay_id = #payId# 
+	</update>
+	
+	<delete id="PayMoney.deletePayMoney" parameterClass="string">
+		delete from jat_cash_pay_money a where a.pay_id = #value# 
+	</delete>
+	
+	<update id="PayMoney.updatePayMoneyStatus" parameterClass="map">
+		update jat_cash_pay_money a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.pay_id = #payId# 
+	</update>
+	
+	
+	<select id="PayMoney.getLessMoney" resultClass="double" parameterClass="string">
+		select nvl(max(LOSS_MONEY), 0) from jat_cash_money_account t
+        where t.voder_id = #vendorId#
+           	and exists (
+           		select voder_id from (
+           					select voder_id, max(mr_id) mr_id
+                          	from jat_cash_money_account
+                         	group by voder_id
+                 ) tt
+                 where t.mr_id = tt.mr_id  and t.voder_id=tt.voder_id
+            )
+	</select>
+	
+	<sql id="PayMoney.getNewLossMoney">
+		(
+			select nvl(max(LOSS_MONEY), 0) - a.PAY_MONEY
+          	from jat_cash_money_account t
+         	where t.voder_id = a.VODER_ID
+           		and exists (select voder_id
+                  from (select voder_id, max(mr_id) mr_id
+                          from jat_cash_money_account
+                         group by voder_id) tt
+                 where t.mr_id = tt.mr_id  and t.voder_id=tt.voder_id)
+       ) as LOSS_MONEY
+	</sql>
+	
+	<insert id="PayMoney.insertMoneyAccountFromPayMoney" parameterClass="map">
+		insert into jat_cash_money_account (
+			MR_ID, 
+			BILL_NO, BILL_TYPE, BILL_DATE, ORG_ID, DOTYPE, 
+			VODER_ID, MONEYS, STATUS, MEMO, 
+			CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID,
+			loss_money
+		) select 
+			jat_cash_money_account_seq.nextval,
+			a.bill_no as BILL_NO, 'FK', a.bill_date as BILL_DATE, a.org_id as ORG_ID, -1,
+			a.VODER_ID as VODER_ID, a.PAY_MONEY as MONEYS, 2, null,
+			#createDate# , #userId#, #updateDate#, #userId#,
+			<include refid="PayMoney.getNewLossMoney"/> 
+		from jat_cash_pay_money a
+		where 1=1
+			and a.pay_id = #payId#
+	</insert>
+	
+	<sql id="PayMoney.getNewLossMoney2">
+		(
+			select nvl(max(LOSS_MONEY), 0) + a.PAY_MONEY
+          	from jat_cash_money_account t
+         	where t.voder_id = a.VODER_ID
+           		and exists (select voder_id
+                  from (select voder_id, max(mr_id) mr_id
+                          from jat_cash_money_account
+                         group by voder_id) tt
+                 where t.mr_id = tt.mr_id  and t.voder_id=tt.voder_id)
+       ) as LOSS_MONEY
+	</sql>
+	
+	<insert id="PayMoney.cancelMoneyAccountFromPayMoney" parameterClass="map">
+		insert into jat_cash_money_account (
+			MR_ID, 
+			BILL_NO, BILL_TYPE, BILL_DATE, ORG_ID, DOTYPE, 
+			VODER_ID, MONEYS, STATUS, MEMO, 
+			CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID,
+			loss_money
+		) select 
+			jat_cash_money_account_seq.nextval,
+			a.bill_no as BILL_NO, 'FK', a.bill_date as BILL_DATE, a.org_id as ORG_ID, -1,
+			a.VODER_ID as VODER_ID, a.PAY_MONEY as MONEYS, 2, null,
+			#createDate# , #userId#, #updateDate#, #userId#,
+			<include refid="PayMoney.getNewLossMoney2"/> 
+		from jat_cash_pay_money a
+		where 1=1
+			and a.pay_id = #payId#
+	</insert>
+</sqlMap>

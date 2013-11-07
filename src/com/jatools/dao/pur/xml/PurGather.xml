@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PurGather">
+	<!-- 获取减库生成的采购总单行数据 -->
+	<select id="PurGather.getSubPurGatherLineData" resultClass="com.jatools.vo.pur.PurGatherLine" parameterClass="map">
+		<![CDATA[select *
+		  from (select a.headquarter_gather_line_id as "gatherLineId",
+		               a.item_class_id as "itemClassId",
+		               a.orna_class_id as "ornaClassId",
+		               a.analysis_arange_id as "analysisId",
+		               a.style_item_class_id as "styleItemClassId",
+		               a.style_middle_class_id as "styleMiddleClassId",
+		               a.style_orna_class_id as "styleOrnaClassId",
+		               a.styleid as "styleId",
+		               a.unitid as "unitId",
+		               a.size_id as "sizeId",
+		               a.quality_id as "qualityId",
+		               a.bracketcolor_id as "bracketcolorId",
+		               a.diam_color_grade_basic_id as "colorGradeId",
+		               a.clean_basic_id as "cleanId",
+		               cgg.grade_id as "colorGradeGradeId",
+		               cg.grade_id as "cleanGradeId",
+		               case when 1 = #enableOrderStart# then a.demand_quantity when a.demand_quantity > nvl(sa.startorder, 1) then a.demand_quantity else nvl(sa.startorder, 1) end -
+		               (select count(1)
+		                  from jat_pl_dispatch_subtemp b
+		                 where a.headquarter_gather_id = b.gather_head_id
+		                   and a.item_class_id = b.item_class_id
+		                   and a.orna_class_id = b.orna_class_id
+		                   and decode(an.analyzeunit_name, 'JZ', b.all_qty, 'CT', b.main_weight, 'XJ', b.basic_price, -1) >=
+		                       decode(ans.analysis_arange_id, null, 1, ans.startanalysiserror)
+		                   and decode(an.analyzeunit_name, 'JZ', b.all_qty, 'CT', b.main_weight, 'XJ', b.basic_price, -1) <
+		                   	   decode(ans.analysis_arange_id, null, -1, ans.endanalysiserror)
+		                   and a.styleid = b.style_id
+		                   and (nvl(a.size_id, 0) = nvl(b.size_id, 0) or nvl(a.size_id, 0) = 0 or nvl(b.size_id, 0) = 0)
+		                   and nvl(a.quality_id, 0) = nvl(b.quality_id, 0)
+		                   and nvl(a.bracketcolor_id, 0) = nvl(b.bracketcolor_id, 0)
+		                   and (nvl(a.diam_color_grade_basic_id, 0) = 0 or exists
+		                        (select 1
+		                           from jas_pl_color_match_rule h
+		                          where h.diam_color_grade_basic_id =
+		                                a.diam_color_grade_basic_id
+		                            and h.match_color_grade_basic_id = b.color_grade_id))
+		                   and (nvl(a.clean_basic_id, 0) = 0 or exists
+		                        (select 1
+		                           from jas_pl_clean_match_rule i
+		                          where i.clean_basic_id = a.clean_basic_id
+		                            and nvl(i.analysis_arange_id, a.analysis_arange_id) =
+		                                a.analysis_arange_id
+		                            and i.match_clean_basic_id = b.clean_id))
+		                   and exists (select 1
+		                          from ic_mater_active c
+		                         where b.orna_code = c.orna_code
+		                           and c.state = 900
+		                           and c.stock_id = 1
+		                           and nvl(c.is_material, 0) = 0)
+		                   and b.src_bill_code = 'HQ') as "numOrder"
+		          from jas_pl_headquarter_gather_line a
+		          left join jat_basic_color_grade_grade cgg
+		            on cgg.color_grade_id = a.diam_color_grade_basic_id
+		          left join jat_basic_clean_grade cg
+		            on cg.clean_id = a.clean_basic_id
+		          left join jas_bd_style_arange sa
+		            on sa.style_id = a.styleid
+		           and sa.analysis_arange_id = a.analysis_arange_id
+		           and sa.archiveflag = '0'
+		          left join jas_bd_analysis_unit an
+		            on a.item_class_id = an.item_class_id
+		           and a.orna_class_id = an.orna_class_id
+		           and an.archiveflag = '0'
+		          left join jas_bd_analysis_arange ans
+		            on a.analysis_arange_id = ans.analysis_arange_id
+		         where a.headquarter_gather_id = #gheadid#
+		           and a.line_state = '0') aa
+		 where aa."numOrder" > 0]]>
+	</select>
+	<!-- 获取不减库生成的采购总单行数据 -->
+	<select id="PurGather.getUnsubPurGatherLineData" resultClass="com.jatools.vo.pur.PurGatherLine" parameterClass="map">
+		<![CDATA[select a.headquarter_gather_line_id as "gatherLineId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.analysis_arange_id as "analysisId", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.styleid as "styleId", a.unitid as "unitId", a.size_id as "sizeId", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.diam_color_grade_basic_id as "colorGradeId", a.clean_basic_id as "cleanId", cgg.grade_id as "colorGradeGradeId", cg.grade_id as "cleanGradeId", case when 1 = #enableOrderStart# then a.demand_quantity when a.demand_quantity > nvl(sa.startorder, 1) then a.demand_quantity else nvl(sa.startorder, 1) end as "numOrder"
+		from jas_pl_headquarter_gather_line a left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = a.diam_color_grade_basic_id
+			left join jat_basic_clean_grade cg on cg.clean_id = a.clean_basic_id
+            left join jas_bd_style_arange sa on sa.style_id = a.styleid and sa.analysis_arange_id = a.analysis_arange_id and sa.archiveflag = '0'
+		where a.headquarter_gather_id = #gheadid# and a.line_state = '0'
+		]]>
+	</select>
+	<!-- 根据总部总单id获取生成采购总单的数据 -->
+	<select id="PurGather.getPurGatherHeadByGatherHeadId" resultClass="com.jatools.vo.pur.PurGatherHead" parameterClass="string">
+		select a.headquarter_gather_head_id as "gatherHeadId", a.order_type as "orderType", a.order_kind as "orderKind", a.REGION_ID as "regionId", a.order_calender_id as "orderCalenderId", a.order_end_date as "orderEndDate", a.org_id as "orgId" from jas_pl_headquarter_gather_head a where a.headquarter_gather_head_id = #value#
+	</select>
+	<!-- 保存采购总单头数据 -->
+	<insert id="PurGather.savePurGatherHead" parameterClass="com.jatools.vo.pur.PurGatherHead">
+		<selectKey keyProperty="headid" type="pre" resultClass="string">
+    		select jat_pur_gather_head_seq.nextval as headid from dual
+    	</selectKey>
+		insert into jat_pur_gather_head (headid, billno, gather_head_id, dodate, org_id, order_type, order_kind, region_id, order_calender_id, order_end_date,
+				status, memo, create_date, create_id, update_date, update_id, src_bill_code)
+		values (#headid#, #billno#, #gatherHeadId#, #dodate#, #orgId#, #orderType#, #orderKind#, #regionId#, #orderCalenderId#, #orderEndDate#,
+				#status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #srcBillCode#)
+	</insert>
+	<!-- 保存采购总单行数据 -->
+	<insert id="PurGather.savePurGatherLine" parameterClass="com.jatools.vo.pur.PurGatherLine">
+		<selectKey keyProperty="lineid" type="pre" resultClass="string">
+    		select jat_pur_gather_line_seq.nextval as headid from dual
+    	</selectKey>
+		insert into jat_pur_gather_line (lineid, headid, gather_line_id, item_class_id, orna_class_id, analysis_id, style_item_class_id, style_middle_class_id, style_orna_class_id,
+			style_id, unit_id, size_id, quality_id, bracketcolor_id, color_grade_id, clean_id, num_order, status, memo, create_date, create_id, update_date, update_id, color_grade_grade_id, clean_grade_id)
+		values(#lineid#, #headid#, #gatherLineId#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#, #styleMiddleClassId#, #styleOrnaClassId#,
+			#styleId#, #unitId#, #sizeId#, #qualityId#, #bracketcolorId#, #colorGradeId#, #cleanId#, #numOrder#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #colorGradeGradeId#, #cleanGradeId#)
+	</insert>
+	<sql id="PurGather.getPurGatherPageDataCD">
+		<isNotEmpty property="billno">and a.billno like '%$billno$%'</isNotEmpty>
+		<isNotEmpty property="cycleTypeId">and c.CYCLE_TYPE_ID = #cycleTypeId#</isNotEmpty>
+		<isNotEmpty property="orderType">and a.order_type = #orderType#</isNotEmpty>
+		<isNotEmpty property="orderKind">and a.order_kind = #orderKind#</isNotEmpty>
+		<isNotEmpty property="status">and a.status = #status#</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="PurGather.getPurGatherPageData" resultClass="com.jatools.vo.pur.PurGatherHead" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid as "headid",
+			       a.billno as "billno",
+			       a.gather_head_id as "gatherHeadId",
+                   (
+                        case when 'PU'=a.src_bill_code then
+                            (select sh.bill_no from jat_pl_gather_set_head sh where sh.headid=a.gather_head_id )
+                        when 'HQ' = a.src_bill_code then
+                            (select gh.HEADQUARTER_GATHER_NO  from jas_pl_headquarter_gather_head gh where gh.HEADQUARTER_GATHER_HEAD_ID = a.gather_head_id)
+                        else null
+                        end
+                    ) as "gatherHeadNo",
+			       b.region_name as "regionName",
+                   case when a.ORDER_TYPE = 4 then t.CYCLE_TYPE_CODE else g.cycle_type_code end as "cycleTypeName",
+			       case
+			         when 'PU' = a.src_bill_code then
+			          (select j.article_type_ids
+			             from jat_pl_gather_set_head j
+			            where j.headid = a.gather_head_id)
+			         when 'HQ' = a.src_bill_code then
+			          decode(g.order_calender_id,
+			                 null,
+			                 to_char((select h.article_type_id
+			                           from jas_pl_headquarter_gather_head h
+			                          where a.gather_head_id =
+			                                h.headquarter_gather_head_id)),
+			                 (select wm_concat(distinct i.article_type_id)
+			                    from jas_pl_calender_articletype i
+			                   where i.order_calender_id = g.order_calender_id))
+			         else
+			          null
+			       end as "articleTypeIds",
+			       a.order_type as "orderType",
+			       a.order_kind as "orderKind",
+			       a.create_id as "createId",
+			       a.create_date as "createDate",
+                    a.update_id as "updateId",
+                    a.update_date as "updateDate",
+			       a.status as "status",
+			       nvl2(j.cnt,1,0) as "usedFlag",
+			       f.sum_num as "sumNum"
+			  from jat_pur_gather_head a,
+			       jas_pl_region b,
+			       (select c.order_calender_id, c.cycle_type_id, d.cycle_type_code
+			          from jas_pl_order_calender c, jas_pl_cycle_type d
+			         where c.cycle_type_id = d.cycle_type_id) g,
+			       (select e.headid, sum(e.num_order) as sum_num
+			          from jat_pur_gather_line e
+			         group by e.headid) f,
+			       (select i.gather_head_id, count(1) cnt
+			          from jat_pur_purchase_line i
+			         where i.used_flag = 1
+			         group by i.gather_head_id) j,
+                    jas_pl_cycle_type t
+			 where a.region_id = b.region_id
+			   and a.order_calender_id = g.order_calender_id(+)
+			   and a.headid = f.headid(+)
+			   and a.headid = j.gather_head_id(+)
+               and a.order_calender_id = t.CYCLE_TYPE_ID(+)
+			<include refid="PurGather.getPurGatherPageDataCD"/>
+			 order by a.headid desc
+	    ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PurGather.getPurGatherTotalCount" resultClass="int">
+			select count(1) from jat_pur_gather_head a,
+			       jas_pl_region b,
+			       (select c.order_calender_id, c.cycle_type_id, d.cycle_type_code
+			          from jas_pl_order_calender c, jas_pl_cycle_type d
+			         where c.cycle_type_id = d.cycle_type_id) g,
+			       (select e.headid, sum(e.num_order) as sum_num
+			          from jat_pur_gather_line e
+			         group by e.headid) f,
+			       (select i.gather_head_id, count(1) cnt
+			          from jat_pur_purchase_line i
+			         where i.used_flag = 1
+			         group by i.gather_head_id) j,
+                   jas_pl_cycle_type t
+			 where a.region_id = b.region_id
+			   and a.order_calender_id = g.order_calender_id(+)
+			   and a.headid = f.headid(+)
+			   and a.headid = j.gather_head_id(+)
+               and a.order_calender_id = t.CYCLE_TYPE_ID(+)
+			<include refid="PurGather.getPurGatherPageDataCD"/>
+    </select>
+	<!-- 根据id获取对象 -->
+    <select id="PurGather.getPurGatherHead" resultClass="com.jatools.vo.pur.PurGatherHead" parameterClass="string">
+		select a.headid as "headid",
+		       a.billno as "billno",
+		       b.region_name as "regionName",
+		       e.cycle_type_code as "cycleTypeName",
+		       a.order_type as "orderType",
+		       a.order_kind as "orderKind",
+		       a.order_calender_id as "orderCalenderId",
+		       a.order_end_date as "orderEndDate",
+		       a.org_id as "orgId",
+		       a.create_id as "createId",
+		       a.create_date as "createDate",
+		       a.status as "status",
+		       a.gather_head_id as "gatherHeadId",
+		       (select sum(e.num_order)
+		          from jat_pur_gather_line e
+		         where a.headid = e.headid) as "sumNum",
+		       a.src_bill_code as "srcBillCode"
+		  from jat_pur_gather_head a,
+		       jas_pl_region b,
+		       (select c.order_calender_id, c.cycle_type_id, d.cycle_type_code
+		          from jas_pl_order_calender c, jas_pl_cycle_type d
+		         where c.cycle_type_id = d.cycle_type_id) e
+		 where a.region_id = b.region_id
+		   and a.order_calender_id = e.order_calender_id(+)
+		   and a.headid = #value#
+    </select>
+    
+    <select id="PurGather.getPurGatherLinePageData" resultClass="com.jatools.vo.pur.PurGatherLine" parameterClass="map">
+    	select * from (select rownum rownum_ , AA.* from (
+    		select * from (
+		    	select a.lineid as "lineid", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a2.summarydescription as "analysisName", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.style_id as "styleId", a3.stylename as "styleName", a3.isbiggraph as "bigGraph", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.unit_id as "unitId", a4.size_name as "sizeName", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.color_grade_grade_id as "colorGradeGradeId", a.clean_grade_id as "cleanGradeId", a.num_order as "numOrder",
+		    	(select nvl(sum(b.num_order), 0) from jat_pur_purchase_line b where b.gather_line_id = a.lineid) as "numDispatch"
+	            from jat_pur_gather_line a left join jas_bd_analysis_arange a2 on a2.analysis_arange_id = a.analysis_id left join jas_bd_style a3 on a3.styleid = a.style_id left join jas_bd_size a4 on a4.size_id = a.size_id
+				where a.headid = #headid#
+					<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+					<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+					<isNotEmpty property="analysisId" prepend="and"> a.analysis_id = #analysisId#</isNotEmpty>
+					<isNotEmpty property="styleItemClassId" prepend="and"> a.style_item_class_id = #styleItemClassId#</isNotEmpty>
+					<isNotEmpty property="styleMiddleClassId" prepend="and"> a.style_middle_class_id = #styleMiddleClassId#</isNotEmpty>
+					<isNotEmpty property="styleOrnaClassId" prepend="and"> a.style_orna_class_id = #styleOrnaClassId#</isNotEmpty>
+					<isNotEmpty property="styleId" prepend="and"> a.style_id = #styleId#</isNotEmpty>
+				order by a.item_class_id, a.orna_class_id, a.analysis_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id,
+					a.style_id, a.color_grade_id, a.clean_id, a.quality_id, a.bracketcolor_id, a.size_id,a.unit_id
+			) c 
+			<isEqual property="dispatchOverFlag" compareValue="1" prepend="where">
+				c."numOrder" > c."numDispatch"
+			</isEqual>
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+    <select id="PurGather.getPurGatherLineTotalCount" resultClass="int" parameterClass="map">
+    		select count(1) from (
+		    	select a.num_order as "numOrder", (select nvl(sum(b.num_order), 0) from jat_pur_purchase_line b where b.gather_line_id = a.lineid) as "numDispatch"
+	            from jat_pur_gather_line a left join jas_bd_analysis_arange a2 on a2.analysis_arange_id = a.analysis_id left join jas_bd_style a3 on a3.styleid = a.style_id left join jas_bd_size a4 on a4.size_id = a.size_id
+				where a.headid = #headid#
+					<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+					<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+					<isNotEmpty property="analysisId" prepend="and"> a.analysis_id = #analysisId#</isNotEmpty>
+					<isNotEmpty property="styleItemClassId" prepend="and"> a.style_item_class_id = #styleItemClassId#</isNotEmpty>
+					<isNotEmpty property="styleMiddleClassId" prepend="and"> a.style_middle_class_id = #styleMiddleClassId#</isNotEmpty>
+					<isNotEmpty property="styleOrnaClassId" prepend="and"> a.style_orna_class_id = #styleOrnaClassId#</isNotEmpty>
+					<isNotEmpty property="styleId" prepend="and"> a.style_id = #styleId#</isNotEmpty>
+				order by a.item_class_id, a.orna_class_id, a.analysis_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id,
+					a.style_id, a.color_grade_id, a.clean_id, a.quality_id, a.bracketcolor_id, a.size_id,a.unit_id
+			) c 
+			<isEqual property="dispatchOverFlag" compareValue="1" prepend="where">
+				c."numOrder" > c."numDispatch"
+			</isEqual>
+    </select>
+    <!-- 从采购总单行中获取所有大类 -->
+    <select id="PurGather.getItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="string">
+    	select a.item_class_id as "value", a.item_class_dsc as "text" from jas_bd_item_class a
+		where exists (select 1 from jat_pur_gather_line b where a.item_class_id = b.item_class_id and b.headid = #value#)
+		order by a.sort, a.item_class_code
+    </select>
+    <!-- 从采购总单行中获取小类 -->
+    <select id="PurGather.getOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_dsc as "text" from jas_bd_orna_class a where exists(
+    		select 1 from jat_pur_gather_line b where a.orna_class_id = b.orna_class_id
+			and b.headid = #headid# and b.item_class_id = #itemClassId#
+		) order by a.sort, a.orna_class_code
+    </select>
+    <!-- 从采购总单行中获取分析范围 -->
+    <select id="PurGather.getAnalysisForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.analysis_arange_id as "value", a.summarydescription as "text" from jas_bd_analysis_arange a where exists(
+			select 1 from jat_pur_gather_line b where a.analysis_arange_id = b.analysis_id
+			and b.headid = #headid# and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId#
+		) order by a.summarydescription, a.analysis_arange_code
+    </select>
+    <!-- 从采购总单行中获取款式大类 -->
+    <select id="PurGather.getStyleItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select a.item_class_id as "value", a.item_class_name as "text"
+		  from jas_bd_style_item_class a
+		 where exists (select 1
+		          from jat_pur_gather_line b
+		         where b.style_item_class_id = a.item_class_id
+			        and b.headid = #headid#
+			        and b.item_class_id = #itemClassId#
+			        and b.orna_class_id = #ornaClassId#
+			        <!--and b.analysis_id = #analysisId#-->
+		        )
+		 order by a.item_class_code, a.item_class_id
+    </select>
+    <!-- 从采购总单行中获取款式中类 -->
+    <select id="PurGather.getStyleMiddleClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.middle_class_id as "value", a.middle_class_name as "text" from jas_bd_style_middle_class a where exists(
+			select 1 from jat_pur_gather_line b where b.style_middle_class_id = a.middle_class_id
+			and b.headid = #headid# and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId# <!--and b.analysis_id = #analysisId#-->
+			and b.style_item_class_id = #styleItemClassId#
+		) order by a.middle_class_code, a.middle_class_id
+    </select>
+    <!-- 从采购总单行中获取款式小类 -->
+    <select id="PurGather.getStyleOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_name as "text"
+		  from jas_bd_style_orna_class a
+		 where exists (select 1
+		          from jat_pur_gather_line b
+		         where b.style_orna_class_id = a.orna_class_id
+		           and b.headid = #headid#
+		           and b.item_class_id = #itemClassId#
+		           and b.orna_class_id = #ornaClassId#
+		           <!--and b.analysis_id = #analysisId#-->
+		           and b.style_item_class_id = #styleItemClassId#
+		           and b.style_middle_class_id = #styleMiddleClassId#)
+		 order by a.orna_class_code, a.orna_class_name
+    </select>
+    <!-- 从采购总单行中获取款式 -->
+    <select id="PurGather.getStyleIdForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.styleid as "value", a.stylename as "text" from jas_bd_style a where exists(
+			select 1 from jat_pur_gather_line b where b.style_id = a.styleid and b.headid = #headid# and b.item_class_id = #itemClassId#
+			and b.orna_class_id = #ornaClassId# <!--and b.analysis_id = #analysisId#-->
+			and b.style_item_class_id = #styleItemClassId# and b.style_middle_class_id = #styleMiddleClassId# and b.style_orna_class_id = #styleOrnaClassId#
+		) order by a.stylename
+    </select>
+	<!-- 获取手工减库生成的采购总单行数据 -->
+    <select id="PurGather.getSubPurGatherLineData2" parameterClass="map" resultClass="com.jatools.vo.pur.PurGatherLine">
+		<![CDATA[select *
+		  from (select a.headquarter_gather_line_id as "gatherLineId",
+		               a.item_class_id as "itemClassId",
+		               a.orna_class_id as "ornaClassId",
+		               a.analysis_arange_id as "analysisId",
+		               a.style_item_class_id as "styleItemClassId",
+		               a.style_middle_class_id as "styleMiddleClassId",
+		               a.style_orna_class_id as "styleOrnaClassId",
+		               a.styleid as "styleId",
+		               a.unitid as "unitId",
+		               a.size_id as "sizeId",
+		               a.quality_id as "qualityId",
+		               a.bracketcolor_id as "bracketcolorId",
+		               a.diam_color_grade_basic_id as "colorGradeId",
+		               a.clean_basic_id as "cleanId",
+		               cgg.grade_id as "colorGradeGradeId",
+		               cg.grade_id as "cleanGradeId",
+		               case when 1 = #enableOrderStart# then a.demand_quantity when a.demand_quantity > nvl(sa.startorder, 1) then a.demand_quantity else nvl(sa.startorder, 1) end - 
+		               (select count(1)
+		                  from jat_pl_dispatch_orna_log b
+		                 where a.headquarter_gather_line_id = b.gather_line_id
+		                   and b.status in (2, 3, 4)) as "numOrder"
+		          from jas_pl_headquarter_gather_line a
+		          left join jat_basic_color_grade_grade cgg
+		            on cgg.color_grade_id = a.diam_color_grade_basic_id
+		          left join jat_basic_clean_grade cg
+		            on cg.clean_id = a.clean_basic_id
+		          left join jas_bd_style_arange sa
+		            on sa.style_id = a.styleid
+		           and sa.analysis_arange_id = a.analysis_arange_id
+		           and sa.archiveflag = '0'
+		         where a.headquarter_gather_id = #gheadid#
+		           and a.line_state = '0') aa
+		 where aa."numOrder" > 0]]>
+ 	</select>
+ 	<!-- 自动生成采购单，判断采购总单行是否存在没有生成采购单的记录 -->
+ 	<select id="PurGather.checkPurGatherLineAvail" parameterClass="string" resultClass="long">
+ 		<![CDATA[select count(1)
+		  from jat_pur_gather_line a
+		 where a.headid = #value#
+		   and a.num_order <> (select sum(b.num_order)
+		                         from jat_pur_purchase_line b
+		                        where a.lineid = b.gather_line_id)]]>
+	</select>
+ 	<!-- 自动生成采购单，获取没有生成采购单的记录的款式的默认供应商 -->
+ 	<select id="PurGather.getVendorIdAuto" parameterClass="string" resultClass="string">
+ 		<![CDATA[select to_char(b.cust_id) from jat_pur_gather_line a, jas_ve_style_vender b
+		where a.style_id = b.style_id and a.headid = #value# and b.ismainvender = '1'
+		    and a.num_order <> (select nvl(sum(c.num_order),0) from jat_pur_purchase_line c where a.lineid = c.gather_line_id)
+		group by b.cust_id]]>
+ 	</select>
+ 	<select id="PurGather.checkPurchaseHeadExistsAuto" parameterClass="map" resultClass="string">
+ 		select to_char(a.headid) from jat_pur_purchase_head a where a.src_bill_code = 'CZ' and a.src_bill_id = #purGatherHeadId# and a.vendor_id = #vendorId# and rownum = 1
+ 	</select>
+ 	<!-- 自动生成采购单，保存采购单头 -->
+ 	<insert id="PurGather.savePurchaseHeadAuto" parameterClass="map">
+ 		<selectKey keyProperty="headid" type="pre" resultClass="string">select jat_pur_purchase_head_seq.nextval from dual</selectKey>
+ 		insert into jat_pur_purchase_head(headid, billno, src_bill_code, src_bill_id, bill_type, biz_type,
+			dodate, org_id, vendor_id, order_calender_id, memo, create_date, create_id, update_date, update_id, status,
+			order_end_date, pur_empids, used_flag, manual_flag)
+		select #headid#, #billno#, 'CZ', a.headid, decode(a.order_kind, 3, 1, 0), null,
+			#dodate#, a.org_id, #vendorId#, a.order_calender_id, null, #date#, #userid#, #date#, #userid#, 2,
+			a.order_end_date, null, 0, 0
+		from jat_pur_gather_head a where a.headid = #purGatherHeadId#
+ 	</insert>
+ 	<!-- 自动生成采购单，保存采购单行 -->
+ 	<insert id="PurGather.savePurchaseLineAuto" parameterClass="map">
+ 		<![CDATA[insert into jat_pur_purchase_line(lineid, headid, item_class_id, orna_class_id, analysis_id,
+			style_item_class_id, style_middle_class_id, style_orna_class_id, style_id, unit_id, size_id, quality_id, bracketcolor_id,
+			color_grade_id, clean_id, num_order, gather_head_id, gather_line_id, status, memo, create_date, create_id, update_date, update_id,
+			num_now_add, color_grade_grade_id, clean_grade_id, num_cancel, pl_gline_id, used_flag)
+		select jat_pur_purchase_line_seq.nextval, #purchaseHeadId#, a.item_class_id, a.orna_class_id, a.analysis_id,
+			a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id, a.style_id, a.unit_id, a.size_id, a.quality_id, a.bracketcolor_id,
+			a.color_grade_id, a.clean_id,
+			a.num_order - (select nvl(sum(c.num_order),0) from jat_pur_purchase_line c where a.lineid = c.gather_line_id) as num_order,
+			a.headid, a.lineid, 1, null, #date#, #userid#, #date#, #userid#,
+			0, a.color_grade_grade_id, a.clean_grade_id, 0, a.gather_line_id, 0
+			from jat_pur_gather_line a
+		where a.headid = #purGatherHeadId#
+			and a.num_order <> (select nvl(sum(c.num_order),0) from jat_pur_purchase_line c where a.lineid = c.gather_line_id)
+			and not exists(select 1 from jat_pur_purchase_line d where a.lineid = d.gather_line_id and d.headid = #purchaseHeadId#)
+            and exists(select 1 from jas_ve_style_vender b where a.style_id = b.style_id and b.ismainvender = '1' and b.cust_id = #vendorId#)]]>
+ 	</insert>
+ 	<!-- 自动生成采购单，修改采购单行 -->
+ 	<update id="PurGather.updatePurchaseLineAuto" parameterClass="map">
+ 		<![CDATA[update jat_pur_purchase_line d
+		   set d.num_order = d.num_order +
+		                     (select a.num_order -
+		                             (select nvl(sum(c.num_order), 0)
+		                                from jat_pur_purchase_line c
+		                               where a.lineid = c.gather_line_id)
+		                        from jat_pur_gather_line a
+		                       where a.lineid = d.gather_line_id
+		                         and a.headid = #purGatherHeadId#
+		                         and a.num_order <>
+		                             (select nvl(sum(c.num_order), 0)
+		                                from jat_pur_purchase_line c
+		                               where a.lineid = c.gather_line_id)
+		                         and exists (select 1
+		                                from jas_ve_style_vender b
+		                               where a.style_id = b.style_id
+		                                 and b.ismainvender = '1'
+		                                 and b.cust_id = #vendorId#)),
+		       d.update_id   = #userid#, d.update_date = #date#
+		 where exists (select 1
+		          from jat_pur_gather_line a
+		         where a.lineid = d.gather_line_id
+		           and a.headid = #purGatherHeadId#
+		           and a.num_order <>
+		               (select nvl(sum(c.num_order), 0)
+		                  from jat_pur_purchase_line c
+		                 where a.lineid = c.gather_line_id)
+		           and exists (select 1
+		                  from jas_ve_style_vender b
+		                 where a.style_id = b.style_id
+		                   and b.ismainvender = '1'
+		                   and b.cust_id = #vendorId#))
+		   and d.headid = #purchaseHeadId#]]>
+ 	</update>
+ 	<!-- 撤销时，获取有手工分解生成采购单数量 -->
+ 	<select id="PurGather.getPurchaseManualCount" parameterClass="string" resultClass="int">
+ 		select count(1)
+		  from jat_pur_purchase_head a
+		 where a.src_bill_code = 'CZ'
+		   and a.src_bill_id = #value#
+		   and nvl(a.manual_flag, 0) = 1
+ 	</select>
+ 	<!-- 撤销时，获取有撤销数量的记录数量 -->
+ 	<select id="PurGather.getPurchaseCancelNumCount" parameterClass="string" resultClass="int">
+ 		<![CDATA[select count(1)
+		  from jat_pur_purchase_line a
+		 where a.gather_head_id = #value#
+		   and nvl(a.num_cancel, 0) <> 0]]>
+ 	</select>
+ 	<!-- 撤销时，获取有到货记录的数量 -->
+ 	<select id="PurGather.getPurchaseEnterCount" parameterClass="string" resultClass="int">
+ 		select count(1)
+		  from jat_pur_purchase_enter a
+		 where exists
+		 (select 1 from jat_pur_purchase_line b where a.lineid = b.lineid and b.gather_head_id = #value#)
+ 	</select>
+ 	<!-- 撤销时，获取有不是记账状态、有保留的数量 -->
+ 	<select id="PurGather.getPurchaseStatusCount" parameterClass="string" resultClass="int">
+ 		<![CDATA[select count(1)
+		  from jat_pur_purchase_head a
+		 where a.src_bill_code = 'CZ'
+		   and a.src_bill_id = #value#
+		   and (a.status <> 2 or nvl(a.used_flag, 0) <> 0)]]>
+ 	</select>
+ 	<!-- 撤销总单时，删除采购单头 -->
+ 	<delete id="PurGather.deletePurchaseHeadByGatherHeadId" parameterClass="string">
+ 		delete jat_pur_purchase_head a where a.src_bill_code = 'CZ' and a.src_bill_id = #value#
+ 	</delete>
+ 	<!-- 撤销总单时，删除采购单行 -->
+ 	<delete id="PurGather.deletePurchaseLineByGatherHeadId" parameterClass="string">
+ 		delete jat_pur_purchase_line a where a.gather_head_id = #value#
+ 	</delete>
+ 	<!-- 撤销总单时，删除采购总单头 -->
+ 	<delete id="PurGather.deletePurGatherHead" parameterClass="string">
+		delete jat_pur_gather_head a where a.headid = #value#
+ 	</delete>
+ 	<!-- 撤销总单时，删除采购总单行 -->
+ 	<delete id="PurGather.deletePurGatherLine" parameterClass="string">
+ 		delete jat_pur_gather_line a where a.headid = #value#
+ 	</delete>
+ 	<!-- 根据采购总单id和供应商id，查看是否已经存在采购单，一个供应商只能有一张采购单 -->
+ 	<select id="PurGather.getPurchaseHeadByVendorId" parameterClass="map" resultClass="com.jatools.vo.pur.PurchaseHead">
+ 		select a.headid      as "headid",
+		       a.dodate      as "dodate",
+		       a.pur_empids  as "purEmpids",
+		       a.biz_type    as "bizType",
+		       a.memo        as "memo",
+		       a.update_id   as "updateId",
+		       a.update_date as "updateDate",
+		       a.manual_flag as "manualFlag",
+		       a.status      as "status"
+		  from jat_pur_purchase_head a
+		 where a.src_bill_code = 'CZ'
+		   and a.src_bill_id = #purGatherHeadId#
+		   and a.vendor_id = #vendorId#
+ 	</select>
+</sqlMap>

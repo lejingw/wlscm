@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Parameter">
+	<typeAlias alias="Parameter" type="com.jatools.vo.sys.Parameter" />
+	
+	<resultMap class="Parameter" id="Parameter.result">
+		<result property = "name"    column = "PARAM_NAME"     />
+		<result property = "value"   column = "PARAM_VALUE"      />
+		<result property = "memo"    column = "MEMO"  />
+		<result property = "status"    column = "STATUS"  />
+		<result property = "createDate" column = "create_date"  />
+		<result property = "createId"   column = "create_id"    />
+		<result property = "updateDate" column = "update_date"  />
+		<result property = "updateId"   column = "update_id"    />
+	</resultMap>
+	
+	<sql id="Parameter_columns">
+		PARAM_NAME, PARAM_VALUE, MEMO, STATUS, CREATE_ID, CREATE_DATE, UPDATE_ID, UPDATE_DATE
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="Parameter.getParameterPageData" resultMap="Parameter.result" parameterClass="map">
+		select <include refid="Parameter_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="Parameter_columns"/>  from JAT_SYS_PARAMETER a 
+			where 1 = 1 
+			<isNotEmpty property="name" prepend="and"> a.PARAM_NAME = #name# </isNotEmpty>
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="Parameter.getParameterTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from JAT_SYS_PARAMETER a where 1 = 1 
+		<isNotEmpty property="name" prepend="and"> a.PARAM_NAME = #name# </isNotEmpty>
+	</select>
+	
+	
+    <select id="Parameter.getParameter" parameterClass="string" resultMap="Parameter.result">
+		select <include refid="Parameter_columns"/> from JAT_SYS_PARAMETER a 
+		where 1=1 and a.PARAM_NAME = #value#
+	</select>
+	
+	<update id="Parameter.updateParameter" parameterClass="Parameter">
+		update JAT_SYS_PARAMETER a set 
+			a.PARAM_VALUE      = #value#,
+			a.MEMO			   = #memo#,
+			a.STATUS		   = #status#,
+			a.UPDATE_ID		   = #updateId#, 
+			a.UPDATE_DATE	   = #updateDate#
+		where a.PARAM_NAME = #name# 
+	</update>
+	
+	<delete id="Parameter.deleteParameter" parameterClass="string">
+		delete from JAT_SYS_PARAMETER a where a.PARAM_NAME = #value# 
+	</delete>
+</sqlMap>

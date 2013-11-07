@@ -1,0 +1,236 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+                "$StringUtil.getContextPath()/dwr/interface/InventoryDwr.js", 
+                "$StringUtil.getContextPath()/js/stock/inventory.js?t=201208171703.js"])
+#set($inventoryHead = $form.procInventoryHead)
+#set($lines = $form.pager.pageData)
+#set($isCode = $form.condition.get("isCode"))	
+#if($StringUtil.isBlank($!inventoryHead.billno))
+	#set($billno = "自动生成")
+	#set($orgId = $StringUtil.getOrgId($session))
+	#set($dodate = $DateUtil.getCurrentDate10())
+	#set($createDate = $DateUtil.getCurrentDate10())
+	#set($createdId = $StringUtil.getUserId($session))
+	#set($status = "保存")
+#else
+	#set($billno = $inventoryHead.billno)
+	#set($orgId = $inventoryHead.orgId)
+	#set($dodate = $inventoryHead.dodate)
+	#set($createDate = $inventoryHead.createDate)
+	#set($createId = $!inventoryHead.createId)
+	#set($status = $!DictUtil.getValue('status', $!{inventoryHead.status}))
+#end
+
+#set($enableClose = false)
+#if(!$StringUtil.isBlank($!inventoryHead.billno) && "$!inventoryHead.status" == "8")
+	#set($enableClose = true)
+#end
+<form id='frm' action="procInventory.vm" method="post">
+	
+	<input type="hidden" id="user_action" name="user_action" value="toShow"/>
+	<input type="hidden" id="billid" name="billid" value="$!{inventoryHead.billid}"/>
+    <table class="title">
+    	<tr><td>盘点单详情查看</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='重开' class='btn' id='btnOpen' #if(!$enableClose)disabled#end $RightUtil.able($session, '08030903','2')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08030903','1')>
+				<input type='checkbox' #if("$!isCode" == "1")checked#end onchange="showCodeBill(this)">显示编码盘点
+				<input type="hidden" id="isCode" name="isCode" value="$!isCode" />
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' readonly value="$!billno">
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status" name='status' readonly value="$!status">
+			</td>
+			<td class='body1'>创建日期：</td>
+			<td class='body2'>
+				<input type='text' id="createDate" name='createDate' readonly value="$!{createDate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>创建人员:</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{createId}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!createId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>单据日期：</td>
+			<td class='body2'>
+				<input type='text' id="dodate" name='dodate' readonly value="$!{dodate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>库存组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>盘点仓库：</td>
+			<td class='body2'>
+				<select id="stockId" name="stockId" #if($inventoryHead)disabled#end  dataType="Require" value="$inventoryHead.stockId" msg="不能为空" onchange="changeStockCount(this);">
+					$StringUtil.emptyOption()
+				</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>仓库总件数：</td>	
+			<td class='body2'>
+				<input type='text' id="isstock" name='isstock' readonly value="$!{inventoryHead.isstock}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>件数合计：</td>
+			<td class='body2'>
+				<input type='text' id="sumCount" name='sumCount' readonly value="$!{inventoryHead.sumCount}">
+			</td>
+			<td class='body1'>修改日期：</td>
+			<td class='body2'>
+				<input type='text' id="updateDate" name='updateDate' readonly value="$!{inventoryHead.updateDate}">
+			</td>
+			<td class='body1'>修改人员:</td>	
+			<td class='body2'>
+				<input type='text' id="updateId" name='updateId'  value="$!BdCommon.getUserName($!inventoryHead.updateId)" readonly  />
+			</td>
+			<td class='body1'></td>
+			<td class='body2'>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>备注：</td>
+			<td class='body2' colspan="7">
+				<input type="text" id="memo" name="memo" readonly style="width:90%;" value="$!{inventoryHead.memo}"/>
+			</td>
+		</tr>
+    </table>
+	
+	<table class='search-tb'>
+        <tr><td>>> 查询条件</td></tr>
+    </table>
+	<table class='content'>
+		#set($cond = $form.condition)
+		#set($itemClassId = $!cond.get('itemClassId'))
+		#set($ornaClassId = $!cond.get('ornaClassId'))
+		#set($ornaCode = $!cond.get('ornaCode'))
+		<tr>
+			<td class='body1'>饰品编码</td>
+			<td class='body2'>
+				<input type="text" id="ornaCode" name="ornaCode" value="$!ornaCode"/>
+			</td>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name="itemClassId" dataType="Require" value="$!BdCommon.getItemClassDesc($!itemClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId" dataType="Require" value="$!BdCommon.getOrnaClassDesc($!ornaClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>
+				<input type='hidden' name="user_action" value='doNoStockList' />
+				<input type="hidden" name="orgId" value="$!orgId"/>
+				<input type='button' value='查询' class='btn' id='btnSearch' style="width:60px;">
+			</td>
+        </tr>
+    </table>
+	<div class="scroll2">
+	<table class='list' style="width:1500px;">
+    	<thead>
+			<tr>
+				<th></th>
+				<th>饰品编码</th>
+        		<th>饰品名称</th>
+				<th>组织</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>款式</th>
+                <th>分析范围</th>
+				<th>计量单位</th>
+				<th>现有量</th>
+				<th>总重量</th>
+				<th>粒数</th>
+				<th>销售金额</th>
+				<th>主石重量</th>
+        		<th>配石重量</th>
+				<th>柜组</th>
+				<th>备注</th>
+				<th>盘点时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl_old_mater">
+		#foreach($line in $lines)
+			<tr>
+				<td></td>
+				<td>$!line.ornaCode</td>
+				<td>$!line.ornaDsc</td>
+				<td>$!BdCommon.getOrgName($!line.orgId)</td>
+				<td>$!line.itemClassName</td>
+				<td>$!line.ornaClassName</td>
+				<td>$!HtmlUtil.printStyle($!line.styleId, $!line.styleName, $!line.bigGraph)</td>
+				<td>$!line.alaysisName</td>
+				<td>$!line.unitName</td>
+                <td>$!line.nowQty</td>
+				<td>$!line.allQty</td>
+				<td>$!line.grains</td>
+				<td>$!line.posMoney</td>
+				<td>$!line.mainWeight</td>
+				<td>$!line.partWeight</td>
+				<td>$!line.groups</td>
+				<td>#if($line.memo)<input type='text' value="$!line.memo" readonly style="width:60px;"/>#end</td>
+				<td>$!line.createDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function changeItemClass(ornaValue){
+	/*BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, ornaValue);
+	});*/
+	BdCommonDwr.getAllOrnaClassForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, ornaValue);
+	});
+}
+
+function showCodeBill(obj){
+	if(obj.checked){
+		jQuery("#isCode").val("1");
+		//window.location = "procInventory.vm?user_action=toShow&billid=" + jQuery("#billid").val() + "&isCode=1";
+	} else {
+		jQuery("#isCode").val("");
+		//window.location = "procInventory.vm?user_action=toShow&billid=" + jQuery("#billid").val();
+	}
+	jQuery("#frm").submit();
+}
+function setValues(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!itemClassId");
+    	changeItemClass("$!ornaClassId");
+	});
+	DictDwr.getDictsForSlt("invcode", function(data){
+		addOptions("stockId",  data, null, null, true, true, "$!inventoryHead.stockId");
+	});
+}
+jQuery(function(){
+	altRowCSS('tbl_old_mater');
+	setValues();
+	jQuery("#itemClassId").change(changeItemClass);
+	jQuery("#btnOpen").click(openBill);
+	jQuery("#btnToList").click(function(){
+		window.location = "procInventory.vm";
+	});
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	changeSeq("tbl_old_mater");
+})
+
+</script>

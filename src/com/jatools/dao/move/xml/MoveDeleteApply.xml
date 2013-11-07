@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveDeleteApply">
+
+    <sql id="MoveDeleteApply-column-1">
+        a.headid       as "headid",
+        a.bill_no       as "billno",
+        a.dodate       as "dodate",
+        a.org_id        as "orgId",
+        a.status       as "status",
+        a.memo         as "memo",
+        a.create_date  as "createDate",
+        a.create_id    as "createId",
+        a.update_date  as "updateDate",
+        a.update_id    as "updateId",
+        a.move_headid  as "moveHeadid",
+        b.billno        as "moveBillno"
+    </sql>
+
+
+    <sql id="MoveDeleteApply.getMoveDeleteApplyPageDataCondition">
+        <isNotEmpty property="billno"> and a.bill_no like '%$billno$%' </isNotEmpty>
+        <isNotEmpty property="orgId"> and a.org_id = #orgId#  </isNotEmpty>
+        <isNotEmpty property="_q_sql"> $_q_sql$ </isNotEmpty>
+    </sql>
+
+    <select id="MoveDeleteApply.getMoveDeleteApplyPageData" parameterClass="map" resultClass="com.jatools.vo.move.MoveDeleteApply">
+        select * from (select rownum rownum_ , AA.* from (
+            select <include refid="MoveDeleteApply-column-1"/> from jat_move_delete_apply a
+            left join jat_move_head_log b on a.move_headid = b.headid
+            where 1=1
+            <isNotEqual property="showAllFlag" compareValue="1"><![CDATA[ and a.status <> 8 ]]></isNotEqual>
+            <include refid="MoveDeleteApply.getMoveDeleteApplyPageDataCondition"/>
+            order by a.headid desc
+        ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+
+    <!-- 获取总条数 -->
+    <select id="MoveDeleteApply.getMoveDeleteApplyTotalCount" parameterClass="map" resultClass="int">
+        select count(1) from jat_move_delete_apply a
+        left join jat_move_head_log b on a.move_headid = b.headid
+        where 1 = 1
+        <isNotEqual property="showAllFlag" compareValue="1"><![CDATA[ and a.status <> 8 ]]></isNotEqual>
+        <include refid="MoveDeleteApply.getMoveDeleteApplyPageDataCondition"/>
+    </select>
+
+
+    <insert id="MoveDeleteApply.saveMoveDeleteApply" parameterClass="com.jatools.vo.move.MoveDeleteApply">
+        <selectKey resultClass="string" keyProperty="headid" type="pre">
+            select JAT_MOVE_DELETE_APPLY_SEQ.nextval as headid from dual
+        </selectKey>
+        insert into jat_move_delete_apply(
+            headid, bill_no, dodate, org_id, memo, status, move_headid, create_id, create_date, update_id, update_date
+        )
+        values(
+            #headid#, #billno#, #dodate#, #orgId#, #memo#, #status#, #moveHeadid#, #createId#, #createDate#, #updateId#, #updateDate#
+        )
+    </insert>
+
+    <update id="MoveDeleteApply,updateMoveDeleteApply" parameterClass="com.jatools.vo.move.MoveDeleteApply">
+        update jat_move_delete_apply a
+        set
+            a.dodate = #dodate#,
+            a.memo = #memo#,
+            a.status = #status#,
+            a.move_headid = #moveHeadid#,
+            a.update_id = #updateId#,
+            a.update_date = #updateDate#
+        where a.headid = #headid#
+    </update>
+
+    <select id="MoveDeleteApply.getMoveDeleteApply" parameterClass="string" resultClass="com.jatools.vo.move.MoveDeleteApply">
+
+        select <include refid="MoveDeleteApply-column-1"/> from jat_move_delete_apply a
+        left join jat_move_head_log b on a.move_headid = b.headid
+        where 1=1 and a.headid = #value#
+    </select>
+
+    <update id="MoveDeleteApply.updateMoveDeleteApplyStatus" parameterClass="map" >
+        update jat_move_delete_apply a
+        set a.status = #status#
+        where a.headid = #headid#
+    </update>
+
+    <delete id="MoveDeleteApply.deleteMoveDeleteApply" parameterClass="string">
+        delete from jat_move_delete_apply a where a.headid = #value#
+    </delete>
+<!-- =============================== 调拨单 =============================================== -->
+
+    <select id="MoveDeleteApply.getMoveLineLog" parameterClass="map" resultClass="com.jatools.vo.move.MoveLineLog">
+    	select a.lineid as "lineid",
+		       a.orna_code as "ornaCode",
+		       a.bar_code as "barCode",
+		       a.orna_dsc as "ornaDsc",
+		       a.item_class_id as "itemClassId",
+		       a.orna_class_id as "ornaClassId",
+		       a.analysis_id as "analysisId",
+		       b.summarydescription as "analysisName",
+		       a.style_id as "styleId",
+		       c.stylename as "styleName",
+		       c.isbiggraph as "bigGraph",
+		       a.unit_id as "unitId",
+		       a.all_weight as "allWeight",
+		       a.now_qty as "nowQty",
+		       a.grains as "grains",
+		       a.pos_amount as "posAmount",
+		       a.pos_cost as "posCost",
+		       a.new_pos_cost as "newPosCost",
+		       a.new_pos_money as "newPosMoney",
+		       a.main_weight as "mainWeight",
+		       a.part_weight as "partWeight",
+		       a.status as "status",
+		       decode(a.is_dbl_label, 1, '1', '0') as "isDblLabel",
+		       decode(a.pos_amount, a.new_pos_money, '0', '1') as "printLabel",
+               a.free_return_flag as "freeReturnFlag",
+               a.free_left_days as "freeLeftDays",
+               substr(a.create_date, 1, 10) as "createDate"
+          <isNotEmpty property="moveId"> from jat_move_line a </isNotEmpty>
+          <isNotEmpty property="moveDeleteId"> from jat_move_line_log a </isNotEmpty>
+		  left join jas_bd_analysis_arange b
+		    on b.analysis_arange_id = a.analysis_id
+		  left join jas_bd_style c
+		    on c.styleid = a.style_id
+		  where 1=1
+        <isNotEmpty property="moveId" prepend="and"> a.headid = #moveId# </isNotEmpty>
+        <isNotEmpty property="moveDeleteId" prepend="and">
+            exists (
+                select 1 from JAT_MOVE_DELETE_APPLY t where t.move_headid = a.headid and t.headid = #moveDeleteId#
+            )
+        </isNotEmpty>
+    	<isEqual compareValue="1" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 0</isEqual>
+    	<isEqual compareValue="2" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 1</isEqual>
+    	<isEqual compareValue="3" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 1</isEqual>
+    	order by a.item_class_id, a.orna_class_id, a.style_id, a.orna_dsc
+    </select>
+    <select id="MoveDeleteApply.getMoveHeadLog" parameterClass="map" resultClass="com.jatools.vo.move.MoveHeadLog">
+    	select w.*, (w."sumCount" - w."receCount" - w."discardCount") as "noreceCount" from (select a.headid as "headid", a.billno as "billno", a.src_bill_code as "srcBillCode", a.dodate as "dodate", a.create_id as "createId", a.status as "status",
+		  a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.out_stock_id as "outStockId", a.in_stock_id as "inStockId", a.out_group as "outGroup", a.in_group as "inGroup",
+		  a.sum_count as "sumCount", a.sum_weight as "sumWeight", a.sum_grains as "sumGrains", a.sum_cost as "sumCost", a.sum_money as "sumMoney", a.sum_new_pos_cost as "sumNewPosCost",
+		  a.receive_date as "receiveDate", a.receive_emp_id as "receiveEmpId", a.memo as "memo", a.bill_type as "billType",
+          a.src_bill_id as "srcBillId", a.src_bill_no as "srcBillNo",
+		  (select count(1) from jat_move_line b where b.headid = a.headid and b.status in (10, 11)) as "receCount",
+		  (select count(1) from jat_move_line b where b.headid = a.headid and b.status = 13) as "discardCount",
+		  nvl(a.back_in48_flag, '0') as "backIn48Flag", a.label_apply_flag as "labelApplyFlag", a.jm_flag as "jmFlag", a.license_complete_flag as "licenseCompleteFlag"
+        <isNotEmpty property="moveId"> from jat_move_head a where 1=1 </isNotEmpty>
+        <isNotEmpty property="moveDeleteId"> from jat_move_head_log a where 1=1 </isNotEmpty>
+            <isNotEmpty property="moveId" prepend="and"> a.headid = #moveId# </isNotEmpty>
+            <isNotEmpty property="moveDeleteId" prepend="and">
+                exists (
+                    select 1 from JAT_MOVE_DELETE_APPLY t where t.move_headid = a.headid and t.headid = #moveDeleteId#
+                )
+            </isNotEmpty>
+		)w
+    </select>
+
+    <sql id="MoveDeleteApply.getMoveBillPageDataCondition">
+        and a.bill_type = 1 and a.jm_flag = 0 and a.status = 5
+        and exists(
+            select 1 from jas_bd_emp_org b where b.orgid = a.out_org_id and b.empid = #userId#
+        )
+        <isNotEmpty property="billno"> and a.billno like '%$billno$%' </isNotEmpty>
+        <isNotEmpty property="startDate"> and a.dodate >= #startDate# </isNotEmpty>
+        <isNotEmpty property="endDate"> <![CDATA[and a.dodate <= #endDate# ]]></isNotEmpty>
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </sql>
+    <select id="MoveDeleteApply.getMoveBillPageData" parameterClass="map" resultClass="com.jatools.vo.move.MoveBillHead">
+        select * from (select rownum rownum_ , AA.* from (
+        select a.headid as "headid", a.billno as "billno", a.move_type as "moveType", a.dodate as "dodate", a.src_bill_code as "srcBillCode", a.src_bill_no as "srcBillNo",
+        a.estimate_id as "estimateId", a.red_estimate_id as "redEstimateId", a.estimate_no as "estimateNo", a.red_estimate_no as "redEstimateNo",
+        a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.out_stock_id as "outStockId", a.in_stock_id as "inStockId", a.out_group as "outGroup", a.in_group as "inGroup",
+        a.sum_count as "sumCount", a.sum_weight as "sumWeight",
+        a.rececount as "receCount", a.norececount as "noreceCount", a.cert_count as "certCount", a.pack_no as "packNo",
+        a.create_id as "createId", a.create_date as "createDate", a.update_id as "updateId", a.update_date as "updateDate", a.receive_date as "receiveDate", a.receive_emp_id as "receiveEmpId",
+        a.status as "status", nvl(a.back_in48_flag, '0') as "backIn48Flag", a.license_complete_flag as "licenseCompleteFlag"
+        from jat_move_head a
+        where 1 = 1
+        <include refid="MoveDeleteApply.getMoveBillPageDataCondition"/>
+        order by a.headid desc
+        ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+    <!-- 获取总条数 -->
+    <select id="MoveDeleteApply.getMoveBillTotalCount" parameterClass="map" resultClass="int">
+        select count(1) from jat_move_head a
+        where 1 = 1
+        <include refid="MoveDeleteApply.getMoveBillPageDataCondition"/>
+    </select>
+
+
+    <delete id="MoveDeleteApply.deleteMoveHeadLog" parameterClass="string">
+        delete from jat_move_head_log a where a.headid = #value#
+    </delete>
+
+    <delete id="MoveDeleteApply.deleteMoveLineLog" parameterClass="string">
+        delete from jat_move_line_log a where a.headid = #value#
+    </delete>
+
+    <insert id="MoveDeleteApply.insertMoveHeadLog" parameterClass="string">
+        insert into jat_move_head_log
+        select * from jat_move_head a where a.headid = #value#
+    </insert>
+
+    <insert id="MoveDeleteApply.insertMoveLineLog" parameterClass="string">
+        insert into jat_move_line_log
+        select * from jat_move_line a where a.headid = #value#
+    </insert>
+
+    <update id="MoveDeleteApply.updateMoveBillStatus" parameterClass="map">
+        update jat_move_head a
+        set a.status = #status#
+        where a.headid = #headid#
+    </update>
+    
+    <delete id="MoveDeleteApply.deleteMoveBillHead" parameterClass="string">
+        delete from jat_move_head a where
+        exists (select 1 from jat_move_delete_apply b where a.headid = b.move_headid and  b.headid = #value#)
+    </delete>
+    <delete id="MoveDeleteApply.deleteMoveBillLine" parameterClass="string">
+        delete from jat_move_line a where
+        exists (select 1 from jat_move_delete_apply b where a.headid = b.move_headid and  b.headid = #value#)
+    </delete>
+
+    <!-- 删除配货记录 -->
+    <delete id="MoveDeleteApply.deleteDispatchOrnaLog" parameterClass="string">
+        delete from jat_pl_dispatch_orna_log a
+        where exists (
+            select 1
+            from jat_move_head b, jat_move_line c, jat_move_delete_apply d
+            where b.headid = c.headid
+                and b.headid = d.move_headid
+                and a.gather_head_id = b.src_bill_id
+                and a.src_bill_code = b.src_bill_code
+                and a.orna_code = c.orna_code
+                and d.headid = #value#
+        )
+    </delete>
+    <!-- 备份配货记录 -->
+    <insert id="MoveDeleteApply.bakDispatchOrnaLog" parameterClass="string">
+        insert into jat_pl_dispatch_orna_log_bak
+        select *  from jat_pl_dispatch_orna_log a
+        where exists (
+            select 1
+            from jat_move_head b, jat_move_line c, jat_move_delete_apply d
+                where b.headid = c.headid
+                and b.headid = d.move_headid
+                and a.gather_head_id = b.src_bill_id
+                and a.src_bill_code = b.src_bill_code
+                and a.orna_code = c.orna_code
+                and d.headid = #value#
+        )
+    </insert>
+
+    <update id="MoveDeleteApply.markMaterActiveValid" parameterClass="string">
+        update ic_mater_active a set a.state = 900, a.bill_code = null, a.bill_no = null
+        where exists (
+            select 1 from jat_move_head b, jat_move_line c , jat_move_delete_apply d
+            where b.headid = c.headid
+                and b.headid = d.move_headid
+                and c.orna_code = a.orna_code
+                and d.headid = #value#
+        )
+    </update>
+
+    <!-- 删除调拨指令单 -->
+    <delete id="MoveDeleteApply.deleteMoveCmdHead" parameterClass="string">
+        delete from jat_move_cmd_head a
+        where exists (
+            select 1 from jat_move_head b , jat_move_delete_apply c
+            where b.headid = c.move_headid
+                and a.headid = b.src_bill_id
+                and b.src_bill_code = 'MC'
+                and c.headid = #value#
+        )
+    </delete>
+    
+    <delete id="MoveDeleteApply.deleteMoveCmdLine" parameterClass="string">
+        delete from jat_move_cmd_line t
+        where exists (
+            select 1 from jat_move_cmd_head a, jat_move_head b , jat_move_delete_apply c
+            where b.headid = c.move_headid
+                and a.headid = b.src_bill_id
+                and b.src_bill_code = 'MC'
+                and t.headid = a.headid
+                and c.headid = #value#
+        )
+    </delete>
+    
+    <select id="MoveDeleteApply.isExistsMoveHeadLog" parameterClass="string" resultClass="int">
+        select count(1) from jat_move_head_log a where a.headid = #value#
+    </select>
+</sqlMap>

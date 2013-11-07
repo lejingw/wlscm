@@ -1,0 +1,93 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/MoveCostcoefDwr.js"])
+<form id='frm' action="moveCostcoef.vm" method="post">
+	<input type="hidden" id="coefId" name="coefId" value="$!{form.coef.coefId}"/>
+    <table class="title">
+    	<tr><td>调拨成本系数</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require" value="" msg="不能为空" onchange="changeItemClass(null)">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require" value="" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>方式</td>
+			<td class='body2'><select id="coefWay" dataType="Require">$StringUtil.emptyOption()</select></td>
+			<td class='body1'>系数</td>
+			<td class='body2'><input type='text' id='coef' dataType="Money" msg="不能为空,且必须为数字类型" value="$!form.coef.coef"></td>
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="3">
+				<input type="text" id="memo" style="width:90%;" value="$!{form.coef.memo}"/>
+			</td>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' readonly value="保存">
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+function changeItemClass(ornaValue){
+	MoveCostcoefDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), jQuery("#coefId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, ornaValue);
+	});
+}
+function setValues(){
+	if(isNull(jQuery("#coefId").val()))	return;
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!form.coef.itemClassId");
+       	changeItemClass("$!form.coef.ornaClassId");
+	});
+}
+//设置页面内容
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+	DictDwr.getDictsForSlt("movecoefway", function(data){
+		addOptions("coefWay", data, null, null, true, true, "$!form.coef.coefWay");
+	});
+}
+function saveform(){
+	if(!Validator.Validate($("frm"),3))
+		return false;
+	confirm("确定保存?", function(){
+    	MoveCostcoefDwr.saveMoveCostcoef({
+    		coefId:jQuery("#coefId").val(),
+			itemClassId:jQuery("#itemClassId").val(),
+			ornaClassId:jQuery("#ornaClassId").val(),
+			coefWay:jQuery("#coefWay").val(),
+			coef:jQuery("#coef").val(),
+			memo:jQuery("#memo").val()
+    	}, function(data){
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+    				window.location = "moveCostcoef.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	jQuery("#btnSave").click(saveform);
+	
+	jQuery("#btnToList").click(function(){
+		window.location = "moveCostcoef.vm";
+	});
+	setPageContent();
+	setValues();
+});
+</script>

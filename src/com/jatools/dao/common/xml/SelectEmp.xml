@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SelectEmp">
+	<select id="SelectEmp.getEmpByOrgAndEmptype" parameterClass="map" resultClass="java.util.HashMap">
+		select to_char(a.empid) as "userid", to_char(a.empname) as "username" from jas_bd_emp a where a.state = 1 and exists(
+		select 1 from jas_bd_emp_emptype b where a.empid = b.empid and b.emptypeid = #emptypeId#
+		) and exists(
+		select 1 from jas_bd_emp_org c where c.orgid = #orgId# and c.empid = a.empid
+		) order by a.empcode
+	</select>
+	<select id="SelectEmp.getUnarchivePurchaseEmp" parameterClass="string" resultClass="com.jatools.vo.sys.User">
+		select a.item_key as "userid", b.empname as "username"
+		  from jat_sys_dict_item a, jas_bd_emp b
+		 where a.entry_code = 'purchaseEmp'
+		   and a.item_key = b.empid
+		   and a.status = 1
+		   and b.archiveflag = '0'
+		 order by a.item_order
+	</select>
+	<select id="SelectEmp.getEmpByOrgId" parameterClass="string" resultClass="com.jatools.vo.sys.User">
+		select a.empid as "userid", a.empname as "username"
+		  from jas_bd_emp a, jas_bd_emp_org b
+		 where a.empid = b.empid
+		   and b.orgid = #value#
+		   and a.state = 1
+		 order by b.sort, a.empname
+	</select>
+	<!-- 根据组织获取快递人员 -->
+	<select id="SelectEmp.getExpressReceusers" parameterClass="string" resultClass="java.util.HashMap">
+		select to_char(a.empid) as "userid", to_char(a.empname) as "username" from jas_bd_emp a where a.state = 1 and a.archiveflag = '0' and exists(
+	    select 1 from jat_basic_express_receuser b where b.rece_user = a.empid and b.org_id = #value#
+	    ) order by a.empcode
+	</select>
+</sqlMap>

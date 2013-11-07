@@ -1,0 +1,79 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/sbraType.js", "$StringUtil.getContextPath()/dwr/interface/SbraTypeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="id" value="$!form.head.id"/>
+    <table class="title">
+    	<tr><td>配件类型</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow' $RightUtil.able($session, '08061002','1')>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08061002','2')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>配件类型</td>
+			<td class='body2' colspan="3">
+				<input type="text" id="sbraType" style="width:50%;" value='$!form.head.sbraType'dataType="Require" msg="不能为空"/>$StringUtil.star()
+			</td>
+			<td class='body1'>其它系数</td>
+			<td class='body2' ><input type='text' id='coefficient' dataType="Require" msg="不能为空" value="$!{form.head.coefficient}">$StringUtil.star()</td>
+			<td class='body1'>是否工费</td>
+			<td class='body2' ><input type='checkbox' id='isFee'/></td>
+			<td class='body1'>是否封存</td>
+			<td class='body2' ><input type='checkbox' id='archiveFlag'/></td>
+		</tr>
+    </table>
+	<table class="list" >
+		<thead>
+			<tr>
+				<th width='28%'>托架材质</th>
+				<th width=''></th>
+			</tr>
+        </thead>
+		<tbody id='tbl'>
+	#if("" != "$!form.head.id")
+		#foreach($item in $form.line)
+			<tr>
+				<td><select name="qualityId" ></select></td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+	#end
+        </tbody>
+	</table>
+</form>
+<script>
+
+//设置页面内容
+function setPageContent(){
+	
+}
+function setValues(){
+	jQuery("#isFee")[0].checked =("$!form.head.isFee"=="1"?true:false);
+	jQuery("#archiveFlag")[0].checked =("$!form.head.archiveFlag"=="1"?true:false);
+	dwr.engine.setAsync(false);//设置同步
+	#foreach($item in $form.line)
+    	BdCommonDwr.getAllQualityForSlt(function(data){
+    		addOptions2("qualityId", ${velocityCounter}-1, data, null, null, true, true,$item.qualityId);
+    	});	
+    #end
+	dwr.engine.setAsync(true);//取消同步
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnAddRow").click(addRow);
+	jQuery("#btnSave").click(saveform);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "sbraType.vm";
+	});
+	if("$!form.head.id"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+});
+</script>

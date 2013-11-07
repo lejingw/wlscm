@@ -1,0 +1,196 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/pur/cash/prodProd.js?t=201202131655.js", 
+"$StringUtil.getContextPath()/dwr/interface/ProdProdDwr.js"])
+	
+<form id='frm' action="prodProd.vm" method="post">
+	#set($prodProd = $!form.cashProdProd)
+	#set($lines = $!form.lines)
+	#if($StringUtil.isBlank($!prodProd.billNo))
+		#set($billNo = "自动生成")
+		#set($orgId = $StringUtil.getOrgId($session))
+		#set($billDate = $DateUtil.getCurrentDate10())
+		#set($statusName = "保存")
+		#set($status = "1")
+		#set($createDate = $DateUtil.getCurrentDate10())
+		#set($createId = $StringUtil.getUserId($session))
+	#else
+		#set($billNo = $prodProd.billNo)
+		#set($orgId = $prodProd.orgId)
+		#set($billDate = $prodProd.billDate)
+		#set($statusName = $!DictUtil.getValue('status', $!{prodProd.status}))
+		#set($status = $!{prodProd.status})
+		#set($createDate = $prodProd.createDate)
+		#set($createId = $!prodProd.createId)
+	#end
+	
+	#set($enableSave = false)
+	#set($isSaved = false)
+	#set($enableCheck = false)
+	#set($enableClose = false)
+	#if($StringUtil.isNotBlank($status))
+		#if($status == "1")
+			#set($enableSave = true)
+			#set($isSaved = true)
+			#set($enableCheck = true)
+		#elseif($status == "5")
+			#set($enableClose = true)
+		#end
+	#end
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="chaId" name="chaId" value="$!{prodProd.chaId}"/>
+    <table class="title">
+    	<tr><td>料转料详情</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' #if(!$enableSave)disabled#end class='btn' id='btnSave' $RightUtil.able($session, '0802090502','1')>
+				<input type='button' value='审核' #if(!$enableCheck)disabled#end class='btn' id='btnCheck' $RightUtil.able($session, '0802090502','2')>
+				<input type='button' value='关闭' #if(!$enableClose)disabled#end class='btn' id='btnClose' $RightUtil.able($session, '0802090502','3')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '0802090502','4')>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billNo" name='billNo' readonly value="$!billNo">
+			</td>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			
+			<td class='body1'>单据日期：</td>
+			<td class='body2'>
+				<input type='text' id="billDate" name='billDate' readonly #if(!$isSaved)disabled#end value="$!{billDate}" dataType="Require" msg="不能为空">
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status" name='status' readonly value="$!statusName">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>供应商：</td>
+			<td class='body2'>
+				#*<select id="verdorId" name="verdorId" #if(!$!isSaved)disabled#end dataType="Require" value="$!prodProd.voderId" onchange="cleanOldProd(this)" msg="不能为空" >
+					$StringUtil.emptyOption()
+                </select>$StringUtil.star()*#
+				<input type='hidden' id='verdorId' name="verdorId" value="$!prodProd.voderId">
+				<input type='text' id='vendorName' value="$!BdCommon.getVendorName($!prodProd.voderId)" #if(!$!isSaved)disabled#end readonly class='target' ondblclick="showVendorWin()" dataType="Require" msg="不能为空">
+				$!StringUtil.star()
+			</td>
+			
+			<td class='body1'>创建人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{createId}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!createId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>创建时间：</td>	
+			<td class='body2'>
+				<input type='text' id="createDate" name='createDate'  value="$!createDate" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'></td>
+			<td class='body2'></td>
+		</tr>
+    </table>
+	<input type="button" value="选择要转换的单据" #if(!$!isSaved)disabled#end onclick="showSelectCashWin()"/>
+	<table class='content'>
+		<tr>
+			<td class='body1'>原类型：</td>	
+			<td class='body2'>
+				<input type='hidden' id="prId" name='prId' readonly value="$!prodProd.prId">
+				<input type='hidden' id="materialTypeOld" name='materialTypeOld' readonly value="$!prodProd.materialTypeOld">
+				<input type='text' id="materialTypeNameOld" name='materialTypeNameOld' readonly value="$!prodProd.materialTypeNameOld" readonly>
+			</td>
+			<td class='body1'>原大类：</td>	
+			<td class='body2'>
+				<input type='hidden' id="itemClassIdOld" name='itemClassIdOld' value="$!prodProd.itemClassIdOld">
+				<input type='text' id="itemClassNameOld" name='itemClassNameOld'  value="$!prodProd.itemClassNameOld" readonly>
+			</td>
+			<td class='body1'>原重量：</td>	
+			<td class='body2'>
+				<input type='text' id="weightOld" name='weightOld'  value="$!prodProd.weightOld" readonly onblur="checkField()" dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+			<td class='body1'>原单价：</td>
+			<td class='body2'>
+				<input type='text' id="priceOld" name='priceOld' #if(!$!isSaved)readonly#end value="$!prodProd.priceOld"  onblur="checkField()" dataType="Require" msg="不能为空" >
+					$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>新类型：</td>	
+			<td class='body2'>
+				<select id="materialTypeNew" dataType="Require" value="" #if(!$!isSaved)disabled#end msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>新大类：</td>	
+			<td class='body2'>
+				<select id="itemClassIdNew" dataType="Require" #if(!$!isSaved)disabled#end value="$!BdCommon.getItemClassDesc($prodProd.itemClassIdNew)" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>新重量：</td>	
+			<td class='body2'>
+				<input type='text' id="weightNew" name='weightNew' #if(!$!isSaved)readonly#end  value="$!prodProd.weightNew"  onblur="checkField()" dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+			<td class='body1'>新单价：</td>
+			<td class='body2'>
+				<input type='text' id="priceNew" name='priceNew' #if(!$!isSaved)readonly#end value="$!prodProd.priceNew"  onblur="checkField()" dataType="Require" msg="不能为空">
+				$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>备注：</td>
+			<td class='body2' colspan="7">
+				<input type='text' id="memo" name='memo' #if(!$!isSaved)readonly#end value="$!prodProd.memo" style="width:600px;" >
+			</td>
+        </tr>
+    </table>
+</form>
+
+<script>
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		var oldVerdorId = jQuery("#verdorId").val(),
+			newVerdorId = idArr.join(',');
+		jQuery("#verdorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+		if(oldVerdorId != newVerdorId){
+			cleanOldProd();
+		}
+	}, null, null, false, jQuery("#verdorId").val());
+}
+function setValues(){
+	/*BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!prodProd.voderId");
+	});*/
+	BdCommonDwr.getItemClassByMaterialType("$!prodProd.materialTypeNew", function(data){
+		addOptions("itemClassIdNew", data, null, null, true, true, "$!prodProd.itemClassIdNew");
+	});
+	DictDwr.getDictsForSlt("materialtype", function(data){
+		addOptions("materialTypeNew", data, null, null, true, true, "$!prodProd.materialTypeNew");
+	});
+}
+
+function changeMaterialType(){
+	BdCommonDwr.getItemClassByMaterialType(jQuery("#materialTypeNew").val(), function(data){
+		addOptions("itemClassIdNew", data, null, null, true, true);
+	});
+}
+
+jQuery(function(){
+	initCalendar("billDate");
+	setValues();
+	jQuery("#btnSave").click(saveForm);
+	jQuery("#btnCheck").click(checkBill);
+	jQuery("#btnClose").click(closeBill);
+	jQuery("#materialTypeNew").change(changeMaterialType);
+	jQuery("#btnToList").click(function(){
+		window.location = "prodProd.vm";
+	});
+	checkReview();
+})
+
+</script>

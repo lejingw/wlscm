@@ -1,0 +1,58 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/MoveSalecoefDwr.js"])
+
+<form id="frm" method="post">
+    <table class="title">
+    	<tr><td>审批单据</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='审批' class='btn' id='btnReview'>
+			</td>
+		</tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>单据名称</th>
+        		<th>单据ID</th>
+        		<th>单据编号</th>
+        		<th>审批页面</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.logid}'/></td>
+				<td><a href="javascript:toEditPage('$!{map.logid}');">$!{map.billName}</a></td>
+				<td>$!{map.billId}</td>
+				<td>$!{map.billNo}</td>
+				<td>$!{map.pageUrl}</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+	//初始化查询div common_query.js中定义默认已经引入
+	initQuery("btnQuery", "btnQueryCancel");
+	
+	jQuery("#btnReview").click(function(){
+		var index = getSelectIndex('chk');
+		if(index<0){
+			alert("请先选择要审批的单据");
+			return ;
+		}
+		window.location = "billReview.vm?user_action=toReview&logid=" + $n("chk")[index].value;
+	});
+});
+function toEditPage(logid){
+	window.location = "billReview.vm?user_action=toReview&logid="+logid;
+}
+</script>

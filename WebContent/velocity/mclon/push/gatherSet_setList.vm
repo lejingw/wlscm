@@ -1,0 +1,149 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/GatherSetDwr.js"])
+#set($modelCode='08090101')
+<form id="frm" action="gatherSet.vm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value='setList'/>
+    <table class="title">
+    	<tr><td>推式订单列表</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增总单头' id='btnAddHead' onclick="addGatherBillHead()" $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='修改总单头' id='btnEditHead' onclick="editGatherBillHead()" $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='配置/查看总单' id='btnEditBody' onclick="editGatherBillBody()" $RightUtil.able($session, $modelCode,'3')>
+				<input type='button' value='删除' id='btnDelete' onclick="deleteGatherBill()" $RightUtil.able($session, $modelCode,'4')>
+				<input type='button' value='查看总单明细' id='btnViewGatherBill' onclick="viewGatherBill()" $RightUtil.able($session, $modelCode,'5')>
+				<input type='button' value='导出Excel' id='btnExportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $modelCode,'6')>
+				<input type='button' value='查询' id='btnQueryShow' >
+				<input type="checkbox" name='showAllFlag' #if("1" == "$!{form.condition.showAllFlag}") checked #end value='1' onclick="jQuery('#frm').submit();">显示所有单据
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+        <table class='list' style="width:1850px;">
+        	<thead>
+    			<tr>
+                    <th width='45px'><input type='checkbox' id='chkall'/></th>
+            		<th width='90px'>状态</th>
+                    <th width='120px'>总单编号</th>
+            		<th width='180px'>区域</th>
+            		<th width='60px'>情侣款</th>
+    				<th width='90px'>周期类型</th>
+    				<th width='180px'>商品类别</th>
+    				<th width='90px'>购物开始日期</th>
+    				<th width='90px'>购物结束日期</th>
+    				<th width='90px'>销售开始日期</th>
+    				<th width='90px'>销售结束日期</th>
+    				<th width='90px'>最后到货日期</th>
+            		<th width='180px'>组织</th>
+            		<th width='90px'>创建人</th>
+            		<th width='120px'>创建时间</th>
+            		<th width='90px'>修改人</th>
+            		<th width='120px'>修改时间</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($item in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value="$!{item.headid}"/>$velocityCounter</td>
+					<td>$!DictUtil.getValue('status', $!item.status)</td>
+    				<td><a href='javascript:toEditPage($!{item.headid});'>$!item.billNo</a></td>
+    				<td>$!item.regionName</td>
+    				<td>$!DictUtil.getValue('yesorno', $!item.isLoveStyle)</td>
+    				<td>$!item.cycleTypeName</td>
+    				<td><input type='text' readonly class='none' value="$!item.articleTypeNames"></td>
+    				<td>$!item.purDateStart</td>
+    				<td>$!item.purDateEnd</td>
+    				<td>$!item.saleDateStart</td>
+    				<td>$!item.saleDateEnd</td>
+    				<td>$!item.purArriveDateEnd</td>
+    				<td>$!BdCommon.getOrgName($!item.orgId)</td>
+    				<td>$!BdCommon.getUserName($!item.createId)</td>
+    				<td>$!item.createDate</td>
+    				<td>$!BdCommon.getUserName($!item.updateId)</td>
+    				<td>$!item.updateDate</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function addGatherBillHead(){
+	window.location = "gatherSet.vm?user_action=headEdit";
+}
+function editGatherBillHead(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要修改的记录");
+		return ;
+	}
+##	toEditPage($n("chk")[index].value);
+    window.location = "gatherSet.vm?user_action=headEdit&billId=" + $n("chk")[index].value;
+}
+function toEditPage(billId){
+	window.location = "gatherSet.vm?user_action=bodyEdit&billId=" + billId;
+}
+function editGatherBillBody(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要修改的记录");
+		return ;
+	}
+	window.location = "gatherSet.vm?user_action=bodyEdit&billId=" + $n("chk")[index].value;
+}
+function deleteGatherBill(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要删除的记录");
+		return ;
+	}
+	confirm("确定删除?", function(data){
+		showLayer(true);
+		GatherSetDwr.deleteGatherSet($n("chk")[index].value, function(data){
+    		showLayer(false);
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+    				window.location = "gatherSet.vm?user_action=setList";
+    			}
+    		});
+		});
+	});
+}
+function viewGatherBill(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要查看的记录");
+		return ;
+	}
+	window.location = "gatherOrder.vm?user_action=view&fromSetList=1&headid=" + $n("chk")[index].value;
+}
+function changeButtons(checked, index){
+	jQuery("#btnEditHead").attr("disabled", true);
+	jQuery("#btnEditBody").attr("disabled", true);
+	jQuery("#btnDelete").attr("disabled", true);
+	jQuery("#btnViewGatherBill").attr("disabled", true);
+	if(checked){
+    	jQuery("#btnEditHead").attr("disabled", false);
+    	jQuery("#btnEditBody").attr("disabled", false);
+    	jQuery("#btnDelete").attr("disabled", false);
+    	jQuery("#btnViewGatherBill").attr("disabled", false);
+	}
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, changeButtons, function(index){
+		//toEditPage($n("chk")[index].value);
+		window.location = "gatherSet.vm?user_action=bodyEdit&billId=" + $n("chk")[index].value;
+	});
+	initQuery2('PGATHERSET01', "frm", 'btnQueryShow');
+	changeButtons(false);
+});
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("setList");
+}
+</script>

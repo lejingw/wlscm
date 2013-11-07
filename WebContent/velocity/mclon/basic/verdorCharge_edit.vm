@@ -1,0 +1,66 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/verdorCharge.js", "$StringUtil.getContextPath()/dwr/interface/VerdorChargeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="chargeId" value="$!{form.c.chargeId}"/>
+    <table class="title">
+    	<tr><td>新特殊工费</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012702','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>供应商</td>	<td class='body2'>
+				<select id='verdorId' dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+			<td class='body1'>款式</td>
+			<td class='body2'>
+				<input type='text' id='styleId' value="$!{form.c.styleName}"><IMG src="$!StringUtil.getContextPath()/image/mclon/sel.png" alt="选择款式" onclick="showStyleWindow()"/>
+				<input type='hidden' id="sid" name='sid' value="$!{form.c.styleId}">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>备注</td>	<td class='body2'>
+				<input type='text' id='memo' value="$!{form.c.memo}"></td>
+				<!--<input type='text' id='vendorId' dataType="Require" msg="不能为空" value="$!{form.sv.vendorId}"></td>-->
+			<td class='body1'>状态</td><td class='body2'>
+				<input type='text' id='statusName' readonly  value="$!DictUtil.getValue('status', $!form.c.status)"></td>
+				<input type='hidden' id='status' readonly  value="$!{form.c.status}"></td>
+		</tr>
+    </table>
+</form>
+
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveVerdorCharge();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "verdorCharge.vm";
+	});
+	if(!"$!form.c.id"){
+		jQuery("#statusName").val("保存");
+	}
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId", data, null, null, true, true,"$!{form.c.verdorId}");
+	});
+});
+
+//选择款式树
+function showStyleWindow(){
+	printWin = selectStyle(function(id,name){}, null, null, false, null, "loadAllInivStyle",null);
+}
+//选择款式后回调 款式ID
+function loadSelectStyleData(styleId,styleName){ 
+	jQuery("#styleId").val(styleName);
+	jQuery("#sid").val(styleId);
+}
+var printWin = null;
+function closePrintWin(){
+	if(printWin!=null)
+		printWin.close();
+}
+
+</script>

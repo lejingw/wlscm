@@ -1,0 +1,264 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/SafeStockDwr.js"])
+#set($rightCode = '08012203')
+	
+<form id='frm' action="safeStock.vm" method="post">
+	<input type='hidden' value='batchCreate' name='user_action'>
+    <table class="title">
+    	<tr><td>总部安全库存</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnQuery'/>
+				<input type='button' value='批量生成' class='btn' id='btnBatchCreate' $RightUtil.able($session, $rightCode, '1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" name="itemClassId" value="">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" name="ornaClassId" value="">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<select id="analysisId" name="analysisId" value="">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式大类</td>
+			<td class='body2'>
+				<select id="styleItemClassId" name="styleItemClassId" value="">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式中类</td>
+			<td class='body2'>
+				<select id="styleMiddleClassId" name="styleMiddleClassId" value="">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>款式小类</td>
+			<td class='body2'>
+				<select id="styleOrnaClassId" name="styleOrnaClassId" value="">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式</td>
+			<td class='body2'>
+				<select id="styleId" name="styleId" value="">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>起订量起止</td>
+			<td class='body2'>
+				<input type='text' id="startOrderNum1" name="startOrderNum1" value="$!{form.condition.startOrderNum1}" style="width:55px;">
+				<input type='text' id="startOrderNum2" name="startOrderNum2" value="$!{form.condition.startOrderNum2}" style="width:55px;">
+			</td>
+			<td class='body1'>库存标准</td>
+			<td class='body2'>
+				<input type='text' id='safeNum' name='safeNum' value="$!{form.condition.safeNum}" onchange="setLineSafeNum()">
+			</td>
+		</tr>
+    </table>
+	
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'></th>
+        		<th width='90px'>大类</th>
+        		<th width='90px'>小类</th>
+				<th width='90px'>分析范围</th>
+				<th width='90px'>款式大类</th>
+				<th width='90px'>款式中类</th>
+				<th width='90px'>款式小类</th>
+				<th width='90px'>款式</th>
+        		<th width='90px'>起订量</th>
+        		<th width='90px'>库存标准</th>
+        		<th width='60px'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+				<td></td>
+				<td>
+					<input type='hidden' name="itemClassId2" value="$!map.itemClassId">
+					<input type='hidden' name="ornaClassId2" value="$!map.ornaClassId">
+					<input type='hidden' name="styleItemClassId2" value="$!map.styleItemClassId">
+					<input type='hidden' name="styleMiddleClassId2" value="$!map.styleMiddleClassId">
+					<input type='hidden' name="styleOrnaClassId2" value="$!map.styleOrnaClassId">
+					<input type='hidden' name="analysisId2" value="$!map.analysisId">
+					<input type='hidden' name="styleId2" value="$!map.styleId">
+						$!BdCommon.getItemClassDesc($!map.itemClassId)
+				</td>
+				<td>$!BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!map.analysisName</td>
+				<td>$!BdCommon.getStyleItemClassNames($!map.styleItemClassId)</td>
+				<td>$!BdCommon.getStyleMiddleClassNames($!map.styleMiddleClassId)</td>
+				<td>$!BdCommon.getStyleOrnaClassNames($!map.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!map.styleId, $!map.styleName, $!map.bigGraph)</td>
+				<td>$!map.startOrder</td>
+				<td><input type='text' name='safeNum2' value='' style='width:90px;'></td>
+				<td><input type='button' value='删除' onclick="deleteCurrentRow(this)"></td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+<script>
+function deleteCurrentRow(obj){
+	var index = obj.parentNode.parentNode.rowIndex - 1;
+	$("tbl").deleteRow(index);
+	setRowNum();
+}
+function setRowNum(){
+	for(var i=0;i<$("tbl").rows.length;i++){
+		$("tbl").rows[i].cells[0].innerHTML = $("tbl").rows.length - i;
+	}
+}
+function setLineSafeNum(){
+	for(var i=0;i<$n("safeNum2").length;i++){
+		$n("safeNum2")[i].value = jQuery("#safeNum").val();
+	}
+}
+function changeItemClass(){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+function changeOrnaClass(){
+	BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+	});
+	//获取款式大类
+	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("styleItemClassId", data, null, null, true, true);
+		changeStyleItemClassId();
+	});
+}
+/**
+ *　改变款式大类
+ */
+function changeStyleItemClassId(){
+	//获取款式中类
+	BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+		addOptions("styleMiddleClassId", data, null, null, true, true);
+		changeStyleMiddleClassId();
+	});
+}
+/**
+ *　改变款式中类
+ */
+function changeStyleMiddleClassId(){
+	//获取款式小类
+	BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+		addOptions("styleOrnaClassId", data, null, null, true, true);
+		changeStyleOrnaClassId();
+	});
+}
+/**
+ *　改变款式小类
+ */
+function changeStyleOrnaClassId(){
+	//获取款式
+	BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true);
+	});
+}
+function saveform(){
+	if($("tbl").rows.length<1){
+		alert("没有行记录可以生成");
+		return ;
+	}
+	var length = $("tbl").rows.length;
+	for(var i=0;i<$("tbl").rows.length;i++){
+		if(!isDecimal($n("safeNum2")[i].value)){
+			alert("第"+(length - i)+"行 库存标准不能为空，且必须为整数");
+			return ;
+		}
+	}
+	confirm("确定批量生成?", function(){
+		var arr = [];
+		for(var i=0;i<$("tbl").rows.length;i++){
+    		arr.push({
+				itemClassId : $n("itemClassId2")[i].value,
+				ornaClassId : $n("ornaClassId2")[i].value,
+				styleItemClassId : $n("styleItemClassId2")[i].value,
+				styleMiddleClassId : $n("styleMiddleClassId2")[i].value,
+				styleOrnaClassId : $n("styleOrnaClassId2")[i].value,
+				analysisId : $n("analysisId2")[i].value,
+				styleId : $n("styleId2")[i].value,
+				safeNum : $n("safeNum2")[i].value
+			});
+    	}
+    	SafeStockDwr.saveBatchSafeStock(arr, function(data){
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+    				window.location = "safeStock.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnQuery").click(function(){
+		if(isNull(jQuery("#itemClassId").val()) || isNull(jQuery("#ornaClassId").val())){
+			alert("请先选择大类、小类");
+			return ;
+		}
+		if(!isNull(jQuery("#startOrderNum1").val()) && !isNumber(jQuery("#startOrderNum1").val())){
+			alert("起订量起必须为整数");
+			return ;
+		}
+		if(!isNull(jQuery("#startOrderNum2").val()) && !isNumber(jQuery("#startOrderNum2").val())){
+			alert("起订量止必须为整数");
+			return ;
+		}
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnBatchCreate").click(saveform);
+	jQuery("#btnToList").click(function(){window.location = "safeStock.vm";});
+	
+	jQuery("#itemClassId").change(changeItemClass);
+	jQuery("#ornaClassId").change(changeOrnaClass);
+	jQuery("#styleItemClassId").change(changeStyleItemClassId);
+	jQuery("#styleMiddleClassId").change(changeStyleMiddleClassId);
+	jQuery("#styleOrnaClassId").change(changeStyleOrnaClassId);
+	
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+		if("$!form.condition.itemClassId"){
+    		BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+        		addOptions("ornaClassId", data, null, null, true, true, "$!form.condition.ornaClassId");
+    			if("$!form.condition.ornaClassId"){
+    				BdCommonDwr.getAnalysisForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                		addOptions("analysisId", data, null, null, true, true, "$!form.condition.analysisId");
+                	});
+                	BdCommonDwr.getStyleItemClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                		addOptions("styleItemClassId", data, null, null, true, true, "$!form.condition.styleItemClassId");
+    					if("$!form.condition.styleItemClassId"){
+    						BdCommonDwr.getStyleMiddleClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), function(data){
+                        		addOptions("styleMiddleClassId", data, null, null, true, true, "$!form.condition.styleMiddleClassId");
+    							if("$!form.condition.styleMiddleClassId"){
+    								BdCommonDwr.getStyleOrnaClassForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+                                		addOptions("styleOrnaClassId", data, null, null, true, true, "$!form.condition.styleOrnaClassId");
+    									if("$!form.condition.styleOrnaClassId"){
+    										BdCommonDwr.getStyleForSlt(jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+                                        		addOptions("styleId", data, null, null, true, true, "$!form.condition.styleId");
+                                        	});
+    									}
+                                	});
+    							}
+                        	});
+    					}
+                	});
+    			}
+        	});
+		}
+	});
+	setLineSafeNum();
+	setRowNum();
+});
+</script>

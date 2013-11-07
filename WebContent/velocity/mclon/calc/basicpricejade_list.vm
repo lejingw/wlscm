@@ -1,0 +1,108 @@
+<form id="myForm" method="post">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<input type='hidden' name='id' id="id"/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>翠核价单基础价</td></tr>
+            </td>
+        </tr>
+    </table>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08061501','1')>
+				<input type='button' value='修改/查看' class='btn' onclick='toEditBasicPriceJade()'  $RightUtil.able($session, '08061501','2')>
+				<input type='button' value='删除' class='btn' onclick='deleteLine()'  $RightUtil.able($session, '08061501','3')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' $RightUtil.able($session, '08061501','4')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()"  $RightUtil.able($session, '08061501','5')>
+				#if($!form.successfulFlag)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end
+			</td>
+		</tr>
+    </table>
+	    <div class="scroll">
+	    <table class='list' style="width:1150px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width='90px'>大类</th>
+        		<th width='90px'>启始价格</th>
+				<th width='90px'>截止价格</th>
+        		<th width='90px'>小价格</th>
+				<th width='90px'>大价格</th>
+				<th width='90px'>取值后几位数</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.billid}"/>$velocityCounter</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemclassid)</td>
+				<td>$!map.startprice</td>
+				<td>$!map.endprice</td>
+				<td>$!map.smallprice</td>
+				<td>$!map.bigprice</td>
+				<td>$!map.decimalnum</td>
+				<td>$!map.createdate</td>
+				<td>$!BdCommon.getUserName($!map.createuserid)</td>
+				<td>$!map.updatedate</td>
+				<td>$!BdCommon.getUserName($!map.updateuserid)</td> 
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null, function(index){
+		window.location = "basicPriceJade.vm?user_action=toEditBasicPriceJade&id=" + $n("chk")[index].value;
+	});
+	initQuery2("HJC01", 'myForm', 'btnQueryShow');
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "basicPriceJade.vm?user_action=toEditBasicPriceJade";
+	});
+	
+});
+function toEditPage(id){
+	window.location = "basicPriceJade.vm?user_action=toEditBasicPriceJade&id=" + id;
+}
+function toEditBasicPriceJade(id){
+	var index = getSelectIndexs('chk');
+	if(index.length!=1){
+		alert("请选择一行");
+		return;
+	}
+	var id = $n("chk")[index[0]].value;
+	window.location = "basicPriceJade.vm?user_action=toEditBasicPriceJade&id=" + id;
+}
+function deleteLine(){
+	var index = getSelectIndexs('chk');
+	if(index.length!=1){
+		alert("请选择一行");
+		return;
+	}
+	var id = $n("chk")[index[0]].value;
+	confirm("确定删除?", function(){
+		//window.location = "basicPriceJade.vm?user_action=deleteBasicPriceJade&id=" + id;
+		jQuery("#id").val(id);
+    	jQuery("#user_action").val("deleteBasicPriceJade");
+    	jQuery("#myForm").submit();
+    	jQuery("#user_action").val("");
+	});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#myForm").submit();
+	//user_action改回之前的值，否则之后的任何提交如果不重新设置user_action，则都将是导出excel，比如上下翻页
+	jQuery("#user_action").val("");
+}
+</script>

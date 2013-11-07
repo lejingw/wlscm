@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="HandoverLineRec">
+	<typeAlias alias="HandoverLineRec" type="com.jatools.vo.pur.HandoverLineRec" />
+	
+	<sql id="HandoverLineRec_columns_1">
+		a.lineid          as "lineid",
+		a.billid          as "billid",
+		a.item_class_id   as "itemClassId",
+		a.unit_no         as "unitNo",
+		a.hang_num        as "hangNum",
+		a.hang_price      as "hangPrice",
+		a.hand_money      as "handMoney",
+		a.hand_charge     as "handCharge",
+		a.no_num_last     as "noNumLast",
+		a.no_num_now      as "noNumNow",
+		a.yes_num         as "yesNum",
+		a.yes_money       as "yesMoney",
+		a.diff_num        as "diffNum",
+		a.diff_money      as "diffMoney",
+		a.is_iniv         as "isIniv",
+		a.status          as "status",
+		a.memo            as "memo",
+		a.create_date     as "createDate",
+		a.create_id       as "createId",
+		a.update_date     as "updateDate",
+		a.update_id       as "updateId",
+		a.gold_price      as "goldPrice",
+		a.last_hang_num   as "lastHangNum",
+		b.ITEM_CLASS_DSC  as "itemClassDesc",
+		c.item_value	  as "unitName",
+		d.empname		  as "editName"
+	</sql>
+	
+	<sql id="HandoverLineRec_columns_3">
+		a.edit_date       as "editDate",
+		a.edit_id         as "editId"
+	</sql>
+	
+	<sql id="HandoverLineRec_columns_4">
+		a.update_date    as "editDate",
+		a.update_id      as "editId"
+	</sql>
+	
+	<sql id="HandoverLineRec_columns_2">
+		"id", "lineid", "billid", "itemClassId", "unitNo", "hangNum", "hangPrice", "handMoney", "handCharge", "noNumLast", 
+		"noNumNow", "yesNum", "yesMoney", "diffNum", "diffMoney", "isIniv", "status", "memo", "createDate", "createId", 
+		"updateDate", "updateId", "goldPrice", "lastHangNum", "editDate", "editId", "itemClassDesc", "unitName", "editName"
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="HandoverLineRec.getHandoverLineRecPageData" resultClass="HandoverLineRec" parameterClass="map">
+		select <include refid="HandoverLineRec_columns_2"/> from (select rownum rownum_ , AA.* from (
+		
+			select * from (
+				select 
+				       -2      as "id",
+				       <include refid="HandoverLineRec_columns_1"/>,
+				       <include refid="HandoverLineRec_columns_4"/>
+				from jat_pur_handover_line a
+				left join jas_bd_item_class b
+				    on a.item_class_id = b.ITEM_CLASS_ID
+				  left join jat_sys_dict_item c
+				    on a.unit_no = c.item_key
+				   and c.entry_code = 'purunit'
+				  left join jas_bd_emp d
+				    on a.update_id = d.empid
+				where a.billid = #billid#
+				union
+				select 
+					-1   as "id",
+					<include refid="HandoverLineRec_columns_1"/>,
+					<include refid="HandoverLineRec_columns_4"/>
+				  from jat_pur_handover_line_rec a
+				  left join jas_bd_item_class b
+				    on a.item_class_id = b.ITEM_CLASS_ID
+				  left join jat_sys_dict_item c
+				    on a.unit_no = c.item_key
+				   and c.entry_code = 'purunit'
+				  left join jas_bd_emp d
+				    on a.edit_id = d.empid
+				 where 1 = 1
+				and a.billid = #billid#
+				) aa order by aa."id", aa."editDate" desc, aa."itemClassId"
+
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="HandoverLineRec.getHandoverLineRecTotalCount" resultClass="int" parameterClass="map">
+		select count(1)
+		from (
+		     select 0 from jat_pur_handover_line_rec a where a.billid = #billid#
+		  union all
+		     select 1 from jat_pur_handover_line a where a.billid = #billid#
+		) aa
+	</select>
+	
+	<select id="HandoverLineRec.getHistoryCount" resultClass="int" parameterClass="map">
+		select count(*) from jat_pur_handover_line_rec a where a.billid = #billid#
+	</select>
+</sqlMap>

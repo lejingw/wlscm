@@ -1,0 +1,179 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+	"$StringUtil.getContextPath()/dwr/interface/InventoryDwr.js", 
+	"$StringUtil.getContextPath()/js/stock/inventory_list.js?t=201202221655.js"])
+
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>盘点单#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	#set($cond = $form.condition)
+	#set($billno = $!cond.get('billno'))
+	#set($orgId = $StringUtil.getOrgId($session))##当前组织
+	#set($stockId = $!cond.get('stockId'))
+	#set($billStatus = $!cond.get('billStatus'))
+	#set($startDate = $!cond.get('startDate'))
+	#set($endDate = $!cond.get('endDate'))
+	#set($status = $!cond.get('status'))
+	#set($createId = $!cond.get('createId'))
+	
+	
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08030901','1')/>
+				<input type='button' value='合并' class='btn' id='btnMerge' $RightUtil.able($session, '08030901','2')/>
+				<input type='button' value='查询' class='btn' id='btnFilter' $RightUtil.able($session, '08030901','3')/>
+				<input type='button' value='高级查询' class='btn' id='btnFilter2' $RightUtil.able($session, '08030901','3')/>
+				<input type='checkbox' id='allBill' name="allBill" onchange="showAllBill(this)" #if("$!status" == "all")checked#end/>显示所有单据
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08030901','4')>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+    			<td class="body1">创建人</td>
+    			<td class='body2'>
+    				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+					<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+    			</td>
+    		</tr>
+			<tr>
+    			<td class="body1">子库</td>
+    			<td class='body2'>
+    				<select id="stockId" name='stockId'  value="$!{stockId}" >$StringUtil.emptyOption()</select>
+    			</td>
+				<td class="body1">状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status'  value="$!{status}" >
+						$StringUtil.emptyOption()
+						<option value="all">所有单据</option>
+						<option value="1">保存</option>
+						<option value="4">审核中</option>
+						<option value="5">审核完毕</option>
+						<option value="10">已接收</option>
+						<option value="8">关闭</option>
+					</select>
+    			</td>
+			</tr>
+    		<tr>
+    			<td class="body1">业务时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">业务时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+    	</table>
+	</div>
+	<div class="scroll">
+    <table class='list' style="width:1450px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th width="60px">状态</th>
+                <th width="120px">单号(继续盘点)</th>
+        		<th width="180px">组织(查看单据)</th>
+				<th width="90px">单据日期</th>
+                <th width="90px">盘点人员</th>
+                <th width="60px">盘点件数</th>
+				<th width="90px">仓库总件数</th>
+        		<th width="100px">子库(生成差异)</th>
+                <th width="60px">查看差异</th>
+                <th width="60px">是否主单</th>
+        		<th width="120px">创建时间</th>
+				<th width="90px">修改人</th>
+        		<th width="120px">修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td style="color:blue;">$!DictUtil.getValue('status', $!map.status)</td>
+				<td>#if
+						($map.orgId == $orgId && "$!map.status" != "8")<a href='javascript:toEditPage(this, $!{map.billid});'>$!{map.billno}</a>
+					#else
+						$!{map.billno}
+					#end
+				</td>
+				<td><a href='javascript:toShowPage($!{map.billid});'>$!BdCommon.getOrgName($!map.orgId)</a></td>
+				<td>$!map.dodate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+                <td>$!map.sumCount</td>
+				<td>$!map.isstock</td>
+				<td>
+					<DIV name="showDiff">
+					
+					 </DIV>
+				</td>
+                <td><a  href='javascript:showDiffBill("$!map.billno")'>查看差异</a></td>
+				<td>
+					<input type='checkbox' name='ismain' #if($!map.ismain == 1)checked=true#end #if($!map.status=="8" || $map.orgId != $orgId)disabled#end  onchange='changeIsmain(this, "$!{map.billid}", "$!map.orgId", "$!map.stockId");'/>主单
+				</td>
+				<td>$!map.createDate
+					<input type='hidden' name="billno_list" value="$!map.billno" />
+					<input type='hidden' name="billid" value="$!map.billid" />
+					<input type='hidden' name="stockId_list" value="$!map.stockId" />
+					<input type='hidden' name="stockName_list" value="$!DictUtil.getValue('invcode', $!map.stockId)" />
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="status_orgId" value="$!map.orgId"/>
+				</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!map.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script >
+var curOrgId = "$!orgId";
+jQuery(function(){
+	initQuery("btnFilter", "btnQueryCancel");
+	initQuery2("PD01", "frm", "btnFilter2");
+	initCalendarArr(["startDate", "endDate"]);
+	checkAll("chkall",'chk', true);
+	altRowCSS('tbl');//为列表添加换行样式
+	jQuery("#status").val("$!status");
+	DictDwr.getDictsForSlt('invcode', function(data){
+		addOptions("stockId", data, null, null, true, true, "$!stockId");
+	});
+	jQuery("#btnAdd").click(function(){
+		window.location = "procInventory.vm?user_action=toEdit";
+	});
+	
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(reset);
+	jQuery("#btnMerge").click(mergeBills);
+	setValues();
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

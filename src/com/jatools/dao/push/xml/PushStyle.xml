@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="PushStyle">
+    <sql id="PushStyle.column">
+            a.id as "id",
+            a.item_class_id as "itemClassId",
+            a.orna_class_id as "ornaClassid",
+            a.style_item_class_id as "styleItemClassId",
+            a.style_id1 as "styleId1",
+            a.style_id2 as "styleId2",
+            a.create_id        as "createId",
+            a.create_date      as "createDate",
+            a.update_id        as "updateId",
+            a.update_date      as "updateDate",
+            a.status           as "status",
+            c.STYLENAME as "styleName1",
+            d.STYLENAME as "styleName2",
+            c.ISBIGGRAPH as "bigGraph1",
+            d.ISBIGGRAPH as "bigGraph2"
+    </sql>
+	<sql id="PushStyle.getPushStylePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="PushStyle.getPushStylePageData" parameterClass="map" resultClass="com.jatools.vo.push.PushStyle">
+		select * from (select rownum rownum_ , AA.* from (
+                select <include refid="PushStyle.column" />
+                from jat_pl_basic_style a
+                left join jas_bd_style c on a.style_id1 = c.STYLEID
+                left join jas_bd_style d on a.style_id2 = d.STYLEID
+			  <include refid="PushStyle.getPushStylePageDataCD"/>
+			 order by a.id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PushStyle.getPushStyleTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_style a
+			  <include refid="PushStyle.getPushStylePageDataCD"/>
+	</select>
+	<select id="PushStyle.getPushStyleById" parameterClass="string" resultClass="com.jatools.vo.push.PushStyle">
+            select  <include refid="PushStyle.column" />
+            from jat_pl_basic_style a
+            left join jas_bd_style c on a.style_id1 = c.STYLEID
+            left join jas_bd_style d on a.style_id2 = d.STYLEID
+			where a.id = #value#
+	</select>
+	<insert id="PushStyle.savePushStyle" parameterClass="com.jatools.vo.push.PushStyle">
+        <selectKey keyProperty="id" type="pre"> select JAT_PL_BASIC_STYLE_SEQ.nextval as "id" from dual </selectKey>
+		insert into jat_pl_basic_style (
+            id, item_class_id, orna_class_id,  style_item_class_id, style_id1, style_id2,
+			create_id, create_date, update_id, update_date, status
+        ) values (
+            #id#, #itemClassId#, #ornaClassId#, #styleItemClassId#, #styleId1#, #styleId2#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#
+        )
+	</insert>
+	<update id="PushStyle.updatePushStyle" parameterClass="com.jatools.vo.push.PushStyle">
+		update jat_pl_basic_style a
+		set
+                a.item_class_id = #itemClassId#,
+                a.orna_class_id = #ornaClassId#,
+                a.style_item_class_id = #styleItemClassId#,
+                a.style_id1 = #styleId1#,
+                a.style_id2 = #styleId2#,
+                a.update_id = #updateId#,
+                a.update_date = #updateDate#
+		where a.id = #id#
+	</update>
+
+	<select id="PushStyle.checkPushStyleExists" parameterClass="com.jatools.vo.push.PushStyle" resultClass="int">
+		select count(1)
+		  from jat_pl_basic_style a
+        where 1=1
+            and a.item_class_id = #itemClassId#
+            and a.orna_class_id = #ornaClassId#
+            and a.style_item_class_id = #styleItemClassId#
+            and (a.style_id1 = #styleId1# or a.style_id1 = #styleId2# or a.style_id2 = #styleId1# or a.style_id2 = #styleId2#)
+		<isNotEmpty property="id"> <![CDATA[ and a.id <> #id# ]]></isNotEmpty>
+	</select>
+
+	<delete id="PushStyle.deletePushStyle" parameterClass="string">
+		delete jat_pl_basic_style a where a.id = #value#
+	</delete>
+</sqlMap>

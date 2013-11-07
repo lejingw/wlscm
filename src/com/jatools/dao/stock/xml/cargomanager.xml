@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CargoManager">
+	
+	<sql id="CargoManager_column_1">
+		a.orna_code          as "ornaCode",
+		a.orna_barcode       as "ornaBarcode",
+		a.orna_dsc           as "ornaDsc",
+		a.style_id           as "styleId",
+		a.now_qty            as "nowQty",
+		a.all_qty            as "allQty",
+		a.item_class_id      as "itemClassId",
+		a.orna_class_id      as "ornaClassId",
+		a.alaysis_id         as "alaysisId",
+		a.quality_id         as "qualityId",
+		a.tag_type           as "tagType",
+		a.sale_unit_id       as "saleUnitId",
+		a.state              as "state",
+		a.pos_amount         as "posAmount",
+		a.real_total_cost    as "realTotalCost",
+		a.store_total_cost   as "storeTotalCost",
+		a.main_weight        as "mainWeight",
+		a.part_weight        as "partWeight",
+		a.stone_total_num    as "stoneTotalNum",
+		a.stone_now_num      as "stoneNowNum",
+		a.special_work_price as "specialWorkPrice",
+		a.is_consign         as "isConsign",
+		a.is_custom          as "isCustom",
+		a.style_type_id      as "styleTypeId",
+		a.is_muti_part       as "isMutiPart",
+		a.main_num           as "mainNum",
+		a.part_num           as "partNum",
+		a.org_id             as "orgId",
+		a.real_cost          as "realCost",
+		a.is_dbl_label       as "isDblLabel",
+		a.is_material        as "isMaterial"
+	</sql>
+	<sql id="CargoManager_column_2">
+		"ornaCode", "ornaBarcode", "ornaDsc", "styleId", "nowQty", "allQty", "itemClassId", "ornaClassId", "alaysisId", "qualityId", "tagType", "saleUnitId", "state", "posAmount", "realTotalCost", "storeTotalCost", "mainWeight", "partWeight", "stoneTotalNum", "stoneNowNum", "specialWorkPrice", "isConsign", "isCustom", "styleTypeId", "isMutiPart", "mainNum", "partNum", "orgId", "realCost", "isDblLabel", "isMaterial"
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="CargoManager.getCargoMaterPageData" resultClass="com.jatools.vo.stock.PackageMaterActive" parameterClass="map">
+		select <include refid="CargoManager_column_2"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="CargoManager_column_1"/> 
+			from ic_mater_active a,
+				jas_bd_analysis_arange b,
+	  			jas_bd_style c
+			where 1 = 1
+			and a.alaysis_id = b.ANALYSIS_ARANGE_ID
+   			and a.style_id = c.STYLEID
+   			<isNotEmpty property="styleItemClass" prepend="and">  c.STYLEITEMCLASS = #styleItemClass# </isNotEmpty>
+   			<isNotEmpty property="styleOrnaClass" prepend="and">  c.STYLEORNACLASS = #styleOrnaClass# </isNotEmpty>
+   			<isNotEmpty property="styleMiddleClass" prepend="and">  c.STYLEMIDDLECLASS = #styleMiddleClass# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+			<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+			<isNotEmpty property="barCode" prepend="and">  a.orna_barcode = #barCode# </isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="isMaterial" prepend="and">
+				<isEqual property="isMaterial" compareValue="1"> a.is_material = 1 </isEqual>
+				<isNotEqual property="isMaterial" compareValue="1"> (a.is_material = 0 or a.is_material is null ) </isNotEqual>
+			</isNotEmpty>
+			order by a.item_class_id, a.orna_class_id, a.alaysis_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="CargoManager.getCargoMaterTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from ic_mater_active a,
+				jas_bd_analysis_arange b,
+	  			jas_bd_style c
+		where 1 = 1 
+			and a.alaysis_id = b.ANALYSIS_ARANGE_ID
+   			and a.style_id = c.STYLEID
+		<isNotEmpty property="styleItemClass" prepend="and">  c.STYLEITEMCLASS = #styleItemClass# </isNotEmpty>
+		<isNotEmpty property="styleOrnaClass" prepend="and">  c.STYLEORNACLASS = #styleOrnaClass# </isNotEmpty>
+		<isNotEmpty property="styleMiddleClass" prepend="and">  c.STYLEMIDDLECLASS = #styleMiddleClass# </isNotEmpty>
+		<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+		<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+		<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+		<isNotEmpty property="barCode" prepend="and">  a.orna_barcode = #barCode# </isNotEmpty>
+		<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="isMaterial" prepend="and">
+			<isEqual property="isMaterial" compareValue="1"> a.is_material = 1 </isEqual>
+			<isNotEqual property="isMaterial" compareValue="1"> (a.is_material = 0 or a.is_material is null ) </isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<select id="CargoManager.getMaterByOrnaCode" parameterClass="string" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="CargoManager_column_1"/> 
+		from ic_mater_active a
+			left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+  			left join jas_bd_style c on a.style_id = c.STYLEID
+		where 1 = 1
+			and a.orna_code = #ornaCode#
+	</select>
+	<select id="CargoManager.getMaterByOrnaBarCode" parameterClass="string" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="CargoManager_column_1"/> 
+		from ic_mater_active a
+			left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+  			left join jas_bd_style c on a.style_id = c.STYLEID
+		where 1 = 1
+			and a.orna_barcode = #ornaBarCode#
+	</select>
+</sqlMap>

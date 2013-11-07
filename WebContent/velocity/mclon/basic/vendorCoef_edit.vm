@@ -1,0 +1,49 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/vendorCoef.js", "$StringUtil.getContextPath()/dwr/interface/VendorCoefDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="coefId" value="$!{form.sc.coefId}"/>
+    <table class="title">
+    	<tr><td>供应商系数</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012502','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+		
+		<tr>
+			<td class='body1'>供应商</td>	
+			<td class='body2'>
+				<!--<input type='hidden' id='styleId' value="1">class='target' ondblclick="showSelectStyleWin()"-->
+				<select id="vendorId" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>系数</td>	
+			<td class='body2'>
+				<input type='text' id='coef' dataType='Double' msg='不能为空,且为数字类型'  value="$!StringUtil.formatDouble($!{form.sc.coef},2)">$StringUtil.star()</td>
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>备注</td><td class='body2'><input type='text' id='memo' value="$!{form.sc.memo}"></td>
+		</tr>
+    </table>
+</form>
+
+<script>
+
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveVendorCoef();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "vendorCoef.vm";
+	});
+	
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("vendorId", data, null, null, true, true,"$!{form.sc.vendorId}");
+	});
+});
+</script>

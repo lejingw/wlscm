@@ -1,0 +1,85 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/QueryConditionDwr.js"])
+
+<form id="frm" method="post">
+    <table class="title">
+    	<tr><td>查询条件配置</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' value='删除' class='btn' onclick="deleteQueryCondition()">
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>查询编码</th>
+        		<th>单据名称</th>
+        		<th>说明</th>
+        		<th>创建时间</th>
+        		<th>创建人</th>
+        		<th>更新时间</th>
+        		<th>更新人</th>
+        		<th>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{item.headid}'/></td>
+				<td><a href="javascript:toEditPage('$!{item.headid}');">$!{item.queryCode}</a></td>
+				<td>$!DictUtil.getValue('billcode',$!{item.billCode})</td>
+				<td>$!{item.memo}</td>
+				<td>$!item.createDate</td>
+				<td>$!BdCommon.getUserName($!item.createId)</td>
+				<td>$!item.updateDate</td>
+				<td>$!BdCommon.getUserName($!item.updateId)</td>
+				<td>$!DictUtil.getValue('status',$!{item.status})</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null, function(index){
+		window.location = "queryCondition.vm?user_action=toEdit&headid=" + $n("chk")[index].value;
+	});
+	//初始化查询div common_query.js中定义默认已经引入
+	initQuery("btnQuery", "btnQueryCancel");
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "queryCondition.vm?user_action=toAdd";
+	});
+});
+function toEditPage(headid){
+	window.location = "queryCondition.vm?user_action=toEdit&headid=" + headid;
+}
+function deleteQueryCondition(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var headid = $n("chk")[index].value;
+	confirm("确定删除?", function(){
+		QueryConditionDwr.deleteQueryCondition(headid, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+        			window.location = "queryCondition.vm";
+				});
+			}
+		});
+	});
+}
+</script>

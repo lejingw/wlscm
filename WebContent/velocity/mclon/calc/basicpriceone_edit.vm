@@ -1,0 +1,67 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/basicPriceOne.js", "$StringUtil.getContextPath()/dwr/interface/BasicPriceOneDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="billid" value="$!{form.sp.billid}"/>
+    <table class="title">
+    	<tr><td>核价基础价(1)</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08061302','1')>
+				<input type='button' value='打印' class='btn' id="btnPrint" onclick="window.print()">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+		<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemclassid" dataType="Require" msg="不能为空" onchange="loadQ()">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaclassid" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>主石重量始</td><td class='body2'><input type='text' id='startweight' dataType="Require" msg="不能为空" value="$!{form.sp.startweight}">$StringUtil.star()</td>
+		</tr>
+    	<tr>
+			<td class='body1'>主石重量止</td><td class='body2'><input type='text' id='endweight' dataType="Require" msg="不能为空" value="$!{form.sp.endweight}">$StringUtil.star()</td>
+		</tr>
+    </table>
+</form>
+
+<script>
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemclassid", data, null, null, true, true);
+	});
+}
+
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveBasicPriceOne();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "basicPriceOne.vm";
+	});
+	if("$!form.sp.billid"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+});
+function setValues(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemclassid", data, null, null, true, true,"$!{form.sp.itemclassid}");
+	});
+	
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt("$!{form.sp.itemclassid}", function(data){
+		addOptions("ornaclassid", data, null, null, true, true,"$!{form.sp.ornaclassid}");
+	});
+}
+
+</script>

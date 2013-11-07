@@ -1,0 +1,47 @@
+<table class='content'>
+	<tr>
+		<td class='body1'>快递费</td><td class='body2'><input type='text' id='expressCharge' onchange="calcExpressMoney(true)" value='$!{form.head.expressCharge}' dataType="Require" msg="不能为空,且必须为金额类型"/></td>
+	</tr>
+	<tr>
+		<td class='body1'>快递保险费</td><td class='body2'><input type='text' id='expressPremium' onchange="calcExpressMoney(false)" value='$!{form.head.expressPremium}' dataType="Require" msg="不能为空,且必须为金额类型"/></td>
+	</tr>
+	<tr>
+		<td class='body1'>快递费合计</td><td class='body2'><input type='text' id='expressMoney' value='$!{form.head.expressMoney}' readonly dataType="Require" msg="不能为空,且必须为金额类型"/></td>
+	</tr>
+</table>
+<script>
+function fixed2(val){
+	var v = parseFloat(val);
+	return ""+ v.toFixed(2);
+}
+function calcExpressMoney(flag){
+	jQuery("#expressMoney").val("0");
+	var flag1 = true, flag2 = true;
+	if(!isDecimal(jQuery("#expressCharge").val()) || parseFloat(jQuery("#expressCharge").val())<0){
+		flag1 = false;
+    	if(flag){
+    		alert("快递费不能为空，且必须为大于等于0的小数类型");
+		}
+	}
+	if(flag1){
+    	jQuery("#expressCharge").val(fixed2(jQuery("#expressCharge").val()));
+	}
+	if(!isDecimal(jQuery("#expressPremium").val()) || parseFloat(jQuery("#expressPremium").val())<0){
+		flag2 = false;
+    	if(!flag){
+    		alert("快递保险费不能为空，且必须为大于等于0的小数类型");
+		}
+	}
+	if(flag2){
+		jQuery("#expressPremium").val(fixed2(jQuery("#expressPremium").val()));
+	}
+	jQuery("#expressMoney").val(fixed2(floatAdd((flag1?parseFloat(jQuery("#expressCharge").val()):"0"),(flag2?parseFloat(jQuery("#expressPremium").val()):"0"))));
+}
+//供外部调用的取值方法
+function getValues(){
+	return [jQuery("#expressCharge").val(), jQuery("#expressPremium").val(), jQuery("#expressMoney").val()];
+}
+jQuery(document).ready(function(){
+   
+});
+</script>

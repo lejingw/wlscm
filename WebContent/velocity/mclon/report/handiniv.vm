@@ -1,0 +1,152 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+    <table class="title">
+    	<tr><td>报表管理【入库信息统计】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()">
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>商品类别</td>
+				<td class='body2'><input type='hidden' id="Finds" name='Finds' value="0">
+				<select id="articleTypeId" name='articleTypeId'  value="" onchange="changeArticleTypeId()">$StringUtil.emptyOption()</select></td>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name='itemClassId'  value="" onchange="changeOrnaClassId()">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>供应商</td>
+			<td class='body2'>
+				<input type='hidden' id='vendorId' name="vendorId" value="">
+				<input type='text' id='vendorName' value="" readonly class='target' ondblclick="showVendorWin()">
+				<input type='hidden' id='vendorId' name="vendorId" value="$!{form.condition.vendorId}">
+				<input type='text' id='vendorName' value="$!BdCommon.getVendorName($!{form.condition.vendorId})" readonly class='target' ondblclick="showVendorWin()" dataType="Require" >
+				
+			</td>	
+		</tr>
+		<tr>
+		
+			<td class='body1'>开始日期</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="">
+			</td>
+				<td class='body1'>结束日期</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+				<td class='body1'>交接单号</td>
+			<td class='body2'>
+				<input type='text' id="handoverno" name='handoverno' value="">
+			</td>
+		</tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>  
+				<th>供应商</th>
+				<th>大类</th>
+				<th>交接数量</th>
+				<th>交接单位</th>				
+				<th>交接单号</th>		
+				<th>交接时间</th>
+				<th>入库数量</th>
+				<th>入库重量</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+				<td>$!map.CUSTNAME</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.PUR_UNIT</td>
+				<td>$!map.BILLNO</td>
+				<td>$!map.DODATE</td>
+				<td>$!map.QUANTITY</td>
+				<td>$!map.ALL_QTY</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+<script>
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		jQuery("#vendorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#vendorId").val());
+}
+/**
+ * 改变商品类别
+ */
+function changeArticleTypeId(){
+	//获取大类
+	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+
+	});
+}
+
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+function setValues(){
+    altRowCSS("tbl");
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+	jQuery("#vendorId").val("$!form.condition.vendorId");
+	jQuery("#vendorName").val("$!BdCommon.getVendorName($!{form.condition.vendorId})");
+	jQuery("#handoverno").val("$!form.condition.handoverno");
+	
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions("articleTypeId", data, null, null, true, true, "$!form.condition.articleTypeId");
+		if("$!form.condition.articleTypeId"){
+        	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+        		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+			
+        	});
+		}
+	});
+}
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	newCalendar();
+	setValues();
+});
+
+function showVendorWin(){
+	selectVendor(function(idArr, nameArr){
+		jQuery("#vendorId").val(idArr.join(','));
+		jQuery("#vendorName").val(nameArr.join(','));
+	}, null, null, false, jQuery("#vendorId").val());
+}
+</script>

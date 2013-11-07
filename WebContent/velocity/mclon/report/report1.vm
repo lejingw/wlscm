@@ -1,0 +1,48 @@
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+    <table class="title">
+    	<tr><td>报表管理#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnQuery'>
+			</td>
+		</tr>
+    </table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>编码</td>
+			<td class='body1'><input type='text' name='entryCode' value="$!form.condition.entryCode"></td>
+			<td class='body1'>名称</td>
+			<td class='body1'><input type='text' name='entryName' value="$!form.condition.entryName"></td>
+		</tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+				<th>编码</th>
+				<th>名称</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+				<td><input type='checkbox' name='chk'/></td>
+				<td>$!map.ENTRY_CODE</td>
+				<td>$!map.ENTRY_NAME</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+	
+	jQuery("#btnQuery").click(function(){
+		jQuery("#frm").submit();
+	});
+});
+</script>

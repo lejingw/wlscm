@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" 
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+id="WebApp_ID" version="2.5">
+	<display-name>wlscm</display-name>
+
+	<description>MCLON SCM Application</description>
+
+	<!--
+		- Key of the system property that should specify the root directory of this
+		- web app. Applied by WebAppRootListener or Log4jConfigListener.
+	-->
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>wlscm.root</param-value>
+	</context-param>
+	
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	<!--
+		- Location of the Log4J config file, for initialization and refresh checks.
+		- Applied by Log4jConfigListener.
+	-->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/log4j.properties</param-value>
+	</context-param>
+	<!-- log4j 配置文件定时刷新配置-->
+	<!--
+ 	<context-param>
+  		<param-name>log4jRefreshInterval</param-name>
+  		<param-value>60000</param-value>
+ 	</context-param>
+	 -->
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			/WEB-INF/wlscm-servlet.xml,
+			/WEB-INF/applicationContext.xml,
+			/WEB-INF/web-ajax-beans.xml,
+			/WEB-INF/web-beans.xml,
+			/WEB-INF/biz-manager.xml,
+			/WEB-INF/biz-dao.xml,
+			/WEB-INF/biz-timer-define.xml,
+			/WEB-INF/biz-time-task.xml,
+			/WEB-INF/oscache.xml,
+			/WEB-INF/biz-ws-service-remote-beans.xml,
+			/WEB-INF/biz-ws-service-local-beans.xml,
+		classpath:org/codehaus/xfire/spring/xfire.xml</param-value>
+	</context-param>
+	
+	<!-- *************** encoding filter  ************** -->
+	<filter>
+    	<filter-name>characterEncodingFilter</filter-name>
+    	<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+  			<param-name>encoding</param-name>
+  			<param-value>UTF-8</param-value>
+  		</init-param>
+        <init-param>
+             <param-name>forceEncoding</param-name>
+             <param-value>true</param-value>
+         </init-param>
+	</filter>
+    <!-- spring encoding convertor -->
+	<filter-mapping>
+    	<filter-name>characterEncodingFilter</filter-name>
+    	<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- ============ CAS集成开始 ============
+		http://192.168.1.12:8801/cas/login
+		http://192.168.0.212:8080
+		http://192.168.0.222:8080
+		http://192.168.1.113:8082
+	 -->
+	<context-param>
+		<param-name>casServerLoginUrl</param-name>
+		<param-value>http://192.168.0.225:8801/cas/login</param-value>
+	</context-param>
+	<context-param>
+		<param-name>casServerUrlPrefix</param-name>
+		<param-value>http://192.168.0.225:8801/cas</param-value>
+	</context-param>
+	<context-param>
+		<param-name>serverName</param-name>
+		<param-value>http://192.168.0.222:8080</param-value>
+	</context-param>
+	<context-param>
+		<param-name>redirectAfterValidation</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<filter>
+		<filter-name>Sfqh Filter</filter-name>
+		<filter-class>com.mclon.sfqh.khd.filter.SfqhFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>Sfqh Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CAS Single Sign Out Filter</filter-name>
+		<filter-class>org.jasig.cas.client.session.SingleSignOutFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Single Sign Out Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CAS Authentication Filter</filter-name>
+ 		<filter-class>com.jatools.web.cas.WlscmCasFilter</filter-class>
+		<init-param>
+			<param-name>CasAuthenticationFilter</param-name>
+			<param-value>org.jasig.cas.client.authentication.AuthenticationFilter</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ignore.Path</param-name>
+			<param-value>EnterReviewRemoteService,ViewReviewLogRemoteService,ReviewOverRemoteService,RefreshCacheRemoteService</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Authentication Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CAS Validation Filter</filter-name>
+		<filter-class>org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Validation Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CAS Assertion Thread Local Filter</filter-name>
+		<filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Assertion Thread Local Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<listener>
+		<listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
+	</listener>
+	<!--
+	 -->
+	<!-- ============ CAS集成结束 ============ -->
+	
+	<!-- =====    Listener      ====== -->
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>com.jatools.web.listener.WlscmServletContextListener</listener-class>
+	</listener>
+	
+	<!--
+		- Spring web MVC servlet that dispatches requests to registered handlers.
+		- Has its own application context, by default defined in "{servlet-name}-servlet.xml",
+		- i.e. "wlscm-servlet.xml" in this case.
+		-
+		- A web app can contain any number of such servlets.
+		- Note that this web app has a shared root application context, serving as parent
+		- of all DispatcherServlet contexts.
+	-->
+	<servlet>
+		<servlet-name>wlscm</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>XFireServlet</servlet-name>
+		<!-- 不与spring整合使用的servlet
+		<servlet-class>org.codehaus.xfire.transport.http.XFireConfigurableServlet</servlet-class>
+		-->
+		<servlet-class>org.codehaus.xfire.spring.XFireSpringServlet</servlet-class>
+	</servlet>
+	<!-- DWR serverlet -->
+    <servlet>
+		<servlet-name>dwr-invoker</servlet-name>
+		<servlet-class>uk.ltd.getahead.dwr.DWRServlet</servlet-class>
+		<init-param>
+			<param-name>config</param-name>
+			<param-value>WEB-INF/dwr.xml</param-value>
+		</init-param>
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<!-- 
+		<init-param>
+			<param-name>scriptCompressed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		-->
+		<init-param>
+             <param-name>crossDomainSessionSecurity</param-name>
+             <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>allowScriptTagRemoting</param-name>
+            <param-value>true</param-value>
+        </init-param>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+	
+	<!-- jfreechart
+  	<servlet>
+	    <servlet-name>DisplayChart</servlet-name>
+	    <servlet-class>org.jfree.chart.servlet.DisplayChart</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>DisplayChart</servlet-name>
+	    <url-pattern>/servlet/DisplayChart</url-pattern>
+	</servlet-mapping>
+	 -->
+	<servlet-mapping>
+		<servlet-name>wlscm</servlet-name>
+		<url-pattern>*.vm</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>XFireServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+	
+    <servlet-mapping>
+		<servlet-name>dwr-invoker</servlet-name>
+		<url-pattern>/dwr/*</url-pattern>
+	</servlet-mapping>
+	
+	<welcome-file-list>
+    	<welcome-file>index.html</welcome-file>
+  	</welcome-file-list>
+	
+    <!-- ====================================================== -->
+    <!-- error pages                                            -->
+    <!-- ====================================================== -->
+    <error-page>
+        <error-code>400</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>401</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>405</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>407</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>408</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>414</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>415</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>501</error-code>
+        <location>/error.vm</location>
+    </error-page>
+    <error-page>
+        <error-code>503</error-code>
+        <location>/error.vm</location>
+    </error-page>
+</web-app>

@@ -1,0 +1,64 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/basicPriceJade.js", "$StringUtil.getContextPath()/dwr/interface/BasicPriceJadeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="billid" value="$!{form.sp.billid}"/>
+    <table class="title">
+    	<tr><td>翠核价单基础价</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08061502','1')>
+				<input type='button' value='打印' class='btn' id="btnPrint" onclick="window.print()">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+		<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemclassid" dataType="Require" msg="不能为空" >$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>取值后几位数</td>	
+			<td class='body2'>
+				<select id="decimalnum" dataType="Require" msg="不能为空">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+				</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>启始价格</td><td class='body2'><input type='text' id='startprice' dataType="Require" msg="不能为空" value="$!{form.sp.startprice}">$StringUtil.star()</td>
+		</tr>
+    	<tr>
+			<td class='body1'>截止价格</td><td class='body2'><input type='text' id='endprice' dataType="Require" msg="不能为空" value="$!{form.sp.endprice}">$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>小价格</td><td class='body2'><input type='text' id='smallprice' dataType="Require" msg="不能为空" value="$!{form.sp.smallprice}">$StringUtil.star()</td>
+		</tr>
+    	<tr>
+			<td class='body1'>大价格</td><td class='body2'><input type='text' id='bigprice' dataType="Require" msg="不能为空" value="$!{form.sp.bigprice}">$StringUtil.star()</td>
+		</tr>
+    </table>
+</form>
+
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveBasicPriceJade();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "basicPriceJade.vm";
+	});
+	
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemclassid", data, null, null, true, true,"$!{form.sp.itemclassid}");
+	});
+	jQuery("#decimalnum").val("$!{form.sp.decimalnum}");
+});
+</script>

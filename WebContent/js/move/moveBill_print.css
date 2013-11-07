@@ -1,0 +1,118 @@
+.bill_head {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 12pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: center;
+}
+
+.bill_td {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 18px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: left;
+	border: 1;
+}
+
+.black_td {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: left;
+	border: solid windowtext 1pt;
+}
+
+.black_td1 {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: center;
+	border: solid windowtext 1pt;
+}
+
+.bill_td_c {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: center;
+	vertical-align: top;
+}
+
+.black_td_c {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: center;
+	border: solid windowtext 1pt;
+}
+
+.bill_td_r {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: right;
+	vertical-align: top;
+}
+
+.black_td_r {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 9pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 15px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: right;
+	border: solid windowtext 1pt;
+}
+
+.bill_tb {
+	BORDER-RIGHT: windowtext 1pt solid;
+	BORDER-TOP: windowtext 1pt solid;
+	BORDER-LEFT: windowtext 1pt solid;
+	BORDER-BOTTOM: windowtext 1pt solid;
+	BORDER-COLLAPSE: collapse
+}
+
+.bill_tb_print {
+	BORDER: windowtext 0pt solid;
+	BORDER-COLLAPSE: collapse
+}
+
+.bill_td_small {
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 7pt;
+	VERTICAL-ALIGN: middle;
+	COLOR: black;
+	FONT-FAMILY: 宋体;
+	HEIGHT: 16px;
+	BACKGROUND-COLOR: white;
+	TEXT-ALIGN: left;
+}

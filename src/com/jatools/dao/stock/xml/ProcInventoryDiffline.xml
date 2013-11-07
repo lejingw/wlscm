@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcInventoryDiffline">
+	<typeAlias alias="ProcInventoryDiffline" type="com.jatools.vo.stock.ProcInventoryDiffline" />
+	
+	<resultMap id="result" class="ProcInventoryDiffline">
+		<result property = "lineid" column = "lineid"  />
+		<result property = "billid" column = "billid"  />
+		<result property = "rowId" column = "row_id"  />
+		<result property = "itemClassId" column = "item_class_id"  />
+		<result property = "ornaClassId" column = "orna_class_id"  />
+		<result property = "styleitemclass" column = "styleitemclass"  />
+		<result property = "stylemiddleclass" column = "stylemiddleclass"  />
+		<result property = "styleornaclass" column = "styleornaclass"  />
+		<result property = "styleId" column = "style_id"  />
+		<result property = "alaysisId" column = "alaysis_id"  />
+		<result property = "ornaCode" column = "orna_code"  />
+		<result property = "ornaBarcode" column = "orna_barcode"  />
+		<result property = "ornaDsc" column = "orna_dsc"  />
+		<result property = "unitId" column = "unit_id"  />
+		<result property = "nowQty" column = "now_qty"  />
+		<result property = "allQty" column = "all_qty"  />
+		<result property = "grains" column = "grains"  />
+		<result property = "mainWeight" column = "main_weight"  />
+		<result property = "partWeight" column = "part_weight"  />
+		<result property = "isMutiPart" column = "is_muti_part"  />
+		<result property = "isDblLabel" column = "is_dbl_label"  />
+		<result property = "posCost" column = "pos_cost"  />
+		<result property = "posMoney" column = "pos_money"  />
+		<result property = "isPsale" column = "is_psale"  />
+		<result property = "groups" column = "groups"  />
+		<result property = "oldCheckuser" column = "old_checkuser"  />
+		<result property = "stockState" column = "stock_state"  />
+		<result property = "status" column = "status"  />
+		<result property = "memo" column = "memo"  />
+		<result property = "createDate" column = "create_date"  />
+		<result property = "createId" column = "create_id"  />
+		<result property = "updateDate" column = "update_date"  />
+		<result property = "updateId" column = "update_id"  />
+		
+		<result property = "ornaState" column = "orna_state" />
+		<result property = "billCode" column = "bill_code" />
+		<result property = "billNo" column = "bill_no" />
+		<result property = "diffSign" column = "diff_sign" />
+	</resultMap>
+	
+	<resultMap class="ProcInventoryDiffline" id="result2" extends="result">
+		<result property="styleName" column="stylename"/>
+		<result property="bigGraph" column="isbiggraph"/>
+	</resultMap>
+	<sql id="ProcInventoryDiffline_columns_all">
+		lineid, billid, row_id, item_class_id, orna_class_id, styleitemclass, stylemiddleclass, 
+		styleornaclass, style_id, alaysis_id, orna_code, orna_barcode, orna_dsc, unit_id, now_qty, 
+		all_qty, grains, main_weight, part_weight, is_muti_part, is_dbl_label, pos_cost, pos_money, 
+		is_psale, groups, old_checkuser, stock_state, status, memo, create_date, create_id, 
+		update_date, update_id,
+		orna_state, bill_code, bill_no,
+		diff_sign
+    </sql>
+    
+    <sql id="ProcInventoryDiffline_columns_2">
+		a.lineid, a.billid, a.row_id, a.item_class_id, a.orna_class_id, a.styleitemclass, a.stylemiddleclass, a.styleornaclass, 
+		a.style_id, a.alaysis_id, a.orna_code, a.orna_barcode, a.orna_dsc, a.unit_id, a.now_qty, a.all_qty, a.grains, a.main_weight, 
+		a.part_weight, a.is_muti_part, a.is_dbl_label, a.pos_cost, a.pos_money, a.is_psale, a.groups, a.old_checkuser, a.stock_state, 
+		a.status, a.memo, a.create_date, a.create_id, a.update_date, a.update_id, a.orna_state, a.bill_code, a.bill_no,
+		diff_sign, c.stylename, c.isbiggraph
+    </sql>
+    
+    <sql id="ProcInventoryDiffline_columns_3">
+		stylename, isbiggraph
+    </sql>
+    
+    <!-- 获取分页数据 -->
+	<select id="ProcInventoryDiffline.getProcInventoryDifflinePageData" resultMap="result2" parameterClass="map">
+		select <include refid="ProcInventoryDiffline_columns_all"/>, <include refid="ProcInventoryDiffline_columns_3"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="ProcInventoryDiffline_columns_2"/>  from jat_proc_inventory_diffline a left join jas_bd_style c on a.style_id = c.styleid
+			where 1 = 1 and a.billid = #billid#
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="groups" prepend="and">  a.groups = #groups# </isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+			<isNotEmpty property="bill_no" prepend="and">  a.bill_no = #bill_no# </isNotEmpty>
+			<isNotEmpty property="bill_type" prepend="and">  a.bill_code = #bill_type# </isNotEmpty>
+			<isNotEmpty property="state" prepend="and">  a.orna_state = #state# </isNotEmpty>
+			<isNotEmpty property="diffSignState" prepend="and">
+				<isEqual property="diffSignState" compareValue="1"> a.diff_sign = 1 </isEqual>
+				<isNotEqual property="diffSignState" compareValue="1"> (a.diff_sign = 0 or a.diff_sign is null)  </isNotEqual>
+			</isNotEmpty>
+			order by a.lineid DESC
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcInventoryDiffline.getProcInventoryDifflineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_inventory_diffline a
+		where 1 = 1 and a.billid = #billid#
+		<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+		<isNotEmpty property="groups" prepend="and">  a.groups = #groups# </isNotEmpty>
+		<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+		<isNotEmpty property="bill_no" prepend="and">  a.bill_no = #bill_no# </isNotEmpty>
+		<isNotEmpty property="bill_type" prepend="and">  a.bill_code = #bill_type# </isNotEmpty>
+		<isNotEmpty property="state" prepend="and">  a.orna_state = #state# </isNotEmpty>
+		<isNotEmpty property="diffSignState" prepend="and">
+			<isEqual property="diffSignState" compareValue="1"> a.diff_sign = 1 </isEqual>
+			<isNotEqual property="diffSignState" compareValue="1"> (a.diff_sign = 0 or a.diff_sign is null)  </isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+    <!-- 保存数据 -->
+    <insert id="ProcInventoryDiffline.saveProcInventoryDiffline" parameterClass="ProcInventoryDiffline">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PROC_INVENT_DIFFLINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_proc_inventory_diffline(<include refid="ProcInventoryDiffline_columns_all"/>)
+		 values(
+		 	#lineid#, #billid#, #rowId#, #itemClassId#, #ornaClassId#, #styleitemclass#, #stylemiddleclass#, 
+		 	#styleornaclass#, #styleId#, #alaysisId#, #ornaCode#, #ornaBarcode#, #ornaDsc#, #unitId#, 
+		 	#nowQty#, #allQty#, #grains#, #mainWeight#, #partWeight#, #isMutiPart#, #isDblLabel#, #posCost#, 
+		 	#posMoney#, #isPsale#, #groups#, #oldCheckuser#, #stockState#, #status#, #memo#, #createDate#, 
+		 	#createId#, #updateDate#, #updateId#,
+		 	#ornaState#, #billCode#, #billNo#
+		 )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcInventoryDiffline.getProcInventoryDiffline" resultClass="ProcInventoryDiffline" resultMap="result" parameterClass="string">
+    	select <include refid="ProcInventoryDiffline_columns_all"/> from jat_proc_inventory_diffline a where a.lineid = #value#
+    </select>
+    
+     <!-- 根据单号获取记录对象 -->
+    <select id="ProcInventoryDiffline.getProcInventoryDifflineList" resultClass="ProcInventoryDiffline" resultMap="result2" parameterClass="string">
+    	select <include refid="ProcInventoryDiffline_columns_2"/> 
+    	from jat_proc_inventory_diffline a
+    	left join jas_bd_style c on a.style_id = c.styleid
+    	where a.billid = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="ProcInventoryDiffline.updateProcInventoryDiffline" parameterClass="ProcInventoryDiffline">
+		update jat_proc_inventory_diffline a set 
+			a.row_id           = #rowId#,
+			a.item_class_id    = #itemClassId#,
+			a.orna_class_id    = #ornaClassId#,
+			a.styleitemclass   = #styleitemclass#,
+			a.stylemiddleclass = #stylemiddleclass#,
+			a.styleornaclass   = #styleornaclass#,
+			a.style_id         = #styleId#,
+			a.alaysis_id       = #alaysisId#,
+			a.orna_code        = #ornaCode#,
+			a.orna_barcode     = #ornaBarcode#,
+			a.orna_dsc         = #ornaDsc#,
+			a.unit_id          = #unitId#,
+			a.now_qty          = #nowQty#,
+			a.all_qty          = #allQty#,
+			a.grains           = #grains#,
+			a.main_weight      = #mainWeight#,
+			a.part_weight      = #partWeight#,
+			a.is_muti_part     = #isMutiPart#,
+			a.is_dbl_label     = #isDblLabel#,
+			a.pos_cost         = #posCost#,
+			a.pos_money        = #posMoney#,
+			a.is_psale         = #isPsale#,
+			a.groups            = #groups#,
+			a.old_checkuser    = #oldCheckuser#,
+			a.stock_state      = #stockState#,
+			a.status           = #status#,
+			a.memo             = #memo#,
+			a.orna_state	   = #ornaState#,
+			a.bill_code		   = #billCode#,
+			a.bill_no		   = #billNo#,
+			a.update_date      = #updateDate#,
+			a.update_id        = #updateId#
+		where a.lineid = #lineid#
+	</update>
+	<delete id="ProcInventoryDiffline.deleteProcInventoryDiffline" parameterClass="string">
+		delete from jat_proc_inventory_diffline a where a.lineid = #value#
+	</delete>
+	
+	<delete id="ProcInventoryDiffline.deleteProcInventoryDifflineByBillid" parameterClass="string">
+		delete from jat_proc_inventory_diffline a where a.billid = #value#
+	</delete>
+	
+	<!-- 使用在盘点单中 查询未盘点饰品 -->
+	 <select id="ProcInventoryDiffline.getNoStockCount" resultClass="int" parameterClass="map">
+		select count(1) from ic_mater_active a ,jas_bd_analysis_arange b, jas_bd_style c where 1 = 1 
+		and a.alaysis_id = b.ANALYSIS_ARANGE_ID and a.style_id = c.STYLEID
+		and a.orna_code not in (select orna_code from jat_proc_inventory_line where billid = #billid# ) 
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+	</select>
+	
+	<insert id="ProcInventoryDiffline.insertDiffLines" parameterClass="map">
+		insert into jat_proc_inventory_diffline (
+			lineid, 
+			billid, item_class_id, orna_class_id, style_id, alaysis_id, orna_code, orna_barcode,
+			orna_dsc, unit_id, now_qty, all_qty, grains, main_weight, part_weight, is_muti_part,
+			is_dbl_label, pos_cost, pos_money, is_psale, groups, status, create_date, create_id,
+			update_date, update_id, orna_state, bill_code, bill_no
+		)
+		select 
+			JAT_PROC_INVENT_DIFFLINE_SEQ.nextval, 
+			#billid#, a.item_class_id, a.orna_class_id, a.style_id, a.alaysis_id, a.orna_code, a.orna_barcode, 
+			a.orna_dsc, a.sale_unit_id, a.now_qty, a.all_qty, a.stone_now_num, a.main_weight, a.part_weight, a.is_muti_part, 
+			a.is_dbl_label, a.real_costaspos_cost, a.pos_amountaspos_money, a.is_consignasis_psale, a.groups, 1, #createDate#, #createId#, 
+			#updateDate#, #updateId#, a.stateasorna_state, a.bill_code, a.bill_no
+		from ic_mater_active a , jas_bd_analysis_arange b, jas_bd_style c where 1 = 1 
+		and a.alaysis_id = b.ANALYSIS_ARANGE_ID and a.style_id = c.STYLEID
+		<![CDATA[
+		and not exists (select 1 from jat_proc_inventory_line where a.orna_code = orna_code and  billid = #oldBillid#)
+		]]>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+	</insert>
+	
+	
+	<insert id="ProcInventoryDiffline.insertDiffLinesByInvent" parameterClass="map">
+		insert into jat_proc_inventory_diffline (
+			lineid, 
+			billid, item_class_id, orna_class_id, style_id, alaysis_id, orna_code, orna_barcode,
+			orna_dsc, unit_id, now_qty, all_qty, grains, main_weight, part_weight, is_muti_part,
+			is_dbl_label, pos_cost, pos_money, is_psale, groups, status, create_date, create_id,
+			update_date, update_id, orna_state, bill_code, bill_no
+		)
+		select 
+			JAT_PROC_INVENT_DIFFLINE_SEQ.nextval, 
+			#billid#, a.item_class_id, a.orna_class_id, a.style_id, a.alaysis_id, a.orna_code, a.orna_barcode, 
+			a.orna_dsc, a.sale_unit_id, a.now_qty, a.all_qty, a.stone_now_num, a.main_weight, a.part_weight, a.is_muti_part, 
+			a.is_dbl_label, a.real_cost as pos_cost, a.pos_amount as pos_money, a.is_consign as is_psale, a.groups, 1, #createDate#, #createId#, 
+			#updateDate#, #updateId#, a.state as orna_state, a.bill_code, a.bill_no
+		from ic_mater_active a , jas_bd_analysis_arange b, jas_bd_style c where 1 = 1 
+		and a.alaysis_id = b.ANALYSIS_ARANGE_ID and a.style_id = c.STYLEID
+		and not exists (select 1 from jat_proc_inventory_line where a.orna_code = orna_code and  billid = #srcBillid#)
+		and exists (select 1 from jat_proc_inventory_diffhead h where a.org_id = h.org_id and a.stock_id = h.stock_id and h.billid = #billid#)
+	</insert>
+	
+	<!-- 生成差异单的 盘盈行数据 -->
+	<insert id="ProcInventoryDiffline.insertDiffSignLines" parameterClass="map">
+		insert into jat_proc_inventory_diffline 
+		(
+			LINEID	,
+			BILLID	,ROW_ID	,ITEM_CLASS_ID	,ORNA_CLASS_ID	,
+			STYLEITEMCLASS	,STYLEMIDDLECLASS	,STYLEORNACLASS	,STYLE_ID	,
+			ALAYSIS_ID	,ORNA_CODE	,ORNA_BARCODE	,ORNA_DSC	,UNIT_ID	,
+			NOW_QTY	,ALL_QTY	,GRAINS	,MAIN_WEIGHT	,PART_WEIGHT	,
+			IS_MUTI_PART	,IS_DBL_LABEL	,POS_COST	,POS_MONEY	,IS_PSALE	,
+			GROUPS	,OLD_CHECKUSER	,STOCK_STATE	,STATUS	,MEMO	,CREATE_DATE	,
+			CREATE_ID	,UPDATE_DATE  ,UPDATE_ID  ,
+			ORNA_STATE	,BILL_CODE	,BILL_NO	,DIFF_SIGN	
+		)
+		select 
+			JAT_PROC_INVENT_DIFFLINE_SEQ.Nextval,
+			#diffId#, null, t.item_class_id,t.orna_class_id,
+			t.styleitemclass,t.stylemiddleclass,t.styleornaclass,t.style_id,
+			t.alaysis_id,t.orna_code, t.orna_barcode, t.orna_dsc, t.unit_id,
+			t.now_qty, t.all_qty, t.grains, t.main_weight, t.part_weight,
+			t.is_muti_part, t.is_dbl_label, t.pos_cost, t.pos_money, t.is_psale,
+			t.groups, null, null, 1, null, #createDate#,
+			#createId#, #updateDate#, #updateId#, 
+			ic.state as ORNA_STATE, ic.bill_code, ic.bill_no, 1
+		from jat_proc_inventory_line t
+			left join jat_proc_inventory_head h on t.billid = h.billid
+			left join ic_mater_active ic on ic.orna_code = t.orna_code
+		where t.billid = #billid#
+			and <![CDATA[t.org_id <> h.org_id]]> 
+	</insert>
+</sqlMap>

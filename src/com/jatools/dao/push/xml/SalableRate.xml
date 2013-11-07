@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SalableRate">
+	<sql id="SalableRate.getSalableRatePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="SalableRate.getSalableRatePageData" parameterClass="map" resultClass="com.jatools.vo.push.SalableRate">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.region_id        as "regionId",
+			       b.region_name      as "regionName",
+			       a.sale_dis_rate    as "saleDisRate",
+			       a.sale_turn_rate   as "saleTurnRate",
+			       a.unsale_dis_rate  as "unsaleDisRate",
+			       a.unsale_turn_rate as "unsaleTurnRate",
+			       a.create_id        as "createId",
+			       a.create_date      as "createDate",
+			       a.update_id        as "updateId",
+			       a.update_date      as "updateDate",
+			       a.status           as "status"
+			  from jat_pl_basic_salable_reate a
+			  left join jas_pl_region b
+			    on a.region_id = b.region_id
+			  <include refid="SalableRate.getSalableRatePageDataCD"/>
+			 order by b.region_name
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="SalableRate.getSalableRateTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_salable_reate a
+			  left join jas_pl_region b
+			    on a.region_id = b.region_id
+			  <include refid="SalableRate.getSalableRatePageDataCD"/>
+	</select>
+	<select id="SalableRate.getSalableRateByRegionId" parameterClass="string" resultClass="com.jatools.vo.push.SalableRate">
+			select a.region_id        as "regionId",
+			       b.region_name      as "regionName",
+			       a.sale_dis_rate    as "saleDisRate",
+			       a.sale_turn_rate   as "saleTurnRate",
+			       a.unsale_dis_rate  as "unsaleDisRate",
+			       a.unsale_turn_rate as "unsaleTurnRate",
+			       a.create_id        as "createId",
+			       a.create_date      as "createDate",
+			       a.update_id        as "updateId",
+			       a.update_date      as "updateDate",
+			       a.status           as "status"
+			  from jat_pl_basic_salable_reate a, jas_pl_region b
+			where a.region_id = b.region_id and a.region_id = #value#
+	</select>
+	<insert id="SalableRate.saveSalableRate" parameterClass="com.jatools.vo.push.SalableRate">
+		insert into jat_pl_basic_salable_reate (region_id, sale_dis_rate, sale_turn_rate, unsale_dis_rate, unsale_turn_rate,
+			create_id, create_date, update_id, update_date, status)
+		values (#regionId#, #saleDisRate#, #saleTurnRate#, #unsaleDisRate#, #unsaleTurnRate#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="SalableRate.updateSalableRate" parameterClass="com.jatools.vo.push.SalableRate">
+		update jat_pl_basic_salable_reate
+		set sale_dis_rate = #saleDisRate#, sale_turn_rate = #saleTurnRate#, unsale_dis_rate = #unsaleDisRate#, unsale_turn_rate = #unsaleTurnRate#,
+			update_id = #updateId#, update_date = #updateDate#
+		where region_id = #regionId#
+	</update>
+	<select id="SalableRate.checkSalableRateExists" parameterClass="com.jatools.vo.push.SalableRate" resultClass="int">
+		select count(1)
+		  from jat_pl_basic_salable_reate a
+		 where a.region_id = #regionId#
+	</select>
+	<delete id="SalableRate.deleteSalableRate" parameterClass="string">
+		delete jat_pl_basic_salable_reate where region_id = #value#
+	</delete>
+</sqlMap>

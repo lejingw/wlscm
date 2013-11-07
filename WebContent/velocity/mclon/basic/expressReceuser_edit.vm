@@ -1,0 +1,126 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/ExpressReceuserDwr.js"])
+
+<form id='frm' action="" method="post">
+    <table class="title">
+    	<tr><td>组织快递接收人</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='添加接收人' class='btn' id='btnAddReceuser'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>组织</td>
+			<td class='body2'>
+				<input type='hidden' id='orgId' value="$!{form.orgId}">
+				<input type='text' id='orgName' value="$!BdCommon.getOrgName(${form.orgId})" readonly #*if("$!{form.orgId}" == "")*# class="target" ondblclick="showSelectOrgWin()" #*#end*#>
+			</td>
+		</tr>
+    </table>
+	<table class='list'>
+		<thead><tr><th>接收人</th></tr></thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.list)
+			<tr>
+				<td>
+					<input type='hidden' name='receId' value='$!item.receId'>
+					<input type='hidden' name='receUser' readonly value='$!item.receUser'>
+					<input type='text' name='receUserName' readonly value='$!{BdCommon.getUserName($item.receUser)}' style='width:200px;'>
+					<input type='button' value='删除' style='width:60px;' onclick='deleteReceuserRow(this)'>
+				</td>
+			</tr>
+		#end
+        </tbody>
+    </table>
+</form>
+<script>
+//显示组织选择窗口
+function showSelectOrgWin(){
+	/*if(!isNull("$!{form.orgId}")){
+		alert("修改页面组织不可编辑");
+		return ;
+	}*/
+	selectOrg(function(idArr, nameArr){
+            var oldOrgId = jQuery("#orgId").val();
+            if(idArr[0] !== oldOrgId){
+                window.location = "expressReceuser.vm?user_action=toEdit&orgId=" + idArr[0];
+            }
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());
+}
+function deleteReceuserRow(obj){
+	var index = obj.parentNode.parentNode.rowIndex-1;
+	if(!isNull($n("receId")[index].value)){
+		deleteReceIds.push($n("receId")[index].value);
+	}
+	deleteRow(obj, 'tbl');
+}
+function addExpreeReceuser(){
+	if(isNull(jQuery("#orgId").val())){
+		alert("请先选择组织");
+		return ;
+	}
+	selectEmp(function(idArr, nameArr){
+			for(var i=0;i<idArr.length;i++){
+				if(!checkOrgExists(idArr[i])){
+					//alert("接收人[" + nameArr[i] + "]已经存在");
+					continue;
+				}
+    			var tdHtmlArr = ["<input type='hidden' name='receId' value=''><input type='hidden' name='receUser' readonly value='" + idArr[i] + "'>" +
+						"<input type='text' name='receUserName' readonly value='" + nameArr[i] + "' style='width:200px;'>"+
+						"<input type='button' value='删除' style='width:60px;' onclick='deleteReceuserRow(this)'>"];
+    			insertRow("tbl", tdHtmlArr, true);
+			}
+		}, null, null, true, getReceUsers().join(","), "getEmpByExeOrgId");
+}
+function getReceUsers(){
+	var receUsers = [];
+	for(var i=0;i<$n("receUser").length;i++){
+		receUsers.push($n("receUser")[i].value);
+	}
+	return receUsers;
+}
+function checkOrgExists(receUser){
+	for(var i=0;i<$n("receUser").length;i++){
+		if($n("receUser")[i].value == receUser){
+			return false;
+		}
+	}
+	return true;
+}
+var deleteReceIds = [];
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnSave").click(saveform);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "expressReceuser.vm";
+	});
+	jQuery("#btnAddReceuser").click(addExpreeReceuser);
+});
+function saveform(){
+	if($n("receUser").length<1){
+		alert("请先添加接收人");
+		return ;
+	}
+	confirm("确定保存?", function(){
+		showLayer(true);
+		var addReceUsers = [];
+    	for(var i=0;i<$n("receUser").length;i++){
+			if(isNull($n("receId")[i].value)){
+        		addReceUsers.push($n("receUser")[i].value);
+			}
+    	}
+    	ExpressReceuserDwr.saveExpressReceuser(jQuery("#orgId").val(), addReceUsers, deleteReceIds, function(data){
+			showLayer(false);
+    		alert(data?data:"保存成功", function(){
+        		window.location = "expressReceuser.vm";
+    		});
+    	});
+	});
+}
+</script>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="QueryCondition">
+	 <!-- 获取分页数据 -->
+	<select id="QueryCondition.getQueryConditionPageData" resultClass="com.jatools.vo.sys.QueryConditionHead" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid      as "headid",
+			       a.bill_code   as "billCode",
+			       a.query_code  as "queryCode",
+			       a.memo        as "memo",
+			       a.create_id   as "createId",
+			       a.create_date as "createDate",
+			       a.update_id   as "updateId",
+			       a.update_date as "updateDate",
+			       a.status      as "status"
+			  from jat_sys_query_conditon_head a
+			 order by a.bill_code, a.query_code, a.headid
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="QueryCondition.getQueryConditionTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_sys_query_conditon_head
+    </select>
+    
+    <select id="QueryCondition.getQueryConditionHead" parameterClass="string" resultClass="com.jatools.vo.sys.QueryConditionHead">
+   		select a.headid      as "headid",
+   		       a.query_code  as "queryCode",
+		       a.bill_code   as "billCode",
+		       a.memo        as "memo",
+		       a.create_id   as "createId",
+		       a.create_date as "createDate",
+		       a.update_id   as "updateId",
+		       a.update_date as "updateDate",
+		       a.status      as "status"
+		from jat_sys_query_conditon_head a where a.headid = #value#
+    </select>
+    <select id="QueryCondition.getQueryConditionLineByheadid" parameterClass="string" resultClass="com.jatools.vo.sys.QueryConditionLine">
+    	select a.lineid as "lineid",
+		       a.headid as "headid",
+		       a.field_name as "fieldName",
+		       a.field_label as "fieldLabel",
+		       a.field_type as "fieldType",
+		       a.input_type as "inputType",
+		       a.input_value as "inputValue",
+		       a.to_id_sql as "toIdSql",
+		       a.sort as "sort"
+		  from jat_sys_query_conditon_line a
+		 where a.headid = #value#
+		 order by a.sort
+    </select>
+    <select id="QueryCondition.getQueryConditionLineByQueryCode" parameterClass="string" resultClass="com.jatools.vo.sys.QueryConditionLine">
+    	select a.lineid      as "lineid",
+		       a.headid      as "headid",
+		       a.field_name  as "fieldName",
+		       a.field_label as "fieldLabel",
+		       a.field_type  as "fieldType",
+		       a.input_type  as "inputType",
+		       a.input_value as "inputValue",
+		       a.to_id_sql   as "toIdSql",
+		       a.sort        as "sort"
+		  from jat_sys_query_conditon_line a
+		 where exists (select 1
+		          from jat_sys_query_conditon_head b
+		         where a.headid = b.headid
+		           and b.query_code = #value#)
+		 order by a.sort
+    </select>
+    <insert id="QueryCondition.saveQueryCondition" parameterClass="com.jatools.vo.sys.QueryConditionHead">
+    	<selectKey keyProperty="headid" type="pre" resultClass="string">
+		select jat_sys_query_conditon_seq.nextval as headid from dual
+		</selectKey>
+		insert into jat_sys_query_conditon_head(headid, query_code, bill_code, memo, create_id, create_date, update_id, update_date, status)
+		values(#headid#, #queryCode#, #billCode#, #memo#, #createId#, #createDate#, #updateId#, #updateDate#, #status#)
+    </insert>
+    <update id="QueryCondition.updateQueryCondition" parameterClass="com.jatools.vo.sys.QueryConditionHead">
+    	update jat_sys_query_conditon_head a set a.query_code = #queryCode#, a.bill_code = #billCode#, a.memo = #memo#,
+    		a.update_id = #updateId#, a.update_date = #updateDate#
+    	where a.headid = #headid#
+    </update>
+    <delete id="QueryCondition.deleteQueryConditionHead" parameterClass="string">
+    	delete jat_sys_query_conditon_head a where a.headid = #value#
+    </delete>
+    <insert id="QueryCondition.saveQueryConditionLine" parameterClass="com.jatools.vo.sys.QueryConditionLine">
+    	<selectKey keyProperty="lineid" type="pre" resultClass="string">
+		select jat_sys_query_conditon2_seq.nextval as lineid from dual
+		</selectKey>
+		insert into jat_sys_query_conditon_line(lineid, headid, field_name, field_label, field_type, input_type, input_value, to_id_sql, sort)
+		values(#lineid#, #headid#, #fieldName#, #fieldLabel#, #fieldType#, #inputType#, #inputValue#, #toIdSql#, #sort#)
+    </insert>
+    <update id="QueryCondition.updateQueryConditionLine" parameterClass="com.jatools.vo.sys.QueryConditionLine">
+    	update jat_sys_query_conditon_line a set a.field_name = #fieldName#, a.field_label = #fieldLabel#, a.field_type = #fieldType#,
+    		a.input_type = #inputType#, a.input_value = #inputValue#, a.to_id_sql = #toIdSql#, a.sort = #sort#
+    	where a.lineid = #lineid#
+    </update>
+    <delete id="QueryCondition.deleteQueryConditionLineByHeadid" parameterClass="string">
+    	delete jat_sys_query_conditon_line a where a.headid = #headid#
+    </delete>
+    <delete id="QueryCondition.deleteQueryConditionLine" parameterClass="string">
+    	delete jat_sys_query_conditon_line a where a.lineid = #lineid#
+    </delete>
+    <select id="QueryCondition.getQueryFieldName" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+    	select a.lineid as "value", a.field_label as "text" from jat_sys_query_conditon_line a
+		where exists(select 1 from jat_sys_query_conditon_head b where a.headid = b.headid
+		and b.query_code = #value#) order by a.sort
+    </select>
+    <select id="QueryCondition.getQueryConditionLine" parameterClass="string" resultClass="com.jatools.vo.sys.QueryConditionLine">
+    	select a.lineid as "lineid",
+		       a.headid as "headid",
+		       a.field_name as "fieldName",
+		       a.field_label as "fieldLabel",
+		       a.field_type as "fieldType",
+		       a.input_type as "inputType",
+		       a.input_value as "inputValue",
+		       a.to_id_sql as "toIdSql",
+		       a.sort as "sort"
+		  from jat_sys_query_conditon_line a
+		 where a.lineid = #value#
+    </select>
+    <select id="QueryCondition.getQueryContentBySqlForSlt" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+    	$value$
+    </select>
+</sqlMap>

@@ -1,0 +1,254 @@
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	font-size: 9pt;
+}
+/* 页面标题  */
+.title {
+	width: 100%;
+	display: none;
+	BACKGROUND-COLOR: #D5E5FA;
+}
+.title td {
+	border: 0px solid;
+	border-spacing: 0px;
+	BACKGROUND-COLOR: #D5E5FA;
+	height: 15;
+	font-size: 9pt;
+	color: #000000;
+	padding-left: 7px;
+	vertical-align: middle;
+}
+/* 查询条件 */
+.search-tb {
+	background-color: #D5E5FA;
+	border: none;
+	width: 100%;
+}
+/* 页面工具  */
+.control {
+	border-collapse: collapse;
+	border-spacing: 1px;
+	width:  100%;
+	background-color: #D2E0F1;
+}
+.control td {
+	border-spacing: 1px;
+	/* BACKGROUND-COLOR: #E6FFFF;
+	BACKGROUND-COLOR: #D2E0F1; */
+	vertical-align: center;
+	padding-left: 5px;
+}
+/* button */
+.btn {
+	/* COLOR: blue; */
+	font-size: 9px;
+	/*
+	cursor: pointer;
+	BORDER-RIGHT: #7b9ebd 1px solid;
+	PADDING-RIGHT: 2px;
+	BORDER-LEFT: #7b9ebd 1px solid;
+	PADDING-LEFT: 2px;
+	BORDER-TOP: #7b9ebd 1px solid;
+	PADDING-TOP: 2px;
+	BORDER-BOTTOM: #7b9ebd 1px solid;
+	*/
+}
+
+.pageToolbarBtn {
+	font-size: 9px;
+}
+/* 列表 */
+.list {
+	width: 100%;
+}
+
+.list thead th {
+	border: 0px solid;
+	border-spacing: 0px;
+	background: #D2E0F1;
+	border: 0px outset white;
+	cursor: default;
+	padding-top: 0;
+	bottom: 0;
+	border-top: 0px solid buttonhighlight;
+	border-left: 1px solid buttonhighlight;
+	border-right: 1px solid buttonshadow;
+	border-bottom: 1px solid buttonshadow;
+	height: 26px;
+	text-align: left;
+	font-size: 10pt;
+	text-indent: 2pt;
+}
+.list tbody tr{
+	border-bottom-style: 1px solid;
+	BORDER-BOTTOM: #7b9ebd 1px solid;
+}
+.list tbody td {
+	height: 20px;
+	border: 0px solid;
+	border-spacing: 0px;
+	border-bottom: 0px solid;
+	font-size:9pt;
+	text-indent: 2pt;
+}
+
+.content {
+	width: 100%;
+}
+
+.content td.body1 {
+	TEXT-ALIGN: center;
+	color: #000000;
+	font-size: 9pt;
+	background-color: #EBF5FF;
+	height: 19pt;
+	width: 10%;
+}
+
+.content td.body2 {
+	TEXT-ALIGN: left;
+	color: #000000;
+	font-size: 9pt;
+	background-color: #F6F6F6;
+	height: 19pt;
+	width: 15%;
+}
+
+.content td.body2 input {
+	width: 130px;
+}
+
+.content td.body2 select {
+	width: 130px;
+}
+
+/* 交替行奇数行的背景色 */
+tr.row1 td {
+	background-color: #FFFFFF;
+}
+/* 交替行偶数行的背景色 */
+tr.row2 td {
+	background-color: #ebf5ff;
+}
+/* 鼠标经过时的背景色 */
+tr.rowover td {
+	background-color: #CCCCCC;
+}
+input.target {
+	cursor: pointer;
+	background-image: url(img/target.png);
+	background-position: right;
+	background-repeat: no-repeat;
+}
+
+input.none {
+	border: none;
+	height: 15px;
+	background-color: transparent;
+}
+
+select.none {
+	border: none;
+	background-color: transparent;
+}
+
+#queryDiv {
+	display: none;
+	position: absolute;
+	width: 520px;
+	height: 300px;
+	border: #06f solid 2px;
+	z-index: 200;
+	background: #fff;
+}
+/*
+#queryCloseBtn { position:absolute; right:10px; top:10px; cursor:pointer; font-size:6;}
+* { margin:0; padding:0; }
+*/
+#queryDivBackground {
+	background: #000;
+	display: block;
+	z-index: 100;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.scroll {
+	width: 100%;
+	height: 590px;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+
+.scroll2 {
+	width: 100%;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+
+.content td.export {
+	TEXT-ALIGN: left;
+	color: #000000;
+	font-size: 9pt;
+	background-color: #F6F6F6;
+	line-height: 16pt;
+	width: 15%;
+}
+.content td.export2 {
+	TEXT-ALIGN: center;
+	color: #000000;
+	font-size: 9pt;
+	background-color: #F6F6F6;
+	line-height: 16pt;
+}
+.content td.export input {
+	width: 70px;
+}
+
+#exportDiv {
+	display: none;
+	position: absolute;
+	width: 420px;
+	height: 100px;
+	border: #06f solid 2px;
+	z-index: 200;
+	background: #fff;
+}
+
+#exportDivBackground {
+	background: #000;
+	display: block;
+	z-index: 100;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+
+.content td.body3 {
+	TEXT-ALIGN: right;
+	color: #000000;
+	font-size: 9pt;
+	line-height: 16pt;
+	width: 15%;
+}
+.content td.body4 {
+	TEXT-ALIGN: left;
+	color: #000000;
+	font-size: 9pt;
+	line-height: 16pt;
+	width: 15%;
+}
+.content td.body5 {
+	TEXT-ALIGN: center;
+	color: #000000;
+	font-size: 9pt;
+	line-height: 16pt;
+	width: 15%;
+}

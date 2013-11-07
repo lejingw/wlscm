@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="StoneCoefficient">
+	<typeAlias alias="StoneCoefficient" type="com.jatools.vo.calc.StoneCoefficient"/>
+	<resultMap class="StoneCoefficient" id="result">
+		<result property="id" column="id"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		<result property="styleStandard" column="STYLE_STANDARD"/>
+		<result property="mainShapeId" column="MAIN_SHAPE_ID"/>
+		<result property="colorId" column="COLOR_ID"/>
+		<result property="cleanId" column="CLEAN_ID"/>
+		<result property="colorGreadId" column="COLOR_GRADE_ID"/>
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<sql id="StoneCoefficient.Columns.all">
+		id,item_class_id,coefficient,style_standard,MAIN_SHAPE_ID,COLOR_ID,CLEAN_ID,COLOR_GRADE_ID,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="StoneCoefficient.getStoneCoefficientAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="StoneCoefficient.Columns.all"/> from jat_calc_stone_coefficient a order by a.id desc 
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="StoneCoefficient.getStoneCoefficientToalCount" resultClass="int">
+		select count(1) from jat_calc_stone_coefficient
+	</select>
+	<!-- findById -->
+	<select id="StoneCoefficient.getStoneCoefficientById" resultClass="StoneCoefficient" parameterClass="string" resultMap="result">
+		select <include refid="StoneCoefficient.Columns.all"/> from jat_calc_stone_coefficient a where a.id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="StoneCoefficient.saveStoneCoefficient" parameterClass="StoneCoefficient">
+		<selectKey keyProperty="id" type="pre">
+			select jat_calc_stone_coefficient_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_stone_coefficient(
+			id,ITEM_CLASS_ID,COEFFICIENT,STYLE_STANDARD,MAIN_SHAPE_ID,COLOR_ID,CLEAN_ID,COLOR_GRADE_ID,CREATEDATE,CREATEUSERID,UPDATEDATE,UPDATEUSERID)
+			values(#id#,#itemClassId#,#coefficient#,#styleStandard#,#mainShapeId#,
+			#colorId#,#cleanId#,#colorGreadId#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="StoneCoefficient.updateStoneCoefficient" parameterClass="StoneCoefficient">
+		update jat_calc_stone_coefficient a set 
+			a.ITEM_CLASS_ID = #itemClassId#,
+			a.COEFFICIENT = #coefficient#,
+			a.STYLE_STANDARD = #styleStandard#,
+			a.MAIN_SHAPE_ID = #mainShapeId#,
+			a.COLOR_ID = #colorId#,
+			a.CLEAN_ID = #cleanId#,
+			a.COLOR_GRADE_ID = #colorGreadId#,
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="StoneCoefficient.deleteStoneCoefficient" parameterClass="string">
+		delete jat_calc_stone_coefficient a where a.id = #value#
+	</delete>
+	<!-- 获取石头系数 -->
+	<select id="StoneCoefficient.getStoneCoefficient" resultClass="StoneCoefficient" parameterClass="StoneCoefficient" resultMap="result">
+		select <include refid="StoneCoefficient.Columns.all"/> from jat_calc_stone_coefficient a where 
+			a.ITEM_CLASS_ID = #itemClassId# and
+			a.COLOR_GRADE_ID = #colorGreadId# and
+			a.MAIN_SHAPE_ID = #mainShapeId# and
+			a.COLOR_ID = #colorId# and
+			a.CLEAN_ID = #cleanId#
+			<isNotEmpty prepend="and" property="id"> a.id!=#id# </isNotEmpty>
+	</select>
+</sqlMap>

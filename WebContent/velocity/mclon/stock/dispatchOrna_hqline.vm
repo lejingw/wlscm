@@ -1,0 +1,49 @@
+<!-- 总部总单行查询 -->
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/DispatchOrnaDwr.js", "$!StringUtil.getContextPath()/js/stock/dispatchOrna_util.js"])
+<form id="frm" action="dispatchOrna.vm?user_action=hqline" method="post">
+	<input type='hidden' name='gheadid' value="$!form.condition.gheadid"/>
+	<input type='hidden' name='itemClassId' value="$!form.condition.itemClassId"/>
+	<input type='hidden' name='ornaClassId' value="$!form.condition.ornaClassId"/>
+	<input type='hidden' name='showUnfullOnly' value="$!form.condition.showUnfullOnly"/>
+    <input type='hidden' name='showUnperfectMatch' value="$!form.condition.showUnperfectMatch"/>
+    <table class='list'>
+    	<thead>
+    		<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+    			<th>大类</th><th>小类</th><th>分析范围</th><th>款式大类</th><th>款式中类</th><th>款式小类</th><th>款式</th><th>色级</th><th>净度</th><th>品质</th>
+    			<th>尺寸</th><th>商品材质</th><th>托架颜色</th><th>计量单位</th><th>订购数</th><th>已配数</th>
+    		</tr>
+    	</thead>
+    	<tbody id='tbl'>
+    	#foreach($item in $form.pager.pageData)
+    		<tr>
+				<td><input type='checkbox' name='chk'/><input type='hidden' name='gatherLineId' value='$!{item.gatherLineId}'/></td>
+    			<td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+    			<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+    			<td>$!item.analyseName</td>
+    			<td>$!BdCommon.getStyleItemClassNames($!item.styleItemClassId)</td>
+    			<td>$!BdCommon.getStyleMiddleClassNames($!item.styleMiddleClassId)</td>
+    			<td>$!BdCommon.getStyleOrnaClassNames($!item.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!item.styleId, $!item.styleName, $!item.bigGraph)</td>
+    			<td>$!DictUtil.getValue('diacolorgrade',$!item.colorGradeId)</td>
+    			<td>$!DictUtil.getValue('diaclean',$!item.cleanId)</td>
+    			<td>$!{DictUtil.getValue('gradelevel',$!item.colorGradeGradeId)}$!{DictUtil.getValue('gradelevel',$!item.cleanGradeId)}</td>
+    			<td>$!item.sizeName</td>
+    			<td>$!BdCommon.getQualityName($!item.qualityId)</td>
+    			<td>$!DictUtil.getValue('bracketcolor',$!item.bracketcolorId)</td>
+    			<td>$!BdCommon.getUnitName($!item.unitId)</td>
+    			<td>$!item.orderNum</td>
+    			<td><input type='button' style='width:40px;' value='$!item.dispatchedNum'  onclick="showDispatched(this, false, '$!{item.gatherLineId}')" name="dispatchedNumInput"/></td>
+            </tr>
+    	#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+});
+</script>

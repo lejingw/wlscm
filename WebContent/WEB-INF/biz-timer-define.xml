@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans default-autowire="byName">
+	<!-- ======================================================================== -->
+	<!--  存放只能一个机器工作的任务相关Spring配置，该文件会被启动脚本加载或者屏蔽，具体参看depoly目录-->
+	<!-- ======================================================================== -->
+<!-- 	<bean id="scheduler-task-cluster" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		autowire="no" >
+		bootstrap触发器
+		<property name="triggers">
+			<list>
+				 初始化产品协议到缓存，下载产品图片到指定的文件夹 
+				<ref local="initProducts" />				
+			</list>
+		</property>
+		<property name="autoStartup">
+			<value>true</value>
+		</property>
+		<property name="applicationContextSchedulerContextKey">
+			<value>applicationContext</value>
+		</property>
+		待延时一段时间后再启动scheduler，以等待bean factory初始化完毕
+		<property name="startupDelay">
+			<value>100</value>
+		</property>
+		<property name="schedulerName">
+			<value>cluster</value>
+		</property>
+	</bean>
+
+	 初始化产品协议到缓存，下载产品图片到指定的文件夹 
+	<bean id="initProducts" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<bean
+				class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject">
+					<ref bean="productUtilDwr" />
+				</property>
+				<property name="targetMethod" value="initProtocolsAndImagesOfProducts" />
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+
+		<property name="startDelay">
+			<value>100</value>
+		</property>
+	
+		生产环境 时间定为24个小时 2*3600*1000
+		<property name="repeatInterval">
+			<value>86400000</value>
+		</property>	
+		
+		测试环境 时间定为20分钟
+		<property name="repeatInterval">
+			<value>1200000</value>
+		</property>
+			 
+	</bean> -->
+</beans>	

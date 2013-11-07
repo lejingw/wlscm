@@ -1,0 +1,218 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PriceLockDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type='hidden' id='headid' name='headid' value='$!{form.head.headid}'/>
+    <table class="title">
+    	<tr><td>价格锁定单</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08011103','1')>
+				<input type='button' value='审核' class='btn' id='btnMark' $RightUtil.able($session, '08011103','2')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号</td><td class='body2'><input type='text' readonly id='billno' value='自动生成'/></td>
+			<td class='body1'>单据状态</td><td class='body2'><input type='text' readonly id='status' value='保存'/></td>
+			<td class='body1'>创建人</td><td class='body2'><input type='text' readonly id='createId' value='$!{StringUtil.getUserName($session)}'/></td>
+			<td class='body1'>组织</td>
+			<td class='body2'>
+				<input type='hidden' id='orgId' value="$!StringUtil.getOrgId($session)">
+				<input type='text' id='orgName' value="$!StringUtil.getOrgName($session)" readonly>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>是否锁定</td><td class='body2'><input type='checkbox' id='lockFlag' checked/></td>
+			<td class='body1'>锁定原因</td><td class='body2' colspan="3"><input type='text' id='lockReason' style="width:95%;" value='$!{form.head.lockReason}'/></td>
+			<td class='body1'>合计件数</td><td class='body2'><input type='text' readonly id='sumCount' value='$!{form.head.sumCount}'/></td>
+		</tr>
+		<tr>
+			<td class='body1'>饰品条码</td>			
+			<td class='body2'><input type='text' id='barCode_in'/></td>
+			<td class='body1'>饰品编码</td>
+			<td class='body2'><input type='text' id='ornaCode_in'/></td>
+		</tr>
+    </table>
+	<table class='list'>
+		<thead><tr>
+				<th width='120px;'>饰品编码</th>
+				<th width='120px;'>饰品名称</th>
+				<th width='120px;'>大类</th>
+				<th width='120px;'>小类</th>
+				<th width='120px;'>款式</th>
+				<th width='60px;'>基础价</th>
+				<th width='90px;'>网点金额</th>
+				<th width='60px;'>总重</th>
+				<th width='60px;'>主石重</th>
+				<th width='60px;'>配石重</th>
+				<th width='60px;'>色级</th>
+				<th width='60px;'>净度</th>
+				<th width='60px;'>操作</th>
+		</tr></thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.list)
+			<tr>
+				<td>
+					<input type='hidden' name='lineid' value='$!item.lineid'>
+					<input type='hidden' name='ornaCode' value='$!item.ornaCode'>
+					<input type='hidden' name='barCode' value='$!item.barCode'>
+					$!item.ornaCode
+				</td>
+				<td>$!item.ornaDsc</td>
+				<td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!item.styleId, $!item.styleName, $!item.bigGraph)</td>
+				<td>$!item.basicPrice</td>
+				<td>$!item.posMoney</td>
+				<td>$!StringUtil.formatDouble($!item.allWeight, 3)</td>
+				<td>$!StringUtil.formatDouble($!item.mainWeight, 3)</td>
+				<td>$!StringUtil.formatDouble($!item.partWeight, 3)</td>
+				<td>$!DictUtil.getValue('diacolorgrade', $!item.colorGradeId)</td>
+				<td>$!DictUtil.getValue('diaclean', $!item.cleanId)</td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteReceuserRow(this)'></td>
+			</tr>
+		#end
+        </tbody>
+    </table>
+</form>
+<script>
+function deleteReceuserRow(obj){
+	var index = obj.parentNode.parentNode.rowIndex-1;
+	if(!isNull($n("lineid")[index].value)){
+		deleteOrnaCodeList.push($n("ornaCode")[index].value);
+	}
+	deleteRow(obj, 'tbl');
+	calcSum();
+}
+var deleteOrnaCodeList = [];
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnSave").click(function(){saveform(1)});
+	jQuery("#btnMark").click(function(){saveform(4)});
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "priceLock.vm";
+	});
+	setEnterKey('ornaCode_in', getMaterActiveByOrnaCode);
+	setEnterKey('barCode_in', getMaterActiveByBarCode);
+	setValues();
+	disabledButton();
+	checkReview();
+});
+function setValues(){
+	if(isNull("$!form.head.headid")) return ;
+	jQuery("#billno").val("$!form.head.billno");
+	jQuery("#status").val("$!DictUtil.getValue('status', $form.head.status)");
+	jQuery("#createId").val("$!BdCommon.getUserName($form.head.createId)");
+	jQuery("#orgId").val("$!form.head.orgId");
+	jQuery("#orgName").val("$!BdCommon.getOrgName($form.head.orgId)");
+	jQuery("#lockFlag").attr("checked", "1" == "$!{form.head.lockFlag}");
+}
+function saveform(status){
+	if($n("ornaCode").length<1){
+		alert("请先添加行");
+		return ;
+	}
+	var action = 1 == status?"保存":(4==status?"审核":"");
+	confirm("确定"+action+"?", function(){
+		var head = {
+			headid : jQuery("#headid").val(),
+			billno : jQuery("#billno").val(),
+			lockFlag : jQuery("#lockFlag").attr("checked")?"1":"0",
+			lockReason : jQuery("#lockReason").val(),
+			sumCount : jQuery("#sumCount").val(),
+			status : status
+		};
+		var newOrnaCodeList = [];
+		for(var i=0;i<$n("ornaCode").length;i++){
+    		if(isNull($n("lineid")[i].value)){
+        		newOrnaCodeList.push($n("ornaCode")[i].value);
+        	}
+		}
+    	PriceLockDwr.savePriceLock(head, newOrnaCodeList, deleteOrnaCodeList, function(data){
+    		alert(data?data:action+"成功", function(){
+				if(!data){
+            		window.location = "priceLock.vm";
+				}
+    		});
+    	});
+	});
+}
+function checkOrnaCodeExists(code, ornaFlag){
+	for(var i=0;i<$n("ornaCode").length;i++){
+		if(ornaFlag && $n("ornaCode")[i].value == code){
+			alert("第"+(i+1)+"行 饰品编码[" + code + "]已经存在");
+			return false;
+		}
+		if(!ornaFlag && $n("barCode")[i].value == code){
+			alert("第"+(i+1)+"行 饰品条码[" + code + "]已经存在");
+			return false;
+		}
+	}
+	return true;
+}
+/**
+ * 根据饰品编码获取饰品信息
+ */
+function getMaterActiveByOrnaCode(){
+	getMaterActiveInfo(jQuery("#ornaCode_in").val(), true);
+}
+/**
+ * 根据饰品条码获取饰品信息
+ */
+function getMaterActiveByBarCode(){
+	getMaterActiveInfo(jQuery("#barCode_in").val(), false);
+}
+function getMaterActiveInfo(code, ornaFlag){
+	if(!checkOrnaCodeExists(code, ornaFlag))
+		return;
+	PriceLockDwr.getMaterActiveInfo(code, ornaFlag, function(data){
+		if((jQuery("#lockFlag").attr("checked")?"1":"0") == data.lockFlag){
+			alert("饰品["+data.ornaCode+"]已经为"+(data.lockFlag?"锁定":"非锁定")+"状态");
+			return ;
+		}
+		addOrnaRow(data);
+		calcSum();
+		if(ornaFlag){
+			jQuery("#ornaCode_in").val("");
+		}else{
+			jQuery("#barCode_in").val("");
+		}
+	});
+}
+function calcSum(){
+	jQuery("#sumCount").val($n("ornaCode").length);
+	jQuery("#lockFlag").attr("disabled", $n("ornaCode").length>0);
+}
+function addOrnaRow(info){
+	var ornaCodeHtml = "<input type='hidden' name='lineid' value=''>"
+			+ "<input type='hidden' name='ornaCode' value='"+info.ornaCode+"'>"
+			+ "<input type='hidden' name='barCode' value='"+info.barCode+"'>" + info.ornaCode;
+	var ornaDscHtml = info.ornaDsc;
+	var itemClassHtml = info.itemClassDsc;
+	var ornaClassHtml = info.ornaClassDsc;
+	var styleHtml = info.styleName;
+	var basicPriceHtml = info.basicPrice;
+	var posMoney = info.posMoney;
+	var allWeight = info.allWeight;
+	var mainWeight = info.mainWeight;
+	var partWeight = info.partWeight;
+	var colorGradeName = info.colorGradeName;
+	var cleanName = info.cleanName;
+	var tdHtmlArr = [ornaCodeHtml, ornaDscHtml, itemClassHtml, ornaClassHtml, styleHtml, basicPriceHtml, posMoney,
+			allWeight, mainWeight, partWeight, colorGradeName, cleanName,
+			"<input type='button' value='删除' style='width:60px;' onclick='deleteReceuserRow(this)'>"];
+	insertRow("tbl", tdHtmlArr, true);
+}
+function disabledButton(){
+	jQuery("#btnSave").attr("disabled", true);
+	jQuery("#btnMark").attr("disabled", true);
+	if("1" == "$!form.head.status" || isNull("$!form.head.status")){
+    	jQuery("#btnSave").attr("disabled", false);
+    	jQuery("#btnMark").attr("disabled", false);
+	}
+	calcSum();
+}
+</script>

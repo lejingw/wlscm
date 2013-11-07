@@ -1,0 +1,68 @@
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js", "$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js"])
+
+#if($form.multiFlag)
+<input type="button" value="全选" class='btn' onclick="checkAllNodes(true)"/>
+#end
+<input type="button" value="清空" class='btn' onclick="checkAllNodes(false)"/>
+<div id="myZTree" class="ztree"></div>
+<script>
+//供外部调用的取值方法
+function getValues(){
+	var idArr = [], nameArr = [];
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	var nodes = zTree.getCheckedNodes(true);
+	for(var i=0;i<nodes.length;i++){
+		idArr.push(nodes[i].id);
+		nameArr.push(nodes[i].name);
+	}
+	return [idArr, nameArr, null];
+}
+jQuery(document).ready(function(){
+    var checkCfg = {enable:true, chkboxType:{'Y':'','N':''}};
+    var radioCheckCfg = {enable:true, chkboxType:{'Y':'','N':''},chkStyle:'radio',radioType:'all'};
+    var setting = {
+    	view: {selectedMulti: false},
+    	check: $!form.multiFlag?checkCfg:radioCheckCfg,
+    	data: {simpleData: {enable: true}},
+		callback: {
+			"onClick": function(event, treeId, treeNode){
+    			jQuery.fn.zTree.getZTreeObj(treeId).checkNode(treeNode, !treeNode.checked);
+			}
+		}
+    };
+    var nodeDataArr =[
+    	#foreach($param in ${form.dataMap.keySet()})
+    		{id:$param, pId:0, name:'${form.dataMap.get($param)}'},
+        #end
+		null
+    ];
+	nodeDataArr.pop();
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, nodeDataArr);
+	
+	var selectedValues = "$!form.selectedValues".split(",");
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	for(var i=0;i<selectedValues.length;i++){
+		if(selectedValues[i]){
+    		var node = zTree.getNodeByParam("id", selectedValues[i]);
+			zTree.checkNode(node, true);
+		}
+	}
+});
+function checkSubNodes(tree, node, flag){
+	tree.checkNode(node, flag);
+	var childs = node.childs;
+	if(!childs)	return ;
+	for(var i=0;i<childs.length;i++){
+		 checkSubNodes(tree, childs[i], flag);
+	}
+}
+function checkAllNodes(flag){
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	var allNodes = zTree.getNodes();
+	for(var i=0;i<allNodes.length;i++){
+		checkSubNodes(zTree, allNodes[i], flag);
+	}
+}
+</script>

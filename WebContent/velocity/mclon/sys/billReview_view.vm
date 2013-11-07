@@ -1,0 +1,62 @@
+<form id='frm' action="billReview.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="logid" name="logid" value="${log.logid}"/>
+    <table class="title">
+    	<tr><td>单据审批</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='同意' class='btn' id="btnSuccess">
+				<input type='button' value='不同意' class='btn' id="btnfail">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+	<table class="content">
+		<tr>
+			<td class='body1'>单据名称</td><td class='body2'>$!log.billName</td>
+			<td class='body1'>单据ID</td><td class='body2'>$!DictUtil.getValue('billcode', $!log.billId)</td>
+			<td class='body1'>单据编号</td><td class='body2'>$!log.billNo</td>
+			<td class='body1'>审批意见</td><td class='body2'>
+				<input type='text' readonly/>
+			</td>
+		</tr>
+	</table>
+	<table style="width:100%;height:520px;">
+		<tr>
+			<td valign="top" style="height:100%;">
+				<iframe src='$!log.reviewUrl' style="border: 0;height: 100%;width: 100%" frameborder="0" align="top" scrolling="auto"></iframe>
+			</td>
+		</tr>
+	</table>
+</form>
+<script>
+/**
+ * 审批不同意
+ */
+function reviewFail(){
+	confirm("确定审批不同意?", function(){
+		jQuery("#user_action").val("reviewFail");
+    	jQuery("#frm").submit();
+	});
+}
+/**
+ * 审批同意
+ */
+function reviewSuccess(){
+	confirm("确定审批同意?", function(){
+		jQuery("#user_action").val("reviewSuccess");
+    	jQuery("#frm").submit();
+	});
+}
+jQuery(function(){
+	jQuery("#btnQuery").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnSuccess").click(reviewSuccess);
+	jQuery("#btnfail").click(reviewFail);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "billReview.vm";
+	});
+});
+</script>

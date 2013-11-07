@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SbraPrice">
+	<typeAlias alias="SbraPrice" type="com.jatools.vo.calc.SbraPrice"/>
+	<resultMap class="SbraPrice" id="result">
+		<result property="id" column="id"/>
+		<result property="qualityId" column="QUALITY_ID"/>
+		<result property="marketPrice" column="MARKET_PRICE"/>
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<sql id="SbraPrice.Columns.all">
+		id,quality_id,MARKET_PRICE,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="SbraPrice.getSbraPriceAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="SbraPrice.Columns.all"/> from jat_calc_sbra_price a  where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.id desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="SbraPrice.getSbraPriceToalCount" resultClass="int">
+		select count(1) from jat_calc_sbra_price a where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<!-- findById -->
+	<select id="SbraPrice.getSbraPriceById" resultClass="SbraPrice" parameterClass="string" resultMap="result">
+		select <include refid="SbraPrice.Columns.all"/> from jat_calc_sbra_price a where a.id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="SbraPrice.saveSbraPrice" parameterClass="SbraPrice">
+		<selectKey keyProperty="id" type="pre">
+			select jat_calc_sbra_price_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_sbra_price
+			(id,QUALITY_ID,MARKET_PRICE,CREATEDATE,CREATEUSERID,UPDATEDATE,UPDATEUSERID)
+			values(#id#,#qualityId#,#marketPrice#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="SbraPrice.updateSbraPrice" parameterClass="SbraPrice">
+		update jat_calc_sbra_price a set 
+			a.QUALITY_ID = #qualityId#,
+			a.MARKET_PRICE = #marketPrice#,
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="SbraPrice.deleteSbraPrice" parameterClass="string">
+		delete jat_calc_sbra_price a where a.id = #value#
+	</delete>
+	<!-- 材质下的市场价 -->
+	<select id="SbraPrice.getSbraPriceByQualityId" resultClass="SbraPrice" parameterClass="string" resultMap="result">
+		select <include refid="SbraPrice.Columns.all"/> from jat_calc_sbra_price a where a.QUALITY_ID = #value#
+	</select>
+</sqlMap>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="LabelType">
+	<typeAlias alias="LabelType" type="com.jatools.vo.basic.LabelType"/>
+	<resultMap class="LabelType" id="result">
+		<result property="labelTypeId" column="LABEL_TYPE_ID"/>
+		<result property="labelTypeName" column="LABEL_TYPE_NAME"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="ornaClassId" column="ORNA_CLASS_ID"/>
+		<result property="unitId" column="UNIT_ID"/>
+		<result property="privateType" column="PRIVATE_TYPE"/>
+		<result property="bracketFlag" column="BRACKET_FLAG"/>
+		<result property="dblLabelFlag" column="DBL_LABEL_FLAG"/>
+		<result property="memo" column="MEMO"/>
+		<result property="archiveflag" column="ARCHIVEFLAG"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+		<result property="status" column="STATUS"/>
+		<result property="labelTypeNameOld" column="LABEL_TYPE_NAME_OLD"/>
+		<result property="dblLabelFlagOld" column="DBL_LABEL_FLAG_OLD"/>
+	</resultMap>
+	<sql id="LabelType.Columns.all">
+		LABEL_TYPE_ID,
+		LABEL_TYPE_NAME,
+		ITEM_CLASS_ID,
+		ORNA_CLASS_ID,
+		UNIT_ID,
+		BRACKET_FLAG,
+		DBL_LABEL_FLAG,
+		MEMO,
+		ARCHIVEFLAG,
+		STATUS,
+		CREATE_DATE,
+		CREATE_ID,
+		UPDATE_DATE,
+		UPDATE_ID,
+		LABEL_TYPE_NAME_OLD,
+		DBL_LABEL_FLAG_OLD,
+		PRIVATE_TYPE
+	</sql>
+	<!-- 分页查询 -->
+	<select id="LabelType.getLabelTypeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="LabelType.Columns.all"/> from JAT_BASIC_LABEL_TYPE a where 1=1
+			<isNotEqual compareValue="1" property="showAllFlag" prepend="and"> a.ARCHIVEFLAG=0 </isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.item_class_id , a.ORNA_CLASS_ID, a.UNIT_ID, a.BRACKET_FLAG, a.LABEL_TYPE_NAME
+		) AA )where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="LabelType.getLabelTypeToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_LABEL_TYPE a where 1=1 
+			<isNotEqual compareValue="1" property="showAllFlag" prepend="and"> a.ARCHIVEFLAG=0 </isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	<!-- findById -->
+	<select id="LabelType.getLabelTypeById" resultClass="LabelType" parameterClass="string" resultMap="result">
+		select <include refid="LabelType.Columns.all"/> from JAT_BASIC_LABEL_TYPE a where a.LABEL_TYPE_ID = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="LabelType.saveLabelType" parameterClass="LabelType">
+		<selectKey keyProperty="labelTypeId" type="pre">
+			select JAT_BASIC_LABEL_TYPE_SEQ.nextval as LABEL_TYPE_ID from dual
+		</selectKey>
+		insert into JAT_BASIC_LABEL_TYPE(LABEL_TYPE_ID, LABEL_TYPE_NAME, ITEM_CLASS_ID, ORNA_CLASS_ID, UNIT_ID, BRACKET_FLAG, DBL_LABEL_FLAG,
+			MEMO, ARCHIVEFLAG, STATUS, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID, LABEL_TYPE_NAME_OLD, DBL_LABEL_FLAG_OLD,PRIVATE_TYPE)
+		values(#labelTypeId#,#labelTypeName#,#itemClassId#,#ornaClassId#,#unitId#,#bracketFlag#,#dblLabelFlag#,
+			#memo#,#archiveflag#,#status#,#createDate#,#createId#,#updateDate#,#updateId#, #labelTypeNameOld#, #dblLabelFlagOld#,#privateType#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="LabelType.updateLabelType" parameterClass="LabelType">
+		update JAT_BASIC_LABEL_TYPE a set 
+			a.LABEL_TYPE_NAME= #labelTypeName#,
+			a.ITEM_CLASS_ID= #itemClassId#,
+			a.ORNA_CLASS_ID= #ornaClassId#,
+			a.UNIT_ID= #unitId#,
+			a.BRACKET_FLAG= #bracketFlag#,
+			a.DBL_LABEL_FLAG= #dblLabelFlag#,
+			a.MEMO= #memo#,
+			a.ARCHIVEFLAG= #archiveflag#,
+			a.UPDATE_DATE= #updateDate#,
+			a.UPDATE_ID= #updateId#,
+			a.LABEL_TYPE_NAME_OLD= #labelTypeNameOld#,
+			a.DBL_LABEL_FLAG_OLD= #dblLabelFlagOld#,
+			a.STATUS = #status#,
+			a.PRIVATE_TYPE=#privateType#
+		where a.LABEL_TYPE_ID = #labelTypeId#
+	</update>
+	<!-- 删除 -->
+	<delete id="LabelType.deleteLabelType" parameterClass="string">
+		delete jat_basic_label_type a where a.LABEL_TYPE_ID = #value#
+	</delete>
+	<!-- 是否重复 -->
+	<select id="LabelType.checkLabelTypeRepeat" resultClass="int" parameterClass="map">
+		select count(1) from JAT_BASIC_LABEL_TYPE a where 
+		    a.ITEM_CLASS_ID= #itemClassId# and
+			a.ORNA_CLASS_ID= #ornaClassId# and
+			a.UNIT_ID = #unitId# and
+			a.PRIVATE_TYPE=#privateType# and
+			a.BRACKET_FLAG= #bracketFlag#
+			<isNotEmpty prepend="and" property="labelTypeId"> 
+				<![CDATA[a.LABEL_TYPE_ID <> #labelTypeId# ]]>
+			</isNotEmpty>
+	</select>
+	<delete id="LabelType.deleteCopyLabelType" parameterClass="map">
+		delete JAT_BASIC_LABEL_TYPE a
+	    where a.ITEM_CLASS_ID = #itemClassId2#
+	    	and a.ORNA_CLASS_ID = #ornaClassId2#
+	</delete>
+	<insert id="LabelType.copyLabelType" parameterClass="map">
+		insert into jat_basic_label_type(LABEL_TYPE_ID, LABEL_TYPE_NAME, ITEM_CLASS_ID, ORNA_CLASS_ID,
+			UNIT_ID, BRACKET_FLAG, DBL_LABEL_FLAG, MEMO, ARCHIVEFLAG, STATUS, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID,PRIVATE_TYPE) 
+		select jat_basic_label_type_seq.nextval,
+	           LABEL_TYPE_NAME,
+	           #itemClassId2#,
+	           #ornaClassId2#,
+	           UNIT_ID,
+	           BRACKET_FLAG,
+	           DBL_LABEL_FLAG,
+	           MEMO,
+	           ARCHIVEFLAG,
+	           1,
+	           #createDate#,
+	           #createId#,
+	           #createDate#,
+	           #createId#,
+	           #privateType#
+	     from jat_basic_label_type lt
+	    where lt.ITEM_CLASS_ID = #itemClassId#
+	    	and lt.ORNA_CLASS_ID = #ornaClassId#
+	</insert>
+	<update id="LabelType.reviewLabelType" parameterClass="map">
+		update jat_basic_label_type a
+		   set a.status = #status#,
+		    a.update_date = #date#,
+		    a.update_id = #userid#,
+			a.LABEL_TYPE_NAME= #labelTypeName#,
+			a.DBL_LABEL_FLAG= #dblLabelFlag#,
+			a.LABEL_TYPE_NAME_OLD= null,
+			a.DBL_LABEL_FLAG_OLD= null
+		 where a.label_type_id = #labelTypeId#
+	</update>
+	<update id="LabelType.updateLabelApplyLine" parameterClass="map"><![CDATA[
+		update jat_lable_tag_apply_line aa
+		   set aa.is_dbl_label =
+		       (select b.dbl_label_flag
+		          from jat_basic_label_type b
+		         where b.label_type_id = #labelTypeId#)
+		 where exists
+		 (select 1
+		          from ic_mater_active a
+		         where exists (select 1
+		                  from jat_basic_label_type b
+		                 where a.item_class_id = b.item_class_id
+		                   and a.orna_class_id = b.orna_class_id
+		                   and a.sale_unit_id = b.unit_id
+		                   and decode(a.quality_id, 97, 0, 1) = b.bracket_flag
+		                   and (nvl(a.is_dbl_label, '0') <> b.dbl_label_flag or
+		                       a.tag_type <> b.label_type_name)
+		                   and b.label_type_id = #labelTypeId#)
+		           and a.orna_code = aa.orna_code)
+		   and not exists (select 1
+		          from jat_lable_tag_apply bb
+		         where aa.head_id = bb.id
+		           and bb.state <> 8)
+	]]></update>
+	<update id="LabelType.updateLabelPrintLine" parameterClass="map"><![CDATA[
+		update jat_lable_tag_print_line aa
+		   set aa.is_dbl_label =
+		       (select b.dbl_label_flag
+		          from jat_basic_label_type b
+		         where b.label_type_id = #labelTypeId#)
+		 where exists
+		 (select 1
+		          from ic_mater_active a
+		         where exists (select 1
+		                  from jat_basic_label_type b
+		                 where a.item_class_id = b.item_class_id
+		                   and a.orna_class_id = b.orna_class_id
+		                   and a.sale_unit_id = b.unit_id
+		                   and decode(a.quality_id, 97, 0, 1) = b.bracket_flag
+		                   and (nvl(a.is_dbl_label, '0') <> b.dbl_label_flag or
+		                       a.tag_type <> b.label_type_name)
+		                   and b.label_type_id = #labelTypeId#)
+		           and a.orna_code = aa.orna_code)
+		   and not exists (select 1
+		          from jat_lable_tag_print bb
+		         where aa.head_id = bb.id
+		           and bb.state <> 8)
+	]]></update>
+	<update id="LabelType.updateMoveLine" parameterClass="map"><![CDATA[
+		update jat_move_line aa
+		   set aa.is_dbl_label =
+		       (select b.dbl_label_flag
+		          from jat_basic_label_type b
+		         where b.label_type_id = #labelTypeId#)
+		 where exists
+		 (select 1
+		          from ic_mater_active a
+		         where exists (select 1
+		                  from jat_basic_label_type b
+		                 where a.item_class_id = b.item_class_id
+		                   and a.orna_class_id = b.orna_class_id
+		                   and a.sale_unit_id = b.unit_id
+		                   and decode(a.quality_id, 97, 0, 1) = b.bracket_flag
+		                   and (nvl(a.is_dbl_label, '0') <> b.dbl_label_flag or
+		                       a.tag_type <> b.label_type_name)
+		                   and b.label_type_id = #labelTypeId#)
+		           and a.orna_code = aa.orna_code)
+		   and not exists (select 1
+		          from jat_move_head bb
+		         where aa.headid = bb.headid
+		           and bb.status <> 8
+		           and bb.status <> 14)
+	]]></update>
+	<update id="LabelType.updateMaterInivLine" parameterClass="map"><![CDATA[
+		update jat_mater_iniv aa
+		   set (aa.is_dbl_label, aa.small_label_type) =
+		       (select b.dbl_label_flag, b.label_type_name
+		          from jat_basic_label_type b
+		         where b.label_type_id = #labelTypeId#)
+		 where exists (select 1
+		          from jat_basic_label_type b
+		         where aa.item_class_id = b.item_class_id
+		           and aa.orna_class_id = b.orna_class_id
+		           and aa.unit_id = b.unit_id
+		           and decode(aa.quality_id, 97, 0, 1) = b.bracket_flag
+		           and (nvl(aa.is_dbl_label, '0') <> b.dbl_label_flag or
+		               aa.small_label_type <> b.label_type_name)
+		           and b.label_type_id = #labelTypeId#)
+	]]></update>
+	<update id="LabelType.updateMaterActive" parameterClass="map"><![CDATA[
+		update ic_mater_active a
+		   set (a.tag_type, a.is_dbl_label) =
+		       (select b.label_type_name, b.dbl_label_flag
+		          from jat_basic_label_type b
+		         where b.label_type_id = #labelTypeId#)
+		 where exists (select 1
+		          from jat_basic_label_type b
+		         where a.item_class_id = b.item_class_id
+		           and a.orna_class_id = b.orna_class_id
+		           and a.sale_unit_id = b.unit_id
+		           and decode(a.quality_id, 97, 0, 1) = b.bracket_flag
+		           and (nvl(a.is_dbl_label, '0') <> b.dbl_label_flag or
+		               a.tag_type <> b.label_type_name)
+		           and b.label_type_id = #labelTypeId#)
+	]]></update>
+</sqlMap>

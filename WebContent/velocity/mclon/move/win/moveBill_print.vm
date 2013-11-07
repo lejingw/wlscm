@@ -1,0 +1,86 @@
+#set($layout = "layout/noneLayout.vm")
+#set($cssfiles = ["$StringUtil.getContextPath()/js/move/moveBill_print.css"])
+<table width='680' border=0>
+	<tbody>
+		<tr>
+			<td class='bill_head' nowrap colspan=4>
+				<p align=center>
+					<b>调拨单</b>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td class='bill_td' nowrap>
+				<b>单据号：</b>$!{form.head.billno}</td>
+			<td class='bill_td' nowrap>
+				<b>调出组织：</b>$!BdCommon.getOrgName($!{form.head.outOrgId})</td>
+			<td class='bill_td' nowrap>
+				<b>调出仓库：</b>$!DictUtil.getValue('invcode', $!{form.head.outStockId})</td>
+		</tr>
+		<tr>
+			<td class='bill_td' nowrap>
+				<b>日期：</b>$!{form.head.dodate}</td>
+			<td class='bill_td' nowrap>
+				<b>调入组织：</b>$!BdCommon.getOrgName($!{form.head.inOrgId})</td>
+			<td class='bill_td' nowrap>
+				<b>调入仓库：</b>$!DictUtil.getValue('invcode', $!{form.head.inStockId})</td>
+		</tr>
+		<tr>
+			<td nowrap colspan=4>
+				<table class='bill_tb' width="100%"  border=1>
+					<tbody>
+						<tr>
+							<td class='black_td' nowrap>
+								大类名称
+							</td>
+							<td class='black_td' nowrap>
+								小类名称
+							</td>
+							<td class='black_td' nowrap>
+								计量单位
+							</td>
+							<td class='black_td' nowrap>
+								件数
+							</td>
+							<td class='black_td' nowrap>
+								重量
+							</td>
+						</tr>
+		#foreach($item in $form.lineList)
+			<tr>
+				<td class='black_td' nowrap>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+				<td class='black_td' nowrap>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+				<td class='black_td' nowrap>$!BdCommon.getUnitName($!item.unitId)</td>
+				<td class='black_td' nowrap>$!item.sumCount</td>
+				<td class='black_td' nowrap>$!item.sumWeight</td>
+			</tr>
+		#end
+						<tr>
+							<td class='black_td_c' nowrap colspan=3>
+								合计
+							</td>
+							<td class='black_td' nowrap>$!{form.head.sumCount}</td>
+							<td class='black_td' nowrap>$!{form.head.sumWeight}</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class='bill_td' nowrap colspan=2>
+				<b>调拨人签字：</b>
+			</td>
+			<td class='bill_td' nowrap colspan=2>
+				<b>接收人签字：</b>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<SCRIPT language=javascript>
+setTimeout("window.print()",500)
+</SCRIPT>

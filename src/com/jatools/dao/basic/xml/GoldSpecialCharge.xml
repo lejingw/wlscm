@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="GoldSpecialCharge">
+	<typeAlias alias="GoldSpecialCharge" type="com.jatools.vo.basic.GoldSpecialCharge" />
+
+	<sql id="GoldSpecialCharge_columns_1">
+        billid, item_class_id, orna_class_id, weight_start, weight_end, work_price, work_type, status, memo, create_date, create_id, update_date, update_id
+    </sql>
+
+	<sql id="GoldSpecialCharge_columns_2">
+        a.billid        as "billid",
+        a.item_class_id as "itemClassId",
+        a.orna_class_id as "ornaClassId",
+        a.weight_start  as "weightStart",
+        a.weight_end    as "weightEnd",
+        a.work_price    as "workPrice",
+        a.work_type     as "workType",
+        a.status        as "status",
+        a.memo          as "memo",
+        a.create_date   as "createDate",
+        a.create_id     as "createId",
+        a.update_date   as "updateDate",
+        a.update_id     as "updateId"
+    </sql>
+
+    <sql id="GoldSpecialCharge.getGoldSpecialChargeCondition">
+        where 1 = 1
+        <isNotEmpty property="weightStr" prepend="and"> a.weight_start >= #weightStart#</isNotEmpty>
+        <isNotEmpty property="weightEnd" prepend="and"> <![CDATA[a.weight_end <= #weightEnd#]]></isNotEmpty>
+    </sql>
+
+    <!-- 获取分页数据 -->
+	<select id="GoldSpecialCharge.getGoldSpecialChargePageData" parameterClass="map" resultClass="GoldSpecialCharge">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="GoldSpecialCharge_columns_2"/> from JAT_BASIC_GOLD_SPECIAL_CHARGE a
+        <include refid="GoldSpecialCharge.getGoldSpecialChargeCondition" />
+        order by a.weight_start
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+
+	<!-- 获取总条数 -->
+    <select id="GoldSpecialCharge.getGoldSpecialChargeTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from JAT_BASIC_GOLD_SPECIAL_CHARGE a
+        <include refid="GoldSpecialCharge.getGoldSpecialChargeCondition" />
+    </select>
+
+    <!-- 保存数据 -->
+    <insert id="GoldSpecialCharge.saveGoldSpecialCharge" parameterClass="GoldSpecialCharge">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_BASIC_GOLD_SPE_CHARGE_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into JAT_BASIC_GOLD_SPECIAL_CHARGE(
+            <include refid="GoldSpecialCharge_columns_1" />
+        ) values(
+            #billid#, #itemClassId#, #ornaClassId#, #weightStart#, #weightEnd#, #workPrice#, #workType#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+        )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="GoldSpecialCharge.getGoldSpecialCharge" resultClass="GoldSpecialCharge" parameterClass="string">
+    	select <include refid="GoldSpecialCharge_columns_2"/> from JAT_BASIC_GOLD_SPECIAL_CHARGE a
+        where a.billid = #value#
+    </select>
+
+    <!-- 修改信息 -->
+    <update id="GoldSpecialCharge.updateGoldSpecialCharge" parameterClass="GoldSpecialCharge">
+		update JAT_BASIC_GOLD_SPECIAL_CHARGE a
+        set
+            a.item_class_id = #itemClassId#,
+            a.orna_class_id = #ornaClassId#,
+            a.weight_start  = #weightStart#,
+            a.weight_end    = #weightEnd#,
+            a.work_price    = #workPrice#,
+            a.work_type     = #workType#,
+            a.status        = #status#,
+            a.memo          = #memo#,
+            a.update_date   = #updateDate#,
+            a.update_id     = #updateId#
+		where a.billid = #billid#
+	</update>
+	<delete id="GoldSpecialCharge.deleteGoldSpecialCharge" parameterClass="string">
+		delete JAT_BASIC_GOLD_SPECIAL_CHARGE a where a.billid = #value#
+	</delete>
+	
+	<select id="GoldSpecialCharge.checkWeightExists" parameterClass="GoldSpecialCharge" resultClass="int">
+		select  count(*) from JAT_BASIC_GOLD_SPECIAL_CHARGE a
+		where 1=1
+            and a.item_class_id = #itemClassId#
+            and a.orna_class_id = #ornaClassId#
+        <![CDATA[
+            and (
+                (a.weight_start <= #weightStart# and a.weight_end > #weightStart#)
+                or
+                (a.weight_start < #weightEnd# and a.weight_end >= #weightEnd#)
+            )
+        ]]>
+        <isNotEmpty prepend="and" property="billid">
+			<![CDATA[ a.billid <> #billid# ]]>
+		</isNotEmpty>
+	</select>
+
+    <select id="GoldSpecialCharge.getGoldSpecialChargeByItemOrna" resultClass="GoldSpecialCharge" parameterClass="map">
+        select <include refid="GoldSpecialCharge_columns_2"/> from JAT_BASIC_GOLD_SPECIAL_CHARGE a
+        where 1=1
+        <![CDATA[
+            and a.item_class_id = #itemClassId#
+            and a.orna_class_id = #ornaClassId#
+            and a.weight_start <= #weight#
+            and a.weight_end > #weight#
+            and rownum = 1
+        ]]>
+    </select>
+</sqlMap>

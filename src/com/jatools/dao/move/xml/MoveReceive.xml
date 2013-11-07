@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveReceive">
+	<sql id="MoveReceive.getMoveReceivePageDataCD">
+		<isEqual property="jmFlag" compareValue="1">
+			<!--
+				若是加盟的，调出组织需要看到部分关闭的调拨单、退货单和退残单，进行关闭、或继续接收
+					调拨单部分关闭，确认后，产生一张红字加盟销售结算单
+					退货单、退残单，确认后，改状态为未生成结算单，由调入组织进行生成加盟结算单
+				加盟调拨单最后状态为关闭，加盟退货单、加盟退残单最后状态为已生成结算单
+			 -->
+			and ((a.in_org_id = #orgId# and ((a.bill_type = 1 and a.status in (7, 8, 14)) or (a.bill_type in (2,3) and a.status in (7, 14, 25, 26)))) or (a.out_org_id = #orgId# and a.status = 7 and (a.bill_type in (2, 3) or (not exists (select 1 from jas_sm_org b where a.out_org_id = b.org_id and b.isfranchise = 1) and a.bill_type = 1))))
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 8 and a.status <> 25 and a.status <> 26]]></isNotEqual>
+		</isEqual>
+		<isNotEqual property="jmFlag" compareValue="1">
+			and a.in_org_id = #orgId# and a.status in (7, 8, 14)
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 8 and a.status <> 7]]></isNotEqual>
+		</isNotEqual>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="MoveReceive.getMoveReceivePageData" parameterClass="map" resultClass="com.jatools.vo.move.MoveBillHead">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid as "headid", a.billno as "billno", a.move_type as "moveType", a.src_bill_code as "srcBillCode", a.src_bill_no as "srcBillNo",
+				a.estimate_id as "estimateId", a.red_estimate_id as "redEstimateId", a.estimate_no as "estimateNo", a.red_estimate_no as "redEstimateNo", 
+				a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.out_stock_id as "outStockId", a.in_stock_id as "inStockId", a.out_group as "outGroup", a.in_group as "inGroup",
+				a.sum_count as "sumCount", a.sum_weight as "sumWeight", a.rececount as "receCount", a.norececount as "noreceCount", a.cert_count as "certCount", a.pack_no as "packNo",
+				a.create_id as "createId", a.create_date as "createDate", a.update_id as "updateId", a.update_date as "updateDate", a.status as "status", a.license_complete_flag as "licenseCompleteFlag"
+			from jat_move_head a
+			where a.bill_type = #billType# and a.jm_flag = #jmFlag#
+			<include refid="MoveReceive.getMoveReceivePageDataCD"/>
+			order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MoveReceive.getMoveReceiveTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_move_head a
+		where a.bill_type = #billType# and a.jm_flag = #jmFlag#
+		<include refid="MoveReceive.getMoveReceivePageDataCD"/>
+    </select>
+    <select id="MoveReceive.getMoveLineInfo" parameterClass="map" resultClass="com.jatools.vo.move.MoveBillLine">
+    	select w.*,
+    		<isEqual property="billType" compareValue="1">d.groups</isEqual>
+    		<isNotEqual property="billType" compareValue="1">10</isNotEqual>
+    			 as "inGroupNo" from (
+    		select a.lineid as "lineid", a.headid as "headid", a.orna_code as "ornaCode", a.bar_code as "barCode", a.orna_dsc as "ornaDsc",
+    			a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.analysis_id as "analysisId", c.summarydescription as "analysisName",
+    			a.style_id as "styleId", b.stylename as "styleName", b.isbiggraph as "bigGraph", a.unit_id as "unitId", a.all_weight as "allWeight", a.now_qty as "nowQty",
+    			a.grains as "grains", a.pos_cost as "posCost", a.pos_amount as "posAmount", a.main_weight as "mainWeight", a.part_weight as "partWeight",
+    			a.status as "status", a.out_group_no as "outGroupNo", a2.in_org_id as "orgId", a2.out_stock_id as "stockId",
+    			a.free_return_flag as "freeReturnFlag", a.free_left_days as "freeLeftDays", substr(a.create_date, 1, 10) as "createDate"
+    		from jat_move_line a left join jas_bd_style b on a.style_id = b.styleid
+    			left join jas_bd_analysis_arange c on a.analysis_id = c.analysis_arange_id,
+    			jat_move_head a2 where a.status not in(11, 13) and rownum = 1 and a2.bill_type = #billType# and a2.jm_flag = #jmFlag#
+				<isEqual property="ornaFlag" compareValue="1" prepend="and"> a.orna_code = #code#</isEqual>
+				<isNotEqual property="ornaFlag" compareValue="1" prepend="and"> a.bar_code = #code#</isNotEqual>
+    			and a.headid = a2.headid) w
+    		<isEqual property="billType" compareValue="1">
+    		left join jat_basic_org_group d on w."orgId" = d.org_id and w."itemClassId" = d.item_class_id and w."ornaClassId" = d.orna_class_id
+    		</isEqual>
+    </select>
+    <update id="MoveReceive.receiveMoveLine" parameterClass="map">
+    	update jat_move_line a set a.rece_date = #receDate#, a.rece_emp_id = #receEmpId#, a.in_group_no = #group#, a.status = #status# where a.lineid = #lineid#
+    </update>
+    <select id="MoveReceive.getReceivedMoveBillLine" parameterClass="string" resultClass="com.jatools.vo.move.MoveBillLine">
+    	select a.lineid as "lineid", a.orna_code as "ornaCode", a.bar_code as "barCode", a.orna_dsc as "ornaDsc", a.item_class_id as "itemClassId",
+    		a.orna_class_id as "ornaClassId", a.analysis_id as "analysisId", b.summarydescription as "analysisName",
+    		a.style_id as "styleId", c.stylename as "styleName", c.isbiggraph as "bigGraph", a.unit_id as "unitId", a.all_weight as "allWeight", a.now_qty as "nowQty", a.grains as "grains", a.pos_amount as "posAmount", a.pos_cost as "posCost", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.status as "status", a.out_group_no as "outGroupNo", a.in_group_no as "inGroupNo",
+    		a.free_return_flag as "freeReturnFlag", a.free_left_days as "freeLeftDays", substr(a.create_date, 1, 10) as "createDate"
+		from jat_move_line a left join jas_bd_analysis_arange b on b.analysis_arange_id = a.analysis_id left join jas_bd_style c on c.styleid = a.style_id
+		where a.headid = #value# and a.status = 10 order by a.item_class_id, a.orna_class_id, a.style_id, a.orna_dsc
+    </select>
+    <select id="MoveReceive.getReceivedMoveLineCount" parameterClass="string" resultClass="java.lang.Long">
+    	select count(1) from jat_move_line a where a.headid = #headid# and a.status = 10
+    </select>
+    <update id="MoveReceive.discardMoveLine" parameterClass="map">
+    	update jat_move_line a set a.status = 13, a.update_date = #date#, a.update_id = #userid# where a.headid = #headid# and a.status = 1
+    </update>
+    <update id="MoveReceive.inivMoveLine" parameterClass="map">
+    	update jat_move_line a set a.status = 11, a.update_date = #date#, a.update_id = #userid# where a.headid = #headid# and a.status = 10
+    </update>
+    <select id="MoveReceive.getUnreceiveMoveBillLine" parameterClass="string" resultClass="com.jatools.vo.move.MoveBillLine">
+    	select a.lineid as "lineid", a.orna_code as "ornaCode", a.bar_code as "barCode", a.orna_dsc as "ornaDsc", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.analysis_id as "analysisId", b.summarydescription as "analysisName", a.style_id as "styleId", c.stylename as "styleName", a.unit_id as "unitId", a.all_weight as "allWeight", a.now_qty as "nowQty", a.grains as "grains", a.pos_amount as "posAmount", a.pos_cost as "posCost", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.status as "status", a.out_group_no as "outGroupNo", a.in_group_no as "inGroupNo"
+		from jat_move_line a left join jas_bd_analysis_arange b on b.analysis_arange_id = a.analysis_id left join jas_bd_style c on c.styleid = a.style_id
+		where a.headid = #value# and a.status in(1, 13) order by a.status, a.item_class_id, a.orna_class_id, a.style_id, a.orna_dsc
+    </select>
+    <select id="MoveReceive.getInivOrnaMoveBillLine" parameterClass="string" resultClass="com.jatools.vo.move.MoveBillLine">
+    	select a.lineid as "lineid", a.orna_code as "ornaCode", a.bar_code as "barCode", a.orna_dsc as "ornaDsc", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.analysis_id as "analysisId", b.summarydescription as "analysisName", a.style_id as "styleId", c.stylename as "styleName", a.unit_id as "unitId", a.all_weight as "allWeight", a.now_qty as "nowQty", a.grains as "grains", a.pos_amount as "posAmount", a.pos_cost as "posCost", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.status as "status", a.out_group_no as "outGroupNo", a.in_group_no as "inGroupNo"
+		from jat_move_line a left join jas_bd_analysis_arange b on b.analysis_arange_id = a.analysis_id left join jas_bd_style c on c.styleid = a.style_id
+		where a.headid = #value# and a.status = 11 order by a.item_class_id, a.orna_class_id, a.style_id, a.orna_dsc
+    </select>
+    <update id="MoveReceive.changeInGroupNo" parameterClass="map">
+    	update jat_move_line a set a.in_group_no = #inGroupNo# where a.lineid = #lineid#
+    </update>
+    <insert id="MoveReceive.createLabelApplyHead" parameterClass="map">
+    	<selectKey keyProperty="applyid" type="pre" resultClass="string">select jat_lable_tag_apply_seq.nextval from dual</selectKey>
+    	<![CDATA[
+    	insert into jat_lable_tag_apply (id, no, createdate, createuserid, org_id, tag_print_bill_id, num_total, changelabel_id, state, updatedate)
+  		select #applyid#, #applyBillNo#, #date#, #userId#, a.in_org_id, null,
+	  		(select count(1) from jat_move_line b where b.pos_amount <> b.new_pos_money and b.unit_id = 612 and b.status <> 13 and b.headid = a.headid),
+	  		#changeLabelReason#, 5, #date# from jat_move_head a where a.headid = #headid#
+	  	]]>
+    </insert>
+    <insert id="MoveReceive.createLabelApplyLine" parameterClass="map">
+    	<![CDATA[
+    	insert into jat_lable_tag_apply_line(id, head_id, orna_code, orna_name, unit_id, num, weighr,
+			old_amount, new_amount, oid_size, old_orna_name, old_native_cert, old_gia_cert, old_hrd_cert, old_igi_cert, old_zodiac, update_reason,
+			state, updatedate, is_dbl_label, label_kind, old_basic_price, item_class_id, orna_class_id, old_special_work_price)
+		select jat_lable_tag_apply_line_seq.nextval, #applyHeadId#, a.orna_code, a.orna_dsc, b.unit_id, b.now_qty, b.all_weight,
+			b.pos_amount, b.new_pos_money, a.size_id, a.orna_dsc, a.ident_id, a.gia_cert, a.hrd_cert, a.igi_cert, a.zodiac, null,
+			1, #date#, a.is_dbl_label, a.tag_type, a.basic_price, a.item_class_id, a.orna_class_id, a.special_work_price
+		from ic_mater_active a, jat_move_line b
+		where a.orna_code = b.orna_code
+			and b.pos_amount <> b.new_pos_money
+			and b.unit_id = 612
+			and b.status <> 13
+			and b.headid = #headid#
+		]]>
+    </insert>
+    <update id="MoveReceive.updateLabelApplyFlag" parameterClass="map">
+    	update jat_move_head a set a.label_apply_flag = 1, a.update_date = #date#, a.update_id = #userId# where a.headid = #headid#
+    </update>
+    <select id="MoveReceive.getLabelApplyLineCount" parameterClass="string" resultClass="int">
+    	<![CDATA[select count(1) from jat_move_line b
+		where b.pos_amount <> b.new_pos_money
+			and b.unit_id = 612
+			and b.status <> 13
+			and b.headid = #headid#]]>
+    </select>
+    <select id="MoveReceive.getUnInivCount" parameterClass="string" resultClass="int">
+    	<![CDATA[select count(1) from jat_move_line a where a.status <> 11 and a.headid = #headid#]]>
+    </select>
+
+    <select id="MoveReceive.isJmMove" parameterClass="string" resultClass="int">
+        select count(1) from jat_move_head a
+        left join jas_sm_org b on a.in_org_id = b.ORG_ID
+        left join jas_sm_org c on a.out_org_id = c.ORG_ID
+        where b.ISFRANCHISE = 1 and c.ISFRANCHISE = 1
+			and a.bill_type = 1
+            and a.headid = #value#
+    </select>
+</sqlMap>

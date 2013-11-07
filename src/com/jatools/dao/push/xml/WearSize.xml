@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="WearSize">
+	<sql id="WearSize.getWearSizePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="WearSize.getWearSizePageData" parameterClass="map" resultClass="com.jatools.vo.push.WearSize">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.billid as "billId",
+			       a.item_class_id as "itemClassId",
+			       a.orna_class_id as "ornaClassId",
+			       a.style_item_class_id as "styleItemClassId",
+			       a.wear_id as "wearId",
+       			   e.wear_name as "wearName",
+			       a.start_size_id || ',' || b.size_num as "startSizeId",
+			       a.end_size_id || ',' || c.size_num as "endSizeId",
+			       a.size_id || ',' || d.size_num as "sizeId",
+			       b.size_name as "startSizeName",
+			       c.size_name as "endSizeName",
+			       d.size_name as "sizeName",
+			       a.rate as "rate",
+			       a.create_id as "createId",
+			       a.create_date as "createDate",
+			       a.update_id as "updateId",
+			       a.update_date as "updateDate",
+			       a.status as "status"
+			  from jat_pl_basic_wear_size a
+			  left join jas_bd_size b
+			    on a.start_size_id = b.size_id
+			  left join jas_bd_size c
+			    on a.end_size_id = c.size_id
+			  left join jas_bd_size d
+			    on a.size_id = d.size_id
+			  left join jas_bd_wear e
+			    on a.wear_id = e.wear_id
+			  <include refid="WearSize.getWearSizePageDataCD"/>
+			 order by a.item_class_id, a.orna_class_id, b.size_num, c.size_num
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="WearSize.getWearSizeTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_wear_size a
+			  left join jas_bd_size b
+			    on a.start_size_id = b.size_id
+			  left join jas_bd_size c
+			    on a.end_size_id = c.size_id
+			  left join jas_bd_size d
+			    on a.size_id = d.size_id
+			  left join jas_bd_wear e
+			    on a.wear_id = e.wear_id
+			  <include refid="WearSize.getWearSizePageDataCD"/>
+	</select>
+	<insert id="WearSize.saveWearSize" parameterClass="com.jatools.vo.push.WearSize">
+		<selectKey keyProperty="billId" resultClass="string">select jat_pl_basic_wear_size_seq.nextval from dual</selectKey>
+		insert into jat_pl_basic_wear_size (billid, item_class_id, orna_class_id, style_item_class_id, wear_id,start_size_id, end_size_id, size_id, rate,
+			create_id, create_date, update_id, update_date, status)
+		values (#billId#, #itemClassId#, #ornaClassId#, #styleItemClassId#, #wearId#, #startSizeId#, #endSizeId#, #sizeId#, #rate#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="WearSize.updateWearSize" parameterClass="com.jatools.vo.push.WearSize">
+		update jat_pl_basic_wear_size
+		set item_class_id = #itemClassId#, orna_class_id = #ornaClassId#, style_item_class_id = #styleItemClassId#, wear_id = #wearId#,
+			start_size_id = #startSizeId#, end_size_id = #endSizeId#,
+			size_id = #sizeId#, rate = #rate#, update_id = #updateId#, update_date = #updateDate#
+		where billid = #billId#
+	</update>
+	<select id="WearSize.checkWearSizeRepeat" parameterClass="com.jatools.vo.push.WearSize" resultClass="com.jatools.vo.push.WearSize">
+		select start_size_id as "startSizeId",
+		       end_size_id   as "endSizeId",
+		       b.size_name   as "startSizeName",
+		       c.size_name   as "endSizeName",
+		       b.size_num    as "startSizeNum",
+		       c.size_num    as "endSizeNum",
+		       rate          as "rate"
+		  from jat_pl_basic_wear_size a
+		  left join jas_bd_size b
+		    on a.start_size_id = b.size_id
+		  left join jas_bd_size c
+		    on a.end_size_id = c.size_id
+		 where a.item_class_id = #itemClassId#
+		   and a.orna_class_id = #ornaClassId#
+		   and a.style_item_class_id = #styleItemClassId#
+		   and a.wear_id = #wearId#
+		<isNotEmpty property="billId"><![CDATA[and a.billid <> #billId#]]></isNotEmpty>
+	</select>
+	<delete id="WearSize.deleteWearSize" parameterClass="string">
+		delete jat_pl_basic_wear_size where billid = #value#
+	</delete>
+</sqlMap>

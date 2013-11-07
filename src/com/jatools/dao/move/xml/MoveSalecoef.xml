@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveSalecoef">
+	<typeAlias alias="MoveSalecoefHead" type="com.jatools.vo.move.MoveSalecoefHead" />
+	<typeAlias alias="MoveSalecoefLine" type="com.jatools.vo.move.MoveSalecoefLine"/>
+	<resultMap id="result" class="MoveSalecoefHead">
+		<result property="headid" column="headid"/>
+		<result property="inOrgId" column="in_org_id"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="styleItemIds" column="style_item_ids"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+		<result property="status" column="status" />
+	</resultMap>
+	<resultMap id="lineResult" class="MoveSalecoefLine">
+		<result property="mainwtStr" column="mainwt_str"/>
+		<result property="mainwtEnd" column="mainwt_end"/>
+		<result property="moveCoef" column="move_coef"/>
+	</resultMap>
+
+	<sql id="MoveSalecoef.columnsall">
+		headid, in_org_id, item_class_id, orna_class_id, style_item_ids, memo, create_date, create_id, update_date, update_id, status
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="MoveSalecoef.getPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="MoveSalecoef.columnsall"/> from jat_move_salecoef_head a where 1 = 1
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by in_org_id, item_class_id, orna_class_id, a.headid desc	
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MoveSalecoef.getTotalCount" resultClass="int">
+		select count(1) from jat_move_salecoef_head a where 1=1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+    <!-- 保存头表 -->
+    <insert id="MoveSalecoef.saveMoveSalecoefHead" parameterClass="MoveSalecoefHead">
+    	<selectKey resultClass="string" keyProperty="headid" type="pre">
+			select jat_move_salecoef_head_seq.nextval as headid from dual
+		</selectKey>
+		insert into jat_move_salecoef_head(headid, in_org_id, item_class_id, orna_class_id, style_item_ids, memo, update_date, update_id, status, create_date, create_id)
+		values(#headid#,#inOrgId#,#itemClassId#,#ornaClassId#,#styleItemIds#,#memo#,#updateDate#,#updateId#,#status#,#createDate#,#createId#)
+	</insert>
+    <!-- 修改头表 -->
+	<update id="MoveSalecoef.updateMoveSalecoefHead" parameterClass="MoveSalecoefHead">
+		update jat_move_salecoef_head a set a.in_org_id=#inOrgId#, a.item_class_id=#itemClassId#, a.orna_class_id=#ornaClassId#, a.style_item_ids=#styleItemIds#, a.memo=#memo#, a.update_date=#updateDate#, a.update_id=#updateId#
+		where a.headid = #headid#
+	</update>
+    <!-- 删除行表 -->
+	<delete id="MoveSalecoef.deleteMoveSalecoefLineByHeadid" parameterClass="string">
+		delete jat_move_salecoef_line a where a.headid = #value#
+	</delete>
+    <!-- 保存行表 -->
+	<insert id="MoveSalecoef.saveMoveSalecoefLineList" parameterClass="MoveSalecoefLine">
+		<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select jat_move_salecoef_line_seq.nextval as lineid from dual
+		</selectKey>
+		insert into jat_move_salecoef_line(lineid, headid, mainwt_str, mainwt_end, move_coef)
+		values(#lineid#,#headid#,#mainwtStr#,#mainwtEnd#,#moveCoef#)
+	</insert>
+	<!-- 获取头表 -->
+	<select id="MoveSalecoef.getMoveSalecoefHead" resultMap="result" parameterClass="string">
+		select <include refid="MoveSalecoef.columnsall"/>, rownum as rownum_ from jat_move_salecoef_head a where a.headid=#value#
+	</select>
+	<!-- 获取行表 -->
+	<select id="MoveSalecoef.getMoveSalecoefLineList" resultMap="lineResult" parameterClass="string">
+		select a.mainwt_str, a.mainwt_end, a.move_coef from jat_move_salecoef_line a where a.headid=#value#
+	</select>
+	<!-- 删除头表 -->
+	<delete id="MoveSalecoef.deleteMoveSalecoefHead" parameterClass="string">
+		delete jat_move_salecoef_head a where a.headid = #value#
+	</delete>
+	
+	<select id="MoveSalecoef.checkRepeat" parameterClass="map" resultClass="com.jatools.vo.move.MoveSalecoefHead">
+		select a.headid as "headid" from jat_move_salecoef_head a where a.in_org_id = #inOrgId# and a.item_class_id = #itemClassId# and a.orna_class_id = #ornaClassId# and a.status = 1
+		<iterate prepend="and" property="styleItemList" open="(" close=")" conjunction="or">
+			instr(','||a.style_item_ids||',', ',$styleItemList[]$,')>0
+		</iterate>
+		<isNotEmpty property="headid" prepend="and"> <![CDATA[a.headid <> #headid#]]></isNotEmpty>
+	</select>
+	<delete id="MoveSalecoef.deleteMoveSolecoefHeadByOrgids" parameterClass="string">
+		delete jat_move_salecoef_head a where a.in_org_id in($value$)
+	</delete>
+	<delete id="MoveSalecoef.deleteMoveSolecoefLineByOrgids" parameterClass="string">
+		delete jat_move_salecoef_line b where exists(
+			select 1 from jat_move_salecoef_head a where a.headid = b.headid
+			and a.in_org_id in ($value$)
+		)
+	</delete>
+	<insert id="MoveSalecoef.createNewHeadidTempData" parameterClass="map">
+		insert into jat_move_salecoef_temp
+		  (headid, newheadid, org_id)
+		  select a.headid, jat_move_salecoef_head_seq.nextval, b.org_id
+		    from jat_move_salecoef_head a, jas_sm_org b
+		   where a.in_org_id = #fromOrgId#
+		   and b.org_id in ($toOrgIds$)
+	</insert>
+	<insert id="MoveSalecoef.copyMoveSolecoefHead" parameterClass="map">
+    	insert into jat_move_salecoef_head
+		  (headid,
+		   in_org_id,
+		   item_class_id,
+		   orna_class_id,
+		   style_item_ids,
+		   memo,
+		   create_date,
+		   create_id,
+		   update_date,
+		   update_id,
+		   status)
+		  select b.newheadid,
+		         c.org_id,
+		         a.item_class_id,
+		         a.orna_class_id,
+		         a.style_item_ids,
+		         a.memo,
+		         #date#,
+		         #userid#,
+		         #date#,
+		         #userid#,
+		         1
+		    from jat_move_salecoef_head a, jat_move_salecoef_temp b, jas_sm_org c
+		   where a.headid = b.headid
+		     and b.org_id = c.org_id
+	</insert>
+	<insert id="MoveSalecoef.copyMoveSolecoefLine" parameterClass="map">
+		insert into jat_move_salecoef_line
+		  (lineid, headid, mainwt_str, mainwt_end, move_coef)
+		  select jat_move_salecoef_line_seq.nextval,
+		         b.newheadid,
+		         a.mainwt_str,
+		         a.mainwt_end,
+		         a.move_coef
+		    from jat_move_salecoef_line a, jat_move_salecoef_temp b, jas_sm_org c
+		   where a.headid = b.headid
+		     and b.org_id = c.org_id
+	</insert>
+</sqlMap>

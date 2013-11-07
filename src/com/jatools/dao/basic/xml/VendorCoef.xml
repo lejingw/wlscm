@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="VendorCoef">
+	<typeAlias alias="VendorCoef" type="com.jatools.vo.basic.VendorCoef"/>
+	<resultMap class="VendorCoef" id="result">
+		<result property="coefId" column="COEF_ID"/>
+		<result property="vendorId" column="VENDOR_ID"/>
+		<result property="coef" column="COEF"/>
+		<result property="memo" column="MEMO"/>
+		<result property="status" column="STATUS"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+	</resultMap>
+	<sql id="VendorCoef.Columns.all">
+		COEF_ID,
+		VENDOR_ID,
+		COEF,
+		MEMO,
+		STATUS,
+		CREATE_DATE,
+		CREATE_ID,
+		UPDATE_DATE,
+		UPDATE_ID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="VendorCoef.getVendorCoefAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="VendorCoef.Columns.all"/> from JAT_BASIC_VENDOR_COEF a where 1=1
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.VENDOR_ID , a.COEF_ID
+		) AA )where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="VendorCoef.getVendorCoefToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_VENDOR_COEF a where 1=1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+		order by a.VENDOR_ID , a.COEF_ID
+	</select>
+	<!-- findById -->
+	<select id="VendorCoef.getVendorCoefById" resultClass="VendorCoef" parameterClass="string" resultMap="result">
+		select <include refid="VendorCoef.Columns.all"/> from JAT_BASIC_VENDOR_COEF a where a.COEF_ID = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="VendorCoef.saveVendorCoef" parameterClass="VendorCoef">
+		<selectKey keyProperty="coefId" type="pre">
+			select JAT_BASIC_VENDOR_SEQ.nextval as COEF_ID from dual
+		</selectKey>
+		insert into JAT_BASIC_VENDOR_COEF(
+			COEF_ID,
+			VENDOR_ID,
+			COEF,
+			MEMO,
+			STATUS,
+			CREATE_DATE,
+			CREATE_ID,
+			UPDATE_DATE,
+			UPDATE_ID)
+		values(#coefId#,#vendorId#,#coef#,#memo#,#status#,#createDate#,
+			#createId#,#updateDate#,#updateId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="VendorCoef.updateVendorCoef" parameterClass="VendorCoef">
+		update JAT_BASIC_VENDOR_COEF a set 
+			a.COEF_ID= #coefId#,
+			a.VENDOR_ID= #vendorId#,
+			a.COEF= #coef#,
+			a.MEMO= #memo#,
+			a.STATUS= #status#,
+			a.CREATE_DATE= #createDate#,
+			a.CREATE_ID= #createId#,
+			a.UPDATE_DATE= #updateDate#,
+			a.UPDATE_ID= #updateId#
+			where a.COEF_ID = #coefId#
+	</update>
+	<!-- 删除 -->
+	<delete id="VendorCoef.deleteVendorCoef" parameterClass="string">
+		delete JAT_BASIC_VENDOR_COEF a where a.COEF_ID = #coefId#
+	</delete>
+	<!-- 是否重复 -->
+	<select id="VendorCoef.getVendorCoefByQualityId" resultClass="string" parameterClass="map" >
+		select count(1) from JAT_BASIC_VENDOR_COEF a where a.VENDOR_ID = #vendorId# 
+			<isNotEmpty prepend="and" property="coefId"> 
+				<![CDATA[   a.COEF_ID <> #coefId# ]]>
+			</isNotEmpty>
+	</select>
+</sqlMap>

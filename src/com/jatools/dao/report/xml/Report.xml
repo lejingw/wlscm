@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Report">
+    <select id="Report.executeQurey" resultClass="java.util.HashMap" remapResults="true" parameterClass="string">
+    	<![CDATA[$value$]]>
+    </select>
+    
+	<!-- 获取分页数据 -->
+	<select id="Report.executeQueryPageData" resultClass="java.util.HashMap" parameterClass="map" remapResults="true">
+		select * from (select rownum rownum_ , AA.* from (
+			<![CDATA[$sql$]]>
+	    ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取分页数 -->
+    <select id="Report.executeQueryTotalCount" resultClass="int">
+		select count(1) from (<![CDATA[$sql$]]>) AA
+    </select>
+    
+    <delete id="Report.deleteOrnaMoveType" >
+        delete from TMP_ORNA_MOVE_TYPE
+    </delete>
+
+    <insert id="Report.insertOrnaMoveType" parameterClass="string">
+        insert into TMP_ORNA_MOVE_TYPE (orna_code)
+        select  a.col0
+        from jat_sys_excel_temp_data a
+        where a.seq_id = #value#
+        and a.sheetindex = 0
+    </insert>
+</sqlMap>

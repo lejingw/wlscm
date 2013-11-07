@@ -1,0 +1,36 @@
+<form id='frm' action="handover.vm" method="post">
+	#set($cond = $form.condition)
+	<input type="hidden" id="lineid" name="lineid" value="$!{cond.lineid}"/>
+	<input type="hidden" id="user_action" name="user_action" value="doSearchChildRec"/>
+	<table class='list'>
+    	<thead>
+    		<tr>
+				<th style="width:24px;"></th>
+    			<th>分析范围</th>
+    			<th>数量</th>
+    			<th>单价</th>
+        		<th>修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+    	#foreach($line in $form.pager.pageData)
+    		<tr>
+                <td>#if("$!line.childid"=="-2")<img src="$!StringUtil.getContextPath()/image/mclon/new.png"/>#end</td>
+    			<td>$!line.alaysisName</td>
+    			<td>$!line.stoneNum</td>
+				<td>$!line.unitPrice</td>
+				<td>$!line.updateDate</td>
+    		</tr>
+    	#end
+    	</tbody>
+    </table>
+	<script>
+    	createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+    </script>
+</form>
+	
+<script >
+jQuery(function(){
+	altRowCSS("tbl");
+})
+</script>

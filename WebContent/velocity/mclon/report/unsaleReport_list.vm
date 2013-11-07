@@ -1,0 +1,330 @@
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type='hidden' name='firstFlag' value="1"/>
+    <table class="title">
+    	<tr><td>滞销商品管理#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	#set($cond = $!form.condition)
+	#set($orgId = $!cond.get('orgId'))
+	#set($ornaCode = $!cond.get("ornaCode"))
+	#set($stockId = $!cond.get("stockId"))
+	#set($itemClassId = $!cond.get("itemClassId"))
+	#set($ornaClassId = $!cond.get("ornaClassId"))
+	#set($styleName = $!cond.get("styleName"))
+	#set($styleId = $!cond.get("styleId"))
+	#set($styleItemClass = $!cond.get("styleItemClass"))
+	#set($styleMiddleClass = $!cond.get("styleMiddleClass"))
+	#set($styleOrnaClass = $!cond.get("styleOrnaClass"))
+	#set($qualityId = $!cond.get("qualityId"))
+	#set($analysisId = $!cond.get("analysisId"))
+	#set($themeId = $!cond.get("themeId"))
+	#set($status = $!cond.get("status"))
+	#set($analysisName = $!cond.get("analysisName"))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '08052701','1')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08052701','2')/>
+				<input type='button' value='重置' class='btn' id='btnReset' onclick="resetSearch()"/>
+			</td>
+		</tr>
+    </table>
+	<table class='content'>
+    	<tr>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" class="target" readonly onclick="showSelectOrgWin()">
+			</td>
+			<td class='body1'>饰品编号：</td>
+			<td class='body2'>
+				<input type='text' id="ornaCode" name='ornaCode'  value="$!ornaCode">
+			</td>
+			<td class='body1'>仓库：</td>
+			<td class='body2'>
+				<select id="stockId" name="stockId" value="$stockId">
+					$StringUtil.emptyOption()
+				</select>
+			</td>
+			</td>
+			<td class='body1'>柜组</td>	
+			<td class='body2'>
+				<select id="groups" name="groups">$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<input type='hidden' id="itemClassId" name='itemClassId' value="$!{itemClassId}">
+				<input type='text' id="itemClassName" name='itemClassName'  value="$!BdCommon.getItemClassNames($itemClassId)" class="target" readonly onclick="showItemClassWin()">
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<input type='hidden' id="ornaClassId" name='ornaClassId' value="$!{ornaClassId}">
+				<input type='text' id="ornaClassName" name='ornaClassName'  value="$!BdCommon.getOrnaClassNames($ornaClassId)" class="target" readonly onclick="showOrnaClassWin()">
+			</td>
+			<td class='body1'>款式</td>
+			<td class='body2'>
+				<input type='text' id="styleName" name='styleName' readonly/><IMG src="$!StringUtil.getContextPath()/image/mclon/sel.png" alt="选择款式" onclick="showStyleWindow()"/>
+			    <input type='hidden' id="styleId" name='styleId' value="$!styleId">
+			</td>
+			<td class='body1'>款式大类</td>
+			<td class='body2'>
+				<input type='hidden' id="styleItemClass" name='styleItemClass' value="$!{styleItemClass}">
+				<input type='text' id="styleItemClassName" name='styleItemClassName'  value="$!BdCommon.getStyleItemClassNames($!styleItemClass)" class="target" readonly onclick="showStyleItemClassWin()">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>款式中类</td>
+			<td class='body2'>
+				<input type='hidden' id="styleMiddleClass" name='styleMiddleClass' value="$!{styleMiddleClass}">
+				<input type='text' id="styleMiddleClassName" name='styleMiddleClassName'  value="$!BdCommon.getStyleMiddleClassNames($!styleMiddleClass)" class="target" readonly onclick="showStyleMiddleClassWin()">
+			</td>
+			<td class='body1'>款式小类</td>
+			<td class='body2'>
+				<input type='hidden' id="styleOrnaClass" name='styleOrnaClass' value="$!{styleOrnaClass}">
+				<input type='text' id="styleOrnaClassName" name='styleOrnaClassName'  value="$!BdCommon.getStyleOrnaClassNames($!styleOrnaClass)" class="target" readonly onclick="showStyleOrnaClassWin()">
+			</td>
+			<td class='body1'>材质</td>
+			<td class='body2'>
+				<select id="qualityId" name="qualityId"  value="">$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1'>淘汰/流转</td>
+			<td class='body2'>
+				<select id="status" name="status"  value="">
+					<option value="0">流转</option>
+					<option value="1">淘汰</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>分析范围</td>
+			<td class='body2'>
+				<input type='hidden' id="analysisId" name='analysisId' value="$!{analysisId}">
+				<input type='text' id="analysisName" name='analysisName' value="$!analysisName"  class="target" readonly onclick="showAnalysisWin()">
+			</td>
+			<td class='body1'>主题名称</td>
+			<td class='body2'>
+				<input type='hidden' id="themeId" name='themeId' value="$!{themeId}">
+				<input type='text' id="themeName" name='themeName'  value="$!BdCommon.getStyleThemeNames($!themeId)" class="target" readonly onclick="showThemeWin()">
+			</td>
+			<td class='body1'></td>
+			<td class='body2'></td>
+			<td class='body1'></td>
+			<td class='body2'></td>
+		</tr>
+	</table>
+	<div class="scroll2">
+    <table class='list' style="width:2550px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall' /></th>
+                <th width='180px'>组织</th>
+        		<th width='90px'>饰品名称</th>
+        		<th width='90px'>饰品编码</th>
+        		<th width='90px'>大类</th>
+        		<th width='60px'>小类</th>
+				<th width='120px'>款式</th>
+        		<th width='90px'>分析范围</th>
+				<th width='90px'>材质</th>
+				<th width='60px'>仓库</th>
+				<th width='60px'>计量单位</th>
+				<th width='90px'>原料类型</th>
+				<th width='30px'>柜组</th>
+				<th width='90px'>基础价</th>
+				<th width='90px'>单位成本</th>
+				<th width='90px'>总成本</th>
+				<th width='90px'>销售金额</th>
+				<th width='90px'>特殊工费</th>
+				<th width='60px'>现有量</th>
+				<th width='60px'>总重量</th>
+				<th width='60px'>粒数</th>
+				<th width='60px'>主石重量</th>
+				<th width='60px'>配石重量</th>
+				<th width='60px'>色级</th>
+				<th width='60px'>净度</th>
+				<th width='120px'>入库时间</th>
+				<th width='120px'>到店时间</th>
+				<th width='60px'>在司库龄</th>
+				<th width='60px'>在店库龄</th>
+				<th width='30px'>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td>$!BdCommon.getOrgName($!map.orgId)</td>
+				<td>$!map.ornaDsc</td>
+				<td>$!map.ornaCode</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!map.styleId, $!map.stylename, $!map.bigGraph)</td>
+				<td>$!map.alaysisName</td>
+				<td>$!BdCommon.getQualityName($!map.qualityId)</td>
+				<td>$!DictUtil.getValue('invcode', $!map.stockId)</td>
+				<td>$!BdCommon.getUnitName($!map.saleUnitId)</td>
+				<td>$!DictUtil.getValue('materialtype', $!map.materialType)</td>
+				<td>$!map.groups</td>
+				<td>$!map.basicPrice</td>
+				<td>$!map.realUnitCost</td>
+				<td>$!map.realTotalCost</td>
+				<td>$!map.posAmount</td>
+				<td>$!map.specialWorkPrice</td>
+				<td>$!map.nowQty</td>
+				<td>$!map.allQty</td>
+				<td>$!map.stoneNowNum</td>
+				<td>$!map.mainWeight</td>
+				<td>$!map.partWeight</td>
+				<td>$!map.mainGradeName</td>
+				<td>$!map.cleanName</td>
+				<td>$!map.storagedate</td>
+				<td>$!map.toshopdate</td>
+				<td>$!map.comAge</td>
+				<td>$!map.shopAge</td>
+				<td>$!DictUtil.getValue('status', $!map.state)</td>
+			</tr>
+		#end
+    	</tbody>
+
+    </table></div><script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#orgId").val());
+}
+
+function showItemClassWin(){
+	selectClass(function(idArr, nameArr){
+			jQuery("#itemClassId").val(idArr.join(","));
+			jQuery("#itemClassName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#itemClassId").val(), "getAllItemClass");
+}
+
+function showOrnaClassWin(){
+	selectClass(function(idArr, nameArr){
+			jQuery("#ornaClassId").val(idArr.join(","));
+			jQuery("#ornaClassName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#ornaClassId").val(), "getAllOrnaClass");
+}
+
+function showStyleItemClassWin(){
+	var params = {itemClassId:jQuery("#itemClassId").val(),
+				ornaClassId:jQuery("#ornaClassId").val()};
+	selectClass(function(idArr, nameArr){
+			jQuery("#styleItemClass").val(idArr.join(","));
+			jQuery("#styleItemClassName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#styleItemClass").val(), "getAllStyleItemClass2", params);
+}
+
+function showStyleMiddleClassWin(){
+	var params = {itemClassId:jQuery("#itemClassId").val(),
+				ornaClassId:jQuery("#ornaClassId").val(),
+				styleItemClassId:jQuery("#styleItemClass").val()};
+	selectClass(function(idArr, nameArr){
+			jQuery("#styleMiddleClass").val(idArr.join(","));
+			jQuery("#styleMiddleClassName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#styleMiddleClass").val(), "getAllStyleMiddleClass", params);
+}
+
+function showStyleOrnaClassWin(){
+	var params = {itemClassId:jQuery("#itemClassId").val(),
+				ornaClassId:jQuery("#ornaClassId").val(),
+				styleItemClassId:jQuery("#styleItemClass").val(),
+				styleMiddleClassId:jQuery("#styleMiddleClass").val()};
+	selectClass(function(idArr, nameArr){
+			jQuery("#styleOrnaClass").val(idArr.join(","));
+			jQuery("#styleOrnaClassName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#styleOrnaClass").val(), "getAllStyleOrnaClass", params);
+}
+
+function showAnalysisWin(){
+	var params = {itemClassId:jQuery("#itemClassId").val(),
+				ornaClassId:jQuery("#ornaClassId").val()};
+	selectClass(function(idArr, nameArr){
+			jQuery("#analysisId").val(idArr.join(","));
+			jQuery("#analysisName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#analysisId").val(), "getAllAnalysis", params);
+}
+
+function showThemeWin(){
+	var params = {styleId:jQuery("#styleId").val()};
+	selectClass(function(idArr, nameArr){
+			jQuery("#themeId").val(idArr.join(","));
+			jQuery("#themeName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#themeId").val(), "getAllTheme", params);
+}
+
+function setValues(){
+	DictDwr.getDictsForSlt("invcode", function(data){
+		addOptions("stockId",  data, null, null, true, true, "$!stockId");
+	});
+	DictDwr.getDictsForSlt('group', function(data){
+		addOptions("groups", data, null, null, true, true, "$!groups");
+	});
+	
+	BdCommonDwr.getAllQualityForSlt(function(data){
+		addOptions("qualityId", data, null, null, true, true, "$!qualityId");
+	});
+	jQuery("#status").val($!status);
+	BdCommonDwr.getStyleName("$!styleId", function(data){
+		jQuery("#styleName").val(data);
+	});
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, null,null);
+	setValues();
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function showStyleWindow(){
+	printWin = selectStyle(function(id,name){}, null, null, false, null, "loadAllInivStyle",null);
+}
+function loadSelectStyleData(styleId,styleName){ 
+    jQuery("#styleId").val(styleId)
+	jQuery("#styleName").val(styleName);
+}
+var printWin = null;
+function closePrintWin(){
+	if(printWin!=null)
+		printWin.close();
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+function resetSearch(){
+	jQuery("#orgId").val("");
+	jQuery("#orgName").val("");
+	jQuery("#ornaCode").val("");
+	jQuery("#stockId").val("");
+	jQuery("#groups").val("");
+	jQuery("#itemClassId").val("");
+	jQuery("#itemClassName").val("");
+	jQuery("#ornaClassId").val("");
+	jQuery("#ornaClassName").val("");
+	jQuery("#styleName").val("");
+	jQuery("#styleId").val("");
+	jQuery("#styleItemClass").val("");
+	jQuery("#styleItemClassName").val("");
+	jQuery("#styleMiddleClass").val("");
+	jQuery("#styleMiddleClassName").val("");
+	jQuery("#styleOrnaClass").val("");
+	jQuery("#styleOrnaClassName").val("");
+	jQuery("#qualityId").val("");
+	jQuery("#analysisId").val("");
+	jQuery("#analysisName").val("");
+	jQuery("#themeId").val("");
+	jQuery("#themeName").val("");
+}
+</script>

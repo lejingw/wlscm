@@ -1,0 +1,140 @@
+<form id='frm' action="" method="post">
+    <table class="title">
+    	<tr><td>#if($!form.entryType=='2')业务 #else 系统 #end 数据字典 #if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1' width="12%">编码</td>
+			<td class='body2' width="13%">
+				<input type='text' id='entryCode' dataType="Require" msg="不能为空" value="$!form.entry.entryCode">
+				$StringUtil.star()
+			</td>
+			<td class='body1' width="12%">名称</td>
+			<td class='body2' width="13%">
+				<input type='text' id='entryName' dataType="Require" msg="不能为空" value="$!form.entry.entryName">
+				$StringUtil.star()
+			</td>
+			<td class='body1' width="12%">说明</td>
+			<td class='body2' colspan="3">
+				<input type='text' id='memo' value="$!form.entry.memo" style="width:98%">
+			</td>
+		</tr>
+    </table>
+	<table class="list" style="width:800px;">
+		<thead>
+			<tr>
+				<th>键</th>
+				<th>值</th>
+				<th>排序</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id='tbl'>
+	#if("update" == "$!form.action")
+		#foreach($item in $form.list)
+			<tr>
+				<td><input type='text' name='itemKey' value='$!item.itemKey'></td>
+				<td><input type='text' name='itemValue' value='$!item.itemValue'></td>
+				<td><input type='text' name='itemOrder' onblur='checkField(this)' value='$!item.itemOrder'></td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+	#end
+        </tbody>
+	</table>
+</form>
+<script>
+function checkField(obj){
+	if(obj.value){
+		if(!isNumber(obj.value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+function checkform(){
+	if(!Validator.Validate($("frm"),3))
+		return false;
+	for(var i=0;i<$n("itemOrder").length;i++){
+		if(!isNumber($n("itemOrder")[i].value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+	}
+	return true;
+}
+function saveform(){
+	if(!checkform())	return;
+	confirm("确定保存?", function(){
+		var entry = {
+			entryCode:jQuery("#entryCode").val(),
+			entryName:jQuery("#entryName").val(),
+			entryType:"$!form.entryType",
+			memo:jQuery("#memo").val()
+		};
+		var itemArr = [];
+		for(var i=0;i<$n("itemKey").length;i++){
+			itemArr.push({
+				entryCode:jQuery("#entryCode").val(),
+				itemKey:$n("itemKey")[i].value,
+				itemValue:$n("itemValue")[i].value,
+				itemOrder:$n("itemOrder")[i].value
+			});
+		}
+    	if("update" == "$!form.action"){
+			DictDwr.updateDictEntry(entry, itemArr, function(data){
+				if(!data){
+					alert('保存成功', function(){
+						window.location = "dict.vm?entryType=$!form.entryType";
+					});
+				}else{
+					alert(data);
+				}
+			});
+		}else{
+			DictDwr.saveDictEntry(entry, itemArr, function(data){
+				if(!data){
+					alert('保存成功', function(){
+						window.location = "dict.vm?entryType=$!form.entryType";
+					});
+				}else{
+					alert(data);
+				}
+			});
+		}
+	});
+}
+//增行
+function addRow(){
+	var field1 = "<input type='text' name='itemKey' value=''>";
+	var field2 = "<input type='text' name='itemValue' value=''>";
+	var field3 = "<input type='text' name='itemOrder' onblur='checkField(this)'>";
+	var field4 = "<input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,\"tbl\")'>";
+	insertRow("tbl",[field1,field2,field3,field4],false);
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	var dw = jQuery(document).width();
+	if(dw > 1000){
+		jQuery(".list").css("width", dw+"px");
+	}
+	jQuery("#btnAddRow").click(addRow);
+	jQuery("#btnSave").click(saveform);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "dict.vm?entryType=$!form.entryType";
+	});
+	if("update" == "$!form.action"){
+		jQuery("#entryCode").attr("readonly", true);
+	}
+});
+</script>

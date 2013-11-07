@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcExitLine">
+	<typeAlias alias="ProcExitLine" type="com.jatools.vo.stock.ProcExitLine" />
+	
+	<resultMap id="ProcExitLine.result" class="ProcExitLine">
+		<result property = "lineid"           column = "lineid"              />
+		<result property = "billid"           column = "billid"              />
+		<result property = "billno"           column = "billno"              />
+		<result property = "billdate"         column = "billdate"            />
+		<result property = "ornaNo"           column = "orna_no"             />
+		<result property = "materialType"     column = "material_type"       />
+		<result property = "itemClassId"      column = "item_class_id"       />
+		<result property = "alaysisId"        column = "alaysis_id"          />
+		<result property = "unitId"           column = "unit_id"             />
+		<result property = "mainColorGradeId" column = "main_color_grade_id" />
+		<result property = "cleanId"          column = "clean_id"            />
+		<result property = "cashUnit"         column = "cash_unit"           />
+		<result property = "billNums"         column = "bill_nums"           />
+		<result property = "oldNums"          column = "old_nums"            />
+		<result property = "exitNums"         column = "exit_nums"           />
+		<result property = "isDiff"           column = "is_diff"             />
+		<result property = "status"           column = "status"              />
+		<result property = "memo"             column = "memo"                />
+		<result property = "createDate"       column = "create_date"         />
+		<result property = "createId"         column = "create_id"           />
+		<result property = "updateDate"       column = "update_date"         />
+		<result property = "updateId"         column = "update_id"           />
+		<result property = "costPrice"         column = "cost_price"           />
+		
+		<result property = "materialTypeName"   column = "material_type_name"       />
+		<result property = "itemClassName"      column = "item_class_name"       />
+		<result property = "alaysisName"        column = "alaysis_name"          />
+		<result property = "unitName"           column = "unit_name"             />
+		<result property = "mainColorGradeName" column = "main_color_grade_name" />
+		<result property = "cleanName"          column = "clean_name"            />
+		<result property = "cashUnitName"       column = "cash_unit_name"           />
+	</resultMap>
+	<sql id="ProcExitLine_columns_all">
+		lineid, billid, billno, billdate, orna_no, material_type, item_class_id, 
+		alaysis_id, unit_id, main_color_grade_id, clean_id, cash_unit, bill_nums, 
+		old_nums, exit_nums, is_diff, status, memo, create_date, create_id, update_date, update_id, cost_price
+    </sql>
+    
+    <sql id="ProcExitLine_expand_columns">
+    	material_type_name, item_class_name, alaysis_name, cash_unit_name, unit_name, main_color_grade_name, clean_name
+    </sql>
+    
+    <sql id="ProcExitLine_selectColumns">
+    	<include refid="ProcExitLine_columns_all"/> ,
+		d.item_value as material_type_name, b.item_class_dsc as item_class_name,
+		c.summarydescription as alaysis_name, e.item_value cash_unit_name,
+		f.unitname as unit_name, g.item_value main_color_grade_name,
+		h.item_value as clean_name
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="ProcExitLine.getProcExitLinePageData" resultMap="ProcExitLine.result" parameterClass="map">
+		select <include refid="ProcExitLine_selectColumns"/>, <include refid="ProcExitLine_expand_columns"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="ProcExitLine_selectColumns"/>
+			from jat_proc_exit_line a
+				left join jat_sys_dict_item d      on d.entry_code='materialtype' and d.item_key = a.material_type
+				left join jas_bd_item_class b      on a.item_class_id = b.item_class_id
+				left join jas_bd_analysis_arange c on c.analysis_arange_id = a.alaysis_id
+				left join jat_sys_dict_item e      on a.cash_unit = e.item_key and e.entry_code = 'purunit'
+				left join jas_bd_unit f            on a.unit_id = f.unitid
+				left join jat_sys_dict_item g      on a.main_color_grade_id = g.item_key and g.entry_code = 'diacolorgrade'
+				left join jat_sys_dict_item h      on a.clean_id = h.item_key and h.entry_code = 'diaclean'
+			where 1 = 1
+			<isNotEmpty property="ornaNo" prepend="and">  a.orna_no = #ornaNo# </isNotEmpty>
+			order by a.lineid DESC         
+			                    
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcExitLine.getProcExitLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_exit_line a
+		where 1 = 1
+		<isNotEmpty property="ornaNo" prepend="and">  a.orna_no = #ornaNo# </isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="ProcExitLine.saveProcExitLine" parameterClass="ProcExitLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PROC_EXIT_LINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_proc_exit_line (<include refid="ProcExitLine_columns_all"/>)
+		 values(
+			#lineid#, #billid#, #billno#, #billdate#, #ornaNo#, #materialType#, #itemClassId#, 
+			#alaysisId#, #unitId#, #mainColorGradeId#, #cleanId#, #cashUnit#, #billNums#, #oldNums#, 
+			#exitNums#, #isDiff#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #costPrice#
+		)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcExitLine.getProcExitLine" resultClass="ProcExitLine" resultMap="ProcExitLine.result" parameterClass="string">
+    	select <include refid="ProcExitLine_columns_all"/> from jat_proc_exit_line a where a.lineid = #value#
+    </select>
+    
+     <!-- 根据单号获取记录对象 -->
+    <select id="ProcExitLine.getProcExitLineList" resultClass="ProcExitLine" resultMap="ProcExitLine.result" parameterClass="string">
+    	select <include refid="ProcExitLine_selectColumns"/> 
+    	from jat_proc_exit_line a 
+    		left join jat_sys_dict_item d      on d.entry_code='materialtype' and d.item_key = a.material_type
+			left join jas_bd_item_class b      on a.item_class_id = b.item_class_id
+			left join jas_bd_analysis_arange c on c.analysis_arange_id = a.alaysis_id
+			left join jat_sys_dict_item e      on a.cash_unit = e.item_key and e.entry_code = 'purunit'
+			left join jas_bd_unit f            on a.unit_id = f.unitid
+			left join jat_sys_dict_item g      on a.main_color_grade_id = g.item_key and g.entry_code = 'diacolorgrade'
+			left join jat_sys_dict_item h      on a.clean_id = h.item_key and h.entry_code = 'diaclean'
+    	where a.billid = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="ProcExitLine.updateProcExitLine" parameterClass="ProcExitLine">
+		update jat_proc_exit_line a set 
+			a.billno              = #billno#,
+			a.billdate            = #billdate#,
+			a.orna_no             = #ornaNo#,
+			a.material_type       = #materialType#,
+			a.item_class_id       = #itemClassId#,
+			a.alaysis_id          = #alaysisId#,
+			a.unit_id             = #unitId#,
+			a.main_color_grade_id = #mainColorGradeId#,
+			a.clean_id            = #cleanId#,
+			a.cash_unit           = #cashUnit#,
+			a.bill_nums           = #billNums#,
+			a.old_nums            = #oldNums#,
+			a.exit_nums           = #exitNums#,
+			a.is_diff             = #isDiff#,
+			a.status              = #status#,
+			a.memo                = #memo#,
+			a.update_date         = #updateDate#,
+			a.update_id           = #updateId#,
+			a.cost_price		  = #costPrice#
+		where a.lineid = #lineid#
+	</update>
+	
+	<delete id="ProcExitLine.deleteProcExitLine" parameterClass="string">
+		delete from jat_proc_exit_line a where a.lineid = #value#
+	</delete>
+	
+	<delete id="ProcExitLine.deleteProcExitLineByBillid" parameterClass="string">
+		delete from jat_proc_exit_line a where a.billid = #value#
+	</delete>
+	
+	
+	<update id="ProcExitLine.subProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+	    set 
+	    	a.user_nums = a.user_nums - 
+		    (
+		      select t.exit_nums from jat_proc_exit_line t where t.lineid = #lineId#
+		      and a.bill_no= t.billno 
+	          and a.memo=t.orna_no 
+		    ), update_date = #updateDate#, update_id = #updateId#
+	    where exists (
+	    	select 1 from jat_proc_exit_line b 
+	          where a.bill_no= b.billno 
+	          and a.memo=b.orna_no 
+	          and b.lineid = #lineId#
+	     )
+	</update>
+	
+	<update id="ProcExitLine.addProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+	    set 
+	    	a.user_nums = a.user_nums + 
+		    (
+		      select t.exit_nums from jat_proc_exit_line t where t.lineid = #lineId#
+		      and a.bill_no= t.billno 
+	          and a.memo=t.orna_no 
+		    ), update_date = #updateDate#, update_id = #updateId#
+	    where exists (
+	    	select 1 from jat_proc_exit_line b 
+	          where a.bill_no= b.billno 
+	          and a.memo=b.orna_no 
+	          and b.lineid = #lineId#
+	     )
+	</update>
+</sqlMap>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SpecialCharge">
+	<typeAlias alias="SpecialCharge" type="com.jatools.vo.calc.SpecialCharge"/>
+	<resultMap class="SpecialCharge" id="result">
+		<result property="chargeId" column="CHARGE_ID"/>
+		<result property="weightCheck" column="WEIGHT_CHECK"/>
+		<result property="chargeUnit" column="CHARGE_UNIT"/>
+		<result property="chargeFloat" column="CHARGE_FLOAT"/>
+		<result property="chargeMoney" column="CHARGE_MONEY"/>
+		<result property="weightStr" column="WEIGHT_STR"/>
+		<result property="weightEnd" column="WEIGHT_END"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="UPDATE_ID"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	<sql id="SpecialCharge.Columns.all">
+		CHARGE_ID,CHARGE_FLOAT,CHARGE_UNIT,CHARGE_MONEY,WEIGHT_CHECK,WEIGHT_STR,WEIGHT_END,status,
+		create_date,CREATE_ID,update_date,UPDATE_ID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="SpecialCharge.getSpecialChargeAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="SpecialCharge.Columns.all"/> from JAT_BASIC_SPECIAL_CHARGE a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+		 	 order by a.WEIGHT_STR , a.WEIGHT_END
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="SpecialCharge.getSpecialChargeToalCount" resultClass="int">
+		select count(1) from JAT_BASIC_SPECIAL_CHARGE a where 1=1 
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty> 
+	</select>
+	<!-- findById -->
+	<select id="SpecialCharge.getSpecialChargeById" resultClass="SpecialCharge" parameterClass="string" resultMap="result">
+		select <include refid="SpecialCharge.Columns.all"/> from JAT_BASIC_SPECIAL_CHARGE a where a.CHARGE_ID = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="SpecialCharge.saveSpecialCharge" parameterClass="SpecialCharge">
+		<selectKey keyProperty="chargeId" type="pre">
+			select JAT_BASIC_SPECIAL_CHARGE_seq.nextval as chargeId from dual
+		</selectKey>
+		insert into JAT_BASIC_SPECIAL_CHARGE(
+			CHARGE_ID,WEIGHT_CHECK,CHARGE_UNIT,CHARGE_FLOAT,CHARGE_MONEY,WEIGHT_STR,WEIGHT_END,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,status)
+			values(#chargeId#,#weightCheck#,#chargeUnit#,#chargeFloat#,#chargeMoney#,#weightStr#,
+			#weightEnd#,#createDate#,#createId#,#updateDate#,#updateId#,1)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="SpecialCharge.updateSpecialCharge" parameterClass="SpecialCharge">
+		update JAT_BASIC_SPECIAL_CHARGE a set 
+			a.WEIGHT_CHECK = #weightCheck#,
+			a.CHARGE_UNIT = #chargeUnit#,
+			a.CHARGE_FLOAT = #chargeFloat#,
+			a.CHARGE_MONEY = #chargeMoney#,
+			a.WEIGHT_STR = #weightStr#,
+			a.WEIGHT_END = #weightEnd#,
+			a.create_date = #createDate#,
+			a.CREATE_ID = #createId#,
+			a.update_date = #updateDate#,
+			a.update_id = #updateId# where a.CHARGE_ID = #chargeId#
+	</update>
+	<!-- 删除 -->
+	<delete id="SpecialCharge.deleteSpecialCharge" parameterClass="string">
+		delete JAT_BASIC_SPECIAL_CHARGE a where a.CHARGE_ID = #value#
+	</delete>
+	<!--  -->
+	<select id="SpecialCharge.getSpecialCharge" resultClass="string" parameterClass="SpecialCharge">
+		select count(1) from JAT_BASIC_SPECIAL_CHARGE a where 1=1 
+			<isNotEmpty prepend="and" property="chargeId">
+				<![CDATA[a.WEIGHT_STR<#weightStr# and a.WEIGHT_END>#weightStr#]]> and
+			 	a.CHARGE_ID != #chargeId# 
+			</isNotEmpty>
+			<isEmpty prepend="and" property="chargeId">
+				<![CDATA[a.WEIGHT_STR<=#weightStr# and a.WEIGHT_END>#weightStr#]]>
+			</isEmpty>
+	</select>
+</sqlMap>

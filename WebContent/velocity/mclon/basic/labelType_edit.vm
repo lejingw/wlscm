@@ -1,0 +1,112 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/labelType.js", "$StringUtil.getContextPath()/dwr/interface/LabelTypeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="labelTypeId" value="$!{form.labelType.labelTypeId}"/>
+    <table class="title">
+    	<tr><td>标签类型</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08012402','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+		<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require" msg="不能为空" onchange="loadItemClass()">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require" msg="不能为空" onchange="">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>计量单位</td>
+			<td class='body2'>
+				<select id="unitId" dataType="Require" msg="不能为空" onchange="">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+			<td class='body1'>是否镶嵌</td><td class='body2'>
+				<input id='bracketFlag' type='checkbox' />
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>标签名称</td>	
+			<td class='body2'>
+				<input type='text' id='labelTypeName' dataType="Require" msg="不能为空"  value="$!{form.labelType.labelTypeName}">$StringUtil.star()</td>
+			</td>
+			<td class='body1'>是否双标签</td>
+			<td class='body2'>
+				<input type='checkbox' id='dblLabelFlag' />
+			</td>
+			<td class='body1'>备注</td>
+			<td class='body2' colspan="3">
+				<input type='text' id='memo' value="$!{form.labelType.memo}" style="width:95%;">
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>是否封存</td>
+			<td class='body2'>
+				<input type='checkbox' id='archiveflag' />
+			</td>
+			<td class='body1'>是否高工艺</td>
+			<td class='body2'>
+				<input type='checkbox' id='privateType' />
+			</td>
+		</tr>
+		#if("$!{form.labelType.status}" == "4")
+    	<tr>
+			<td class='body1'>标签名称(旧值)</td>	
+			<td class='body2'>
+				<input type='text' readonly value="$!{form.labelType.labelTypeNameOld}"/>
+			</td>
+			<td class='body1'>是否双标签(旧值)</td>
+			<td class='body2'>
+				<input type='checkbox' disabled id='dblLabelFlag' #if("1" == "$!{form.labelType.dblLabelFlagOld}") checked #end/>
+			</td>
+		</tr>
+		#end
+    </table>
+</form>
+
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(saveLabelType);
+	jQuery("#btnUpdateStock").click(updateStock);
+	jQuery("#btnToList").click(function(){
+		window.location = "labelType.vm";
+	});
+	if("$!form.labelType.labelTypeId"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+	checkReview();
+});
+function setValues(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!{form.labelType.itemClassId}");
+	});
+	BdCommonDwr.getAllUnit(function(data){
+		addOptions("unitId", data, null, null, true, true, "$!{form.labelType.unitId}");
+	});
+	//大类下的小类
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt("$!{form.labelType.itemClassId}", function(data){
+		addOptions("ornaClassId", data, null, null, true, true, "$!{form.labelType.ornaClassId}");
+	});
+	jQuery("#bracketFlag")[0].checked= "$!form.labelType.bracketFlag"=="1"?true:false;
+	jQuery("#dblLabelFlag")[0].checked= "$!form.labelType.dblLabelFlag"=="1"?true:false;
+	jQuery("#archiveflag")[0].checked= "$!form.labelType.archiveflag"=="1"?true:false;
+	jQuery("#privateType")[0].checked= "$!form.labelType.privateType"=="1"?true:false;
+	#if("$!{form.labelType.status}" == "4")
+		jQuery("#btnSave").attr("disabled", true);
+	#end
+}
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+	BdCommonDwr.getAllUnit(function(data){
+		addOptions("unitId", data, null, null, true, true);
+	});
+}
+</script>

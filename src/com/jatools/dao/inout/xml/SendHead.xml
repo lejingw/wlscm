@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SendHead">
+	<typeAlias alias="SendHead" type="com.jatools.vo.inout.SendHead" />
+	
+	<resultMap class="SendHead" id="SendHead.result">
+		<result property = "billid"       column = "billid"        />
+		<result property = "billno"       column = "billno"        />
+		<result property = "dodate"       column = "dodate"        />
+		<result property = "orgId"        column = "org_id"        />
+		<result property = "vendorId"     column = "vendor_id"     />
+		<result property = "invoiceNo"    column = "invoice_no"    />
+		<result property = "invoiceMoney" column = "invoice_money" />
+		<result property = "status"       column = "status"        />
+		<result property = "isFlag"       column = "is_flag"       />
+		<result property = "memo"         column = "memo"          />
+		<result property = "createDate"   column = "create_date"   />
+		<result property = "createId"     column = "create_id"     />
+		<result property = "updateDate"   column = "update_date"   />
+		<result property = "updateId"     column = "update_id"     />
+		<result property = "invoiceDate"  column = "invoice_date"  />
+	</resultMap>
+	
+	<sql id="SendHead_columns">
+		billid, billno, dodate, org_id, vendor_id, invoice_no, invoice_money, status, is_flag, memo, create_date, create_id, update_date, update_id, invoice_date
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="SendHead.getSendHeadPageData" resultMap="SendHead.result" parameterClass="map">
+		select <include refid="SendHead_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="SendHead_columns"/>  from jat_bill_send_head a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.billid DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="SendHead.getSendHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_bill_send_head a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="SendHead.saveSendHead" parameterClass="SendHead">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_BILL_SEND_HEAD_SEQ.nextval as "billid" from dual
+		</selectKey>
+		insert into jat_bill_send_head(<include refid="SendHead_columns"/>)
+		 values(
+		 	#billid#, #billno#, #dodate#, #orgId#, #vendorId#, #invoiceNo#, #invoiceMoney#, #status#, #isFlag#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #invoiceDate#
+		 )
+    </insert>
+    
+    <select id="SendHead.getSendHead" parameterClass="string" resultMap="SendHead.result">
+		select <include refid="SendHead_columns"/> from jat_bill_send_head a 
+		where 1=1
+			and a.billid = #value#
+	</select>
+	
+	<update id="SendHead.updateSendHead" parameterClass="SendHead">
+		update jat_bill_send_head a set 
+			a.dodate        = #dodate#,
+			a.org_id        = #orgId#,
+			a.vendor_id     = #vendorId#,
+			a.invoice_no    = #invoiceNo#,
+			a.invoice_money = #invoiceMoney#,
+			a.status        = #status#,
+			a.is_flag       = #isFlag#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#,
+			a.invoice_date  = #invoiceDate#
+		where a.billid = #billid# 
+	</update>
+	
+	<delete id="SendHead.deleteSendHead" parameterClass="string" >
+		delete from jat_bill_send_head a where a.billid = #value# 
+	</delete>
+	
+	<update id="SendHead.updateSendHeadStatus" parameterClass="map">
+		update jat_bill_send_head a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.billid = #billid# 
+	</update>
+	
+	<!-- 查询对公销售单 -->
+	<select id="SendHead.getOutVendorList" parameterClass="map" resultClass="com.jatools.vo.out.OutVendorHead">
+		select "billNo", "dodate", "saleMoney", "sumCount", "sumWeight", "sumGrains", "sumCost", "sumMoney"  from (select rownum rownum_ , AA.* from (
+			select 
+				a.billno 		as "billNo",
+				a.dodate		as "dodate",
+				a.sale_money	as "saleMoney",
+				a.sum_count		as "sumCount",
+				a.sum_weight	as "sumWeight",
+				a.sum_grains	as "sumGrains",
+				a.sum_cost		as "sumCost",
+				a.sum_money		as "sumMoney"
+			from jat_out_vendor_head a
+			where 1=1
+				and a.dotype = 0
+				and a.status = 8
+				and (a.invalid = 0 or a.invalid is null) 
+				and (a.is_bill = 0 or a.is_bill is null)
+				and a.org_id = #orgId#
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="SendHead.getOutVendorCount" parameterClass="map" resultClass="int">
+		select count(*)
+		from jat_out_vendor_head a
+		where 1=1
+			and a.dotype = 0
+			and a.status = 8
+			and (a.invalid = 0 or a.invalid is null) 
+			and (a.is_bill = 0 or a.is_bill is null)
+			and a.org_id = #orgId#
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+	</select>
+	
+	<!-- 修改对公销售单 出票状态 -->
+	<update id="SendHead.modifyOutVendorIsBill" parameterClass="map">
+		update jat_out_vendor_head t
+		set
+			t.is_bill = 1, t.update_id = #userId#, t.update_date = #updateDate#
+		where t.billno = #billno#
+	</update>
+	
+	<update id="SendHead.modifyOutVendorBillByLineid" parameterClass="map">
+		update jat_out_vendor_head t
+		set
+			t.is_bill = #status#, t.update_id = #userId#, t.update_date = #updateDate#
+		where t.billno = (select l.out_no from jat_bill_send_line l where l.lineid = #lineid#)
+	</update>
+	
+	<update id="SendHead.modifyOutVendorIsNotBill" parameterClass="map">
+		update jat_out_vendor_head t
+		set
+			t.is_bill = 0, t.update_id = #userId#, t.update_date = #updateDate#
+		where exists (
+			select 1 from jat_bill_send_line l where t.billno = l.out_no and l.billid = #billid#
+		)
+	</update>
+</sqlMap>

@@ -1,0 +1,128 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PurchaseDwr.js"])
+
+<form id="frm" method="post">
+	<input type='hidden' name='headid' id='headid' value="$!form.condition.headid"/>
+	<input type='hidden' name='lineid' id='lineid' value="$!form.condition.lineid"/>
+	<input type='hidden' name='enterType' id='enterType' value="$!form.condition.enterType"/>	
+    <table class="control">
+    	<tr>
+			<td><input type='button' class='btn' id='btnSave' value='保存'/></td>
+		</tr>
+    </table>
+    <table class="content">
+    	<tr>
+			<td class='body1'>#if("1" == $!form.condition.enterType) 到货数量 #else 不合格数量 #end</td>
+			<td class='body2'><input type='text' maxlength="8" id='numEnter' onchange="checkNumArrive(this)"/></td>
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2'><input type='text' maxlength="1000" id='memo' style="width:98%;"/></td>
+		</tr>
+    </table>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+                <th>#if("1" == $!form.condition.enterType) 到货数量 #else 不合格数量 #end</th>
+                <th>是否过时</th>
+        		<th>说明</th>
+        		<th>创建人</th>
+        		<th>创建时间</th>
+        		<th>状态</th>
+        		<th></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{item.headid}'/></td>
+				<td><input type='text' readonly style="width:45px;" class='none' name='num' value='$!{item.numEnter}'/></a></td>
+				<td>$!DictUtil.getValue("yesorno", $!item.outdateFlag)</td>
+				<td>$!item.memo</td>
+				<td>$!BdCommon.getUserName($!item.createId)</td>
+				<td>$!item.createDate</td>
+				<td>$!DictUtil.getValue('status', $!item.status)</td>
+				<td><input type='button' class='btn' value='删除' onclick="deletePurchaseEnter(this, '$!{item.enterid}')"/></td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+	jQuery("#btnSave").click(savePurchaseEnter);
+});
+function savePurchaseEnter(){
+	if(!checkNumArrive($("numEnter"))){
+		return false;
+	}
+	if(jQuery("#enterType").val() == "2"){
+		//检查合格数量
+    	PurchaseDwr.checkSaveNumUncheck(jQuery("#lineid").val(), jQuery("#numEnter").val(), function(data){
+    		if(!data){
+            	savePurchaseEnter2();
+    		}else{
+    			alert(data);
+    		}
+    	});
+	}else{
+		savePurchaseEnter2();
+	}
+}
+function savePurchaseEnter2(){
+	confirm("确定保存?", function(){
+		PurchaseDwr.savePurchaseEnter(jQuery("#headid").val(), {
+			lineid:jQuery("#lineid").val(),
+			enterType:jQuery("#enterType").val(),
+			numEnter:jQuery("#numEnter").val(),
+			memo:jQuery("#memo").val()
+		}, function(data){
+			alert(data?data:"保存成功", function(){
+    			if(!data){
+    				jQuery("#frm").submit();
+    			}
+			});
+		});
+	});
+}
+function deletePurchaseEnter(obj, enterid){
+	var index = obj.parentNode.parentNode.rowIndex - 1;
+	if(jQuery("#enterType").val() == "1"){
+    	//检查合格数量
+    	PurchaseDwr.checkDeleteNumArrive(jQuery("#lineid").val(), $n("num")[index].value, function(data){
+    		if(!data){
+            	deletePurchaseEnter2(enterid);
+    		}else{
+    			alert(data);
+    		}
+    	});
+	}else{
+		deletePurchaseEnter2(enterid);
+	}
+}
+function deletePurchaseEnter2(enterid){
+	confirm("确定删除?", function(){
+		PurchaseDwr.deletePurchaseEnter(enterid, function(data){
+			alert(data?data:"删除成功", function(){
+    			if(!data){
+    				jQuery("#frm").submit();
+    			}
+			});
+		});
+	});
+}
+/**
+ * 检查到货数量
+ */
+function checkNumArrive(obj){
+	if(!isNumber(obj.value)){
+		alert("到货数量 必须为整数");
+		return false;
+	}
+	return true;
+}
+</script>

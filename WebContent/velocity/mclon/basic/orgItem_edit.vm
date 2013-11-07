@@ -1,0 +1,123 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/OrgItemDwr.js"])
+
+<form id='frm' action="vendor_edit.vm" method="post">
+	<input type="hidden" id="orgItemId" value="$!{form.oi.orgItemId}"/>
+    <table class="title">
+    	<tr><td>采购组织与大类关系</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>采购组织</td>	
+			<td class='body2'>
+				<input type='hidden' id='orgId' value="">
+				<input type='text' id='orgName' dataType="Require" msg="不能为空" value="" class='target' readonly ondblclick="showSelectOrgWin()">
+					$StringUtil.star()
+			</td>
+			<td class='body1'>状态</td><td class='body2'><input type='text' name='status' readonly value="保存"></td>
+			<td class='body1'>说明</td><td class='body2' colspan="3"><input type="text" id="memo" style="width:90%;" value='$!{form.oi.memo}'/></td>
+		</tr>
+    </table>
+	<table class="list">
+		<thead>
+			<tr>
+				<th width='28%'>大类</th>
+				<th width=''></th>
+			</tr>
+        </thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.items)
+			<tr>
+				<td><select name="itemClassId" dataType="Require" msg="不能为空"></select></td>
+				<td><input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,"tbl")'></td>
+			</tr>
+		#end
+        </tbody>
+	</table>
+</form>
+<script>
+//增行
+function addRow(){
+	var field1 = "<td><select name='itemClassId' dataType='Require' msg='不能为空'></select></td>";
+	var field2 = "<input type='button' value='删除' style='width:60px;' onclick='deleteRow(this,\"tbl\")'>";
+	insertRow("tbl",[field1,field2],false);
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions2("itemClassId", $("tbl").rows.length - 1,data, null, null, true, true);
+	});
+}
+//显示组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());
+}
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveOrgItem();
+	});
+	jQuery("#btnAddRow").click(addRow);
+	
+	jQuery("#btnToList").click(function(){
+		window.location = "orgItem.vm";
+	});
+	if("$!form.oi.orgItemId"){
+		setValues();
+	}
+	#foreach($item in $form.items)
+    	BdCommonDwr.getAllItemClassForSlt(function(data){
+    		//addOptions2("acsType", ${velocityCounter}-1, data, null, null, true, true, "$!item.acsType"+"_"+"$!item.otherCoefficient");
+			addOptions2("itemClassId", ${velocityCounter}-1,data, null, null, true, true,"$!item");
+    	});
+    #end
+});
+function setValues(){
+	jQuery("#orgId").val("$!form.oi.orgId");
+	jQuery("#orgName").val("$!BdCommon.getOrgName($!form.oi.orgId)");
+	//BdCommonDwr.getAllItemClassForSlt(function(data){
+	//	addOptions("itemClassId", data, null, null, true, true, "$!form.oi.itemClassId");
+	//});
+	jQuery("#memo").val("$!form.oi.memo");
+}
+function saveOrgItem(){
+	if(Validator.Validate($("frm"),3)){
+        if($("tbl").rows.length=="0"){
+			alert("必须添加大类");
+			return;
+        }
+		var itemClassIds = $n("itemClassId")[0].value;
+		for(var i=1;i<$("tbl").rows.length;i++){
+			for(var j=1;j<$("tbl").rows.length;j++){
+				
+				if($n("itemClassId")[i].value==$n("itemClassId")[j].value&&i!=j){
+					alert("存在相同的大类");
+					return;
+				}
+			}
+			itemClassIds+="_"+$n("itemClassId")[i].value;
+		}
+		confirm("确定保存?", function(){
+    		
+    		var headObj = {orgId:jQuery("#orgId").val(),
+						   orgItemId:jQuery("#orgItemId").val(),
+    					   status:jQuery("#status").val(),
+						   memo:jQuery("#memo").val()};
+    		OrgItemDwr.saveOrUpdateOrgItem(headObj,itemClassIds, function(data){
+				var d = data.split("_");
+				alert(d[1]);
+    			if(d[0]=="1"){
+    				alert("保存成功", function(){
+    					window.location = "orgItem.vm";
+    				});
+    			}
+    		});
+    	});
+	}
+}
+</script>

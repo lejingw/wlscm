@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="DispatchWay">
+	<sql id="DispatchWay.getDispatchStylePageDataCD">
+		where 1 = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="DispatchWay.getDispatchStylePageData" parameterClass="map" resultClass="com.jatools.vo.move.DispatchWay">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.billid                as "billId",
+			       a.org_id                as "orgId",
+			       a.item_class_id         as "itemClassId",
+			       a.orna_class_id         as "ornaClassId",
+			       a.analysis_id           as "analysisId",
+			       b.summarydescription    as "analysisName",
+			       a.style_item_class_id   as "styleItemClassId",
+			       a.style_middle_class_id as "styleMiddleClassId",
+			       a.style_orna_class_id   as "styleOrnaClassId",
+			       a.style_id              as "styleId",
+			       c.stylename             as "styleName",
+			       c.isbiggraph            as "bigGraph",
+			       a.disp_min              as "dispMin",
+			       a.disp_max              as "dispMax",
+			       a.create_id             as "createId",
+			       a.create_date           as "createDate",
+			       a.update_id             as "updateId",
+			       a.update_date           as "updateDate",
+			       a.status                as "status"
+			  from jat_pl_basic_dispatch_style a
+			  left join jas_bd_analysis_arange b on a.analysis_id = b.analysis_arange_id
+			  left join jas_bd_style c on a.style_id = c.styleid
+			   <include refid="DispatchWay.getDispatchStylePageDataCD"/>
+			 order by a.org_id, a.item_class_id, a.orna_class_id, b.summarydescription
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="DispatchWay.getDispatchStyleTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_dispatch_style a left join jas_bd_analysis_arange b on a.analysis_id = b.analysis_arange_id
+			  left join jas_bd_style c on a.style_id = c.styleid
+		<include refid="DispatchWay.getDispatchStylePageDataCD"/>
+	</select>
+	
+	
+	<sql id="DispatchWay.getDispatchPricePageDataCD">
+		where 1 = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="DispatchWay.getDispatchPricePageData" parameterClass="map" resultClass="com.jatools.vo.move.DispatchWay">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.billid             as "billId",
+			       a.org_id             as "orgId",
+			       a.item_class_id      as "itemClassId",
+			       a.orna_class_id      as "ornaClassId",
+			       a.analysis_id        as "analysisId",
+			       b.summarydescription as "analysisName",
+			       a.price_start        as "priceStart",
+			       a.price_end          as "priceEnd",
+			       a.disp_min           as "dispMin",
+			       a.disp_max           as "dispMax",
+			       a.create_id          as "createId",
+			       a.create_date        as "createDate",
+			       a.update_id          as "updateId",
+			       a.update_date        as "updateDate",
+             	   a.status             as "status"
+	        from jat_pl_basic_dispatch_price a
+	        left join jas_bd_analysis_arange b
+	          on a.analysis_id = b.analysis_arange_id
+	         <include refid="DispatchWay.getDispatchPricePageDataCD"/>
+	       order by a.org_id, a.item_class_id, a.orna_class_id, b.summarydescription
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="DispatchWay.getDispatchPriceTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_dispatch_price a left join jas_bd_analysis_arange b
+          on a.analysis_id = b.analysis_arange_id <include refid="DispatchWay.getDispatchPricePageDataCD"/>
+	</select>
+	
+	
+	
+	<insert id="DispatchWay.saveDispatchStyle" parameterClass="com.jatools.vo.move.DispatchWay">
+		<selectKey keyProperty="billId" resultClass="string">select jat_pl_basic_disp_style_seq.nextval from dual</selectKey>
+		insert into jat_pl_basic_dispatch_style (billid, org_id, item_class_id, orna_class_id, analysis_id,
+			style_item_class_id, style_middle_class_id, style_orna_class_id, style_id, disp_min, disp_max,
+			create_id, create_date, update_id, update_date,  status)
+		values (#billId#, #orgId#, #itemClassId#, #ornaClassId#, #analysisId#,
+			#styleItemClassId#, #styleMiddleClassId#, #styleOrnaClassId#, #styleId#, #dispMin#, #dispMax#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="DispatchWay.updateDispatchStyle" parameterClass="com.jatools.vo.move.DispatchWay">
+		update jat_pl_basic_dispatch_style
+		set org_id = #orgId#, item_class_id = #itemClassId#, orna_class_id = #ornaClassId#, analysis_id = #analysisId#,
+			style_item_class_id = #styleItemClassId#, style_middle_class_id = #styleMiddleClassId#, style_orna_class_id = #styleOrnaClassId#,
+			style_id = #styleId#, disp_min = #dispMin#, disp_max = #dispMax#,
+			update_id = #updateId#, update_date = #updateDate#
+		where billid = #billId#
+	</update>
+	<select id="DispatchWay.checkDispatchStyleRepeat" parameterClass="com.jatools.vo.move.DispatchWay" resultClass="com.jatools.vo.move.DispatchWay">
+		select a.billid as "billId"
+		  from jat_pl_basic_dispatch_style a
+		 where a.org_id = #orgId#
+		   and a.analysis_id = #analysisId#
+		   and a.style_id = #styleId#
+		<isNotEmpty property="billId"><![CDATA[and a.billid <> #billId#]]></isNotEmpty>
+	</select>
+	<delete id="DispatchWay.deleteDispatchStyle" parameterClass="string">
+		delete jat_pl_basic_dispatch_style where billid = #value#
+	</delete>
+	<insert id="DispatchWay.saveDispatchStyleFromExcel" parameterClass="map">
+		insert into jat_pl_basic_dispatch_style
+		  (billid,
+		   org_id,
+		   item_class_id,
+		   orna_class_id,
+		   analysis_id,
+		   style_item_class_id,
+		   style_middle_class_id,
+		   style_orna_class_id,
+		   style_id,
+		   disp_min,
+		   disp_max,
+		   create_id,
+		   create_date,
+		   update_id,
+		   update_date,
+		   status)
+		  select jat_pl_basic_disp_style_seq.nextval,
+		         a.col0,
+		         a.col1,
+		         a.col2,
+                 a.col3,
+		         a.col4,
+		         a.col5,
+		         a.col6,
+                 a.col7,
+		         a.col8,
+		         a.col9,
+		         #userId#,
+		         #date#,
+		         #userId#,
+		         #date#,
+		         1
+		    from jat_sys_excel_temp_data a
+		   where a.seq_id = #seqId#
+		     and a.sheetindex = 0
+		     and not exists (select 1
+		            from jat_pl_basic_dispatch_style t
+		           where t.org_id = a.col0
+                    and t.item_class_id = a.col1
+                    and t.orna_class_id = a.col2
+                    and t.analysis_id = a.col3
+                    and t.style_item_class_id = a.col4
+                    and t.style_middle_class_id = a.col5
+                    and t.style_orna_class_id = a.col6
+                    and t.style_id = a.col7
+                )
+	</insert>
+	<!-- 价位带 -->
+	<insert id="DispatchWay.saveDispatchPrice" parameterClass="com.jatools.vo.move.DispatchWay">
+		<selectKey keyProperty="billId" resultClass="string">select jat_pl_basic_disp_price_seq.nextval from dual</selectKey>
+		insert into jat_pl_basic_dispatch_price (billid, org_id, item_class_id, orna_class_id, analysis_id,
+			price_start, price_end, disp_min, disp_max,
+			create_id, create_date, update_id, update_date,  status)
+		values (#billId#, #orgId#, #itemClassId#, #ornaClassId#, #analysisId#,
+			#priceStart#, #priceEnd#, #dispMin#, #dispMax#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="DispatchWay.updateDispatchPrice" parameterClass="com.jatools.vo.move.DispatchWay">
+		update jat_pl_basic_dispatch_price
+		set org_id = #orgId#, item_class_id = #itemClassId#, orna_class_id = #ornaClassId#, analysis_id = #analysisId#,
+			price_start = #priceStart#, price_end = #priceEnd#, disp_min = #dispMin#, disp_max = #dispMax#,
+			update_id = #updateId#, update_date = #updateDate#
+		where billid = #billId#
+	</update>
+	<select id="DispatchWay.checkDispatchPriceRepeat" parameterClass="com.jatools.vo.move.DispatchWay" resultClass="com.jatools.vo.move.DispatchWay">
+		select a.billid as "billId", a.price_start as "priceStart", a.price_end as "priceEnd"
+		  from jat_pl_basic_dispatch_price a
+		 where a.org_id = #orgId#
+		   and a.item_class_id = #itemClassId#
+		   and a.orna_class_id = #ornaClassId#
+		   and a.analysis_id = #analysisId#
+		<isNotEmpty property="billId"><![CDATA[and a.billid <> #billId#]]></isNotEmpty>
+	</select>
+	<delete id="DispatchWay.deleteDispatchPrice" parameterClass="string">
+		delete jat_pl_basic_dispatch_price where billid = #value#
+	</delete>
+	<insert id="DispatchWay.saveDispatchPriceFromExcel" parameterClass="map">
+		insert into jat_pl_basic_dispatch_price
+		  (billid,
+		   org_id,
+		   item_class_id,
+		   orna_class_id,
+		   analysis_id,
+		   price_start,
+		   price_end,
+		   disp_min,
+		   disp_max,
+		   create_id,
+		   create_date,
+		   update_id,
+		   update_date,
+		   status)
+		  select jat_pl_basic_disp_price_seq.nextval,
+		         a.col0,
+		         a.col1,
+		         a.col2,
+		         a.col3,
+		         a.col4,
+		         a.col5,
+		         a.col6,
+		         a.col7,
+		         #userId#,
+		         #date#,
+		         #userId#,
+		         #date#,
+		         1
+		    from jat_sys_excel_temp_data a
+		   where a.seq_id = #seqId#
+		     and a.sheetindex = 0
+		     and not exists (select 1
+		            from jat_pl_basic_dispatch_price c
+		           where c.org_id = a.col0
+		             and c.item_class_id = a.col1
+		             and c.orna_class_id = a.col2
+		             and c.analysis_id = a.col3
+		             and c.price_start = a.col4
+		             and c.price_end = a.col5)
+	</insert>
+
+    <sql id="DispatchWay.getDispatchStyleReportPageDataCD">
+        where 1 = 1
+                and a.disp_min > 0
+                and a.disp_max > 0
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </sql>
+    <select id="DispatchWay.getDispatchStyleReportPageData" parameterClass="map" resultClass="com.jatools.vo.move.DispatchWay">
+        select * from (select rownum rownum_ , AA.* from (
+                select
+                        a.billid as "billId",
+                        a.org_id as "orgId",
+                        a.item_class_id as "itemClassId",
+                        a.orna_class_id as "ornaClassId",
+                        a.analysis_id as "analysisId",
+                        b.summarydescription as "analysisName",
+                        a.style_item_class_id as "styleItemClassId",
+                        a.style_middle_class_id as "styleMiddleClassId",
+                        a.style_orna_class_id as "styleOrnaClassId",
+                        a.style_id as "styleId",
+                        c.stylename as "styleName",
+                        c.isbiggraph as "bigGraph",
+                        a.disp_min as "dispMin",
+                        a.disp_max as "dispMax",
+                        nvl(aa.cnt, 0) as "stockNum",
+                        a.disp_min - nvl(aa.cnt, 0) as "dispMinDiff",
+                        a.disp_max - nvl(aa.cnt, 0) as "dispMaxDiff"
+                from jat_pl_basic_dispatch_style a
+                left join jas_bd_analysis_arange b on a.analysis_id = b.analysis_arange_id
+                left join jas_bd_style c on a.style_id = c.styleid
+                left join (select d.org_id,
+                        d.item_class_id,
+                        d.orna_class_id,
+                        d.alaysis_id,
+                        d.style_id,
+                        count(1) cnt
+                        from ic_mater_active d
+                        where d.state = 900
+                        group by d.org_id,
+                        d.item_class_id,
+                        d.orna_class_id,
+                        d.alaysis_id,
+                        d.style_id
+                ) aa  on aa.org_id = a.org_id
+                            and aa.item_class_id = a.item_class_id
+                            and aa.orna_class_id = a.orna_class_id
+                            and aa.alaysis_id = a.analysis_id
+                            and aa.style_id = a.style_id
+                <include refid="DispatchWay.getDispatchStyleReportPageDataCD"/>
+                order by a.org_id, a.item_class_id, a.orna_class_id, b.summarydescription
+        ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+    <!-- 获取总条数 -->
+    <select id="DispatchWay.getDispatchStyleReportTotalCount" parameterClass="map" resultClass="int">
+            select count(1)
+            from jat_pl_basic_dispatch_style a
+            left join jas_bd_analysis_arange b
+            on a.analysis_id = b.analysis_arange_id
+            left join jas_bd_style c
+            on a.style_id = c.styleid
+            left join (select d.org_id,
+                            d.item_class_id,
+                            d.orna_class_id,
+                            d.alaysis_id,
+                            d.style_id,
+                            count(1) cnt
+                    from ic_mater_active d
+                    where d.state = 900
+                    group by d.org_id,
+                            d.item_class_id,
+                            d.orna_class_id,
+                            d.alaysis_id,
+                            d.style_id
+            ) aa  on aa.org_id = a.org_id
+                    and aa.item_class_id = a.item_class_id
+                    and aa.orna_class_id = a.orna_class_id
+                    and aa.alaysis_id = a.analysis_id
+                    and aa.style_id = a.style_id
+        <include refid="DispatchWay.getDispatchStyleReportPageDataCD"/>
+    </select>
+
+    <sql id="DispatchWay.getDispatchPriceReportPageDataCD">
+        where 1 = 1
+                and a.disp_min > 0
+                and a.disp_max > 0
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </sql>
+    <select id="DispatchWay.getDispatchPriceReportPageData" parameterClass="map" resultClass="com.jatools.vo.move.DispatchWay">
+        select * from (select rownum rownum_ , AA.* from (
+                select
+                        a.billid             as "billId",
+                        a.org_id             as "orgId",
+                        a.item_class_id      as "itemClassId",
+                        a.orna_class_id      as "ornaClassId",
+                        a.analysis_id        as "analysisId",
+                        b.summarydescription as "analysisName",
+                        a.price_start        as "priceStart",
+                        a.price_end          as "priceEnd",
+                        a.disp_min           as "dispMin",
+                        a.disp_max           as "dispMax",
+                        nvl(sum(aa.cnt), 0) as "stockNum",
+                        a.disp_min - nvl(sum(aa.cnt), 0) as "dispMinDiff",
+                        a.disp_max - nvl(sum(aa.cnt), 0) as "dispMaxDiff"
+                from jat_pl_basic_dispatch_price a
+                left join jas_bd_analysis_arange b on a.analysis_id = b.analysis_arange_id
+                left join (select d.org_id,
+                                d.item_class_id,
+                                d.orna_class_id,
+                                d.alaysis_id,
+                                nvl(d.pos_amount, 0) as pos_amount,
+                                count(1) cnt
+                        from ic_mater_active d
+                        where d.state = 900
+                        group by d.org_id,
+                                d.item_class_id,
+                                d.orna_class_id,
+                                d.alaysis_id,
+                                d.pos_amount
+                ) aa on aa.org_id = a.org_id
+                            and aa.item_class_id = a.item_class_id
+                            and aa.orna_class_id = a.orna_class_id
+                            and aa.alaysis_id = a.analysis_id
+                            <![CDATA[and aa.pos_amount <= a.price_end]]>
+                            and aa.pos_amount >= a.price_start
+                <include refid="DispatchWay.getDispatchPriceReportPageDataCD"/>
+                group by a.billid,
+                            a.org_id,
+                            a.item_class_id,
+                            a.orna_class_id,
+                            a.analysis_id,
+                            b.summarydescription,
+                            a.price_start,
+                            a.price_end,
+                            a.disp_min,
+                            a.disp_max
+                order by a.org_id, a.item_class_id, a.orna_class_id, b.summarydescription
+        ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+    <!-- 获取总条数 -->
+    <select id="DispatchWay.getDispatchPriceReportTotalCount" parameterClass="map" resultClass="int">
+            select count(1)
+            from jat_pl_basic_dispatch_price a
+            left join jas_bd_analysis_arange b  on a.analysis_id = b.analysis_arange_id
+            left join (select d.org_id,
+                        d.item_class_id,
+                        d.orna_class_id,
+                        d.alaysis_id,
+                        nvl(d.pos_amount, 0) as pos_amount,
+                        count(1) cnt
+                from ic_mater_active d
+                where d.state = 900
+                group by d.org_id,
+                        d.item_class_id,
+                        d.orna_class_id,
+                        d.alaysis_id,
+                        d.pos_amount
+            ) aa on aa.org_id = a.org_id
+                        and aa.item_class_id = a.item_class_id
+                        and aa.orna_class_id = a.orna_class_id
+                        and aa.alaysis_id = a.analysis_id
+                        <![CDATA[and aa.pos_amount <= a.price_end]]>
+                        and aa.pos_amount >= a.price_start
+            <include refid="DispatchWay.getDispatchPriceReportPageDataCD"/>
+    </select>
+</sqlMap>

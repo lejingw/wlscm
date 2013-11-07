@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Consume">
+	<typeAlias alias="Consume" type="com.jatools.vo.out.Consume"/>
+	<typeAlias alias="ConsumeLine" type="com.jatools.vo.out.ConsumeLine"/>
+	
+	<sql id="Consume_Column_1">
+		BILLID, BILLNO, ORG_ID, STATUS, VENDOR_ID, AMOUNT, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID, MEMO, DODATE
+	</sql>
+	<sql id="Consume_Column_2">
+		a.BILLID      as "billid",
+		a.BILLNO      as "billno",
+		a.ORG_ID      as "orgId",
+		a.STATUS      as "status",
+		a.VENDOR_ID   as "vendorId",
+		a.AMOUNT      as "amount",
+		a.CREATE_DATE as "createDate",
+		a.CREATE_ID   as "createId",
+		a.UPDATE_DATE as "updateDate",
+		a.UPDATE_ID   as "updateId",
+		a.MEMO        as "memo",
+		a.DODATE	  as "dodate"
+	</sql>
+	
+	<select id="Consume.getConsumeAllPageData" resultClass="Consume" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="Consume_Column_2"/> from JAT_PROC_MAINTAIN_CONSUME a where 1=1
+			<isNotEqual compareValue="all" property="status" prepend="and"> <![CDATA[ a.STATUS<>8 ]]> </isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.billid desc
+		) AA )where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="Consume.getConsumeToalCount" resultClass="int">
+		select count(1) from JAT_PROC_MAINTAIN_CONSUME a where 1=1
+		<isNotEqual compareValue="all" property="status" prepend="and"> <![CDATA[ a.STATUS<>8 ]]> </isNotEqual>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+		order by a.billid desc
+	</select>
+	
+	<select id="Consume.getConsumeById" resultClass="Consume" parameterClass="string" >
+		select <include refid="Consume_Column_2"/> from JAT_PROC_MAINTAIN_CONSUME a where a.billid = #value#
+	</select>
+	
+	<update id="Consume.updateConsumeStatus" parameterClass="map">
+		update JAT_PROC_MAINTAIN_CONSUME a 
+		set 
+			a.status = #status#,          
+			a.UPDATE_DATE= #updateDate#,         
+			a.UPDATE_ID= #updateId#
+		 where a.billid = #billid#
+	</update>
+	
+	<insert id="Consume.saveConsume" parameterClass="Consume">
+		<selectKey keyProperty="billid" type="pre">
+			select JAT_PROC_MAINTAIN_CONSUME_SEQ.nextval as billid from dual
+		</selectKey>
+		insert into JAT_PROC_MAINTAIN_CONSUME(<include refid="Consume_Column_1"/>)
+		values(                            
+			#billid#, #billno#, #orgId#, #status#, #vendorId#,      
+			#amount#, #createDate#, #createId#, #updateDate#, #updateId#, #memo#, #dodate#
+		)
+	</insert>
+	
+	<update id="Consume.updateConsume" parameterClass="Consume">
+		update JAT_PROC_MAINTAIN_CONSUME 
+		set 
+		 	BILLID=           			#billid#,                         
+			BILLNO=           			#billno#,                      
+			ORG_ID=           			#orgId#,                       
+			STATUS=           			#status#,                      
+			VENDOR_ID=        			#vendorId#,               
+			AMOUNT=           			#amount#,                   
+			UPDATE_DATE=      			#updateDate#,                  
+			UPDATE_ID=        			#updateId#,                    
+			MEMO=             			#memo#,
+			DODATE=              		#dodate#
+		where BILLID=#billid#       
+	</update>
+	
+	<delete id="Consume.deleteConsume" parameterClass="string">
+		delete JAT_PROC_MAINTAIN_CONSUME a where a.billid = #billid#
+	</delete>
+	
+	<!-- ============================================== line =========================================================== -->
+	<sql id="Consume_column_line_1">
+		lineid, billid, item_class_id, orna_class_id, quality_id, all_qty, main_weight, part_weight, add_nums, 
+		add_weight, add_money, add_gold_weight, add_gold_money, repair_charge, repair_money, status, memo, 
+		create_date, create_id, update_date, update_id, dotype
+	</sql>
+	
+	<sql id="Consume_column_line_2">
+		a.lineid          as "lineid",
+		a.billid          as "billid",
+		a.item_class_id   as "itemClassId",
+		a.orna_class_id   as "ornaClassId",
+		a.quality_id      as "qualityId",
+		a.all_qty         as "allQty",
+		a.main_weight     as "mainWeight",
+		a.part_weight     as "partWeight",
+		a.add_nums        as "addNums",
+		a.add_weight      as "addWeight",
+		a.add_money       as "addMoney",
+		a.add_gold_weight as "addGoldWeight",
+		a.add_gold_money  as "addGoldMoney",
+		a.repair_charge   as "repairCharge",
+		a.repair_money    as "repairMoney",
+		a.status          as "status",
+		a.memo            as "memo",
+		a.create_date     as "createDate",
+		a.create_id       as "createId",
+		a.update_date     as "updateDate",
+		a.update_id       as "updateId",
+		a.dotype          as "dotype"
+	</sql>
+	
+	<select id="Consume.getLines" parameterClass="string" resultClass="ConsumeLine">
+		select <include refid="Consume_column_line_2"/> from JAT_PROC_MAINTAIN_CONSUME_LINE a where a.billid = #value#
+	</select>
+	
+	<insert id="Consume.inserLine" parameterClass="ConsumeLine">
+		<selectKey keyProperty="lineid" type="pre">
+			select JAT_PROC_MAINTAIN_CON_LINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into JAT_PROC_MAINTAIN_CONSUME_LINE(<include refid="Consume_column_line_1"/>)
+		values(                            
+			#lineid#, #billid#, #itemClassId#, #ornaClassId#, #qualityId#, #allQty#, #mainWeight#, #partWeight#, #addNums#, 
+			#addWeight#, #addMoney#, #addGoldWeight#, #addGoldMoney#, #repairCharge#, #repairMoney#, #status#, #memo#, 
+			#createDate#, #createId#, #updateDate#, #updateId#, #dotype#
+		)
+	</insert>
+	
+	<update id="Consume.updateLine" parameterClass="ConsumeLine">
+		update JAT_PROC_MAINTAIN_CONSUME_LINE a
+		set 
+			a.item_class_id   = #itemClassId#,
+			a.orna_class_id   = #ornaClassId#,
+			a.quality_id      = #qualityId#,
+			a.all_qty         = #allQty#,
+			a.main_weight     = #mainWeight#,
+			a.part_weight     = #partWeight#,
+			a.add_nums        = #addNums#,
+			a.add_weight      = #addWeight#,
+			a.add_money       = #addMoney#,
+			a.add_gold_weight = #addGoldWeight#,
+			a.add_gold_money  = #addGoldMoney#,
+			a.repair_charge   = #repairCharge#,
+			a.repair_money    = #repairMoney#,
+			a.status          = #status#,
+			a.memo            = #memo#,
+			a.update_date     = #updateDate#,
+			a.update_id       = #updateId#,
+			a.dotype          = #dotype#
+		where a.lineid = #lineid#
+	</update>
+	
+	<delete id="Consume.deleteLineById" parameterClass="string">
+		delete from JAT_PROC_MAINTAIN_CONSUME_LINE a where a.lineid = #lineid#
+	</delete>
+	
+	<delete id="Consume.deleteLineByBillid" parameterClass="string">
+		delete from JAT_PROC_MAINTAIN_CONSUME_LINE a where a.billid = #value#
+	</delete>
+	
+	
+	<insert id="Consume.insertMoneyAccountByConsume" parameterClass="map">
+		insert into jat_cash_money_account (
+	      MR_ID, 
+	      BILL_NO, BILL_TYPE, BILL_DATE, ORG_ID, DOTYPE, 
+	      VODER_ID, MONEYS, STATUS, MEMO, 
+	      CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID,
+	      loss_money
+	    ) select 
+	      jat_cash_money_account_seq.nextval,
+	      a.billno as BILL_NO, 'HL', a.dodate as BILL_DATE, a.org_id as ORG_ID, 1,
+	      a.vendor_id as VODER_ID, a.amount as MONEYS, 2, null,
+	      #createDate# , #userId#, #updateDate#, #userId#,
+	      (
+				select nvl(max(LOSS_MONEY), 0) + a.amount
+	          	from jat_cash_money_account t
+	         	where t.voder_id = a.vendor_id
+	           		and exists (select voder_id
+	                  from (select voder_id, max(mr_id) mr_id
+	                          from jat_cash_money_account
+	                         group by voder_id) tt
+	                 where t.mr_id = tt.mr_id  and t.voder_id=tt.voder_id)
+	       ) as LOSS_MONEY
+	    from JAT_PROC_MAINTAIN_CONSUME a
+	    where 1=1
+	      and a.billid = #billid#
+	</insert>
+</sqlMap>

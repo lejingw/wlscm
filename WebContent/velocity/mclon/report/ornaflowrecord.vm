@@ -1,0 +1,84 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【饰品流转记录查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset'>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' $RightUtil.able($session, '08051101','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08051101','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>	
+			<td class='body1'>饰品编码</td>
+			<td class='body2'>
+				<input type='text' id="ornaNo" name='ornaNo' value="$!{ornaNo}">
+			</td>
+		
+		</tr>
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th>组织</th>
+				<th>仓库</th>
+				<th>业务类型</th>
+				<th>单据类型</th>
+				<th>单据编号</th>
+				<th>业务日期</th>
+				<th>创建日期</th>
+				<th>商品编码</th>
+				<th>事务数量</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>款式名称</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+			    <td>$!map.ORG_NAME</td>
+				<td>$!map.STOCK</td>
+				<td>$!map.TRANS_FLAG</td>
+				<td>$!map.BILL_NAME</td>
+				<td>$!map.TRANS_SOURCE_NO</td>
+				<td>$!map.TRANS_DATE</td>
+				<td>$!map.CREATE_DATE</td>
+				<td>$!map.ORNA_CODE</td>	
+				<td>$!map.TRANS_QTY</td>	
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.STYLENAME</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+<script>
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+  altRowCSS("tbl");
+  jQuery("#ornaNo").val("$!form.condition.ornaNo");
+  
+  initExportExcel("exportToExcel", exportListToExcel);
+  
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

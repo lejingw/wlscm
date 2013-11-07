@@ -1,0 +1,96 @@
+<!-- 正配货变更 -->
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/DispatchOrnaDwr.js"])
+<form id="frm" action="dispatchOrna.vm?user_action=changeDispatching" method="post">
+	<input type='hidden' name='conditionId' value="$!form.condition.conditionId"/>
+	<input type='hidden' name='orderLineId' value="$!form.condition.orderLineId"/>
+	<input type='hidden' name='ornaLogId' value="$!form.condition.ornaLogId"/>
+	<input type='hidden' name='styleFalg' value="$!form.condition.styleFalg"/>
+	<input type='hidden' name='styleFalg2' value="$!form.condition.styleFalg2"/>
+	<input type='hidden' name='colorGradeFlag' value="$!form.condition.colorGradeFlag"/>
+	<input type='hidden' name='cleanFlag' value="$!form.condition.cleanFlag"/>
+	<input type='hidden' id='openflag' name='openflag' value="$!form.condition.openflag"/>
+    <table class='list'>
+    	<thead>
+    		<tr>
+                <th width='20px'><input type='checkbox' id='chkall'/></th>
+    			<th>大类</th><th>小类</th><th>分析范围</th><th>款式大类</th><th>款式中类</th><th>款式小类</th><th>款式</th><th>色级</th><th>净度</th><th>品质</th>
+                <th>尺寸</th><th>商品材质</th><th>托架颜色</th><th>计量单位</th><th>订购数</th><th align="center">已配数</th><th>正配数</th><th>分配店</th><th></th>
+    		</tr>
+    	</thead>
+    	<tbody id='tbl'>
+    	#foreach($item in $form.pager.pageData)
+    		<tr>
+				<td><input type='checkbox' name='chk'/></td>
+    			<td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+    			<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+    			<td>$!item.analyseName</td>
+    			<td>$!BdCommon.getStyleItemClassNames($!item.styleItemClassId)</td>
+    			<td>$!BdCommon.getStyleMiddleClassNames($!item.styleMiddleClassId)</td>
+    			<td>$!BdCommon.getStyleOrnaClassNames($!item.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!item.styleId, $!item.styleName, $!item.bigGraph)</td>
+    			<td>$!DictUtil.getValue('diacolorgrade',$!item.colorGradeId)</td>
+    			<td>$!DictUtil.getValue('diaclean',$!item.cleanId)</td>
+    			<td>$!{DictUtil.getValue('gradelevel',$!item.colorGradeGradeId)}$!{DictUtil.getValue('gradelevel',$!item.cleanGradeId)}</td>
+    			<td>$!item.sizeName</td>
+    			<td>$!BdCommon.getQualityName($!item.qualityId)</td>
+    			<td>$!DictUtil.getValue('bracketcolor',$!item.bracketcolorId)</td>
+    			<td>$!BdCommon.getUnitName($!item.unitId)</td>
+    			<td>$!item.orderNum</td>
+    			<td>$!{item.dispatched}</td>
+    			<td>$!{item.dispatching}</td>
+    			<td>$!BdCommon.getOrgName($!item.orgId)</td>
+				#if($!{form.condition.orderLineId} == $!{item.olineid})
+				<td><input type='button' class='btn' value='取消' onclick="cancelChange(this, '$!{item.olineid}')"/></td>
+				#else
+				<td><input type='button' class='btn' value='变更' onclick="exchange(this, '$!{item.olineid}')"/></td>
+				#end
+            </tr>
+    	#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false);
+	changeButtonStatus();
+});
+function changeButtonStatus(){
+	if("2" == jQuery("#openflag").val()){
+		jQuery(".btn").each(function(){
+			jQuery(this).attr("disabled", true);
+		});
+	}
+}
+/**
+ * 取消变更
+ */
+function cancelChange(obj){
+	jQuery("#openflag").val("2");
+	changeButtonStatus();
+	if(isNull(jQuery("#openflag").val())){
+		parent.closeChangeDispatchingBox();
+	}
+}
+/**
+ * 变更正配货饰品
+ */
+function exchange(obj, orderLineId){
+	confirm("确定变更?", function(){
+    	DispatchOrnaDwr.exchangeDispatching("$!form.condition.ornaLogId", orderLineId, function(data){
+    		alert(data?data:"变更成功", function(){
+				if(isNull(jQuery("#openflag").val())){
+        			if(!data){
+            			parent.closeChangeDispatchingBox(orderLineId, "$!form.condition.orderLineId");
+        			}
+				}else{
+                	jQuery("#openflag").val("2");
+                	changeButtonStatus();
+				}
+    		});
+    	});
+	});
+}
+</script>

@@ -1,0 +1,106 @@
+	<!-- crumbs -->
+        	<div class="crumbs">
+            	您的位置：
+                <a href="#">浙商证券</a> &gt; 
+                <a href="#">服务帮助</a> &gt; 
+                <b>服务帮助首页</b> 
+            </div>
+     <!-- crumbs  end-->
+	<div class="help_mian">
+	  <div class="help_left">
+	    <div class="bzxx">
+	      <h3>帮助分类</h3>
+	      <ul>
+	        <div class="modules">
+	          <!--菜单-->
+	          <h4 class="menu-closed">开户指南</h4>
+	          <ul>
+	            <li><a href="#" >开户流程</a></li>
+	            <li><a href="#" >预约开户</a></li>
+	            <li><a href="#" >网上营业厅</a></li>
+              </ul>
+	          <h4 >常见问题</h4>
+	          <ul>
+	            <li><a href="#" >开户常见问题</a></li>
+	            <li><a href="#" >卖卖常见问题</a></li>
+	            <li><a href="#" >账户常见问题</a></li>
+              </ul>
+	          <h4>新手必读</h4>
+	          <ul>
+	            <li><a href="#" >交易常识</a></li>
+	            <li><a href="#" >投资分析</a></li>
+	            <li><a href="#" >法律法规</a></li>
+	            <li><a href="#" >开放式基金</a></li>
+              </ul>
+	          <h4 class="menu-closed">售后与服务</h4>
+	          <ul>
+	            <li><a href=".html" >售后与服务</a></li>
+              </ul>
+	          <h4>理财课堂</h4>
+	          <ul>
+	            <li><a href="#" >关于理财</a></li>
+	            <li><a href="#" >理财规划</a></li>
+              </ul>
+	          <h4>关于我们</h4>
+	          <ul>
+	            <li><a href="#" >我的资料</a></li>
+	            <li><a href="#" >修改密码</a></li>
+	            <li><a href="#" >密码保护</a></li>
+              </ul>
+            </div>
+          </ul>
+        </div>
+	    <!--
+                    <div class="ykfjl">
+                    	<h3>与客服交流</h3>
+                        <ul>
+                       	  <dl class="first">
+                            <a href="#"><img src="../images/web_img/kefu.png" /></a>
+                            <dt><strong><a href="#">网上在线客服</a></strong><br />
+                              点击即可交流</dt>
+                          </dl>
+                            <div class="clear"></div>
+                            <dl>
+                            <a href="#"><img src="../images/web_img/kf-qq.png" /></a>
+                            <dt><strong><a href="#">在线客服务QQ</a></strong><br />
+                              点击即可交流</dt>
+                            </dl>
+                        </ul>
+                  </div>
+                  -->
+      </div>
+	  <div class="help_right">
+<h3>购物指南</h3>
+            	  <div class="help-search" >
+                  	<div style="display:none">
+            	    <form action="fhelps.html" method="post" name="listForm" id="listForm" >
+            	      <input type="text" id="message" name="message" class="inp" />
+          	      </form>
+            	    <input type="button" onclick="find()" value="搜 索" class="but" />
+                    </div>
+          	    </div>
+            	  <div class="midTitle" >如何设置个人资料？</div>
+            	  <div class="help-list">
+            	    <p></p>
+            	    <p><strong><span style="font-size: medium;"><span style="font-family: 宋体;">拍品介绍：</span></span></strong></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp;&nbsp; 顶级HI-FI发烧碟 萨顶顶亲笔签名《万物生》CD+DVD精装珍藏版极具震慑的HI-FI音乐，极富个性的不羁嗓音，惊世神秘音乐人，惊艳，沉静，悠远，宏大。内增DVD及福满门神鱼，祝福翻倍，吉祥无限！<br />
+            	      &nbsp;&nbsp;&nbsp; 本专辑于2007年获英国《卫报》四颗星评价，并获中国唱片评审团4星最高评价，是2007年唯一四星专辑；2008年获第六届中国“金唱片”奖的通俗类专辑奖、音乐录音带奖。</span></span></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp;&nbsp; 皇冠发烧碟《天地合》CD+DVD精装版（送海报）萨顶顶2010全新创作的《天地合》，英文名为Harmony，取“天地合则万物生”之意，由曾为麦当娜、U2等人制作专辑的世界级大师Marius De Vries倾力打造。用古老神秘的少数民族乐器所创造出的律动，让每个听到它的人都无比兴奋和感动……</span></span></p>
+            	    <p><strong><span style="font-size: medium;"><span style="font-family: 宋体;">拍卖时间：</span></span></strong></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp; 4月3日&nbsp; 15：58&nbsp; 2组</span></span></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp; 4月4日&nbsp; 15：58&nbsp; 2组</span></span></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp; 4月10日 15：58&nbsp; 2组</span></span></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">萨顶顶亲笔签名《万物生》CD+DVD精装珍藏版 + 《天地合》CD+DVD精装版（送海报）为一组</span></span></p>
+            	    <p><strong><span style="font-size: medium;"><span style="font-family: 宋体;">拍卖规则：</span></span></strong></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">&nbsp;&nbsp;&nbsp; 每组1元起拍；<br />
+            	      &nbsp;&nbsp;&nbsp; 每次出价固定加价10元。</span></span></p>
+            	    <p><strong><span style="font-size: medium;"><span style="font-family: 宋体;">费用说明：</span></span></strong></p>
+            	    <p><span style="font-size: medium;"><span style="font-family: 宋体;">参与萨顶顶拍卖须保证网站账户余额大于51元，否则无法出价。<br />
+            	      --其中1元为拍卖手续费，用户首次出价时系统自动在用户网站账户余额内扣除；<br />
+            	      --其中50元为拍卖保证金，出价最高时冻结在用户账户，不可使用，有</span></span><span style="font-size: medium;"><span style="font-family: 宋体;">更高出价时解冻；</span><span style="color: rgb(255, 0, 0);"><span style="font-family: 宋体;"><br />
+            	        拍中商品后，须在72个小时内完成支付全款，否则视为放弃并违约，系统自动扣除买家账户拍卖时冻结的保证金。</span></span></span></p>
+          	    </div>
+          	  </div>
+            	<div class="help_right"></div>
+          <div class="clear"></div>
+            </div>

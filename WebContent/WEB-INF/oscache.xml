@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	
+	<bean id="cacheAdministrator" class="com.opensymphony.oscache.general.GeneralCacheAdministrator" destroy-method="destroy">
+		
+	</bean>
+	
+	<bean id="cache" factory-bean="cacheAdministrator" factory-method="getCache"/>
+
+	<bean id="osCacheManager"
+		class="com.jatools.common.OSCacheManagerUtil">
+		<property name="cacheAdministrator" ref="cacheAdministrator"></property>
+	</bean>
+
+   <!--<bean id="autoproxy"
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+
+	<bean id="cacheManager"
+		class="org.springmodules.cache.provider.oscache.OsCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:oscache.properties" />
+	</bean>
+	<bean id="cacheProviderFacade" class="org.springmodules.cache.provider.oscache.OsCacheFacade">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+
+
+	<!-#- 通过标注实现对具体方法的缓存 -#->
+	<bean id="cachingAttributeSource" class="org.springmodules.cache.annotations.AnnotationCachingAttributeSource"></bean>
+
+	<bean id="cachingInterceptor" class="org.springmodules.cache.interceptor.caching.MetadataCachingInterceptor">
+		<property name="cacheProviderFacade" ref="cacheProviderFacade" />
+		<property name="cachingAttributeSource" ref="cachingAttributeSource" />
+		<property name="cachingModels">
+			<props>
+				<prop key="selfCaching">refreshPeriod=86400;cronExpression=0 1 * * *;groups=self_help</prop>
+				<prop key="testCaching">refreshPeriod=86400;cronExpression=0 1 * * *;groups=test_gp</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="cachingAttributeSourceAdvisor" class="org.springmodules.cache.interceptor.caching.CachingAttributeSourceAdvisor">
+		<constructor-arg ref="cachingInterceptor" />
+	</bean>
+
+	<bean id="flushingAttributeSource" class="org.springmodules.cache.annotations.AnnotationFlushingAttributeSource"></bean>
+
+	<bean id="flushingInterceptor" class="org.springmodules.cache.interceptor.flush.MetadataFlushingInterceptor">
+		<property name="cacheProviderFacade" ref="cacheProviderFacade" />
+		<property name="flushingAttributeSource" ref="flushingAttributeSource" />
+		<property name="flushingModels">
+			<props>
+				<prop key="selfFlushing">groups=self_help</prop>
+				<prop key="testFlushing">groups=test_gp</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="flushingAttributeSourceAdvisor" class="org.springmodules.cache.interceptor.flush.FlushingAttributeSourceAdvisor">
+		<constructor-arg ref="flushingInterceptor" />
+	</bean>
+	-->
+
+</beans>

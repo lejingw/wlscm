@@ -1,0 +1,51 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/sys/parameter.js", 
+	"$StringUtil.getContextPath()/dwr/interface/ParameterDwr.js"])
+
+#set($parameter = $form.parameter)
+	
+<form id='frm' action="charge.vm" method="post">
+	
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="param_name" name="param_name" value="$!{parameter.name}"/>
+    <table class="title">
+    	<tr><td>系统参数</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08011702','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>键</td>	
+			<td class='body2'>
+				<input type='text' id="name" name='name' value="$!parameter.name" readonly disabled style="width:90%;"/>
+			</td>
+			<td class='body1'>值</td>	
+			<td class='body2'>
+				<input type='text' id="value" name='value' value="$!parameter.value">
+			</td>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' name='status' readonly value="保存">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="5">
+				<input type="text" id="memo" name="memo" style="width:90%;" value="$!{parameter.memo}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(saveform);
+	
+	jQuery("#btnToList").click(function(){
+		window.location = "parameter.vm";
+	});
+})
+
+</script>

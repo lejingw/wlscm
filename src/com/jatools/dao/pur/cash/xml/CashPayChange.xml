@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashPayChange">
+	<typeAlias alias="CashPayChange" type="com.jatools.vo.pur.cash.CashPayChange" />
+	
+	<resultMap class="CashPayChange" id="CashPayChange.result">
+		<result property = "chaId"      column = "cha_id"      />
+		<result property = "billNo"     column = "bill_no"     />
+		<result property = "billDate"   column = "bill_date"   />
+		<result property = "orgId"      column = "org_id"      />
+		<result property = "voderId"    column = "voder_id"    />
+		<result property = "dotype"     column = "dotype"      />
+		<result property = "billType"   column = "bill_type"   />
+		<result property = "chaMoney"   column = "cha_money"   />
+		<result property = "status"     column = "status"      />
+		<result property = "memo"       column = "memo"        />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId"   column = "create_id"   />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId"   column = "update_id"    />
+	</resultMap>
+	
+	<sql id="CashPayChange_columns">
+		cha_id, bill_no, bill_date, org_id, voder_id, dotype, bill_type, cha_money, status, memo, create_date, create_id, update_date, update_id
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="CashPayChange.getCashPayChangePageData" resultMap="CashPayChange.result" parameterClass="map">
+		select <include refid="CashPayChange_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="CashPayChange_columns"/>  from jat_cash_pay_change a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="billType" prepend="and"> a.bill_type = #billType# </isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.bill_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="CashPayChange.getCashPayChangeTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_pay_change a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="billType" prepend="and"> a.bill_type = #billType# </isNotEmpty>
+		<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype# </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="CashPayChange.saveCashPayChange" parameterClass="CashPayChange">
+    	<selectKey resultClass="string" keyProperty="chaId" type="pre">
+			select JAT_CASH_PAY_CHANGE_SEQ.nextval as "chaId" from dual
+		</selectKey>
+		insert into jat_cash_pay_change(<include refid="CashPayChange_columns"/>)
+		 values(
+		 	#chaId#, #billNo#, #billDate#, #orgId#, #voderId#, #dotype#, #billType#, #chaMoney#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    
+    <select id="CashPayChange.getCashPayChange" parameterClass="string" resultMap="CashPayChange.result">
+		select <include refid="CashPayChange_columns"/> from jat_cash_pay_change a 
+		where 1=1
+			and a.cha_id = #value#
+	</select>
+	
+	<update id="CashPayChange.updateCashPayChange" parameterClass="CashPayChange">
+		update jat_cash_pay_change a set 
+			a.bill_date   = #billDate#,
+			a.org_id      = #orgId#,
+			a.voder_id    = #voderId#,
+			a.dotype      = #dotype#,
+			a.bill_type   = #billType#,
+			a.cha_money   = #chaMoney#,
+			a.status      = #status#,
+			a.memo        = #memo#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#
+		where a.cha_id = #chaId# 
+	</update>
+	
+	<delete id="CashPayChange.deleteCashPayChange" parameterClass="string">
+		delete from jat_cash_pay_change a where a.cha_id = #value# 
+	</delete>
+	
+	<update id="CashPayChange.updateCashPayChangeStatus" parameterClass="map">
+		update jat_cash_pay_change a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.cha_id = #chaId# 
+	</update>
+	
+	<sql id="CashPayChange.getNewLossMoney">
+		(
+			select nvl(max(LOSS_MONEY), 0) + a.cha_money*a.bill_type
+          	from jat_cash_money_account t
+         	where t.voder_id = a.voder_id
+           		and exists (select voder_id
+                  from (select voder_id, max(mr_id) mr_id
+                          from jat_cash_money_account
+                         group by voder_id) tt
+                 where t.mr_id = tt.mr_id and t.voder_id=tt.voder_id)
+       ) as LOSS_MONEY
+	</sql>
+	
+	<!-- 根据资金台账调整单 插入 资金台账记录 -->
+	<insert id="CashPayChange.insertPayAccountByChaId" parameterClass="map">
+		insert into jat_cash_money_account
+		(
+		     mr_id, 
+		     bill_no, bill_type, bill_date, org_id, dotype, voder_id, moneys, 
+		     status, memo, create_date, create_id, update_date, update_id,
+		     loss_money
+		)
+		select 
+		     JAT_CASH_MONEY_ACCOUNT_SEQ.nextval,
+		     a.bill_no, 'ZT', a.bill_date, a.org_id, a.bill_type as dotype, a.voder_id, a.cha_money as moneys,
+		     2, null, #createDate#, #userId#, #updateDate#, #userId#,
+		     <include refid="CashPayChange.getNewLossMoney"/> 
+		from jat_cash_pay_change a 
+		where 
+			a.cha_id = #chaId#
+	</insert>
+</sqlMap>

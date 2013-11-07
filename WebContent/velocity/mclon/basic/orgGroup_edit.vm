@@ -1,0 +1,108 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/orgGroup.js?t=201204011204.js", 
+	"$StringUtil.getContextPath()/dwr/interface/DictDwr.js",
+	"$StringUtil.getContextPath()/dwr/interface/OrgGroupDwr.js"])
+	
+#set($orgGroup = $form.orgGroup)
+#set($enableOrg = false)
+#set($curOrgId = $StringUtil.getOrgId($session))
+#if($orgGroup)
+	#set($orgId = $orgGroup.orgId)
+#else
+	#if("$curOrgId" != "$!BdCommon.getMainOrg()")
+		#set($orgId = $curOrgId)
+	#end
+#end
+#if("$curOrgId" == "$!BdCommon.getMainOrg()")
+	#set($enableOrg = true)
+#end
+		
+<form id='frm' action="orgGroup.vm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+	<input type="hidden" id="groupId" name="groupId" value="$!{orgGroup.groupId}"/>
+    <table class="title">
+    	<tr><td>单位柜组</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08011902','1') />
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='hidden' id="copySave" value=''>
+                <span id="copyMsg" style="color:red;"></span>
+			</td>
+		</tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>组织</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($!orgId)" readonly class="target" dataType="Require" msg="不能为空" #if($enableOrg) onclick="showSelectOrgWin()" #end >
+				$StringUtil.star()
+			</td>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<select id="itemClassId" dataType="Require" value="$!BdCommon.getItemClassDesc($orgGroup.itemClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>小类</td>	
+			<td class='body2'>
+				<select id="ornaClassId" dataType="Require" value="$!BdCommon.getOrnaClassDesc($orgGroup.ornaClassId)" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+			<td class='body1'>柜组</td>	
+			<td class='body2'>
+				<select id="groups" dataType="Require" value="$!DictUtil.getValue('group', $orgGroup.groups)" msg="不能为空">$StringUtil.emptyOption()</select>
+				$StringUtil.star()
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>状态</td>
+			<td class='body2'>
+				<input type='text' name='status' readonly value="保存">
+			</td>
+			<td class='body1'>说明</td>
+			<td class='body2' colspan="3">
+				<input type="text" id="memo" name="memo" style="width:90%;" value="$!{orgGroup.memo}"/>
+			</td>
+		</tr>
+    </table>
+</form>
+<script>
+//显示组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());//, "getExecuteOrgTree");
+}
+
+function setValues(){
+	//jQuery("#orgId").val("$!orgGroup.orgId");
+	//jQuery("#orgName").val("$!BdCommon.getOrgName($!orgGroup.orgId)");
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!orgGroup.itemClassId");
+	});
+	BdCommonDwr.getAllOrnaClassForSlt("", function(data){
+		addOptions("ornaClassId", data, null, null, true, true, "$!orgGroup.ornaClassId");
+	});
+}
+
+function setGroups(groupVal){
+	DictDwr.getDictsForSlt('group', function(data){
+		addOptions("groups", data, null, null, true, true, groupVal);
+	});
+}
+jQuery(function(){
+	//jQuery("#itemClassId").change(changeItemClass);
+	jQuery("#btnSave").click(saveform);
+	setGroups("$!DictUtil.getValue('group', $orgGroup.groups)");
+	jQuery("#btnToList").click(function(){
+		window.location = "orgGroup.vm";
+	});
+	
+	setValues();
+	
+})
+
+</script>

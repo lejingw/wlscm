@@ -1,0 +1,132 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/stonePrice.js?t=201211081132",
+"$StringUtil.getContextPath()/dwr/interface/StonePriceDwr.js?t=201211081132"])
+#if("1" == $!{form.priceType})
+	#set($modelCode = '08060802')
+#elseif("2" == $!{form.priceType})
+	#set($modelCode = '08060902')
+#end
+<form id='frm' action="" method="post">
+	<input type="hidden" id="id" value="$!{form.sp.id}"/>
+	<input type="hidden" id="priceType" value="$!{form.priceType}"/>
+    <table class="title">
+    	<tr><td>主石市场价</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>大类</td>	<td class='body2'>
+            <select id="itemClassId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>规格</td><td class='body2'>
+				<input type='text' id='styleStandard' dataType="Require" msg="不能为空" value="$!{form.sp.styleStandard}">$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>石头类型</td>	
+			<td class='body2'>
+				<select id="stoneType" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>形状</td>	
+			<td class='body2'>
+				<select id="shapeId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>颜色</td>
+			<td class='body2'>
+				<select id="colorId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+			<td class='body1'>色级</td><td class='body2'>
+				<select id="colorGradeId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>净度</td><td class='body2'>
+				<select id="cleanId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>切工</td><td class='body2'>
+				<select id="cutId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>启始重量</td><td class='body2'><input type='text' id='startWeight' dataType='Double' msg='不能为空,且为数字类型' value="$!{form.sp.startWeight}">$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>截止重量</td><td class='body2'><input type='text' id='endWeight' dataType='Double' msg='不能为空,且为数字类型' value="$!{form.sp.endWeight}">$StringUtil.star()</td>
+		</tr>
+		<tr>			
+			<td class='body1'>价格</td><td class='body2'><input type='text' id='marketPrice' dataType='Double' msg='不能为空,且为数字类型' value="$!{form.sp.marketPrice}">$StringUtil.star()</td>
+		</tr>
+    </table>
+</form>
+
+<script>
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+}
+function setValues(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true,"$!{form.sp.itemClassId}");
+	});
+}
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveStonePrice();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "stonePrice.vm?priceType=$!{form.priceType}";
+	});
+	if("$!form.sp.id"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+	DictDwr.getDictsForSlt("diashape", function(data){
+		addOptions("shapeId", data);
+		if("$!form.sp.id"){
+			selectOption("shapeId", "$!{form.sp.shapeId}");
+		}
+	});
+	DictDwr.getDictsForSlt("diaclean", function(data){
+		addOptions("cleanId", data);
+		if("$!form.sp.id"){
+			selectOption("cleanId", "$!{form.sp.cleanId}");
+		}
+	});
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("colorGradeId", data);
+		if("$!form.sp.id"){
+			selectOption("colorGradeId", "$!{form.sp.colorGradeId}");
+		}
+	});
+	DictDwr.getDictsForSlt("diacolor", function(data){
+		addOptions("colorId", data);
+		if("$!form.sp.id"){
+			selectOption("colorId", "$!{form.sp.colorId}");
+		}
+	});
+	DictDwr.getDictsForSlt("diacut", function(data){
+		addOptions("cutId", data);
+		if("$!form.sp.id"){
+			selectOption("cutId", "$!{form.sp.cutId}");
+		}
+	});
+	DictDwr.getDictsForSlt("stonetype", function(data){
+		addOptions("stoneType", data);
+		if("$!form.sp.id"){
+			selectOption("stoneType", "$!{form.sp.stoneType}");
+		}
+	});
+	
+});
+
+
+</script>

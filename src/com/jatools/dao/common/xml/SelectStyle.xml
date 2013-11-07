@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SelectStyle">
+	<select id="SelectStyle.getEmpByOrgAndEmptype" parameterClass="map" resultClass="java.util.HashMap">
+		select to_char(a.empid) as "userid", to_char(a.empname) as "username" from jas_bd_emp a where a.state = 1 and exists(
+		select 1 from jas_bd_emp_emptype b where a.empid = b.empid and b.emptypeid = #emptypeId#
+		) and exists(
+		select 1 from jas_bd_emp_org c where c.orgid = #orgId# and c.empid = a.empid
+		) order by a.empcode
+	</select>
+</sqlMap>

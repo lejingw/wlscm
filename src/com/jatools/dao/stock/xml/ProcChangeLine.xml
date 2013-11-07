@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ProcChangeLine">
+	<typeAlias alias="ProcChangeLine" type="com.jatools.vo.stock.ProcChangeLine" />
+	
+	<resultMap id="ProcChangeLine.result" class="ProcChangeLine">
+		<result property = "lineid"           column = "lineid" />
+		<result property = "billid"           column = "billid" />
+		<result property = "itemClassId"      column = "item_class_id" />
+		<result property = "ornaClassId"      column = "orna_class_id" />
+		<result property = "styleitemclass"   column = "styleitemclass" />
+		<result property = "stylemiddleclass" column = "stylemiddleclass" />
+		<result property = "styleornaclass"   column = "styleornaclass" />
+		<result property = "styleId"          column = "style_id" />
+		<result property = "alaysisId"        column = "alaysis_id" />
+		<result property = "ornaCode"         column = "orna_code" />
+		<result property = "ornaBarcode"      column = "orna_barcode" />
+		<result property = "ornaDsc"          column = "orna_dsc" />
+		<result property = "unitId"           column = "unit_id" />
+		<result property = "nowQty"           column = "now_qty" />
+		<result property = "allQty"           column = "all_qty" />
+		<result property = "grains"           column = "grains" />
+		<result property = "mainWeight"       column = "main_weight" />
+		<result property = "partWeight"       column = "part_weight" />
+		<result property = "isMutiPart"       column = "is_muti_part" />
+		<result property = "isDblLabel"       column = "is_dbl_label" />
+		<result property = "posCost"          column = "pos_cost" />
+		<result property = "posMoney"         column = "pos_money" />
+		<result property = "isPsale"          column = "is_psale" />
+		<result property = "status"           column = "status" />
+		<result property = "memo"             column = "memo" />
+		<result property = "createDate"       column = "create_date" />
+		<result property = "createId"         column = "create_id" />
+		<result property = "updateDate"       column = "update_date" />
+		<result property = "updateId"         column = "update_id" />
+	</resultMap>
+	
+	<resultMap id="result2" class="ProcChangeLine" extends="ProcChangeLine.result">
+		<result property="styleName" column="stylename"/>
+		<result property="bigGraph" column="isbiggraph"/>
+	</resultMap>
+	
+	<sql id="ProcChangeLine_columns_all">
+		lineid, billid, item_class_id, orna_class_id, styleitemclass, stylemiddleclass, styleornaclass, 
+		style_id, alaysis_id, orna_code, orna_barcode, orna_dsc, unit_id, now_qty, all_qty, grains, 
+		main_weight, part_weight, is_muti_part, is_dbl_label, pos_cost, pos_money, is_psale, status, 
+		memo, create_date, create_id, update_date, update_id
+    </sql>
+    
+    <sql id="ProcChangeLine_columns_2">
+    	a.lineid, a.billid, a.item_class_id, a.orna_class_id, a.styleitemclass, a.stylemiddleclass, a.styleornaclass, 
+    	a.style_id, a.alaysis_id, a.orna_code, a.orna_barcode, a.orna_dsc, a.unit_id, a.now_qty, a.all_qty, a.grains, 
+    	a.main_weight, a.part_weight, a.is_muti_part, a.is_dbl_label, a.pos_cost, a.pos_money, a.is_psale, a.status, 
+    	a.memo, a.create_date, a.create_id, a.update_date, a.update_id,
+    	c.stylename, c.isbiggraph
+    </sql>
+    
+    <!-- 获取分页数据 -->
+	<select id="ProcChangeLine.getProcChangeLinePageData" resultMap="ProcChangeLine.result" parameterClass="map">
+		select <include refid="ProcChangeLine_columns_all"/> from (select rownum rownum_ , AA.* from (
+		    select <include refid="ProcChangeLine_columns_all"/> from jat_proc_change_line a 
+			where 1 = 1
+			<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+			order by a.lineid DESC                                                               
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ProcChangeLine.getProcChangeLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_proc_change_line a
+		where 1 = 1
+		<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="ProcChangeLine.saveProcChangeLine" parameterClass="ProcChangeLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_PROC_CHANGE_LINE_SEQ.nextval as lineid from dual
+		</selectKey>
+		insert into jat_proc_change_line(<include refid="ProcChangeLine_columns_all"/>)
+		 values(
+		 	#lineid#, #billid#, #itemClassId#, #ornaClassId#, #styleitemclass#, #stylemiddleclass#, 
+		 	#styleornaclass#, #styleId#, #alaysisId#, #ornaCode#, #ornaBarcode#, #ornaDsc#, #unitId#, 
+		 	#nowQty#, #allQty#, #grains#, #mainWeight#, #partWeight#, #isMutiPart#, #isDblLabel#, 
+		 	#posCost#, #posMoney#, #isPsale#, #status#, #memo#, #createDate#, 
+		 	#createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="ProcChangeLine.getProcChangeLine" resultClass="ProcChangeLine" resultMap="ProcChangeLine.result" parameterClass="string">
+    	select <include refid="ProcChangeLine_columns_all"/> from jat_proc_change_line a where a.lineid = #value#
+    </select>
+    
+     <!-- 根据单号获取记录对象 -->
+    <select id="ProcChangeLine.getProcChangeLineList" resultClass="ProcChangeLine" resultMap="result2" parameterClass="string">
+    	select <include refid="ProcChangeLine_columns_2"/>
+    	from jat_proc_change_line a 
+    	left join jas_bd_style c on a.style_id = c.styleid
+    	where a.billid = #value# order by a.create_date desc ,a.lineid
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="ProcChangeLine.updateProcChangeLine" parameterClass="ProcChangeLine">
+		update jat_proc_change_line a set 
+			a.item_class_id    = #itemClassId#, 
+			a.orna_class_id    = #ornaClassId#, 
+			a.styleitemclass   = #styleitemclass#, 
+			a.stylemiddleclass = #stylemiddleclass#, 
+			a.styleornaclass   = #styleornaclass#, 
+			a.style_id         = #styleId#, 
+			a.alaysis_id       = #alaysisId#, 
+			a.orna_code        = #ornaCode#, 
+			a.orna_barcode     = #ornaBarcode#, 
+			a.orna_dsc         = #ornaDsc#, 
+			a.unit_id          = #unitId#, 
+			a.now_qty          = #nowQty#, 
+			a.all_qty          = #allQty#, 
+			a.grains           = #grains#, 
+			a.main_weight      = #mainWeight#, 
+			a.part_weight      = #partWeight#, 
+			a.is_muti_part     = #isMutiPart#, 
+			a.is_dbl_label     = #isDblLabel#, 
+			a.pos_cost         = #posCost#, 
+			a.pos_money        = #posMoney#, 
+			a.is_psale         = #isPsale#, 
+			a.status           = #status#, 
+			a.memo             = #memo#, 
+			a.update_date      = #updateDate#, 
+			a.update_id        = #updateId#
+		where a.lineid = #lineid#
+	</update>
+	<delete id="ProcChangeLine.deleteProcChangeLine" parameterClass="string">
+		delete from jat_proc_change_line a where a.lineid = #value#
+	</delete>
+	
+	<delete id="ProcChangeLine.deleteProcChangeLineByBillid" parameterClass="string">
+		delete from jat_proc_change_line a where a.billid = #value#
+	</delete>
+</sqlMap>

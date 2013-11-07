@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ReceiveHead">
+	<typeAlias alias="ReceiveHead" type="com.jatools.vo.inout.ReceiveHead" />
+	
+	<resultMap class="ReceiveHead" id="ReceiveHead.result">
+		<result property = "billid" column = "billid"              />
+		<result property = "billno" column = "billno"              />
+		<result property = "dodate" column = "dodate"              />
+		<result property = "orgId" column = "org_id"               />
+		<result property = "vendorId" column = "vendor_id"         />
+		<result property = "invoiceNo" column = "invoice_no"       />
+		<result property = "invoiceDate" column = "invoice_date"       />
+		<result property = "invoiceMoney" column = "invoice_money" />
+		<result property = "status" column = "status"              />
+		<result property = "isFlag" column = "is_flag"             />
+		<result property = "memo" column = "memo"                  />
+		<result property = "createDate" column = "create_date"     />
+		<result property = "createId" column = "create_id"         />
+		<result property = "updateDate" column = "update_date"     />
+		<result property = "updateId" column = "update_id"         />
+	</resultMap>
+	
+	<sql id="ReceiveHead_columns">
+		billid, billno, dodate, org_id, vendor_id, invoice_no, invoice_date, invoice_money, status, is_flag, memo, create_date, create_id, update_date, update_id
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="ReceiveHead.getReceiveHeadPageData" resultMap="ReceiveHead.result" parameterClass="map">
+		select <include refid="ReceiveHead_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="ReceiveHead_columns"/>  from jat_bill_receive_head a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="handoverNo" prepend="and">
+				exists (select 1 from jat_bill_receive_line b where a.billid=b.billid and b.hand_no = #handoverNo#)
+			</isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.billid DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="ReceiveHead.getReceiveHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_bill_receive_head a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.vendor_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.dodate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.dodate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="handoverNo" prepend="and">
+			exists (select 1 from jat_bill_receive_line b where a.billid=b.billid and b.hand_no = #handoverNo#)
+		</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="ReceiveHead.saveReceiveHead" parameterClass="ReceiveHead">
+    	<selectKey resultClass="string" keyProperty="billid" type="pre">
+			select JAT_BILL_RECEIVE_HEAD_SEQ.nextval as "billid" from dual
+		</selectKey>
+		insert into jat_bill_receive_head(<include refid="ReceiveHead_columns"/>)
+		 values(
+		 	#billid#, #billno#, #dodate#, #orgId#, #vendorId#, #invoiceNo#, #invoiceDate#, #invoiceMoney#, #status#, #isFlag#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+		 )
+    </insert>
+    
+    <select id="ReceiveHead.getReceiveHead" parameterClass="string" resultMap="ReceiveHead.result">
+		select <include refid="ReceiveHead_columns"/> from jat_bill_receive_head a 
+		where 1=1
+			and a.billid = #value#
+	</select>
+	
+	<update id="ReceiveHead.updateReceiveHead" parameterClass="ReceiveHead">
+		update jat_bill_receive_head a set 
+			a.dodate        = #dodate#,
+			a.org_id        = #orgId#,
+			a.vendor_id     = #vendorId#,
+			a.invoice_no    = #invoiceNo#,
+			a.invoice_date    = #invoiceDate#,
+			a.invoice_money = #invoiceMoney#,
+			a.status        = #status#,
+			a.is_flag       = #isFlag#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#
+		where a.billid = #billid# 
+	</update>
+	
+	<delete id="ReceiveHead.deleteReceiveHead" parameterClass="string" >
+		delete from jat_bill_receive_head a where a.billid = #value# 
+	</delete>
+	
+	<update id="ReceiveHead.updateReceiveHeadStatus" parameterClass="map">
+		update jat_bill_receive_head a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.billid = #billid# 
+	</update>
+	
+	
+	<!-- 出票单 查询交接单 -->
+	<sql id="ReceiveHead.searchHandover_columns">
+		"billid", "billno", "dodate", "status", "srcBillType", "srcBillNo", "verdorId", "sumNum", "sumMoney", "sumCharge", "lines"
+	</sql>
+	<select id="ReceiveHead.searchHandoverList" parameterClass="map" resultClass="com.jatools.vo.inout.ReceiveHandover">
+		select <include refid="ReceiveHead.searchHandover_columns"/> from (select rownum rownum_ , AA.* from (
+			select 
+		        h.billid          as "billid",
+		        h.billno          as "billno",
+		        h.dodate          as "dodate",
+		        h.status          as "status",
+		        h.source_type     as "srcBillType",
+		        h.source_no       as "srcBillNo",
+		        h.verdor_id       as "verdorId",
+		        h.sum_num         as "sumNum",
+		        h.sum_money       as "sumMoney",
+		        h.sum_charge      as "sumCharge",
+		        (
+		           select '[' || wmsys.wm_concat('{"lineid":"' || a.lineid || '","itemClassId":"' ||
+		                a.item_class_id || '","itemClassDesc":"' || b.item_class_dsc ||
+		                '","unitId":"' || a.unit_no ||'","unitName":"'||c.item_value ||'","handNum":"'||a.hang_num||'","noNum":"'||a.no_num_last||'","billno":"'||h.billno||'"}') || ']'
+		           from jat_pur_handover_line a 
+		             left join jas_bd_item_class b on a.item_class_id = b.item_class_id
+		             left join jat_sys_dict_item c on c.item_key = a.unit_no and c.entry_code = 'purunit'
+		           where a.billid = h.billid
+		        ) as "lines"
+		      from jat_pur_handover_head h
+		      where 1=1 
+			      and <![CDATA[h.status <> 1]]> and <![CDATA[h.status <> 4]]> and (h.is_bill = 0 or h.is_bill is null)
+			      and exists ( select 1 from jat_pur_handover_line l where l.billid = h.billid )
+			      and exists ( select 1 from jat_mater_iniv d where d.src_bill_id = h.billid )
+			      and h.org_id = #orgId# and <![CDATA[h.source_type = 'CM']]>
+				<isNotEmpty property="billno" prepend="and"> h.billno = #billno# </isNotEmpty>
+				<isNotEmpty property="srcBillNo" prepend="and"> h.source_no = #srcBillNo# </isNotEmpty>
+				<isNotEmpty property="verdorId" prepend="and"> h.verdor_id = #verdorId# </isNotEmpty>
+				<isNotEmpty property="startDate" prepend="and"> h.dodate >= #startDate# </isNotEmpty>
+				<isNotEmpty property="endDate" prepend="and"> <![CDATA[h.dodate <= #endDate#]]> </isNotEmpty>
+				order by h.create_date desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="ReceiveHead.searchHandoverCount" resultClass="int" parameterClass="map">
+		select count(*)
+		from jat_pur_handover_head h
+		where 1=1 
+		      and <![CDATA[h.status <> 1]]> and <![CDATA[h.status <> 4]]> and (h.is_bill = 0 or h.is_bill is null)
+		      and exists ( select 1 from jat_pur_handover_line l where l.billid = h.billid )
+			  and exists ( select 1 from jat_mater_iniv d where d.src_bill_id = h.billid )
+		      and h.org_id = #orgId# and <![CDATA[h.source_type = 'CM']]>
+			<isNotEmpty property="billno" prepend="and"> h.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="srcBillNo" prepend="and"> h.source_no = #srcBillNo# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> h.verdor_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> h.dodate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[h.dodate <= #endDate#]]> </isNotEmpty>
+	</select>
+</sqlMap>

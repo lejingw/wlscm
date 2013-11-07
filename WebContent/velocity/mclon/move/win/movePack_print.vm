@@ -1,0 +1,57 @@
+#set($layout = "layout/noneLayout.vm")
+#set($cssfiles = ["$StringUtil.getContextPath()/js/move/moveBill_print.css"])
+<table width='680' border=0>
+	<tbody>
+		<tr>
+			<td class='bill_head' nowrap colspan=4>
+				<p align=center>
+					<b>装箱单</b>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td class='bill_td' nowrap>
+				<b>单据号：</b>$!{form.head.billno}</td>
+			<td class='bill_td' nowrap>
+				<b>调出组织：</b>$!BdCommon.getOrgName($!{form.head.outOrgId})</td>
+			<td class='bill_td' nowrap>
+				<b>调入组织：</b>$!BdCommon.getOrgName($!{form.head.inOrgId})</td>
+		</tr>
+		<tr>
+			<td class='bill_td' nowrap colspan="2">
+				<b>备注：</b>$!{form.head.memo}</td>
+			<td class='bill_td' nowrap>
+				<b>总数量：</b>$!{form.head.sumCount}</td>
+		</tr>
+		<tr>
+			<td nowrap colspan=4>
+				<table class='bill_tb' width="100%"  border=1>
+					<tbody>
+            			<tr>
+            				<th class='black_td' nowrap></th>
+            				<th class='black_td' nowrap>#if("1" == $!{form.billType})调拨单号#elseif("2" == $!{form.billType})维修单号#elseif("3" == $!{form.billType})交接单号#end</th>				
+            				<th class='black_td' nowrap>创建人</th>
+            				<th class='black_td' nowrap>件数</th>
+            			</tr>
+					#foreach($item in $form.lineList)
+            			<tr>
+            				<td class='black_td' nowrap>$!{velocityCounter}</td>
+            				<td class='black_td' nowrap>$!{item.billNo}</td>
+            				<td class='black_td' nowrap>$!{item.billUserName}</td>
+            				<td class='black_td' nowrap>$!{item.billCount}</td>
+            			</tr>
+            		#end
+                    </tbody>
+                </table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<SCRIPT language=javascript>
+setTimeout("window.print()",500)
+</SCRIPT>

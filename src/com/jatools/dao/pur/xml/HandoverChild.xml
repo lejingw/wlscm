@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="HandoverChild">
+	<typeAlias alias="HandoverChild" type="com.jatools.vo.pur.HandoverChild" />
+	
+	<resultMap class="HandoverChild" id="HandoverChild.result">
+		<result property = "childid"    column = "childid"     />
+		<result property = "lineid"     column = "lineid"      />
+		<result property = "alaysisId"  column = "alaysis_id"  />
+		<result property = "stoneNum"   column = "stone_num"   />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId"   column = "create_id"   />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId"   column = "update_id"   />
+		<result property = "unitPrice"   column = "unit_price"   />
+	</resultMap>
+	
+	<sql id="HandoverChild_columns">
+		childid, lineid, alaysis_id, stone_num, create_date, create_id, update_date, update_id, unit_price
+	</sql>
+	
+	<select id="HandoverChild.getHandoverChildList" parameterClass="string" resultClass="HandoverChild">
+		select <include refid="HandoverChild_columns"/> from jat_pur_handover_child a 
+		where 1=1
+			and a.lineid = #value#
+	</select>
+	
+	<insert id="HandoverChild.saveHandoverChild" parameterClass="HandoverChild">
+    	<selectKey resultClass="string" keyProperty="childid" type="pre">
+			select JAT_PUR_HANDOVER_CHILD_SEQ.nextval as "childid" from dual
+		</selectKey>
+		insert into jat_pur_handover_child(<include refid="HandoverChild_columns"/>)
+		 values(
+		 	#childid#, #lineid#, #alaysisId#, #stoneNum#, #createDate#, #createId#, #updateDate#, #updateId#, #unitPrice#
+		 )
+    </insert>
+    
+    <select id="HandoverChild.getHandoverChild" parameterClass="string" resultClass="HandoverChild">
+		select <include refid="HandoverChild_columns"/> from jat_pur_handover_child a 
+		where 1=1
+			and a.childid = #value#
+	</select>
+	
+	<update id="HandoverChild.updateHandoverChild" parameterClass="HandoverChild">
+		update jat_pur_handover_child a set 
+			a.lineid      = #lineid#,
+			a.alaysis_id  = #alaysisId#,
+			a.stone_num   = #stoneNum#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#,
+			a.unit_price  = #unitPrice#
+		where a.childid = #childid# 
+	</update>
+	
+	<delete id="HandoverChild.deleteHandoverChild" parameterClass="string">
+		delete from jat_pur_handover_child a where a.childid = #value# 
+	</delete>
+	
+	<delete id="HandoverChild.deleteHandoverChildByLineid" parameterClass="string">
+		delete from jat_pur_handover_child a where a.lineid = #value# 
+	</delete>
+	
+	<sql id="HandoverChild_column">
+		a.alaysis_id as "alaysisId",
+		b.SUMMARYDESCRIPTION as "alaysisName",
+		a.unit_price as "unitPrice",
+		a.stone_num  as "stoneNum",
+		a.update_date as "updateDate",
+		a.update_id as "updateId"
+	</sql>
+	
+	<sql id="HandoverChild_column_1">
+		"childid", "alaysisId", "alaysisName",  "unitPrice", "stoneNum", "updateDate", "updateId"
+	</sql>
+	
+	<select id="HandoverChild.getHandoverChildHistoryData" parameterClass="map" resultClass="HandoverChild">
+		select <include refid="HandoverChild_column_1"/> from (select rownum rownum_ , AA.* from (
+		
+			select 
+				-2 as "childid",
+				<include refid="HandoverChild_column"/>
+			from jat_pur_handover_child a
+			left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+			where a.lineid = #lineid#
+		union all
+			select 
+				-1 as "childid",
+				<include refid="HandoverChild_column"/>
+			from jat_pur_handover_child_rec a
+			left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+			where a.lineid = #lineid#
+
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="HandoverChild.getHandoverChildHistoryCount" resultClass="int" parameterClass="map">
+		select count(*) from 
+		(
+			select * from jat_pur_handover_child a where a.lineid = #lineid#
+			union all
+			select * from jat_pur_handover_child_rec a where a.lineid = #lineid#
+		) aa
+	</select>
+	
+	<select id="HandoverChild.getHistoryCount" resultClass="int" parameterClass="map">
+		select count(*) from jat_pur_handover_child a where a.lineid = #lineid#
+	</select>
+	
+	<!-- 通过退料单 插入交接单孙表 -->
+	<insert id="HandoverChild.insertChildByExit" parameterClass="map">
+		insert into jat_pur_handover_child (
+		       childid, lineid, alaysis_id, stone_num, 
+		       create_date, create_id, update_date, update_id
+		)
+		select 
+		       jat_pur_handover_child_seq.nextval,
+		       (select b.lineid from jat_pur_handover_line b where b.item_class_id = 156 and b.unit_no = aa.cash_unit and b.billid=#handoverId#) as lineid,
+		       aa.alaysis_id, aa.exit_nums,
+		       #createDate#, #createId#, #updateDate#, #updateId#
+		from (
+		    select 
+		            a.cash_unit, a.alaysis_id, sum(a.exit_nums)  as exit_nums
+		    from jat_proc_exit_line a 
+		    where a.item_class_id = 156 and a.billid = #exitBillid#
+		    group by a.cash_unit,  a.alaysis_id
+		) aa
+	</insert>
+</sqlMap>

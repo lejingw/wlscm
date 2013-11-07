@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MaterialItem">
+	<typeAlias alias="MaterialItem" type="com.jatools.vo.basic.MaterialItem" />
+	
+	<resultMap id="result" class="MaterialItem">
+		<result property="materialItemId" column="material_item_id"/>
+		<result property="materialType" column="material_type"/>
+		<result property="purUnit" column="pur_unit"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+	</resultMap>
+	<sql id="MaterialItem_columns_all">
+		material_item_id, material_type, pur_unit, item_class_id,
+		status, memo, create_date, create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="MaterialItem.getMaterialItemPageData" resultMap="result" parameterClass="map">
+		select <include refid="MaterialItem_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="MaterialItem_columns_all"/> from jat_basic_material_item a 
+			where 1 = 1
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="materialType" prepend="and">  a.material_type = #materialType# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and">  a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.material_type , a.item_class_id, a.pur_unit
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MaterialItem.getMaterialItemTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_material_item a
+		where 1 = 1
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="materialType" prepend="and">  a.material_type = #materialType# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and">  a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+    <!-- 保存数据 -->
+    <insert id="MaterialItem.saveMaterialItem" parameterClass="MaterialItem">
+    	<selectKey resultClass="string" keyProperty="materialItemId" type="pre">
+			select JAT_BASIC_MATERIAL_ITEM_SEQ.nextval as materialItemId from dual
+		</selectKey>
+		insert into jat_basic_material_item( <include refid="MaterialItem_columns_all"/> )
+		 values(#materialItemId#, #materialType#, #purUnit#, #itemClassId#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="MaterialItem.getMaterialItem" resultClass="MaterialItem" resultMap="result" parameterClass="string">
+    	select <include refid="MaterialItem_columns_all"/> from jat_basic_material_item a where a.material_item_id = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="MaterialItem.updateMaterialItem" parameterClass="MaterialItem">
+		update jat_basic_material_item a set 
+			a.material_type = #materialType#, 
+			a.item_class_id = #itemClassId#, 
+			a.pur_unit = #purUnit#, 
+			a.memo = #memo#, 
+			a.update_date = #updateDate#, 
+			a.update_id = #updateId#
+		where a.material_item_id = #materialItemId#
+	</update>
+	<delete id="MaterialItem.deleteMaterialItem" parameterClass="string">
+		delete jat_basic_material_item a where a.material_item_id = #value#
+	</delete>
+	
+	<select id="MaterialItem.selectCount" parameterClass="MaterialItem" resultClass="int">
+		select count(1) from  jat_basic_material_item a
+		where a.material_type = #materialType#
+			and a.item_class_id = #itemClassId#
+			and a.pur_unit = #purUnit#
+		<isNotEmpty property="materialItemId" prepend="and"> <![CDATA[ a.material_item_id <> #materialItemId#]]> </isNotEmpty>
+			
+	</select>
+</sqlMap>

@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveCmd">
+	
+	<sql id="MoveCmd-column-1">
+		a.headid       as "headid",
+		a.billno       as "billno",
+		a.dodate       as "dodate",
+		a.out_org_id   as "outOrgId",
+		a.out_stock_id as "outStockId",
+		a.in_org_id    as "inOrgId",
+		a.in_stock_id  as "inStockId",
+		a.sum_count    as "sumCount",
+		a.sum_weight   as "sumWeight",
+		a.sum_grains   as "sumGrains",
+		a.sum_cost     as "sumCost",
+		a.sum_money    as "sumMoney",
+		a.status       as "status",
+		a.memo         as "memo",
+		a.create_date  as "createDate",
+		a.create_id    as "createId",
+		a.update_date  as "updateDate",
+		a.update_id    as "updateId"
+	</sql>
+	<sql id="MoveCmd-column-2">
+		a.lineid             as "lineid",
+		a.headid             as "headid",
+		a.item_class_id      as "itemClassId",
+		a.orna_class_id      as "ornaClassId",
+		a.style_item_class   as "styleItemClass",
+		a.style_middle_class as "styleMiddleClass",
+		a.style_orna_class   as "styleOrnaClass",
+		a.style_id           as "styleId",
+		a.analysis_id        as "analysisId",
+		a.orna_code          as "ornaCode",
+		a.bar_code           as "barCode",
+		a.orna_dsc           as "ornaDsc",
+		a.unit_id            as "unitId",
+		a.now_qty            as "nowQty",
+		a.all_weight         as "allWeight",
+		a.grains             as "grains",
+		a.main_weight        as "mainWeight",
+		a.part_weight        as "partWeight",
+		a.is_muti_part       as "isMutiPart",
+		a.is_dbl_label       as "isDblLabel",
+		a.pos_cost           as "posCost",
+		a.pos_amount         as "posAmount",
+		a.is_psale           as "isPsale",
+		a.out_group_no       as "outGroupNo",
+		a.in_group_no        as "inGroupNo",
+		a.rece_date          as "receDate",
+		a.rece_emp_id        as "receEmpId",
+		a.new_pos_cost       as "newPosCost",
+		a.new_pos_money      as "newPosMoney",
+		a.saleprice_coef     as "salepriceCoef",
+		a.status             as "status",
+		a.memo               as "memo",
+		a.create_date        as "createDate",
+		a.create_id          as "createId",
+		a.update_date        as "updateDate",
+		a.update_id          as "updateId",
+		a.cost_coef_way      as "costCoefWay",
+		a.costprice_coef     as "costpriceCoef",
+		a.hrd_cert           as "hrdCert",
+		a.gia_cert           as "giaCert",
+		a.igi_cert           as "igiCert",
+		a.ags_cert           as "agsCert",
+		a.ident_id           as "identId",
+		b.summarydescription as "analysisName",
+       c.stylename as "styleName",
+       c.isbiggraph as "bigGraph"
+	</sql>
+	
+	<sql id="MoveCmd.getMoveCmdPageDataCondition">
+		<isNotEmpty property="billno">and a.billno like '%$billno$%'</isNotEmpty>
+		<isNotEmpty property="orgId">and (a.out_org_id = #orgId# or a.in_org_id = #orgId#)</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	
+	<select id="MoveCmd.getMoveCmdPageData" parameterClass="map" resultClass="com.jatools.vo.move.MoveCmdHead">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="MoveCmd-column-1"/>
+			from jat_move_cmd_head a where 1=1 
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[ and a.status <> 8 ]]></isNotEqual>
+			<include refid="MoveCmd.getMoveCmdPageDataCondition"/>
+			order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="MoveCmd.getMoveCmdTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_move_cmd_head a
+		where 1 = 1 
+		<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[ and a.status <> 8 ]]></isNotEqual>
+		<include refid="MoveCmd.getMoveCmdPageDataCondition"/>
+    </select>
+    
+    <select id="MoveCmd.getMaterActiveInfo" parameterClass="map" resultClass="com.jatools.vo.move.MoveCmdLine">
+		select bb.orna_code as "ornaCode",
+		       bb.orna_barcode as "barCode",
+		       bb.orna_dsc as "ornaDsc",
+		       bb.item_class_id as "itemClassId",
+		       bb.orna_class_id as "ornaClassId",
+		       bb.alaysis_id as "analysisId",
+		       bb.summarydescription as "analysisName",
+		       bb.style_id as "styleId",
+		       bb.stylename as "styleName",
+		       bb.isbiggraph as "bigGraph",
+		       bb.sale_unit_id as "unitId",
+		       bb.all_qty as "allWeight",
+		       bb.now_qty as "nowQty",
+		       bb.stone_now_num as "grains",
+		       bb.pos_amount as "posAmount",
+		       bb.real_total_cost as "posCost",
+		       bb.main_weight as "mainWeight",
+		       bb.part_weight as "partWeight",
+		       bb.state as "status",
+		       decode(bb.is_dbl_label, '1', '1', '0') as "isDblLabel",
+		       bb.org_id as "orgId",
+		       bb.stock_id as "stockId",
+		       bb.groups as "outGroupNo"
+		  from (select a.orna_code,
+		               a.orna_barcode,
+		               a.orna_dsc,
+		               a.item_class_id,
+		               a.orna_class_id,
+		               a.alaysis_id,
+		               c.summarydescription,
+		               a.style_id,
+		               b.stylename,
+		               b.isbiggraph,
+		               a.sale_unit_id,
+		               a.all_qty,
+		               a.now_qty,
+		               a.stone_now_num,
+		               a.real_unit_cost,
+		               a.real_total_cost,
+		               a.basic_price,
+		               a.pos_amount,
+		               a.is_lock,
+		               a.main_weight,
+		               a.part_weight,
+		               a.org_id,
+		               a.stock_id,
+		               a.state,
+		               a.groups,
+		               a.is_dbl_label,
+		               a.toshopdate, 
+		               d.coef_way, d.coef
+		          from ic_mater_active a
+		            left join jat_move_costcoef d
+		              on a.item_class_id = d.item_class_id
+		              and a.orna_class_id = d.orna_class_id
+		            left join jas_bd_style b
+		              on a.style_id = b.styleid
+		            left join jas_bd_analysis_arange c
+		              on a.alaysis_id = c.analysis_arange_id
+				  where <isEqual property="ornaFlag" compareValue="1"> a.orna_code = #code#</isEqual>
+						<isNotEqual property="ornaFlag" compareValue="1"> a.orna_barcode = #code#</isNotEqual>) bb
+    </select>
+    
+    <select id="MoveCmd.checkOrnaStatusAvail" parameterClass="string" resultClass="string">
+    	<![CDATA[select a.orna_code from ic_mater_active a where a.state <> 900 and a.orna_code in ($value$)]]>
+    </select>
+    
+    <!-- 保存调拨单 -->
+    <insert id="MoveCmd.saveMoveCmdHead" parameterClass="com.jatools.vo.move.MoveCmdHead">
+    	<selectKey keyProperty="headid" resultClass="string" type="pre">
+    		select jat_move_cmd_head_seq.nextval as "headid" from dual
+    	</selectKey>
+    	insert into jat_move_cmd_head(
+    		headid, billno, dodate, out_org_id, out_stock_id, in_org_id, in_stock_id, sum_count, sum_weight, sum_grains, sum_cost, sum_money, status, memo, create_date, create_id, update_date, update_id
+    	) values(
+    		#headid#, #billno#, #dodate#, #outOrgId#, #outStockId#, #inOrgId#, #inStockId#, #sumCount#, #sumWeight#, #sumGrains#, #sumCost#, #sumMoney#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#
+    	)
+    </insert>
+    
+    <update id="MoveCmd.updateMoveCmdHead" parameterClass="com.jatools.vo.move.MoveCmdHead">
+    	update jat_move_cmd_head a set a.dodate = #dodate#, a.update_date = #updateDate#, a.update_id = #updateId#, a.status = #status#
+		where a.headid = #headid#
+    </update>
+    
+    <update id="MoveCmd.updateMoveCmdSumNum" parameterClass="map">
+    	update jat_move_cmd_head a set (a.sum_count, a.sum_weight, a.sum_grains, a.sum_cost, a.sum_money) = (
+			select count(1), nvl(sum(b.all_weight),0), nvl(sum(b.grains),0)
+			, nvl(sum(b.pos_cost),0), nvl(sum(b.pos_amount),0)
+			 from jat_move_cmd_line b where a.headid = b.headid
+			), a.update_date = #date#, a.update_id = #userid#
+		where a.headid = #headid#
+    </update>
+    
+    <insert id="MoveCmd.saveMoveCmdLine" parameterClass="map">
+    	insert into jat_move_cmd_line(lineid, headid, orna_code, bar_code, orna_dsc, item_class_id, orna_class_id,
+			style_item_class, style_middle_class, style_orna_class, style_id,
+			analysis_id, unit_id, now_qty, all_weight, grains, main_weight, part_weight, 
+			is_muti_part, is_dbl_label, pos_cost, pos_amount, is_psale, out_group_no, saleprice_coef, cost_coef_way,
+			in_group_no, rece_date, rece_emp_id, memo,
+			create_date, create_id, update_date, update_id, status,
+			hrd_cert, gia_cert, igi_cert, ags_cert, ident_id)
+		select jat_move_cmd_line_seq.nextval, #headid#, bb.orna_code, bb.orna_barcode, bb.orna_dsc, bb.item_class_id, bb.orna_class_id,
+	         bb.styleitemclass, bb.stylemiddleclass, bb.styleornaclass, bb.style_id,
+	         bb.alaysis_id, bb.sale_unit_id, bb.now_qty, bb.all_qty, bb.stone_now_num, bb.main_weight, bb.part_weight,
+	         bb.is_muti_part, bb.is_dbl_label, bb.real_total_cost, bb.pos_amount, bb.is_consign, bb.groups, bb.coef_way, bb.coef,
+	         null, null, null, null,
+			 #date#, #userid#, #date#, #userid#, 1,
+		     bb.hrd_cert, bb.gia_cert, bb.igi_cert, bb.ags_cert, bb.ident_id
+		from (
+			select  a.orna_code, a.orna_barcode, a.orna_dsc, a.item_class_id, a.orna_class_id,
+				b.styleitemclass, b.stylemiddleclass, b.styleornaclass, a.style_id,
+				a.alaysis_id, a.sale_unit_id, a.now_qty, a.all_qty, a.stone_now_num, a.main_weight, a.part_weight,
+				a.is_muti_part, a.is_dbl_label, a.real_total_cost, a.basic_price, a.pos_amount, a.is_consign, a.groups, a.is_lock,
+				a.hrd_cert, a.gia_cert, a.igi_cert, a.ags_cert, a.ident_id, c.coef_way, c.coef, a.real_unit_cost
+				from ic_mater_active a left join jas_bd_style b on a.style_id = b.styleid
+				  left join jat_move_costcoef c on a.item_class_id = c.item_class_id and a.orna_class_id = c.orna_class_id
+			where a.orna_code = #ornaCode#
+		) bb
+    </insert>
+    
+    <delete id="MoveCmd.deleteMoveCmdLineByOrnaCode" parameterClass="map">
+		delete jat_move_cmd_line a where a.orna_code = #ornaCode# and a.headid = #headid#
+    </delete>
+    
+    <delete id="MoveCmd.deleteMoveCmdLine" parameterClass="string">
+		delete jat_move_cmd_line a where a.headid = #value#
+    </delete>
+    
+    <delete id="MoveCmd.deleteMoveCmdHead" parameterClass="string">
+    	delete jat_move_cmd_head a where a.headid = #value#
+    </delete>
+    
+    <select id="MoveCmd.getMoveCmdLine" parameterClass="map" resultClass="com.jatools.vo.move.MoveCmdLine">
+    	select <include refid="MoveCmd-column-2"/>
+		  from jat_move_cmd_line a 
+		  left join jas_bd_analysis_arange b on b.analysis_arange_id = a.analysis_id
+		  left join jas_bd_style c on c.styleid = a.style_id
+		  where a.headid = #headid#
+    	<isEqual compareValue="1" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 0</isEqual>
+    	<isEqual compareValue="2" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 1</isEqual>
+    	<isEqual compareValue="3" property="printLabelType"> and nvl(a.is_dbl_label, 0) = 1</isEqual>
+    	order by a.item_class_id, a.orna_class_id, a.style_id, a.orna_dsc
+    </select>
+    
+    <select id="MoveCmd.getMoveCmdHead" parameterClass="string" resultClass="com.jatools.vo.move.MoveCmdHead">
+    	select <include refid="MoveCmd-column-1"/>
+		from jat_move_cmd_head a where a.headid = #value#
+    </select>
+    
+    <update id="MoveCmd.updateMoveCmdHeadStatus" parameterClass="map">
+    	update jat_move_cmd_head a set a.status = #status#, a.update_date = #date#, a.update_id = #userid#
+    	where a.headid = #headid#
+    </update>
+    
+    <update id="MoveCmd.closeMoveCmd" parameterClass="map">
+    	<![CDATA[update jat_move_cmd_head a
+		   set a.status =
+		       (select case when count(1) > 0 then 7 else decode(a.jm_flag, 1, (decode(a.bill_type, 1, 8, 26)), 8) end
+		          from jat_move_cmd_line b
+		         where b.headid = a.headid
+		           and b.status <> 11)
+		   , a.update_date = #date#, a.update_id = #userid#
+		 where a.headid = #headid#]]>
+    </update>
+    
+    <resultMap id="MoveCmd.MaterActiveResult" class="com.jatools.vo.stock.MaterActive">
+		<result property="ornaCode"			column="ORNA_CODE"/>
+		<result property="ornaBarcode"		column="ORNA_BARCODE"/>
+		<result property="ornaDsc"			column="ORNA_DSC"/>
+		<result property="stockId"			column="STOCK_ID"/>
+		<result property="groups"			column="GROUPS"/>
+		<result property="styleId"			column="STYLE_ID"/>
+		<result property="nowQty"			column="NOW_QTY"/>
+		<result property="allQty"			column="ALL_QTY"/>
+		<result property="itemClassId"		column="ITEM_CLASS_ID"/>
+		<result property="ornaClassId"		column="ORNA_CLASS_ID"/>
+		<result property="alaysisId"		column="ALAYSIS_ID"/>
+		<result property="styleNoId"		column="STYLE_NO_ID"/>
+		<result property="qualityId"		column="QUALITY_ID"/>
+		<result property="tagType"			column="TAG_TYPE"/>
+		<result property="saleUnitId"		column="SALE_UNIT_ID"/>
+		<result property="buyUnitId"		column="BUY_UNIT_ID"/>
+		<result property="pricUnitId"		column="PRIC_UNIT_ID"/>
+		<result property="priceAttrGroup"	column="PRICE_ATTR_GROUP"/>
+		<result property="state"			column="STATE"/>
+		<result property="basicPrice"		column="BASIC_PRICE"/>
+		<result property="rebate"			column="REBATE"/>
+		<result property="rebateType"		column="REBATE_TYPE"/>
+		<result property="storeUnitCost"	column="STORE_UNIT_COST"/>
+		<result property="realUnitCost"		column="REAL_UNIT_COST"/>
+		<result property="posAmount"		column="POS_AMOUNT"/>
+		<result property="realTotalCost"	column="REAL_TOTAL_COST"/>
+		<result property="storeTotalCost"	column="STORE_TOTAL_COST"/>
+		<result property="productdate"		column="PRODUCTDATE"/>
+		<result property="oldResponsible"	column="OLD_RESPONSIBLE"/>
+		<result property="storeColor"		column="STORE_COLOR"/>
+		<result property="comStore"			column="COM_STORE"/>
+		<result property="storagedate"		column="STORAGEDATE"/>
+		<result property="toshopdate"		column="TOSHOPDATE"/>
+		<result property="nuclearBillId"	column="NUCLEAR_BILL_ID"/>
+		<result property="mainShapeId"		column="MAIN_SHAPE_ID"/>
+		<result property="colorId"			column="COLOR_ID"/>
+		<result property="mainWeight"		column="MAIN_WEIGHT"/>
+		<result property="partWeight"		column="PART_WEIGHT"/>
+		<result property="partContent"		column="PART_CONTENT"/>
+		<result property="cleanId"			column="CLEAN_ID"/>
+		<result property="mainColorGradeId"	column="MAIN_COLOR_GRADE_ID"/>
+		<result property="qltyId"			column="QLTY_ID"/>
+		<result property="stoneTotalNum"	column="STONE_TOTAL_NUM"/>
+		<result property="stoneNowNum"		column="STONE_NOW_NUM"/>
+		<result property="specialWorkPrice"	column="SPECIAL_WORK_PRICE"/>
+		<result property="stringWorkPrice"	column="STRING_WORK_PRICE"/>
+		<result property="summaryId"		column="SUMMARY_ID"/>
+		<result property="isConsign"		column="IS_CONSIGN"/>
+		<result property="isCustom"			column="IS_CUSTOM"/>
+		<result property="handoverBillId"	column="HANDOVER_BILL_ID"/>
+		<result property="manufacturerId"	column="MANUFACTURER_ID"/>
+		<result property="supplierId"		column="SUPPLIER_ID"/>
+		<result property="zodiac"			column="ZODIAC"/>
+		<result property="identId"			column="IDENT_ID"/>
+		<result property="factoryStyleId"	column="FACTORY_STYLE_ID"/>
+		<result property="storagePricAttrGroup"	column="STORAGE_PRIC_ATTR_GROUP"/>
+		<result property="rebateAmount"		column="REBATE_AMOUNT"/>
+		<result property="specialWeight"	column="SPECIAL_WEIGHT"/>
+		<result property="cutId"			column="CUT_ID"/>
+		<result property="cutWideScale"		column="CUT_WIDE_SCALE"/>
+		<result property="cutDeepScale"		column="CUT_DEEP_SCALE"/>
+		<result property="symmetryId"		column="SYMMETRY_ID"/>
+		<result property="polishineId"		column="POLISHINE_ID"/>
+		<result property="fluorescenceId"	column="FLUORESCENCE_ID"/>
+		<result property="waistlineId"		column="WAISTLINE_ID"/>
+		<result property="vertexId"			column="VERTEX_ID"/>
+		<result property="hrdCert"			column="HRD_CERT"/>
+		<result property="giaCert"			column="GIA_CERT"/>
+		<result property="igiCert"			column="IGI_CERT"/>
+		<result property="bracketcolorId"	column="BRACKETCOLOR_ID"/>
+		<result property="updatedate"		column="UPDATEDATE"/>
+		<result property="wearId"			column="WEAR_ID"/>
+		<result property="styleTypeId"		column="STYLE_TYPE_ID"/>
+		<result property="isMutiPart"		column="IS_MUTI_PART"/>
+		<result property="currencyPrice"	column="CURRENCY_PRICE"/>
+		<result property="currencyMoney"	column="CURRENCY_MONEY"/>
+		<result property="currencyTax"		column="CURRENCY_TAX"/>
+		<result property="tax"				column="TAX"/>
+		<result property="totalCurrencyTax"	column="TOTAL_CURRENCY_TAX"/>
+		<result property="sizeId"			column="SIZE_ID"/>
+		<result property="mainNum"			column="MAIN_NUM"/>
+		<result property="partNum"			column="PART_NUM"/>
+		<result property="materialId"		column="MATERIAL_ID"/>
+		<result property="orgId"			column="ORG_ID"/>
+		<result property="useQtyTemp"		column="USE_QTY_TEMP"/>
+		<result property="agsCert"			column="AGS_CERT"/>
+		<result property="realCost"			column="REAL_COST"/>
+		<result property="customizeNo"		column="CUSTOMIZE_NO"/>
+		<result property="isDblLabel"		column="IS_DBL_LABEL"/>
+		<result property="billCode"			column="BILL_CODE"/>
+		<result property="billNo"			column="BILL_NO"/>
+		<result property="isMaterial"		column="IS_MATERIAL"/>
+		<result property="materialType"		column="MATERIAL_TYPE"/>
+		<result property="colorGradeGradeId"	column="COLOR_GRADE_GRADE_ID"/>
+		<result property="cleanGradeId"		column="CLEAN_GRADE_ID"/>
+	</resultMap>
+	<!-- 只根据饰品编码获取饰品信息 -->
+	<select id="MoveCmd.getMaterActiveByOrnaCode" parameterClass="map" resultMap="MoveCmd.MaterActiveResult">
+		select a.orna_code, a.orna_barcode, a.orna_dsc, a.stock_id, a.groups, a.style_id, a.now_qty, a.all_qty, a.item_class_id, a.orna_class_id,
+			a.alaysis_id, a.style_no_id, a.quality_id, a.tag_type, a.sale_unit_id, a.buy_unit_id, a.pric_unit_id, a.price_attr_group, a.state,
+			a.basic_price, a.rebate, a.rebate_type, a.store_unit_cost, a.real_unit_cost, b.new_pos_money as pos_amount, a.real_total_cost,
+			a.store_total_cost, a.productdate, a.old_responsible, a.store_color, a.com_store, a.storagedate, a.toshopdate, a.nuclear_bill_id,
+			a.main_shape_id, a.color_id, a.main_weight, a.part_weight, a.part_content, a.clean_id, a.main_color_grade_id, a.qlty_id, a.stone_total_num,
+			a.stone_now_num, a.special_work_price, a.string_work_price, a.summary_id, a.is_consign, a.is_custom, a.handover_bill_id, a.manufacturer_id,
+			a.supplier_id, a.zodiac,
+			a.ident_id as ident_id,
+			a.factory_style_id, a.storage_pric_attr_group, a.rebate_amount, a.special_weight, a.cut_id,
+			a.cut_wide_scale, a.cut_deep_scale, a.symmetry_id, a.polishine_id, a.fluorescence_id, a.waistline_id, a.vertex_id, a.hrd_cert, a.gia_cert,
+			a.igi_cert, a.bracketcolor_id, a.updatedate, a.wear_id, a.style_type_id, a.is_muti_part, a.currency_price, a.currency_money, a.currency_tax,
+			a.tax, a.total_currency_tax, a.size_id, a.main_num, a.part_num, a.material_id, a.org_id, a.use_qty_temp, a.ags_cert, a.real_cost,
+			a.customize_no, a.is_dbl_label, a.bill_code, a.bill_no, a.is_material, a.material_type, a.color_grade_grade_id, a.clean_grade_id
+		from ic_mater_active a, jat_move_cmd_line b where a.orna_code = b.orna_code and b.headid = #headid# and b.orna_code = #ornaCode#
+	</select>
+	
+	<select id="MoveCmd.getInvalidOrgOrnaCode" parameterClass="string" resultClass="string">
+		select wmsys.wm_concat(a.orna_code) from jat_move_cmd_line a 
+		left join jat_move_cmd_head b on a.headid = b.headid
+		where exists (
+			<![CDATA[ select 1 from ic_mater_active c where a.orna_code = c.orna_code and b.out_org_id <> c.org_id ]]>
+		)
+		and a.headid = #value#
+	</select>
+	
+	<select id="MoveCmd.getInvalidStateOrnaCode" parameterClass="string" resultClass="string">
+		select wmsys.wm_concat(a.orna_code) from jat_move_cmd_line a 
+		left join jat_move_cmd_head b on a.headid = b.headid
+		where exists (
+			<![CDATA[ select 1 from ic_mater_active c where a.orna_code = c.orna_code and c.state <> 900 ]]>
+		)
+		and a.headid = #value#
+	</select>
+	
+	<update id="MoveCmd.modifyMaterValidByMoveCmd" parameterClass="map">
+		update ic_mater_active a
+		   set a.state = 900, a.updatedate = #updateDate#
+		 where exists (select 1
+		          from jat_move_cmd_line b
+		         where a.orna_code = b.orna_code
+		           and b.headid = #headid#)
+	</update>
+	
+	<update id="MoveCmd.modifyMaterInvalidByMoveCmd" parameterClass="map">
+		update ic_mater_active a
+		   set a.state = 901, a.updatedate = #updateDate#
+		 where exists (select 1
+		          from jat_move_cmd_line b
+		         where a.orna_code = b.orna_code
+		           and b.headid = #headid#)
+	</update>
+	
+	<sql id="MoveCmd.getMoveCmdPageDataConditionByMoveBill">
+			and (a.status = 5 
+			<isNotEmpty property="moveId" prepend="or">
+				exists (select 1 from jat_move_head m where m.headid = #moveId# and m.src_bill_id = a.headid)
+			</isNotEmpty>
+			)
+			and a.out_stock_id = #outStockId#
+			and a.out_org_id = #outOrgId# 
+			and a.in_org_id = #inOrgId#
+			and a.in_stock_id = #inStockId# 
+		<isNotEmpty property="billno"> and a.billno like '%$billno$%' </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	
+	<sql id="MoveCmd.getOrnaCodeList">
+		(select wmsys.wm_concat(b.orna_code) from jat_move_cmd_line b where b.headid = a.headid) as "ornaCodes"
+	</sql>
+	<select id="MoveCmd.getMoveCmdPageDataByMoveBill" parameterClass="map" resultClass="com.jatools.vo.move.MoveCmdHead">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="MoveCmd-column-1"/>, <include refid="MoveCmd.getOrnaCodeList"/>
+			from jat_move_cmd_head a where 1=1 
+			<include refid="MoveCmd.getMoveCmdPageDataConditionByMoveBill"/>
+			order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="MoveCmd.getMoveCmdTotalCountByMoveBill" parameterClass="map" resultClass="int">
+		select count(1) from jat_move_cmd_head a
+		where 1 = 1 
+		<include refid="MoveCmd.getMoveCmdPageDataConditionByMoveBill"/>
+    </select>
+</sqlMap>

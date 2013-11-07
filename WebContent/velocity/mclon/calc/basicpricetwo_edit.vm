@@ -1,0 +1,33 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/basicPriceTwo.js", "$StringUtil.getContextPath()/dwr/interface/BasicPriceTwoDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="billid" value="$!{form.sp.billid}"/>
+    <table class="title">
+    	<tr><td>核价基础价(2)</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08061402','1')>
+				<input type='button' value='打印' class='btn' id="btnPrint" onclick="window.print()">
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>价格</td><td class='body2'><input type='text' id='basicprice' dataType="Require" msg="不能为空" value="$!{form.sp.basicprice}">$StringUtil.star()</td>
+		</tr>
+    </table>
+</form>
+
+<script>
+
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveBasicPriceTwo();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "basicPriceTwo.vm";
+	});
+});
+
+</script>

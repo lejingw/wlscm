@@ -1,0 +1,262 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$!StringUtil.getContextPath()/js/stock/dispatchOrna_list.js",
+	"$StringUtil.getContextPath()/script/mclon/calendar/calendar.js",
+	"$!StringUtil.getContextPath()/dwr/interface/BdCommonDwr.js",
+	"$!StringUtil.getContextPath()/dwr/interface/DispatchOrnaDwr.js"])
+
+<form id="frm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <div id="queryDiv">
+        <table class="control">
+        	<tr>
+        		<td>
+        			<input type='button' value='确定' id='btnQueryOk' class='btn'>
+        			<input type='button' value='重置' id='btnQueryReset' class='btn'>
+        			<input type='button' value='取消' id='btnQueryCancel' class='btn'>
+        		</td>
+        	</tr>
+        </table>
+        <table class='content'>
+        	<tr>
+        		<td class="body1">总单编号</td>
+        		<td class='body2'><input type='text' name='gatherNo' value="$!{form.condition.gatherNo}"/></td>
+        		<td class="body1">汇总日期</td>
+        		<td class='body2'><input type='text' readonly id='gatherDate' name='gatherDate' value="$!{form.condition.gatherDate}"/></td>
+        	</tr>
+        	<tr>
+        		<td class="body1">周期类型</td>
+        		<td class='body2'><select id='cycleTypeId' name='cycleTypeId'></select></td>
+        		<td class="body1">购物类型</td>
+        		<td class='body2'><select name='orderType'>${HtmlUtil.printDictOptions('ordertype', true, $!form.condition.orderType)}</select></td>
+			</tr>
+        	<tr>
+        		<td class="body1">要货分类</td>
+        		<td class='body2'><select name='orderKind2'>${HtmlUtil.printDictOptions('orderkind', true, $!form.condition.orderKind2)}</select></td>
+        		<td class="body1">状态</td>
+        		<td class='body2'><select name='status'>${HtmlUtil.printOptions(['55', '69', '8'], ['已汇总','已生成采购单','关闭'], true, $!form.condition.status)}</select></td>
+			</tr>
+        	<tr>
+        		<td class="body1">执行功能</td>
+        		<td class='body2'><select name='dotype'>${HtmlUtil.printDictOptions('dispatchdotype', true, $!form.condition.dotype)}</select></td>
+        		<td class="body1">已配货</td>
+        		<td class='body2'><select name='dispatchFlag2'>${HtmlUtil.printDictOptions('yesorno', true, $!form.condition.dispatchFlag2)}</select></td>
+			</tr>
+        </table>
+<script>
+function setQueryContent(){
+	initCalendar('gatherDate');
+	BdCommonDwr.getAllCycleTypeForSlt(function(data){
+		addOptions('cycleTypeId', data, null, null, true, true);
+		addOption('cycleTypeId', '-1', '为空');
+		selectOption('cycleTypeId', "$!form.condition.cycleTypeId");
+	});
+}
+</script>
+    </div>
+    <table class="title">
+    	<tr><td>订单配货#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='减库生成采购总单' class='btn' id='btnSubPurchase' $RightUtil.able($session, '08030201','1')>
+				<input type='button' value='不减库生成采购总单' class='btn' id='btnUnsubPurchase' $RightUtil.able($session, '08030201','2')>
+				<input type='button' value='手工减库生成采购总单' disabled class='btn' id='btnSubPurchase2' $RightUtil.able($session, '08030201','3')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()">
+				<input type='button' value='查询' class='btn' id='btnQueryShow' $RightUtil.able($session, '08030201','4')>
+				<input type="checkbox" name='showAllFlag' #if("1" == "$!{form.condition.showAllFlag}") checked #end value='1' onclick="showAllBill('frm')">显示所有单据
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+    <table class='list' style="width:1300px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width='90px'>状态</th>
+				<th></th>
+                <th width='120px'>总单编号</th>
+        		<th width='120px'>区域</th>
+				<th width='120px'>周期类型</th>
+				<th width='180px'>商品类别</th>
+				<th width='60px'>购物类型</th>
+				<th width='60px'>要货分类</th>
+        		<th width='90px'>汇总人</th>
+        		<th width='90px'>汇总日期</th>
+				<th width='120px'>执行功能</th>
+				<th>已配货</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td>
+					<input type='checkbox' name='chk'/>
+					<input type='hidden' name='gatherHeadId' value='$!{map.gatherHeadId}'/>
+					<input type='hidden' name='orderKind' value='$!{map.orderKind}'/>
+					<input type='hidden' name='dispatchFlag' value='$!{map.dispatchFlag}'/>
+					<input type='hidden' name='purchaseFlag' value='$!{map.purchaseFlag}'/>$velocityCounter
+				</td>
+				<td>$!DictUtil.getValue('planstatus', $!map.status)</td>
+				<td><input type="button" class="btn" value="进入配货" #if("3" == "$!map.orderKind")disabled#end onclick="dispatch(this, '$!map.gatherHeadId', '$!map.status')"/></td>
+				<td>$!map.gatherNo</td>
+				<td>$!map.regionName</td>
+				<td>$!map.cycleTypeName</td>
+				<td><input type='text' readonly class='none' value="$!BdCommon.getArticleTypeDesc($!map.articleTypeIds)" style='width:180px;'></td>
+				<td>$!DictUtil.getValue('ordertype',$!map.orderType)</td>
+				<td>$!DictUtil.getValue('orderkind',$!map.orderKind)</td>
+				<td>$!BdCommon.getUserName($!map.gatherUser)</td>
+				<td>$!map.gatherDate</td>
+				<td>$!DictUtil.getValue('dispatchdotype', $!map.dotype)</td>
+				<td>$!DictUtil.getValue('yesorno', $!map.dispatchFlag)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function showAllBill(formId){
+	jQuery("#" + formId).submit();
+}
+function dispatch(obj, gatherHeadId, gstatus){
+	var rowIndex = obj.parentNode.parentNode.rowIndex - 1;
+	//非明细下单只能不减库生成采购单,且不能配货,，若是已生成采购单，则还可以生成采购单
+   	if("3" == $n("orderKind")[rowIndex].value){
+		alert("要货类型为 非明细下单，不能进行配货");
+		return;
+	}
+	selectOrg(gatherHeadId, gstatus, function(result){
+		if(!result){
+			alert("请先选择配货参数记录");
+			return ;
+		}
+		if(result.createId != "$!StringUtil.getUserId($session)"){
+			alert('只能选择自己创建的配货参数');
+			return false;
+		}
+    	window.location = "dispatchOrna.vm?user_action=dispatch&gheadid="+gatherHeadId+"&gstatus="+gstatus+"&conditionId=" + result.conditionId;
+		return true;
+	}, function(){
+    	window.location = "dispatchOrna.vm?user_action=dispatch&gheadid="+gatherHeadId+"&gstatus="+gstatus+"&conditionId=-1";
+		return true;
+	});
+}
+function changeBtn(checked, index){
+	jQuery("#btnSubPurchase").attr("disabled", true);
+	jQuery("#btnUnsubPurchase").attr("disabled", true);
+	jQuery("#btnSubPurchase2").attr("disabled", true);
+	if(!checked)return;
+	
+	//非明细下单只能不减库生成采购单,且不能配货,可多次生成采购单
+   	if("3" == $n("orderKind")[index].value){
+		jQuery("#btnUnsubPurchase").attr("disabled", false);
+	}else{
+    	//若未生成采购单
+		if("0" == $n("purchaseFlag")[index].value){
+        	//已经配货则，只能手工减库生成采购单
+        	if("1" == $n('dispatchFlag')[index].value){
+        		jQuery("#btnSubPurchase2").attr("disabled", false);
+        	}else{
+        		jQuery("#btnSubPurchase").attr("disabled", false);
+        		jQuery("#btnUnsubPurchase").attr("disabled", false);
+        	}
+		}	
+	}
+}
+/**
+ * 减库生成采购单
+ */
+function subPurchase(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要减库生成采购单的总部总单");
+		return ;
+	}
+	confirm("确定减库生成采购单?", function(){
+		showLayer(true);
+    	DispatchOrnaDwr.subPurchase($n("gatherHeadId")[index].value, function(data){
+    		showLayer(false);
+    		alert(data?data:"减库生成采购单成功", function(){
+    			if(!data){
+    				window.location = ctxPath + "/stock/dispatchOrna.vm";
+    			}
+    		});
+    	});
+	});
+}
+/**
+ * 手工减库生成采购单
+ */
+function subPurchase2(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要手工减库生成采购单的总部总单");
+		return ;
+	}
+	confirm("确定手工减库生成采购单?", function(){
+		showLayer(true);
+    	DispatchOrnaDwr.subPurchase2($n("gatherHeadId")[index].value, function(data){
+    		showLayer(false);
+    		alert(data?data:"手工减库生成采购单成功", function(){
+    			if(!data){
+    				window.location = ctxPath + "/stock/dispatchOrna.vm";
+    			}
+    		});
+    	});
+	});
+}
+/**
+ * 不减库生成采购单
+ */
+function unsubPurchase(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要不减库生成采购单的总部总单");
+		return ;
+	}
+	confirm("确定不减库生成采购单?", function(){
+    	var gatherHeadId = $n("gatherHeadId")[index].value;
+		showLayer(true);
+    	DispatchOrnaDwr.unsubPurchase(gatherHeadId, function(data){
+    		showLayer(false);
+    		alert(data?data:"不减库生成采购单成功", function(){
+    			if(!data){
+    				window.location = ctxPath + "/stock/dispatchOrna.vm";
+    			}
+    		});
+    	});
+	});
+}
+/**
+ * 查询
+ */
+function executeQuery(){
+	jQuery("#frm").submit();
+}
+function resetQuery(){
+	jQuery("#frm").clearForm();
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, changeBtn);
+	//初始化查询div common_query.js中定义默认已经引入
+	//initQuery("btnQueryShow", "btnQueryCancel");
+	initQuery2("DP01", "frm", "btnQueryShow");
+	changeBtn(false);
+	jQuery("#btnQueryOk").click(executeQuery);
+	jQuery("#btnQueryReset").click(resetQuery);
+	jQuery("#btnSubPurchase").click(subPurchase);//减库生成采购单
+	jQuery("#btnSubPurchase2").click(subPurchase2);//手工减库生成采购单
+	jQuery("#btnUnsubPurchase").click(unsubPurchase);//不减库生成采购单
+	
+	setQueryContent();
+});
+</script>

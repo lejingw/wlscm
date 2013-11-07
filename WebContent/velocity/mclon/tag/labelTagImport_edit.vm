@@ -1,0 +1,204 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/tag/labelTagImport.js?t=201204191703.js", 
+"$StringUtil.getContextPath()/dwr/interface/LabelTagImportDwr.js?t=201204191703.js",
+"$StringUtil.getContextPath()/script/mclon/ajaxfileupload.js?t=201204191703.js"])
+	
+<form id='frm' action="labelTagImport.vm" method="post">
+	#set($labelTagImport = $!form.importHead)
+	#set($lines = $!form.lines)
+	#if($StringUtil.isBlank($!labelTagImport.billno))
+		#set($billno = "自动生成")
+		#set($orgId = $StringUtil.getOrgId($session))
+		#set($statusName = "保存")
+		#set($status = "1")
+		#set($createDate = $DateUtil.getCurrentDate16())
+		#set($createId = $StringUtil.getUserId($session))
+	#else
+		#set($billno = $labelTagImport.billno)
+		#set($orgId = $labelTagImport.orgId)
+		#set($statusName = $!DictUtil.getValue('status', $!{labelTagImport.status}))
+		#set($status = $!{labelTagImport.status})
+		#set($createDate = $labelTagImport.createdate)
+		#set($createId = $!labelTagImport.createid)
+		#set($updateDate = $labelTagImport.updatedate)
+		#set($updateId = $!labelTagImport.updateid)
+	#end
+	
+	#set($enableSave = false)
+	#set($disable = false)
+	#set($isSaved = false)
+	#set($enableCheck = false)
+	#set($enableClose = false)
+	#if($StringUtil.isNotBlank($status))
+		#if($status == "1")
+			#set($enableSave = true)
+			#set($isSaved = true)
+			#set($enableCheck = true)
+			#if($!labelTagImport)
+				#set($enableAccount = true)
+			#end
+		#elseif("$!status"=="5")
+			#set($enableClose = true)
+		#end
+	#end
+	#if($labelTagImport)
+		#set($disable = true)
+	#end
+	<input type="hidden" id="user_action" name="user_action" value="toEdit"/>
+	<input type="hidden" id="headid" name="headid" value="$!{labelTagImport.headid}"/>
+    <table class="title">
+    	<tr><td>标签申请单详情</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' #if(!$enableSave)disabled#end class='btn' id='btnAdd' $RightUtil.able($session, '08080302','1')>
+				<input type='button' value='保存当前页' #if(!$enableSave)disabled#end class='btn' id='btnSave' $RightUtil.able($session, '08080302','2')>
+				<input type='button' value='审核' #if(!$enableCheck)disabled#end class='btn' id='btnCheck' $RightUtil.able($session, '08080302','3')>
+				<input type='button' value='生成打印单' #if(!$enableClose)disabled#end class='btn' id='btnClose' $RightUtil.able($session, '08080302','4')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08080302','5')>
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编号：</td>
+			<td class='body2'>
+				<input type='text' id="billno" name='billno' readonly value="$!billno">
+			</td>
+			<td class='body1'>组织:</td>	
+			<td class='body2'>
+				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+				<input type='text' id="orgName" name='orgName'  value="$!BdCommon.getOrgName($orgId)" readonly  dataType="Require" msg="不能为空" >
+			</td>
+			<td class='body1'>单据状态：</td>	
+			<td class='body2'>
+				<input type='text' id="status"  readonly value="$!statusName">
+			</td>
+			<td class='body1'>件数合计：</td>	
+			<td class='body2'>
+				<input type='text' id="counts" name='counts' readonly value="$!labelTagImport.counts">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>创建人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="createId" name='createId' value="$!{createId}">
+				<input type='text' id="createName" name='createName'  value="$!BdCommon.getUserName($!createId)" readonly  >
+			</td>
+			<td class='body1'>创建时间：</td>	
+			<td class='body2'>
+				<input type='text' id="createDate" name='createDate'  value="$!createDate" readonly  >
+			</td>
+			<td class='body1'>修改人员：</td>	
+			<td class='body2'>
+				<input type='hidden' id="updateId" name='updateId' value="$!{updateId}">
+				<input type='text' id="updateName" name='updateName'  value="$!BdCommon.getUserName($!updateId)" readonly>
+			</td>
+			<td class='body1'>修改时间：</td>	
+			<td class='body2'>
+				<input type='text' id="updateDate" name='updateDate'  value="$!updateDate" readonly >
+			</td>
+		</tr>
+    </table>
+	<input type="hidden" value="" name="deleteIds" id="deleteIds"/>
+	#set($cond = $form.condition)
+    #set($searchOrnaCode = $!cond.get('searchOrnaCode'))
+	<table class='content'>
+    	<tr>
+			<td class='body1'>饰品编码：</td>
+			<td class='body2'>
+				<input type='text' name='searchOrnaCode' value="$!searchOrnaCode">
+			</td>
+			<td class='body2'><input type="button" id="searchBtn" value="查询" style="width:50px;"/></td>
+			<td class='body2'></td>
+			<td class='body2'></td>
+			<td class='body2'></td>
+			<td class='body2'></td>
+			<td class='body2'></td>
+		</tr>
+    </table>
+	<div class="scroll2">
+	<table class='list' style="width:1000px" id="tb_line_id">
+    	<thead>
+			<tr>
+				<th></th>
+				<th width="120px">饰品编码</th>
+				<th width="120px">新饰品名称</th>
+				<th width="80px">新基础价</th>
+				<th width="80px">新金额</th>
+        		<th width="80px">新特殊工费</th>
+				<th >更新原因</th>
+				<th >分单说明</th>
+				<th width='60px'></th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($line in $form.pager.pageData)
+			<tr>
+				<td></td>
+				<td><input type='text' style='width:120px;' name='ornaCode' value="$!line.ornaCode" #if(!$!isSaved)readonly#end dataType="Require" msg="不能为空" /></td>
+				<td><input type='text' style='width:120px;' name='newOrnaName' value="$!line.newOrnaName" #if(!$!isSaved)readonly#end /></td>
+				<td><input type='text' style='width:100px;' name='newBasicPrice' value="$!line.newBasicPrice" #if(!$!isSaved)readonly#end onblur="checkField()"/></td>
+				<td><input type='text' style='width:100px;' name='newAmount' value="$!line.newAmount" #if(!$!isSaved)readonly#end onblur="checkField()"/></td>
+				<td><input type="text" style='width:100px;' name="newSpecialWorkPrice" value="$!line.newSpecialWorkPrice" #if(!$!isSaved)readonly#end onblur="checkField()"/></td>
+				<td><input type='text' style='width:180px;' name='updateReason' value="$!line.updateReason" #if(!$!isSaved)readonly#end /></td>
+				<td><input type='text' style='width:180px;' name='groupNo' value="$!line.groupNo" #if(!$!isSaved)readonly#end </td>
+				<td><input type='button' value='删除' #if(!$!isSaved)disabled#end style='width:60px;' onclick='deleteLineRow(this, "tbl")'/>
+    				<input type='hidden' name='lineid' value="$!line.lineid" />
+				</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+	<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+	<div id="import_excel_div" style="display:none;">
+    	<table class='content'>
+        	<tr>
+    			<td class='body1'>选择文件：</td>
+    			<td class='body2'>
+    				<input name="excel_file" type="file" id="excel_file" style="background:#eeeeee;font:normal 12px Tahoma;width:220px;"> 
+    			</td>
+    		</tr>
+            <tr><td colspan="2">
+					<font style="color:red">
+						注：请严格按照模板来导入，若没有模板点击
+						<a href="$StringUtil.getContextPath()/velocity/mclon/tag/tagImportTemplate.xls">这里</a>
+						下载模板。
+			</td></tr>
+        </table>
+	</div>
+</form>
+<script>
+
+function setValues(){
+	//changeValues();
+	var dw = jQuery(document).width();
+	if(dw > 1000){
+		jQuery("#tb_line_id").css("width", dw+"px");
+	}
+}
+
+jQuery(function(){
+	altRowCSS("tbl");
+	jQuery("#deleteIds").val("");
+	setValues();
+	jQuery("#btnAdd").click(addLine);
+	jQuery("#btnSave").click(saveForm);
+	jQuery("#btnCheck").click(checkBill);
+	jQuery("#btnClose").click(closeBill);
+	jQuery("#btnToList").click(function(){
+		window.location = "labelTagImport.vm";
+	});
+	checkReview();
+	changeSeq("tbl");
+	jQuery("#searchBtn").click(function(){
+		jQuery("#frm").submit();
+	});
+	// 必须要保存权限才能进行导入
+	#if(!$labelTagImport && $RightUtil.isAble($session, '08080302','2'))
+		showImportWin();
+	#end
+})
+
+</script>

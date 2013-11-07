@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="DispatchOrna">
+	<resultMap id="DispatchOrna.GatherHeadResult" class="com.jatools.vo.stock.GatherHead">
+		<result property="gatherHeadId" column="headquarter_gather_head_id"/>
+		<result property="gatherNo" column="headquarter_gather_no"/>
+		<result property="regionName" column="region_name"/>
+		<result property="gatherDate" column="gather_date"/>
+		<result property="cycleTypeName" column="cycle_type_code"/>
+		<result property="articleTypeIds" column="article_type_ids"/>
+		<result property="orderType" column="order_type"/>
+		<result property="orderKind" column="order_kind"/>
+		<result property="gatherUser" column="gather_user"/>
+		<result property="status" column="state"/>
+		<result property="dispatchFlag" column="dispatch_flag"/>
+		<result property="purchaseFlag" column="purchase_flag"/>
+		<result property="dotype" column="dotype"/>
+	</resultMap>
+	<sql id="DispatchOrna.sql1">
+		where a.region_id = b.region_id
+			and a.order_calender_id = e.order_calender_id(+)
+			and a.state in(55, 69, 8)
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.state <> 8]]></isNotEqual>
+			<isNotEmpty property="gatherNo" prepend="and"> a.headquarter_gather_no like '%$gatherNo$%'</isNotEmpty>
+			<isNotEmpty property="cycleTypeId" prepend="and"> nvl(e.cycle_type_id, -1) = #cycleTypeId#</isNotEmpty>
+			<isNotEmpty property="orderType" prepend="and"> a.order_type = #orderType#</isNotEmpty>
+			<isNotEmpty property="orderKind" prepend="and"> a.order_kind = #orderKind#</isNotEmpty>
+			<isNotEmpty property="gatherDate" prepend="and"> a.gather_date = #gatherDate#</isNotEmpty>
+			<isNotEmpty property="status" prepend="and"> a.state = #status#</isNotEmpty>
+			<isNotEmpty property="dotype" prepend="and"> a.dotype = #dotype#</isNotEmpty>
+			<isEqual property="dispatchFlag" compareValue="1"> and exists(select 1 from jat_pl_dispatch_condition aa where a.headquarter_gather_head_id = aa.gather_head_id and aa.src_bill_code = 'HQ')</isEqual>
+			<isEqual property="dispatchFlag" compareValue="0"> and not exists(select 1 from jat_pl_dispatch_condition aa where a.headquarter_gather_head_id = aa.gather_head_id and aa.src_bill_code = 'HQ')</isEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>		
+	</sql>
+    <!-- 获取分页数据 -->
+	<select id="DispatchOrna.getGatherHeadPageData" resultMap="DispatchOrna.GatherHeadResult" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headquarter_gather_head_id, a.headquarter_gather_no, b.region_name, a.gather_date,
+				e.cycle_type_code, decode(e.order_calender_id, null, to_char(a.article_type_id), (select wm_concat(distinct g.article_type_id) from jas_pl_calender_articletype g
+                where g.order_calender_id = e.order_calender_id)) as article_type_ids, a.order_type, a.order_kind, a.gather_user, a.state, a.dotype as "dotype",
+				(select case when count(1)>0 then 1 else 0 end from jat_pl_dispatch_condition a2 where a.headquarter_gather_head_id = a2.gather_head_id and a2.src_bill_code = 'HQ') as dispatch_flag,
+				(select case when count(1)>0 then 1 else 0 end from jat_pur_gather_head a3 where a3.gather_head_id = a.headquarter_gather_head_id and a3.src_bill_code = 'HQ') as purchase_flag
+			from jas_pl_headquarter_gather_head a, jas_pl_region b, 
+			(select c.order_calender_id, c.cycle_type_id, d.cycle_type_code from jas_pl_order_calender c, jas_pl_cycle_type d where c.cycle_type_id = d.cycle_type_id) e
+			<include refid="DispatchOrna.sql1"/>
+			order by a.headquarter_gather_head_id desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="DispatchOrna.getGatherHeadTotalCount" resultClass="int">
+		select count(1) from jas_pl_headquarter_gather_head a, jas_pl_region b,
+			(select c.order_calender_id, c.cycle_type_id, d.cycle_type_code from jas_pl_order_calender c, jas_pl_cycle_type d where c.cycle_type_id = d.cycle_type_id) e
+			<include refid="DispatchOrna.sql1"/>
+    </select>
+    
+    <resultMap id="DispatchOrna.DispatchConditionResult" class="com.jatools.vo.stock.DispatchCondition">
+		<result property="id" column="id"/>
+		<result property="gheadid" column="gather_head_id"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="createId" column="create_id"/>
+		<result property="createDate" column="create_date"/>
+	</resultMap>
+    <!-- 获取配货参数 -->
+    <select id="DispatchOrna.getDispatchCondition" resultMap="DispatchOrna.DispatchConditionResult" parameterClass="map">
+    	select a.id, a.gather_head_id, a.item_class_id, a.orna_class_id, a.create_id, a.create_date from jat_pl_dispatch_condition a
+			where a.gather_head_id = #gheadid# and a.status = 1 and a.src_bill_code = #srcBillCode#
+    </select>
+     <resultMap id="DispatchOrna.DispatchGatherHResult" class="com.jatools.vo.stock.GatherHead">
+		<result property="gatherNo" column="headquarter_gather_no"/>
+		<result property="regionName" column="region_name"/>
+		<result property="cycleTypeName" column="cycle_type_code"/>
+		<result property="orderType" column="order_type"/>
+	</resultMap>
+    <!-- 订单配货页面，获取总部总单部分数据 -->
+    <select id="DispatchOrna.getDispatchGatherHead" resultMap="DispatchOrna.DispatchGatherHResult" parameterClass="string">
+    	select a.headquarter_gather_no, b.region_name, e.cycle_type_code, a.order_type
+		  from jas_pl_headquarter_gather_head a,
+		       jas_pl_region b,
+		       (select c.order_calender_id, c.cycle_type_id, d.cycle_type_code
+		          from jas_pl_order_calender c, jas_pl_cycle_type d
+		         where c.cycle_type_id = d.cycle_type_id) e
+		 where a.region_id = b.region_id
+		   and a.order_calender_id = e.order_calender_id(+)
+		   and a.headquarter_gather_head_id = #value#
+    </select>
+    
+    <select id="DispatchOrna.getDispatchConditionById" resultMap="DispatchOrna.DispatchConditionResult" parameterClass="string">
+    	select a.id, a.gather_head_id, a.item_class_id, a.orna_class_id, a.create_id, a.create_date from jat_pl_dispatch_condition a
+			where a.id = #value#
+    </select>
+    <!-- 获取总部总单行中的所有大类 -->
+    <select id="DispatchOrna.getGatherLineItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="string">
+    	select a.item_class_id as "value", a.item_class_dsc as "text" from jas_bd_item_class a where exists(
+			select 1 from jas_pl_headquarter_gather_line b where b.item_class_id = a.item_class_id
+			and b.headquarter_gather_id= #value#) order by a.sort, a.item_class_code
+    </select>
+    <!-- 根据大类 获取总部总单行中的所有小类 -->
+    <select id="DispatchOrna.getGatherLineOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_dsc as "text" from jas_bd_orna_class a where exists(
+			select 1 from jas_pl_headquarter_gather_line b where b.orna_class_id = a.orna_class_id
+			and b.headquarter_gather_id = #gheadid# and b.item_class_id = #itemClassId#) order by a.sort, a.orna_class_code
+    </select>
+    <!-- 检查配货参数是否已经存在 -->
+    <select id="DispatchOrna.checkDispatchCondition" resultClass="int" parameterClass="map">
+    	select count(1) from jat_pl_dispatch_condition a
+		where a.gather_head_id = #gheadid# and a.item_class_id = #itemClassId# and a.orna_class_id = #ornaClassId# and a.status = 1 and a.src_bill_code = #srcBillCode#
+    </select>
+    <!-- 保存配货参数 -->
+    <insert id="DispatchOrna.saveDispatchCondition" parameterClass="com.jatools.vo.stock.DispatchCondition">
+    	<selectKey resultClass="string" keyProperty="id" type="pre">
+			select JAT_PL_DISPATCH_SEQ.nextval as id from dual
+		</selectKey>
+    	insert into jat_pl_dispatch_condition(id, gather_head_id, item_class_id, orna_class_id, create_id, create_date, update_id, update_date, status, src_bill_code)
+		values(#id#,#gheadid#,#itemClassId#,#ornaClassId#,#createId#,#createDate#,#updateId#,#updateDate#,#status#, #srcBillCode#)
+    </insert>
+    <select id="DispatchOrna.getSubtempDispatchOrnaInfo" resultClass="com.jatools.vo.stock.DispatchOrnaInfo" parameterClass="map">
+    	select a.orna_code as "ornaCode", a.orna_dsc as "ornaDsc", a.unit_id as "unitId", a.style_id as "styleId", a.style_name as "styleName", d.isbiggraph as "bigGraph", d.styleitemclass as "styleItemClassId", d.stylemiddleclass as "styleMiddleClassId", d.styleornaclass as "styleOrnaClassId", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId",
+    		a.color_grade_grade_id as "colorGradeGradeId", a.clean_grade_id as "cleanGradeId", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.size_id as "sizeId", a.size_name as "sizeName", a.basic_price as "basicPrice", a.pos_amount as "posAmount", a.analyze_unit_name as "analyzeUnitName",
+    		a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.analysis_id as "analyseId", c.summarydescription as "analyseName",a.status as "status", a.now_qty as "nowQty", a.all_qty as "allQty", a.real_total_cost as "realTotalCost", a.org_id as "orgId", 1 as "stockId", 0 as "materialFlag", a.id as "subtempId"
+    	from jat_pl_dispatch_subtemp a left join jas_bd_style d on a.style_id = d.styleid left join jas_bd_analysis_arange c on a.analysis_id = c.analysis_arange_id
+    	where a.src_bill_code = #srcBillCode#
+    		<isEqual property="ornaFlag" compareValue="1">and a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">and a.bar_code = #code#</isNotEqual>
+    		and exists(select 1 from jat_pl_dispatch_condition b where b.id = #conditionId# and b.src_bill_code = #srcBillCode# and b.gather_head_id = a.gather_head_id and b.item_class_id = a.item_class_id and b.orna_class_id = a.orna_class_id)
+    		and exists(select 1 from ic_mater_active c where a.orna_code = c.orna_code and c.state = 900 and c.stock_id = 1 and nvl(c.is_material,0) = 0)
+    </select>
+    <!-- 根据饰品编码获取配货饰品信息 -->
+    <select id="DispatchOrna.getDispatchOrnaInfo" resultClass="com.jatools.vo.stock.DispatchOrnaInfo" parameterClass="map">
+    	select a.orna_code as "ornaCode", a.orna_dsc as "ornaDsc", a.sale_unit_id as "unitId", a.style_id as "styleId", b.stylename as "styleName", b.isbiggraph as "bigGraph", b.styleitemclass as "styleItemClassId", b.stylemiddleclass as "styleMiddleClassId", b.styleornaclass as "styleOrnaClassId", a.main_color_grade_id as "colorGradeId", a.clean_id as "cleanId",
+	    	a.color_grade_grade_id as "colorGradeGradeId", a.clean_grade_id as "cleanGradeId", a.main_weight as "mainWeight", a.part_weight as "partWeight", decode(c.SIZE_NAME, 'ZZ', null, a.size_id) as "sizeId", decode(c.SIZE_NAME, 'ZZ', null, c.size_num) as "sizeName", a.basic_price as "basicPrice", a.pos_amount as "posAmount", d.analyzeunit_name as "analyzeUnitName",
+	    	a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.alaysis_id as "analyseId", e.summarydescription as "analyseName", a.state as "status", a.now_qty as "nowQty", a.all_qty as "allQty", a.real_total_cost as "realTotalCost", a.org_id as "orgId", a.stock_id as "stockId", a.is_material as "materialFlag", null as "subtempId"
+    	from ic_mater_active a left join jas_bd_style b on a.style_id = b.styleid left join jas_bd_size c on a.size_id = c.size_id
+    		left join jas_bd_analysis_unit d on a.item_class_id = d.item_class_id and a.orna_class_id = d.orna_class_id and d.archiveflag = '0'
+    		left join jas_bd_analysis_arange e on a.alaysis_id = e.analysis_arange_id
+    	where <isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+    <resultMap id="DispatchOrna.DispatchOrnaLog" class="com.jatools.vo.stock.DispatchOrnaLog">
+    	<result property="id" column="id"/>
+    	<result property="ornaCode" column="orna_code"/>
+    	<result property="gatherHeadId" column="gather_head_id"/>
+    	<result property="gatherLineId" column="gather_line_id"/>
+    	<result property="orderHeadId" column="order_head_id"/>
+    	<result property="orderLineId" column="order_line_id"/>
+    	<result property="orgId" column="org_id"/>
+    	<result property="itemClassId" column="item_class_id"/>
+    	<result property="ornaClassId" column="orna_class_id"/>
+    	<result property="createId" column="create_id"/>
+    	<result property="createDate" column="create_date"/>
+    	<result property="updateId" column="update_id"/>
+    	<result property="updateDate" column="update_date"/>
+    	<result property="status" column="status"/>
+    </resultMap>
+    <!-- 根据配货记录id获取配货记录信息 -->
+    <select id="DispatchOrna.getDispatchOrnaLogById" resultMap="DispatchOrna.DispatchOrnaLog" parameterClass="string">
+    	select a.id, a.orna_code, a.gather_head_id, a.gather_line_id, a.order_head_id, a.order_line_id, a.org_id, a.item_class_id,
+			a.orna_class_id, a.create_id, a.create_date, a.update_id, a.update_date, a.status
+		from jat_pl_dispatch_orna_log a where a.id = #value#
+    </select>
+    <!-- 根据饰品编码获取配货记录信息 -->
+    <select id="DispatchOrna.getDispatchOrnaLogByOrnaCode" resultMap="DispatchOrna.DispatchOrnaLog" parameterClass="map">
+    	select a.id, a.orna_code, a.gather_head_id, a.gather_line_id, a.order_head_id, a.order_line_id, a.org_id, a.item_class_id,
+			a.orna_class_id, a.create_id, a.create_date, a.update_id, a.update_date, a.status
+		from jat_pl_dispatch_orna_log a where a.status in (1,2,3) and a.orna_code = #ornaCode# and a.src_bill_code = #srcBillCode#
+    </select>
+    <!-- 获取配货参数下的所有分配店 -->
+    <select id="DispatchOrna.getDispatchOrg" resultClass="com.jatools.vo.bd.Org" parameterClass="string">
+		select a.org_id as "orgId", a.org_name as "orgName" from jas_sm_org a where exists (
+			select 1 from jas_pl_purchase_gather_line b, jas_pl_purchase_gather_head c
+			where b.purchase_gather_head_id = c.purchase_gather_head_id and a.org_id = c.org_id and exists (select 1 from jat_pl_dispatch_condition d
+			where d.gather_head_id = c.headquarter_gather_id and d.src_bill_code = 'HQ' and d.item_class_id = b.item_class_id and d.orna_class_id = b.orna_class_id and d.id = #value#))
+		order by a.parent_id, a.sort
+    </select>
+    <!-- 生成配货临时数据 -->
+    <insert id="DispatchOrna.createDispatchTempData" parameterClass="map">
+    	insert into jat_pl_dispatch_temp (id, gather_head_id, gather_line_id, order_head_id, order_line_id, 
+    	  org_id, item_class_id, orna_class_id, user_id, style_id, quality_id, bracketcolor_id,
+    	  analyse_beg, analyse_end, size_beg, size_end, color_grade_id, clean_id,
+    	  ANALYSE_ID, style_item_class_id, STYLE_MIDDLE_CLASS_ID, style_orna_class_id, SIZE_ID,UNIT_ID, COLOR_GRADE_GRADE_ID,CLEAN_GRADE_ID,
+    	  order_num, order_end_date, GUJIAQSZ, GUJIAJZZ)
+    	select jat_pl_dispatch_seq.nextval, oh.headquarter_gather_id, ol.headquarter_line_id, oh.purchase_gather_head_id, ol.purchase_gather_line_id,
+    	  oh.org_id, ol.item_class_id, ol.orna_class_id, #userid# as userid, ol.styleid, ol.quality_id, ol.bracketcolor_id,
+    	  decode(ans.analysis_arange_id, null, 1, ans.startanalysiserror), decode(ans.analysis_arange_id, null, -1, ans.endanalysiserror),
+    	  decode(ms.size_id, null, -1, ms.errorstart), decode(ms.size_id, null, 999999, ms.errorend), ol.diam_color_grade_basic_id, ol.clean_basic_id,
+    	  ol.analysis_arange_id, ol.style_item_class_id, ol.style_middle_class_id, ol.style_orna_class_id, ol.size_id, ol.unitid, cgg.grade_id, cg.grade_id,
+    	  ol.demand_quantity, oc.order_end_date,
+          ol.GUJIAQSZ, ol.GUJIAJZZ
+    	from jas_pl_purchase_gather_head oh left join jas_pl_order_calender oc on oh.order_calender_id = oc.order_calender_id,
+    	  jas_pl_purchase_gather_line ol left join jas_bd_analysis_arange ans on ol.analysis_arange_id = ans.analysis_arange_id
+    	  left join jas_bd_size ms on ol.size_id = ms.size_id
+    	  left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = ol.diam_color_grade_basic_id
+          left join jat_basic_clean_grade cg on cg.clean_id = ol.clean_basic_id
+    	where ol.purchase_gather_head_id = oh.purchase_gather_head_id and oh.state in(55, 69) and oh.headquarter_gather_id = #gheadid#
+    	  and ol.item_class_id = #itemClassId# and ol.orna_class_id = #ornaClassId#
+    </insert>
+    <!--  根据sql获取匹配的临时数据 -->
+    <select id="DispatchOrna.getMatchDispatchTemp" resultClass="com.jatools.vo.stock.DispatchTemp" parameterClass="string">
+    	$value$
+    </select>
+    <insert id="DispatchOrna.saveDispatchOrnaLog" parameterClass="com.jatools.vo.stock.DispatchOrnaLog">
+    	<selectKey keyProperty="id" type="pre" resultClass="string">
+    		select jat_pl_dispatch_orna_log_seq.nextval as id from dual
+    	</selectKey>
+    	insert into jat_pl_dispatch_orna_log(ID,ORNA_CODE,GATHER_HEAD_ID,GATHER_LINE_ID,ORDER_HEAD_ID,ORDER_LINE_ID,ORG_ID,
+    		ITEM_CLASS_ID,ORNA_CLASS_ID,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,STATUS,NOW_QTY,ALL_QTY,REAL_TOTAL_COST, OLD_FLAG,
+    		orna_dsc, unit_id, style_id, style_name, main_weight, part_weight, size_id, size_name, basic_price, dispatch_flag, color_grade_id, clean_id,
+    		is_perfect_match, match_rule_dsc, analysis_id, analysis_name, quality_id, bracketcolor_id, POS_AMOUNT, src_bill_code)
+		values(#id#,#ornaCode#,#gatherHeadId#,#gatherLineId#,#orderHeadId#,#orderLineId#,#orgId#,
+			#itemClassId#,#ornaClassId#,#createId#,#createDate#,#updateId#,#updateDate#,#status#,#nowQty#,#allQty#,#realTotalCost#,#oldFlag#,
+			#ornaDsc#,#unitId#,#styleId#,#styleName#,#mainWeight#,#partWeight#,#sizeId#,#sizeName#,#basicPrice#, #dispatchFlag#, #colorGradeId#, #cleanId#,
+			#isPerfectMatch#, #matchRuleDsc#, #analysisId#, #analysisName#, #qualityId#, #bracketcolorId#, #posAmount#, #srcBillCode#)
+    </insert>
+    <!-- 根据配货参数id，获取正配货临时分页数据 -->
+    <select id="DispatchOrna.getDispatchingPageData" resultClass="com.jatools.vo.stock.DispatchOrnaLine" parameterClass="map">
+    	select * from (select rownum rownum_ , AA.* from (
+	    	select a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", b.summarydescription as "analyseName", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.style_id as "styleId", c.stylename as "styleName", c.isbiggraph as "bigGraph",
+	    		a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.color_grade_grade_id as "colorGradeGradeId", a.clean_grade_id as "cleanGradeId",
+	    		d.size_name as "sizeName", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.unit_id as "unitId", a.order_num as "orderNum", nvl(f.cnt, 0) as "dispatchedNum", nvl(g.cnt, 0) as "dispatchingNum", a.org_id as "orgId", a.order_line_id as "orderLineId"
+	    	from jat_pl_dispatch_temp a left join jas_bd_analysis_arange b on a.analyse_id = b.analysis_arange_id
+	    	left join jas_bd_style c on a.style_id = c.styleid left join jas_bd_size d on a.size_id = d.size_id
+	    	left join (select e.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.order_line_id) f
+	    		on a.order_line_id = f.order_line_id
+	    	left join (select e2.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e2 where e2.status = 1 group by e2.order_line_id) g
+    			on a.order_line_id = g.order_line_id
+	    	where exists (select 1 from jat_pl_dispatch_condition b where b.gather_head_id = a.gather_head_id and b.src_bill_code = 'HQ' and b.item_class_id = a.item_class_id
+	    			and b.orna_class_id = a.orna_class_id and b.create_id = a.user_id and b.id = #conditionId#)
+	    	<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+	    	<isEqual property="showUnfullOnly" compareValue="1" prepend="and"> a.order_num > (nvl(f.cnt, 0) + nvl(g.cnt, 0))</isEqual>
+	    	order by a.item_class_id, a.orna_class_id, a.analyse_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id, a.style_id, a.color_grade_id, a.clean_id, a.color_grade_grade_id, a.clean_grade_id,
+	    		d.size_name, a.quality_id, a.bracketcolor_id, a.unit_id
+	    ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+	<!-- 获取总条数 -->
+    <select id="DispatchOrna.getDispatchingTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_pl_dispatch_temp a
+			left join (select e.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.order_line_id) f
+	    		on a.order_line_id = f.order_line_id
+	    	left join (select e2.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e2 where e2.status = 1 group by e2.order_line_id) g
+    			on a.order_line_id = g.order_line_id
+		where exists (select 1 from jat_pl_dispatch_condition b where b.gather_head_id = a.gather_head_id  and b.src_bill_code = 'HQ' and b.item_class_id = a.item_class_id
+	    			and b.orna_class_id = a.orna_class_id and b.create_id = a.user_id and b.id = #conditionId#)
+	    	<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+	    	<isEqual property="showUnfullOnly" compareValue="1" prepend="and"> a.order_num > (nvl(f.cnt, 0) + nvl(g.cnt, 0))</isEqual>
+    </select>
+    <!-- 根据总部总单id，获取门店已配货分页数据 -->
+    <select id="DispatchOrna.getDispatchedPageData" resultClass="com.jatools.vo.stock.DispatchOrnaLine" parameterClass="map">
+    	select * from (select rownum rownum_ , AA.* from (
+	    	select a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", b.summarydescription as "analyseName", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.styleid as "styleId", c.stylename as "styleName", c.isbiggraph as "bigGraph", a.diam_color_grade_basic_id as "colorGradeId", a.clean_basic_id as "cleanId", cgg.grade_id as "colorGradeGradeId", cg.grade_id as "cleanGradeId", d.size_name as "sizeName", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.unitid as "unitId", a.demand_quantity as "orderNum", nvl(f.cnt, 0) as "dispatchedNum", g.org_id as "orgId", a.purchase_gather_line_id as "orderLineId"
+	    	from jas_pl_purchase_gather_lineb a
+	    			left join jas_bd_analysis_arange b on a.analysis_arange_id = b.analysis_arange_id
+		    		left join jas_bd_style c on a.styleid = c.styleid
+		    		left join jas_bd_size d on a.size_id = d.size_id
+		    		left join (select e.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.order_line_id) f on a.purchase_gather_line_id = f.order_line_id
+		    		left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = a.diam_color_grade_basic_id
+		    		left join jat_basic_clean_grade cg on cg.clean_id = a.clean_basic_id,
+	    		jas_pl_purchase_gather_head g
+	    	where a.purchase_gather_head_id = g.purchase_gather_head_id and g.headquarter_gather_id = #gheadid#
+	    		<isNotEmpty property="orgId" prepend="and"> g.org_id = #orgId#</isNotEmpty>
+	    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+	    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+	    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+	    		<isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+	    			exists(select 1 from jat_pl_dispatch_orna_log lg where lg.order_line_id = a.purchase_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+	    		]]></isEqual>
+			order by a.item_class_id, a.orna_class_id, a.analysis_arange_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id, a.styleid, a.diam_color_grade_basic_id, a.clean_basic_id, cgg.grade_id, cg.grade_id, d.size_name, a.quality_id, a.bracketcolor_id, a.unitid
+	    ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+	<!-- 获取总条数 -->
+	<select id="DispatchOrna.getDispatchedTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jas_pl_purchase_gather_lineb a
+			left join (select e.order_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.order_line_id) f on a.purchase_gather_line_id = f.order_line_id,
+			jas_pl_purchase_gather_head g
+    	where a.purchase_gather_head_id = g.purchase_gather_head_id and g.headquarter_gather_id = #gheadid#
+    		<isNotEmpty property="orgId" prepend="and"> g.org_id = #orgId#</isNotEmpty>
+    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+            <isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+                exists(select 1 from jat_pl_dispatch_orna_log lg where lg.order_line_id = a.purchase_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+            ]]></isEqual>
+	</select>
+	<!-- 根据总部总单id，获取对应所有的门店 -->
+	<select id="DispatchOrna.getPurchaseGatherOrg" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+		select a.org_id as "orgId", a.org_name as "orgName" from jas_sm_org a where exists (select 1 from jas_pl_purchase_gather_line b, jas_pl_purchase_gather_head c where b.purchase_gather_head_id = c.purchase_gather_head_id and a.org_id = c.org_id and c.headquarter_gather_id = #value#)
+	</select>
+	<select id="DispatchOrna.getPurchaseGatherItemClass" parameterClass="map" resultClass="com.jatools.vo.bd.ItemClass">
+		select a.item_class_id as "itemClassId", a.item_class_dsc as "itemClassDesc" from jas_bd_item_class a where exists (select 1 from jas_pl_purchase_gather_line b, jas_pl_purchase_gather_head c where b.purchase_gather_head_id = c.purchase_gather_head_id and a.item_class_id = b.item_class_id
+		<isNotEmpty property="orgId" prepend="and"> c.org_id = #orgId#</isNotEmpty>
+		and c.headquarter_gather_id = #gheadid#) order by a.sort, a.item_class_code
+	</select>
+	<select id="DispatchOrna.getPurchaseGatherOrnaClass" parameterClass="map" resultClass="com.jatools.vo.bd.OrnaClass">
+		select a.orna_class_id as "ornaClassId", a.orna_class_dsc as "ornaClassDesc" from jas_bd_orna_class a where exists (select 1 from jas_pl_purchase_gather_line b, jas_pl_purchase_gather_head c where b.purchase_gather_head_id = c.purchase_gather_head_id and a.orna_class_id = b.orna_class_id
+		<isNotEmpty property="itemClassId" prepend="and"> b.item_class_id = #itemClassId#</isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> c.org_id = #orgId#</isNotEmpty>
+		and c.headquarter_gather_id = #gheadid#) order by a.sort, a.orna_class_code
+	</select>
+	<!-- 获取总部总单分页数据 -->
+	<select id="DispatchOrna.getHqlinePageData" resultClass="com.jatools.vo.stock.DispatchOrnaLine" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", b.summarydescription as "analyseName", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.styleid as "styleId", c.stylename as "styleName", c.isbiggraph as "bigGraph", a.diam_color_grade_basic_id as "colorGradeId", a.clean_basic_id as "cleanId", cgg.grade_id as "colorGradeGradeId", cg.grade_id as "cleanGradeId", d.size_name as "sizeName", a.quality_id as "qualityId", a.bracketcolor_id as "bracketcolorId", a.unitid as "unitId", a.demand_quantity as "orderNum", nvl(f.cnt, 0) as "dispatchedNum", a.headquarter_gather_line_id as "gatherLineId"
+			from jas_pl_headquarter_gather_line a
+				left join jas_bd_analysis_arange b on a.analysis_arange_id = b.analysis_arange_id
+				left join jas_bd_style c on a.styleid = c.styleid
+				left join jas_bd_size d on a.size_id = d.size_id
+				left join (select e.gather_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.gather_line_id) f on a.headquarter_gather_line_id = f.gather_line_id
+				left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = a.diam_color_grade_basic_id
+				left join jat_basic_clean_grade cg on cg.clean_id = a.clean_basic_id
+			where a.headquarter_gather_id = #gheadid#
+	    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+	    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+	    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+	    		<isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+	    			exists(select 1 from jat_pl_dispatch_orna_log lg where lg.gather_line_id = a.headquarter_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+	    		]]></isEqual>
+			order by a.item_class_id, a.orna_class_id, a.analysis_arange_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id, a.styleid, a.diam_color_grade_basic_id, a.clean_basic_id, cgg.grade_id, cg.grade_id, d.size_name, a.quality_id, a.bracketcolor_id, a.unitid
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+	<select id="DispatchOrna.getHqlineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jas_pl_headquarter_gather_line a
+			left join (select e.gather_line_id, count(1) as cnt from jat_pl_dispatch_orna_log e where e.status in (2,3,4) group by e.gather_line_id) f on a.headquarter_gather_line_id = f.gather_line_id
+		where a.headquarter_gather_id = #gheadid#
+    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+            <isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+                exists(select 1 from jat_pl_dispatch_orna_log lg where lg.gather_line_id = a.headquarter_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+            ]]></isEqual>
+	</select>
+	<select id="DispatchOrna.getHqlineItemClass" parameterClass="string" resultClass="com.jatools.vo.bd.ItemClass">
+		select a.item_class_id as "itemClassId", a.item_class_dsc as "itemClassDesc" from jas_bd_item_class a where exists (select 1 from jas_pl_headquarter_gather_line b where a.item_class_id = b.item_class_id and b.headquarter_gather_id = #value#) order by a.sort, a.item_class_code
+	</select>
+	<select id="DispatchOrna.getHqlineOrnaClass" parameterClass="map" resultClass="com.jatools.vo.bd.OrnaClass">
+		select a.orna_class_id as "ornaClassId", a.orna_class_dsc as "ornaClassDesc" from jas_bd_orna_class a where exists (select 1 from jas_pl_headquarter_gather_line b where b.orna_class_id = a.orna_class_id
+			<isNotEmpty property="itemClassId" prepend="and"> b.item_class_id = #itemClassId#</isNotEmpty>
+			and b.headquarter_gather_id = #gheadid#) order by a.sort, a.orna_class_code
+	</select>
+	<!-- 获取正分配饰品分页数据信息 -->
+	<select id="DispatchOrna.getShowDispatchingPageData" parameterClass="map" resultClass="com.jatools.vo.stock.DispatchOrnaLog">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.id as "id", a.orna_code as "ornaCode", a.orna_dsc as "ornaDsc", a.unit_id as "unitId", a.style_id as "styleId", a.style_name as "styleName", e.isbiggraph as "bigGraph", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.all_qty as "allQty", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.size_name as "sizeName", a.basic_price as "basicPrice",
+			<![CDATA[decode(b.is_lock, 1, a.pos_amount, a.basic_price * (select nvl(max(d.move_coef), 1) from jat_move_salecoef_head c, jat_move_salecoef_line d
+	                where c.headid = d.headid and c.in_org_id = a.org_id and c.item_class_id = b.item_class_id
+	                  and c.orna_class_id = b.orna_class_id and (instr(',' || c.style_item_ids || ',', ',' || e.styleitemclass || ',') > 0 or c.style_item_ids is null)
+	                  and d.mainwt_str <= b.main_weight and b.main_weight < d.mainwt_end)) as "newPosMoney", nvl(a.is_perfect_match,0) as "isPerfectMatch", a.match_rule_dsc as "matchRuleDsc", a.dispatch_flag as "dispatchFlag"]]>
+			from jat_pl_dispatch_orna_log a left join ic_mater_active b on a.orna_code = b.orna_code left join jas_bd_style e on a.style_id = e.styleid
+			where a.status = 1 and a.order_line_id = #orderLineId#
+			order by a.style_id, a.orna_code
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="DispatchOrna.getShowDispatchingTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_dispatch_orna_log a where a.status = 1 and a.order_line_id = #orderLineId#
+	</select>
+	<!-- 获取已分配饰品分页数据信息 -->
+	<select id="DispatchOrna.getShowDispatchedPageData" parameterClass="map" resultClass="com.jatools.vo.stock.DispatchOrnaLog">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.id as "id", a.orna_code as "ornaCode", a.orna_dsc as "ornaDsc", a.unit_id as "unitId", a.style_id as "styleId", a.style_name as "styleName", e.isbiggraph as "bigGraph", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.all_qty as "allQty", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.size_name as "sizeName", a.basic_price as "basicPrice", a.status as "status",
+				<![CDATA[decode(b.is_lock, 1, a.pos_amount, a.basic_price * (select nvl(max(d.move_coef), 1) from jat_move_salecoef_head c, jat_move_salecoef_line d
+	                where c.headid = d.headid and c.in_org_id = a.org_id and c.item_class_id = b.item_class_id
+	                  and c.orna_class_id = b.orna_class_id and (instr(',' || c.style_item_ids || ',', ',' || e.styleitemclass || ',') > 0 or c.style_item_ids is null)
+	                  and d.mainwt_str <= b.main_weight and b.main_weight < d.mainwt_end)) as "newPosMoney", nvl(a.is_perfect_match,0) as "isPerfectMatch", a.match_rule_dsc as "matchRuleDsc", a.dispatch_flag as "dispatchFlag"]]>
+			from jat_pl_dispatch_orna_log a left join ic_mater_active b on a.orna_code = b.orna_code left join jas_bd_style e on a.style_id = e.styleid
+			where a.status in (2,3,4)
+            <isEmpty property="srcBillCode" prepend="and"> a.src_bill_code = 'HQ' </isEmpty>
+            <isNotEmpty property="srcBillCode" prepend="and"> a.src_bill_code = '$srcBillCode$' </isNotEmpty>
+			<isEqual property="useOrderLineIdFlag" compareValue="1" prepend="and"> a.order_line_id = #lineId#</isEqual>
+			<isNotEqual property="useOrderLineIdFlag" compareValue="1" prepend="and"> a.gather_line_id = #lineId#</isNotEqual>
+			order by a.style_id, a.orna_code
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="DispatchOrna.getShowDispatchedTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_dispatch_orna_log a where a.status in (2,3,4)
+        <isEmpty property="srcBillCode" prepend="and"> a.src_bill_code = 'HQ' </isEmpty>
+        <isNotEmpty property="srcBillCode" prepend="and"> a.src_bill_code = '$srcBillCode$' </isNotEmpty>
+		<isEqual property="useOrderLineIdFlag" compareValue="1" prepend="and"> a.order_line_id = #lineId#</isEqual>
+		<isNotEqual property="useOrderLineIdFlag" compareValue="1" prepend="and"> a.gather_line_id = #lineId#</isNotEqual>
+	</select>
+	<!-- 删除配货记录信息 -->
+	<update id="DispatchOrna.deleteDispatchOrnaLog" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.status = 0, a.update_id = #updateId#, a.update_date = #updateDate# where a.id = #id#
+	</update>
+	<!-- 删除已配记录时，调整总部总单行汇总的已配数量段
+	<update id="DispatchOrna.updateGatherLineDispatchNum" parameterClass="string">
+		update jas_pl_headquarter_gather_line a set a.distribute_quantity = 
+			(select count(1) from jat_pl_dispatch_orna_log b where a.headquarter_gather_line_id = b.gather_line_id and b.status in(2,3,4))
+		where a.headquarter_gather_line_id = #value#
+	</update> -->
+	<!-- 将保存状态的饰品记录改为记账状态 -->
+	<update id="DispatchOrna.markDispatchOrnaLog" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.status = 2, a.update_id = #updateId#, a.update_date = #updateDate#
+ 		where a.status = 1 and exists (select 1 from jat_pl_dispatch_condition b where a.gather_head_id = b.gather_head_id and a.src_bill_code = b.src_bill_code and a.item_class_id = b.item_class_id
+           and a.orna_class_id = b.orna_class_id and a.create_id = b.create_id and b.id = #conditionId#)
+	</update>
+	<!-- 根据配货参数id更新总部总单行的已分配数量
+	<update id="DispatchOrna.updateGatherLineDispatchNumByConditionId" parameterClass="string">
+		update jas_pl_headquarter_gather_line a set a.distribute_quantity =
+	       (select count(1) from jat_pl_dispatch_orna_log c where c.status in (2,3,4) and c.gather_line_id = a.headquarter_gather_line_id)
+		where exists (select 1 from jat_pl_dispatch_condition b where b.gather_head_id = a.headquarter_gather_id
+	           and b.src_bill_code = 'HQ' and b.item_class_id = a.item_class_id and b.orna_class_id = a.orna_class_id and b.id = #value#)
+	</update> -->
+	<!-- 根据配货参数id，删除临时数据 -->
+	<delete id="DispatchOrna.deleteDispatchTempData" parameterClass="string">
+		delete jat_pl_dispatch_temp a where exists (select 1 from jat_pl_dispatch_condition b where b.gather_head_id = a.gather_head_id and b.src_bill_code = 'HQ'
+           and b.item_class_id = a.item_class_id and b.orna_class_id = a.orna_class_id and b.id = #value#)
+	</delete>
+	<!-- 删除配货参数 -->
+	<update id="DispatchOrna.deleteDispatchCondition" parameterClass="map">
+		update jat_pl_dispatch_condition a set a.status = 0, a.update_id = #updateId#, a.update_date = #updateDate# where a.id = #conditionId#
+	</update>
+	<update id="DispatchOrna.exchangeDispatching" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set (a.gather_line_id, a.order_head_id, a.order_line_id, a.org_id) = 
+		(select b.headquarter_line_id, c.purchase_gather_head_id, b.purchase_gather_line_id, c.org_id from jas_pl_purchase_gather_line b, jas_pl_purchase_gather_head c
+			where b.purchase_gather_head_id = c.purchase_gather_head_id and b.purchase_gather_line_id = #newOrderLineId#),
+			a.update_id = #updateId#, a.update_date = #updateDate# where a.id = #ornaLogId#
+	</update>
+	<!-- 生成减库配货临时数据 -->
+	<insert id="DispatchOrna.createDispatchSubtemp" parameterClass="map">
+		insert into jat_pl_dispatch_subtemp (id, orna_code, bar_code, orna_dsc, unit_id, style_id, style_name, color_grade_id, clean_id, color_grade_grade_id, clean_grade_id, main_weight, part_weight, size_id, size_name, basic_price, pos_amount, analyze_unit_name, item_class_id, orna_class_id, quality_id, bracketcolor_id, analysis_id, status, now_qty, all_qty, real_total_cost, org_id, gather_head_id, create_id, create_date, orna_log_id, src_bill_code)
+		select jat_pl_dispatch_subtemp_seq.nextval, a.orna_code, a.orna_barcode, a.orna_dsc, a.sale_unit_id as unit_id, a.style_id as style_id, b.stylename as style_name, a.main_color_grade_id as color_grade_id, a.clean_id as clean_id, a.color_grade_grade_id as color_grade_grade_id, a.clean_grade_id as clean_grade_id, a.main_weight as main_weight, a.part_weight as part_weight, decode(c.size_name, 'ZZ', null, a.size_id) as size_id, decode(c.size_name, 'ZZ', null, c.size_num) as size_name, a.basic_price as basic_price, a.pos_amount as pos_amount, d.analyzeunit_name as analyze_unit_name, a.item_class_id as item_class_id, a.orna_class_id as orna_class_id, a.quality_id as quality_id, a.bracketcolor_id as bracketcolor_id, a.alaysis_id as analysis_id, a.state as status, a.now_qty as now_qty, a.all_qty as all_qty, a.real_total_cost as real_total_cost, a.org_id as org_id, #gheadid# as gather_head_id, #createId# as create_id, #createDate# as create_date, null as orna_log_id, 'HQ'
+		from ic_mater_active a left join jas_bd_style b on a.style_id = b.styleid left join jas_bd_size c on a.size_id = c.size_id left join jas_bd_analysis_unit d on a.item_class_id = d.item_class_id and a.orna_class_id = d.orna_class_id and d.archiveflag = '0'
+		where a.state = 900 and a.stock_id = 1 and nvl(a.is_material, 0) = 0 and exists (select 1 from jat_sys_dict_item e where e.entry_code = 'hqorgs' and e.item_key = a.org_id)
+		and exists (select 1 from jas_pl_headquarter_gather_line g left join jas_bd_analysis_arange ans on g.analysis_arange_id = ans.analysis_arange_id
+	    where g.headquarter_gather_id = #gheadid# and g.item_class_id = a.item_class_id and g.orna_class_id = a.orna_class_id
+        <![CDATA[
+            and nvl(a.basic_price,0) >=decode(g.GUJIAQSZ, 0,  nvl(a.basic_price,0) , round(g.GUJIAQSZ*(1-$priceRate$)))
+            and nvl(a.basic_price,0) <=decode(g.GUJIAQSZ, 0,  nvl(a.basic_price,0) , round(g.GUJIAJZZ*(1+$priceRate$)))
+            and decode(d.analyzeunit_name, 'JZ', a.all_qty, 'CT', a.main_weight, 'XJ', a.basic_price, -1) >= decode(ans.analysis_arange_id, null, 1, ans.startanalysiserror)
+           and decode(d.analyzeunit_name, 'JZ', a.all_qty, 'CT', a.main_weight, 'XJ', a.basic_price, -1) < decode(ans.analysis_arange_id, null, -1, ans.endanalysiserror)
+	    	and g.styleid = a.style_id and nvl(g.size_id, 0) = nvl(a.size_id, 0)
+	    	and decode(g.quality_id, 75, -1, 76, -1, 79, -2, 80, -2, nvl(g.quality_id, 0)) = decode(a.quality_id, 75, -1, 76, -1, 79, -2, 80, -2, nvl(a.quality_id, 0))
+	    	and nvl(g.bracketcolor_id, 0) = nvl(a.bracketcolor_id, 0)
+			and (nvl(a.main_color_grade_id, 0) = 0 or exists (select 1 from jas_pl_color_match_rule h where h.diam_color_grade_basic_id = g.diam_color_grade_basic_id and h.match_color_grade_basic_id = a.main_color_grade_id))
+			and (nvl(a.clean_id, 0) = 0 or exists (select 1 from jas_pl_clean_match_rule i where i.clean_basic_id = g.clean_basic_id and nvl(i.analysis_arange_id, g.analysis_arange_id) = g.analysis_arange_id and i.match_clean_basic_id = a.clean_id))
+			and g.line_state = '0')
+		   and to_char(to_date(substr(a.storagedate,1,10), 'yyyy-mm-dd') + #dispatchBeyondDays#, 'yyyy-mm-dd')<=to_char(sysdate, 'yyyy-mm-dd')]]>
+	</insert>
+	<update id="DispatchOrna.updateSubtempOrna" parameterClass="map">
+		update jat_pl_dispatch_subtemp a set a.orna_log_id = #ornaLogId# where a.id = #subtempId#
+	</update>
+	<!-- 根据总部汇总单头id，获取采购总单头id，若未生成采购单，则返回null -->
+	<select id="DispatchOrna.getPurGatherHeadId" parameterClass="string" resultClass="string">
+		select a.headid from jat_pur_gather_head a where a.gather_head_id = #value# and a.src_bill_code = 'HQ'
+	</select>
+	<update id="DispatchOrna.updateUpdateIdAndDate" parameterClass="map">
+		update jat_pur_gather_head a set a.update_date = #updateDate#, a.update_id = #updateId# where a.headid = #purGatherHeadId#
+	</update>
+	<update id="DispatchOrna.updatePurGatherNumOrderFMX" parameterClass="map">
+		<![CDATA[
+		update jat_pur_gather_line a set a.num_order =
+			(select case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end from jas_pl_headquarter_gather_line b
+          		left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+          		where b.headquarter_gather_line_id = a.gather_line_id),
+        	a.update_date = #updateDate#, a.update_id = #updateId#
+		where a.headid = #purGatherHeadId# and a.num_order <>
+			(select case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end from jas_pl_headquarter_gather_line b
+				left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+				where b.headquarter_gather_line_id = a.gather_line_id)
+		]]>
+	</update>
+	<!-- 创建新的采购总单行(非明细中新添加的行记录) -->
+	<insert id="DispatchOrna.savePurGatherLineFMX" parameterClass="map">
+		<![CDATA[
+		insert into jat_pur_gather_line (lineid, headid, gather_line_id, item_class_id, orna_class_id, analysis_id, style_item_class_id, style_middle_class_id, style_orna_class_id, style_id, unit_id, size_id, quality_id, bracketcolor_id, color_grade_id, clean_id, num_order, status, memo, create_date, create_id, update_date, update_id, color_grade_grade_id, clean_grade_id)
+		select jat_pur_gather_line_seq.nextval, #purGatherHeadId#, b.headquarter_gather_line_id, b.item_class_id, b.orna_class_id, b.analysis_arange_id, b.style_item_class_id, b.style_middle_class_id, b.style_orna_class_id, b.styleid, b.unitid, b.size_id, b.quality_id, b.bracketcolor_id, b.diam_color_grade_basic_id, b.clean_basic_id,
+			case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end, 1, null, #createDate#, #createId#, #updateDate#, #updateId#, cgg.grade_id, cg.grade_id
+		from jas_pl_headquarter_gather_line b left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = b.diam_color_grade_basic_id
+			left join jat_basic_clean_grade cg on cg.clean_id = b.clean_basic_id
+			left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+		where not exists (select 1 from jat_pur_gather_line a where a.gather_line_id = b.headquarter_gather_line_id)
+			and b.line_state = '0' and b.headquarter_gather_id = #gheadid#
+		]]>
+	</insert>
+	<select id="DispatchOrna.getVendorIdListFMX" parameterClass="string" resultClass="string">
+		select a.cust_id from jas_ve_style_vender a, jat_pur_gather_line b where a.style_id = b.style_id and a.ismainvender = '1'
+			and b.headid = #value# and not exists (select 1 from jat_pur_purchase_head c where b.headid = c.src_bill_id and c.src_bill_code = 'CZ' and a.cust_id = c.vendor_id)
+	</select>
+	<!-- 更新已有的采购单行的采购数量和当前增量(非明细中新添加的行记录) -->
+	<update id="DispatchOrna.updatePurchaseLineNumOrderFMX" parameterClass="map">
+		<![CDATA[
+		update jat_pur_purchase_line a
+		   set a.num_order   = (select case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end - nvl(a.num_cancel, 0) from jas_pl_headquarter_gather_line b
+				left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+				where b.headquarter_gather_line_id = a.pl_gline_id),
+		       a.num_now_add = (select case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end - nvl(a.num_order, 0) - nvl(a.num_cancel, 0) from jas_pl_headquarter_gather_line b
+				left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+				where b.headquarter_gather_line_id = a.pl_gline_id),
+		       a.update_date = #updateDate#, a.update_id = #updateId#
+		 where a.gather_head_id = #purGatherHeadId#
+		 	and (a.num_order + a.num_cancel) <> (select case when 1 = #enableOrderStart# then b.demand_quantity when b.demand_quantity > nvl(sa.startorder, 1) then b.demand_quantity else nvl(sa.startorder, 1) end from jas_pl_headquarter_gather_line b
+				left join jas_bd_style_arange sa on sa.style_id = b.styleid and sa.analysis_arange_id = b.analysis_arange_id and sa.archiveflag = '0'
+  				where b.headquarter_gather_line_id = a.pl_gline_id)
+		]]>
+	</update>
+	<!-- 创建新的采购单行(非明细中新添加的行记录) -->
+	<insert id="DispatchOrna.savePurchaseLineFMX" parameterClass="map">
+		insert into jat_pur_purchase_line(LINEID, HEADID, pl_gline_id, ITEM_CLASS_ID, ORNA_CLASS_ID, ANALYSIS_ID, 
+			STYLE_ITEM_CLASS_ID, STYLE_MIDDLE_CLASS_ID, STYLE_ORNA_CLASS_ID, STYLE_ID, UNIT_ID, SIZE_ID, 
+		    QUALITY_ID, bracketcolor_id, COLOR_GRADE_ID, CLEAN_ID, NUM_ORDER, GATHER_HEAD_ID, GATHER_LINE_ID, STATUS, MEMO,
+		    CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID, NUM_NOW_ADD, COLOR_GRADE_GRADE_ID, CLEAN_GRADE_ID, NUM_CANCEL)
+		select jat_pur_purchase_line_seq.nextval, c.headid, a.gather_line_id, a.item_class_id, a.orna_class_id, a.analysis_id,
+			a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id, a.style_id, a.unit_id, a.size_id,
+			a.quality_id, a.bracketcolor_id, a.color_grade_id, a.clean_id, a.num_order, a.headid, a.lineid, 1, null,
+			#createDate#, #createId#, #updateDate#, #updateId#, 0, a.color_grade_grade_id, a.clean_grade_id, 0
+		from jat_pur_gather_line a, jas_ve_style_vender b, jat_pur_purchase_head c
+		where a.headid = #purGatherHeadId# and a.style_id = b.style_id and b.ismainvender = '1' and b.cust_id = c.vendor_id
+			and c.src_bill_code = 'CZ' and c.src_bill_id = a.headid
+			and not exists (select 1 from jat_pur_purchase_line d where d.gather_line_id = a.lineid and d.gather_head_id = a.headid)
+	</insert>
+	<select id="DispatchOrna.getMoveItemClass" parameterClass="string" resultClass="com.jatools.vo.bd.ItemClass">
+		select a.item_class_id as "itemClassId", a.item_class_dsc as "itemClassDesc" from jas_bd_item_class a where exists(
+			select 1 from jat_pl_dispatch_orna_log b where a.item_class_id = b.item_class_id and
+				b.status = 2 and b.gather_head_id = #value#
+				and not exists(select 1 from jat_sys_dict_item c where c.entry_code = 'hqorgs' and c.item_key = b.org_id and c.status = 1)
+			) order by a.sort, a.item_class_code
+	</select>
+	<select id="DispatchOrna.getMoveOrnaClass" parameterClass="string" resultClass="com.jatools.vo.bd.OrnaClass">
+		select a.orna_class_id as "ornaClassId", a.orna_class_dsc as "ornaClassDesc" from jas_bd_orna_class a where exists(
+			select 1 from jat_pl_dispatch_orna_log b where a.orna_class_id = b.orna_class_id and
+				b.status = 2 and b.gather_head_id = #value#
+				and not exists(select 1 from jat_sys_dict_item c where c.entry_code = 'hqorgs' and c.item_key = b.org_id and c.status = 1)
+			) order by a.sort, a.orna_class_code
+	</select>
+	<select id="DispatchOrna.getMoveOrgForSlt" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+		select a.org_id as "value", a.org_name as "text" from jas_sm_org a where
+			exists(select 1 from jat_pl_dispatch_orna_log b where a.org_id = b.org_id
+				and b.status = 2 and b.gather_head_id = #value#)
+		and not exists(select 1 from jat_sys_dict_item c where c.entry_code = 'hqorgs' and c.item_key = a.org_id and c.status = 1)
+		order by a.parent_id, a.org_id
+	</select>
+	<select id="DispatchOrna.getMoveDispatchUserForSlt" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+		select a.empid as "value", a.empname as "text" from jas_bd_emp a where
+			exists(select 1 from jat_pl_dispatch_orna_log b where a.empid = b.create_id
+					and b.status = 2 and b.gather_head_id = #value#
+					and not exists(select 1 from jat_sys_dict_item c where c.entry_code = 'hqorgs' and c.item_key = b.org_id and c.status = 1)
+      		) order by a.empcode, a.empid
+	</select>
+	<select id="DispatchOrna.getUnmovebill" resultClass="com.jatools.vo.stock.DispatchMoveBill" parameterClass="string">
+		select a.org_id as "orgId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", count(1) as "sumCount"
+		from jat_pl_dispatch_orna_log a
+		where a.gather_head_id = #value# and a.status = 2 group by a.org_id, a.item_class_id, a.orna_class_id
+	</select>
+	<select id="DispatchOrna.getMovebill" resultClass="com.jatools.vo.stock.DispatchMoveBill" parameterClass="string">
+		select a.in_org_id as "orgId", a.billno as "moveNo", a.sum_count as "sumCount",
+			a.create_id as "createId", a.create_date as "createDate", a.status as "status"
+		from jat_move_head a where a.src_bill_code = 'HQ' and a.src_bill_id = #value#
+		order by a.headid desc
+	</select>
+	<!-- 获取真实总成本 -->
+	<select id="DispatchOrna.getDispatchRealCost" parameterClass="map" resultClass="com.jatools.vo.stock.DispatchRealCost">
+		select a.org_id as "orgId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", sum(a.real_total_cost) as "realCost"
+		  from jat_pl_dispatch_orna_log a
+		where a.gather_head_id = #gheadid# and a.src_bill_code = #srcBillCode# and a.org_id in ($orgIds$)
+		  and a.item_class_id in ($itemClassIds$) and a.orna_class_id in ($ornaClassIds$)
+		group by a.org_id, a.item_class_id, a.orna_class_id
+		order by a.org_id, a.item_class_id, a.orna_class_id
+	</select>
+	<update id="DispatchOrna.updateHqGatherHead" parameterClass="map">
+		update jas_pl_headquarter_gather_head a set a.state = #planstatus#, a.dotype = #operAction#
+		where a.headquarter_gather_head_id = #gheadid#
+	</update>
+	<delete id="DispatchOrna.deleteDispatchSubTempData" parameterClass="string">
+		delete jat_pl_dispatch_subtemp a where a.gather_head_id = #value# and a.src_bill_code = 'HQ'
+	</delete>
+	<parameterMap class="map" id="DispatchOrna.updateHqGatherHeadStatusPM">
+		<parameter property="gheadid"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="dotype"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="planstatus"	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="userid"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="result"		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+	</parameterMap>
+	<!--
+	<update id="DispatchOrna.updateHqGatherHeadStatus" parameterClass="map">
+		update jas_pl_headquarter_gather_head a set a.dotype = #dotype#, a.state = #planstatus#
+		where a.headquarter_gather_head_id = #gheadid#
+	</update>
+	-->
+	<procedure id="DispatchOrna.updateHqGatherHeadStatus" parameterMap="DispatchOrna.updateHqGatherHeadStatusPM">
+		<![CDATA[{call wl_scm.purchase_update(?,?,?,?,?)}]]>
+	</procedure>
+	<delete id="DispatchOrna.deleteDispatchLogStat" parameterClass="string">
+		delete jat_pl_dispatch_log_stat a where
+		exists (select 1
+	        from jat_pl_dispatch_orna_log b
+	        where b.status in (2,3,4)
+	           and a.gather_head_id = b.gather_head_id
+	           and a.gather_line_id = b.gather_line_id
+	           and a.order_head_id = b.order_head_id
+	           and a.order_line_id = b.order_line_id
+	           and exists (select 1
+	                  from jat_pl_dispatch_condition c
+	                 where b.gather_head_id = c.gather_head_id
+	                   and c.src_bill_code = 'HQ'
+	                   and b.item_class_id = c.item_class_id
+	                   and b.orna_class_id = c.orna_class_id
+	                   and c.id = #value#
+	                ))
+	</delete>
+	<insert id="DispatchOrna.createDispatchLogStat" parameterClass="map">
+		insert into jat_pl_dispatch_log_stat(logid, gather_head_id, gather_line_id, order_head_id, order_line_id,
+		demand_quantity, num_dispatch, stat_user_id, stat_date)
+		select jat_pl_dispatch_log_stat_seq.nextval, aa.*, #statUserId#, #statDate#
+		  from (select b.gather_head_id,
+		               b.gather_line_id,
+		               b.order_head_id,
+		               b.order_line_id,
+		               (select d.demand_quantity
+		                  from jas_pl_purchase_gather_line d
+		                 where d.purchase_gather_line_id = b.order_line_id),
+		               count(1)
+		          from jat_pl_dispatch_orna_log b
+		         where b.status in (2,3,4)
+		           and exists (select 1
+		                  from jat_pl_dispatch_condition c
+		                 where b.gather_head_id = c.gather_head_id
+	                       and c.src_bill_code = 'HQ'
+		                   and b.item_class_id = c.item_class_id
+		                   and b.orna_class_id = c.orna_class_id
+		                   and c.id = #conditionId#
+		                )
+		         group by b.gather_head_id,
+		                  b.gather_line_id,
+		                  b.order_head_id,
+		                  b.order_line_id) aa
+	</insert>
+	<update id="DispatchOrna.updateDispatchLogStatByOrnaLogId" parameterClass="map">
+		update jat_pl_dispatch_log_stat a
+		   set a.num_dispatch =
+		       (select count(1)
+		          from jat_pl_dispatch_orna_log c
+		         where a.gather_head_id = c.gather_head_id
+		           and a.gather_line_id = c.gather_line_id
+		           and a.order_head_id = c.order_head_id
+		           and a.order_line_id = c.order_line_id),
+		       a.stat_user_id = #statUserId#,
+		       a.stat_date = #statDate#
+		 where exists (select 1
+		          from jat_pl_dispatch_orna_log b
+		         where b.id = #conditionId#
+		           and a.gather_head_id = b.gather_head_id
+		           and a.gather_line_id = b.gather_line_id
+		           and a.order_head_id = b.order_head_id
+		           and a.order_line_id = b.order_line_id)
+	</update>
+	<!-- 配货后减库生成采购总单，更新配货记录标志为手工减库配货 -->
+	<update id="DispatchOrna.updateDispatchOrnaDispatchFlagToManualSub" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.dispatch_flag = #dispatchFlag#
+		where exists(
+			select 1 from jas_pl_headquarter_gather_line g
+		         where g.headquarter_gather_id = #gheadid#
+		         and g.headquarter_gather_id = a.gather_head_id
+		         and g.item_class_id = a.item_class_id
+		         and g.orna_class_id = a.orna_class_id
+		         and g.analysis_arange_id = a.analysis_id
+		         and g.styleid = a.style_id
+		         and nvl(g.size_id, 0) = nvl(a.size_id, 0)
+		         and nvl(g.quality_id, 0) = nvl(a.quality_id, 0)
+		         and nvl(g.bracketcolor_id, 0) = nvl(a.bracketcolor_id, 0)
+		         and nvl(g.diam_color_grade_basic_id, 0) = nvl(a.color_grade_id, 0)
+		         and nvl(g.clean_basic_id, 0) = nvl(a.clean_id, 0)
+		         and g.line_state = '0'
+		)
+	</update>
+	<select id="DispatchOrna.getGatherHeadBillno" parameterClass="string" resultClass="string">
+		select a.headquarter_gather_no from jas_pl_headquarter_gather_head a where a.headquarter_gather_head_id = #value#
+	</select>
+	<select id="DispatchOrna.getOrnaCodeFromMove" parameterClass="map" resultClass="string">
+		select distinct a.orna_code
+		  from jat_pl_dispatch_orna_log a
+		where a.gather_head_id = #gheadid#
+		  and a.org_id = #orgId#
+		  and a.item_class_id in ($itemClassIds$)
+		  and a.orna_class_id in ($ornaClassIds$)
+		  and a.create_id in ($dispatchUserIds$)
+		  and a.status = 2
+	</select>
+	<update id="DispatchOrna.updateDispatchOrnaStatusToMoved" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.status = 3, a.update_id = #updateId#, a.update_date = #updateDate#
+		where a.gather_head_id = #gheadid#
+		  and a.org_id in ($orgIds$)
+		  and a.item_class_id in ($itemClassIds$)
+		  and a.orna_class_id in ($ornaClassIds$)
+		  and a.create_id in ($dispatchUserIds$)
+		  and a.status = 2
+	</update>
+	<!-- 改总部饰品状态为已到店 -->
+	<update id="DispatchOrna.updateHqOrnaStatus" parameterClass="map">
+		update jat_pl_dispatch_orna_log a
+		   set a.status = 4, a.update_id = #userid#, a.update_date = #date#
+		 where a.gather_head_id = #gheadid#
+		   and a.status = 2
+		   and a.src_bill_code = #srcBillCode#
+		   and exists (select 1
+		          from jat_sys_dict_item b
+		         where b.entry_code = 'hqorgs'
+		           and b.status = 1
+		           and b.item_key = a.org_id)
+	</update>
+	<select id="DispatchOrna.getDispatchSubTempOrnaPageData" parameterClass="map" resultClass="com.jatools.vo.stock.DispatchOrnaLog">
+		select * from (select rownum rownum_ , AA.* from (
+			<![CDATA[select a.id as "id",
+		       a.orna_code as "ornaCode",
+		       a.orna_dsc as "ornaDsc",
+		       a.item_class_id as "itemClassId",
+		       a.orna_class_id as "ornaClassId",
+		       b.styleitemclass as "styleItemClassId",
+		       b.stylemiddleclass as "styleMiddleClassId",
+		       b.styleornaclass as "styleOrnaClassId",
+		       e.summarydescription as "analysisName",
+		       a.unit_id as "unitId",
+		       a.style_id as "styleId",
+		       b.stylename as "styleName",
+		       b.isbiggraph as "bigGraph",
+		       a.color_grade_id as "colorGradeId",
+		       a.clean_id as "cleanId",
+		       a.all_qty as "allQty",
+		       a.main_weight as "mainWeight",
+		       a.part_weight as "partWeight",
+		       a.size_name as "sizeName",
+		       a.basic_price as "basicPrice",
+		       nvl2(f.id, 1, 0) as "dispatchFlag",
+		       c.state as "status",
+		       c.stock_id as "stockId",
+		       nvl(c.is_material, 0) as "isMaterial"
+		  from jat_pl_dispatch_subtemp a
+		  left join jas_bd_style b
+		    on a.style_id = b.styleid
+		  left join jas_bd_analysis_arange e
+		    on a.analysis_id = e.analysis_arange_id
+		  left join jat_pl_dispatch_orna_log f
+		    on f.id = a.orna_log_id, ic_mater_active c
+		 where a.gather_head_id = #gheadid#
+			 and a.orna_code = c.orna_code
+			 and a.src_bill_code = #srcBillCode#
+		 order by a.item_class_id,
+		          a.orna_class_id,
+		          b.styleitemclass,
+		          b.stylemiddleclass,
+		          b.styleornaclass,
+		          e.summarydescription,
+		          a.unit_id,
+		          a.style_id,
+		          a.color_grade_id,
+		          a.clean_id,
+		          a.orna_code]]>
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="DispatchOrna.getDispatchSubTempOrnaTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_dispatch_subtemp a, ic_mater_active c where a.gather_head_id = #gheadid#
+			and a.src_bill_code = 'HQ' and a.orna_code = c.orna_code
+    </select>
+	<select id="DispatchOrna.getHqlineDispatchRate" resultClass="string" parameterClass="map">
+		    select to_char(sum(nvl(f.cnt, 0)) / sum(a.demand_quantity) * 100, '990.00')
+		      from jas_pl_headquarter_gather_line a
+		      left join (select e.gather_line_id, count(1) as cnt
+		                   from jat_pl_dispatch_orna_log e
+		                  where e.status in (2, 3, 4)
+		                  group by e.gather_line_id) f
+		        on a.headquarter_gather_line_id = f.gather_line_id
+			where a.headquarter_gather_id = #gheadid#
+	    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+	    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+	    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+          		<isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+	    			exists(select 1 from jat_pl_dispatch_orna_log lg where lg.gather_line_id = a.headquarter_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+	    		]]></isEqual>
+	</select>
+	<select id="DispatchOrna.getDispatchedDispatchRate" resultClass="string" parameterClass="map">
+        select to_char(sum(nvl(f.cnt, 0)) / sum(a.demand_quantity) * 100, '990.00')
+          from jas_pl_purchase_gather_lineb a
+          left join (select e.order_line_id, count(1) as cnt
+                       from jat_pl_dispatch_orna_log e
+                      where e.status in (2, 3, 4)
+                      group by e.order_line_id) f
+            on a.purchase_gather_line_id = f.order_line_id, jas_pl_purchase_gather_head g
+        where a.purchase_gather_head_id = g.purchase_gather_head_id and g.headquarter_gather_id = #gheadid#
+          <isNotEmpty property="orgId" prepend="and"> g.org_id = #orgId#</isNotEmpty>
+          <isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+          <isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+          <isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+          <isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+	   			exists(select 1 from jat_pl_dispatch_orna_log lg where lg.order_line_id = a.purchase_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+	   		]]></isEqual>
+	</select>
+	<select id="DispatchOrna.getHeadquarterStatus" parameterClass="string" resultClass="string">
+		select a.state from jas_pl_headquarter_gather_head a where a.headquarter_gather_head_id = #value#
+	</select>
+	<select id="DispatchOrna.getHqlineForExcel" parameterClass="map" resultClass="java.util.HashMap">
+		select a.item_class_id as "itemClassId",
+		       a.orna_class_id as "ornaClassId",
+		       a.style_item_class_id as "styleItemClassId",
+		       a.style_middle_class_id as "styleMiddleClassId",
+		       a.style_orna_class_id as "styleOrnaClassId",
+		       b.stylename as "styleName",
+		       b.isbiggraph as "bigGraph",
+		       c.summarydescription as "analysisName",
+		       a.quality_id as "qualityId",
+		       a.bracketcolor_id as "bracketcolorId",
+		       a.unitid as "unitId",
+		       d.size_name as "sizeName",
+		       a.demand_quantity - nvl(f.cnt, 0) as "numOrder",
+		       b.issmallgraph as "smallGraph",
+		       a1.item_value || a2.item_value as "gradeName"
+		  from jas_pl_headquarter_gather_line a
+		  left join jat_sys_dict_item a1
+		    on a1.entry_code = 'gradelevel'
+		   and a1.item_key = a.diam_color_grade_basic_id
+		  left join jat_sys_dict_item a2
+		    on a2.entry_code = 'gradelevel'
+		   and a2.item_key = a.clean_basic_id
+		  left join jas_bd_style b
+		    on a.styleid = b.styleid
+		  left join jas_bd_analysis_arange c
+		    on a.analysis_arange_id = c.analysis_arange_id
+		  left join jas_bd_size d
+		    on d.size_id = a.size_id
+		  left join (select e.gather_line_id, count(1) as cnt
+		               from jat_pl_dispatch_orna_log e
+		              where e.status in (2, 3, 4)
+		              group by e.gather_line_id) f
+		    on a.headquarter_gather_line_id = f.gather_line_id
+		 where a.headquarter_gather_id = #gheadid#
+    		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+    		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+    		<isEqual property="showUnfullOnly" compareValue="1" prepend="and"><![CDATA[ a.demand_quantity > nvl(f.cnt, 0)]]></isEqual>
+    		<isEqual property="showUnperfectMatch" compareValue="1" prepend="and"><![CDATA[
+    			exists(select 1 from jat_pl_dispatch_orna_log lg where lg.gather_line_id = a.headquarter_gather_line_id and lg.is_perfect_match <> '1' and lg.status in (2, 3, 4))
+    		]]></isEqual>
+		 order by a.item_class_id,
+		          a.orna_class_id,
+		          a.style_item_class_id,
+		          a.style_middle_class_id,
+		          a.style_orna_class_id,
+		          a.styleid,
+		          c.summarydescription
+	</select>
+</sqlMap>

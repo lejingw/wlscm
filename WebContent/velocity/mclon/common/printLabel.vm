@@ -1,0 +1,118 @@
+#set($layout = "layout/printLabelLayout.vm")	
+<script language="javascript" for= 'PrintCtrl' event='OnPrintFinished'> 
+</script>
+
+<html>
+<head>
+<script>
+	var is_init=0;
+	function  loadJS(_url){
+	    var script=document.createElement("script");
+	    script.type='text/javascript';
+	    script.language='javascript';
+	    script.src=_url;
+	    document.getElementsByTagName("head")[0].appendChild(script);
+    }
+	
+	function jsonpCallback(result) {
+      	aajj=result;
+		is_init=1;
+		initShow();
+ 	}
+
+	aajj = $!form.printData;
+	var index_print=window.location.href.indexOf('printUrl');
+	if(aajj!=null){
+		is_init=1;
+	}else if(scm_data!=null){
+		aajj=scm_data;
+		is_init=1;
+	}else if(index_print!=-1){
+		var printUrl=window.location.href.substring(window.location.href.indexOf('printUrl')+9);
+		loadJS(printUrl+'&fn=jsonpCallback');
+	}
+
+function doPrint(){
+	var printType=5;
+	var data=getDateUrlArray(aajj,printType);
+	var cmd = '';// '"C:\\Program Files\\Seagull\\BarTender\\7.75\\Bartend.exe" /F=%1. /D=%2. /P /X';
+	var params = '';
+	var pathstr = window.location.protocol+'//'+window.location.host+"$!BdCommon.getParameterValue('print_btw_path')";
+	PrintCtrl.ClearDataCache();
+	for(var i=0;i<data.length;i++){
+		var temp=data[i];
+		var btwName=getFormatBtw(temp[0],printType);
+		if(btwName==null||btwName==""||temp[1]==""){
+			continue;
+		}
+
+		PrintCtrl.LoadFormatFile(pathstr+btwName); 
+		PrintCtrl.LoadData(temp[1]);
+		PrintCtrl.ExecuteCommand(cmd, params); 
+	}
+}
+	
+	function doClrCache(){ 
+		var sum = PrintCtrl.ClearFormatCache();
+		PrintCtrl.ClearDataCache();
+		alert("缓存已清除");
+	} 
+	
+	function initShow(){
+		if(is_init!=1)return;	
+		var tbt =document.getElementById("tbt");
+		if(tbt==null||tbt.rows.length>0)return;
+		
+		if(aajj==null)aajj=[];
+		else aajj=aajj.lines;
+
+		for(var i=0;i<aajj.length;i++){
+			var o=aajj[i];
+			var r=tbt.insertRow(tbt.rows.length);
+			with(o){
+				r.insertCell(0).innerHTML=getCellHtml(tbt.rows.length+'');
+				r.insertCell(1).innerHTML=getCellHtml(ornaBarCode);
+				r.insertCell(2).innerHTML=getCellHtml(ornaCode); 
+				r.insertCell(3).innerHTML=getCellHtml(posAmount);
+			}
+		}
+	}
+	function getCellHtml(value){
+		return "<div style='white-space:nowrap;'>"+value+"</div>"
+	}
+window.onload =function(){initShow(); tablecloth();}
+
+</script>
+</head>
+<body>
+<form name="frm" action="" method="POST">
+<table id="buttonline">
+	<tr>
+		<td align="left">
+			<input type="button" value="打印" onclick="doPrint();" />
+			<input  type="button" name="clearCache" onClick="doClrCache()" value="清除缓存" />
+		</td>
+	</tr>
+</table>
+<table width="100%">
+	<tr>
+		<td>
+	    <TABLE id="tabobj"  class="list">
+	    <thead>
+	    	<tr>
+	    		<th  nowrap='nowrap'>行号</th>
+				<th  nowrap='nowrap'>条码</th>
+				<th  nowrap='nowrap'>编码</th>
+				<th  nowrap='nowrap'>基础价</th>
+			</tr>
+		</thead>
+		<tbody id='tbt'>
+ 
+		</tbody>	
+		</TABLE>
+		</td>
+	</tr>	
+</TABLE>
+</form>
+</BODY>
+</HTML>

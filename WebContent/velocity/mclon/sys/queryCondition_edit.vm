@@ -1,0 +1,179 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/QueryConditionDwr.js",
+	"$StringUtil.getContextPath()/dwr/interface/DictDwr.js"])
+<form id='frm' action="" method="post">
+	<input type='hidden' id='headid' value='$!form.head.headid'/>
+    <table class="title">
+    	<tr><td>查询条件配置</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='增行' class='btn' id='btnAddRow'>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1' width="12%">单据名称</td>
+			<td class='body2' width="13%">
+				<select id="billCode">$!StringUtil.emptyOption()</select>
+			</td>
+			<td class='body1' width="12%">查询编码</td>
+			<td class='body2' width="13%">
+				<input type='text' id='queryCode' dataType="Require" msg="不能为空" value="$!form.head.queryCode">$StringUtil.star()
+			</td>
+			<td class='body1' width="12%">说明</td>
+			<td class='body2' colspan="3">
+				<input type='text' id='memo' value="$!form.head.memo" style="width:98%">
+			</td>
+		</tr>
+    </table>
+	<table class="list">
+		<thead>
+			<tr>
+				<th>字段名</th>
+				<th>显示名</th>
+				<th>类型</th>
+				<th>输入类型</th>
+				<th>输入段值</th>
+				<th>转化ID SQL</th>
+				<th>排序</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id='tbl'>
+        </tbody>
+	</table>
+</form>
+<script>
+function checkField(obj){
+	if(obj.value){
+		if(!isNumber(obj.value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+function checkform(){
+	if(!Validator.Validate($("frm"),3))
+		return false;
+	for(var i=0;i<$n("itemOrder").length;i++){
+		if(!isNumber($n("itemOrder")[i].value)){
+			alert("请输入正确格式的数字");
+			return false;
+		}
+	}
+	return true;
+}
+var deleteIdArr = [];
+function saveform(){
+	if(!checkform())	return;
+	confirm("确定保存?", function(){
+		var head = {
+			headid:jQuery("#headid").val(),
+			queryCode:jQuery("#queryCode").val(),
+			billCode:jQuery("#billCode").val(),
+			memo:jQuery("#memo").val()
+		};
+		var addLineArr = [];
+		var updateLineArr = [];
+		for(var i=0;i<$("tbl").rows.length;i++){
+			var obj = {
+    				fieldName:$n("fieldName")[i].value,
+    				fieldLabel:$n("fieldLabel")[i].value,
+    				fieldType:$n("fieldType")[i].value,
+    				inputType:$n("inputType")[i].value,
+    				inputValue:$n("inputValue")[i].value,
+    				toIdSql:$n("toIdSql")[i].value,
+    				sort:$n("sort")[i].value
+    			};
+			if(!isNull($n("lineid")[i].value)){
+				obj.lineid = $n("lineid")[i].value;
+				updateLineArr.push(obj);
+			}else{
+       			addLineArr.push(obj);
+			}
+		}
+		QueryConditionDwr.saveQueryCondition(head, addLineArr, updateLineArr, deleteIdArr, function(data){
+			alert(data?data:'保存成功', function(){
+				if(!data){
+    				window.location = "queryCondition.vm";
+				}
+			});
+		});
+	});
+}
+function changeInputType(obj){
+	var index = obj.parentNode.parentNode.rowIndex-1;
+	$n("inputValue")[index].disabled = "1" == obj.value;
+}
+//增行
+function addRow(obj){
+	var field2 = "<input type='hidden' name='lineid'><input type='text' name='fieldName' value=''>";
+	var field3 = "<input type='text' name='fieldLabel' value=''>";
+	//1字符2整数3小数4渲染5日期str6日期date
+	var field4 = "<select name='fieldType'><option value='1'>字符</option><option value='2'>整数</option><option value='3'>小数</option><option value='4'>渲染</option><option value='5'>日期str</option><option value='6'>日期date</option></select>";
+	//1手工输入2sql返回SelectorOption3JSONArray4js target
+	var field5 = "<select name='inputType' onchange='changeInputType(this)'><option value='1'>手工输入</option><option value='2'>SQL返回SelectorOption</option><option value='3'>JSONArray</option><option value='4'>JS Target</option><option value='5'>数据字典</option></select>";
+	var field6 = "<input type='text' name='inputValue' value=''>";
+	var field7 = "<input type='text' name='toIdSql' value=''>";
+	var field8 = "<input type='text' name='sort' value='' style='width:60px;'>";
+	var field9 = "<input type='button' value='删除' style='width:60px;' onclick='deleteQueryLineRow(this)'>";
+	insertRow("tbl",[field2,field3,field4,field5,field6,field7,field8,field9],false);
+	
+	var index = $("tbl").rows.length-1;
+	selectOption($n("fieldType")[index], obj.fieldType);
+	selectOption($n("inputType")[index], obj.inputType);
+	changeInputType($n("inputType")[index]);
+	$n("lineid")[index].value = obj.lineid;
+	$n("fieldName")[index].value = obj.fieldName;
+	$n("fieldLabel")[index].value = obj.fieldLabel;
+	$n("inputValue")[index].value = obj.inputValue;
+	$n("toIdSql")[index].value = obj.toIdSql;
+	$n("sort")[index].value = obj.sort;
+}
+function deleteQueryLineRow(obj){
+	var index = obj.parentNode.parentNode.rowIndex - 1;
+	if(!isNull($n("lineid")[index].value)){
+		deleteIdArr.push($n("lineid")[index].value);
+	}
+	deleteRow(obj, 'tbl');
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	jQuery("#btnAddRow").click(function(){addRow({
+			lineid : "",
+			fieldName:"",
+			fieldLabel:"",
+			fieldType:"",
+			inputType:"",
+			inputValue:"",
+			toIdSql:"",
+			sort:$("tbl").rows.length});});
+	jQuery("#btnSave").click(saveform);
+	//返回列表
+	jQuery("#btnToList").click(function(){
+		window.location = "queryCondition.vm";
+	});
+	jQuery("#billCode").change(function(){
+		if(!isNull(jQuery("#billCode").val()) && isNull(jQuery("#queryCode").val())){
+			jQuery("#queryCode").val(jQuery("#billCode").val()+"01");
+		}
+	});
+	setValues();
+});
+function setValues(){
+	DictDwr.getDictsForSlt("billcode", function(data){
+		addOptions("billCode", data, null, null, true, true, "$!form.head.billCode");
+	});
+	if(!isNull(jQuery("#headid").val())){
+    	QueryConditionDwr.getQueryConditionLine(jQuery("#headid").val(), function(datas){
+			for(var i=0;i<datas.length;i++){
+    			addRow(datas[i]);
+			}
+    	});
+	}
+}
+</script>

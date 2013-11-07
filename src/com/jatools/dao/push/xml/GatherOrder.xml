@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="GatherOrder">
+	<select id="GatherOrder.getRealSalableOrderNum" parameterClass="map" resultClass="string">
+		<![CDATA[
+			select case
+			         when (select count(1)
+			                 from jat_pl_gather_set_style bb
+			                where bb.lineid = aa.lineid
+			                  and bb.salable_flag = 1) = 0 then
+			          0
+			         when (select count(1)
+			                 from jat_pl_gather_set_style bb
+			                where bb.lineid = aa.lineid
+			                  and bb.salable_flag = 0) = 0 then
+			          aa.order_num
+			         else
+			          (aa.stock_num + aa.onway_num + aa.order_num - aa.dis_num) *
+			          aa.sale_turn_rate / 100 + aa.dis_num * aa.sale_dis_rate / 100 -
+			          (aa.salable_stock_num + aa.salable_onway_num)
+			       end
+			  from (select a.lineid,
+			               (select nvl(sum(b1.distribute_num), 0)
+			                  from jas_pl_region_org a1, jat_pl_basic_distribute_num b1
+			                 where a1.region_id = b.region_id
+			                   and a1.org_id = b1.org_id
+			                   and a.item_class_id = b1.item_class_id
+			                   and a.orna_class_id = b1.orna_class_id
+			                   and a.analysis_id = b1.analysis_id
+			                   and a.style_item_class_id = b1.style_item_class_id) as dis_num,
+			               (select nvl(sum(nvl(b3.stock_num, 0)), 0)
+			                  from jas_pl_region_org a3, jat_pl_stock_statistics_grade b3
+			                 where a3.region_id = b.region_id
+			                   and a3.org_id = b3.org_id
+			                   and a.item_class_id = b3.item_class_id
+			                   and a.orna_class_id = b3.orna_class_id
+			                   and a.analysis_id = b3.analysis_id
+			                   and a.style_item_class_id = b3.style_item_class_id) as stock_num,
+			               (select nvl(sum(nvl(b33.onway_num, 0)), 0)
+			                  from jat_pl_hqway_statistics_grade b33
+			                 where b.region_id = b33.region_id
+			                   and a.item_class_id = b33.item_class_id
+			                   and a.orna_class_id = b33.orna_class_id
+			                   and a.analysis_id = b33.analysis_id
+			                   and a.style_item_class_id = b33.style_item_class_id) as onway_num,
+			               (select nvl(sum(nvl(b4.stock_num, 0)), 0)
+			                  from jas_pl_region_org             a4,
+			                       jat_pl_stock_statistics_grade b4,
+			                       jat_pl_gather_set_style       c4
+			                 where b.region_id = a4.region_id
+			                   and a.lineid = c4.lineid
+			                   and a4.org_id = b4.org_id
+			                   and a.item_class_id = b4.item_class_id
+			                   and a.orna_class_id = b4.orna_class_id
+			                   and a.analysis_id = b4.analysis_id
+			                   and a.style_item_class_id = b4.style_item_class_id
+			                   and c4.style_id = b4.style_id
+			                   and c4.salable_flag = 1) as salable_stock_num,
+			               (select nvl(sum(nvl(b44.onway_num, 0)), 0)
+			                  from jat_pl_hqway_statistics_grade b44,
+			                       jat_pl_gather_set_style       c44
+			                 where b.region_id = b44.region_id
+			                   and a.lineid = c44.lineid
+			                   and a.item_class_id = b44.item_class_id
+			                   and a.orna_class_id = b44.orna_class_id
+			                   and a.analysis_id = b44.analysis_id
+			                   and a.style_item_class_id = b44.style_item_class_id
+			                   and c44.style_id = b44.style_id
+			                   and c44.salable_flag = 1) as salable_onway_num,
+			               b.sale_dis_rate,
+			               b.sale_turn_rate,
+			               a.order_num
+			          from jat_pl_gather_set_line a, jat_pl_gather_set_head b
+			         where a.lineid = #lineid#
+			           and a.headid = b.headid) aa
+		]]>
+	</select>
+	<insert id="GatherOrder.saveGatherOrderLineByItem" parameterClass="map">
+		insert into jat_pl_gather_order_line
+		  (lineid,
+		   headid,
+		   item_class_id,
+		   orna_class_id,
+		   analysis_id,
+		   style_item_class_id,
+		   style_middle_class_id,
+		   style_orna_class_id,
+		   style_id,
+		   quality_id,
+		   bracket_color_id,
+		   unit_id,
+		   size_id,
+		   color_grade_id,
+		   clean_id,
+		   color_grade_grade_id,
+		   clean_grade_id,
+		   ORIGNAL_ORDER_NUM,
+		   order_num,
+		   salable_flag,
+		   set_line_id,
+		   set_style_id,
+		   set_grade_id,
+		   set_size_id,
+		   create_id,
+		   create_date,
+		   status)
+		  <isEqual property="wearSizeFlag" compareValue="1">
+			  select jat_pl_gather_order_line_seq.nextval,
+			         a.headid,
+			         a.item_class_id,
+			         a.orna_class_id,
+			         a.analysis_id,
+			         a.style_item_class_id,
+			         e.stylemiddleclass,
+			         e.styleornaclass,
+			         b.style_id,
+			         b.quality_id,
+			         b.bracket_color_id,
+			         e.saleanalyst,
+					 #sizeId#,
+			         c.color_grade_id,
+			         c.clean_id,
+			         c.color_grade_grade_id,
+			         c.clean_grade_id,
+			         #orderNum#,
+			         #orderNum#,
+			         b.salable_flag,
+			         a.lineid,
+			         b.listid,
+			         c.listid,
+			         null,
+			         #userid#,
+			         #date#,
+			         1
+			    from jat_pl_gather_set_line a, jat_pl_gather_set_style b
+			    left join jas_bd_style e
+			      on b.style_id = e.styleid, jat_pl_gather_set_grade c
+			   where a.lineid = b.lineid
+			     and b.listid = #styleLineId#
+			     and c.listid = #gradeLineId#
+		  </isEqual>
+		  <isNotEqual property="wearSizeFlag" compareValue="1">
+			  select jat_pl_gather_order_line_seq.nextval,
+			         a.headid,
+			         a.item_class_id,
+			         a.orna_class_id,
+			         a.analysis_id,
+			         a.style_item_class_id,
+			         e.stylemiddleclass,
+			         e.styleornaclass,
+			         b.style_id,
+			         b.quality_id,
+			         b.bracket_color_id,
+			         e.saleanalyst,
+					 d.size_id,
+			         c.color_grade_id,
+			         c.clean_id,
+			         c.color_grade_grade_id,
+			         c.clean_grade_id,
+			         #orderNum#,
+			         #orderNum#,
+			         b.salable_flag,
+			         a.lineid,
+			         b.listid,
+			         c.listid,
+			         d.listid,
+			         #userid#,
+			         #date#,
+			         1
+			    from jat_pl_gather_set_line a, jat_pl_gather_set_style b
+			    left join jas_bd_style e
+			      on b.style_id = e.styleid, jat_pl_gather_set_grade c,
+			   jat_pl_gather_set_size d
+			   where a.lineid = b.lineid
+			     and b.listid = #styleLineId#
+			     and c.listid = #gradeLineId#
+			     and d.listid = #sizeLineId#
+		  </isNotEqual>
+	</insert>
+	
+    <!-- 从采购总单行中获取所有大类 -->
+    <select id="GatherOrder.getItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.item_class_id as "value", a.item_class_dsc as "text" from jas_bd_item_class a
+		where exists (select 1 from jat_pl_gather_order_line b where a.item_class_id = b.item_class_id
+			<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+			<isEmpty property="headid">
+			 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+			 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+			</isEmpty>
+		 )
+		order by a.sort, a.item_class_code
+    </select>
+    <!-- 从采购总单行中获取小类 -->
+    <select id="GatherOrder.getOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_dsc as "text" from jas_bd_orna_class a where exists(
+    		select 1 from jat_pl_gather_order_line b where a.orna_class_id = b.orna_class_id
+			<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+			<isEmpty property="headid">
+			 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+			 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+			</isEmpty>
+		 	and b.item_class_id = #itemClassId#
+		) order by a.sort, a.orna_class_code
+    </select>
+    <!-- 从采购总单行中获取分析范围 -->
+    <select id="GatherOrder.getAnalysisForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.analysis_arange_id as "value", a.summarydescription as "text" from jas_bd_analysis_arange a where exists(
+			select 1 from jat_pl_gather_order_line b where a.analysis_arange_id = b.analysis_id
+			<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+			<isEmpty property="headid">
+			 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+			 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+			</isEmpty>
+		 	and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId#
+		) order by a.summarydescription, a.analysis_arange_code
+    </select>
+    <!-- 从采购总单行中获取款式大类 -->
+    <select id="GatherOrder.getStyleItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select a.item_class_id as "value", a.item_class_name as "text"
+		  from jas_bd_style_item_class a
+		 where exists (select 1
+		          from jat_pl_gather_order_line b
+		         where b.style_item_class_id = a.item_class_id
+					<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+					<isEmpty property="headid">
+					 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+					 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+					</isEmpty>
+			        and b.item_class_id = #itemClassId#
+			        and b.orna_class_id = #ornaClassId#
+			        <!--and b.analysis_id = #analysisId#-->
+		        )
+		 order by a.item_class_code, a.item_class_id
+    </select>
+    <!-- 从采购总单行中获取款式中类 -->
+    <select id="GatherOrder.getStyleMiddleClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.middle_class_id as "value", a.middle_class_name as "text" from jas_bd_style_middle_class a where exists(
+			select 1 from jat_pl_gather_order_line b where b.style_middle_class_id = a.middle_class_id
+			<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+			<isEmpty property="headid">
+			 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+			 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+			</isEmpty>
+		 	and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId# <!--and b.analysis_id = #analysisId#-->
+			and b.style_item_class_id = #styleItemClassId#
+		) order by a.middle_class_code, a.middle_class_id
+    </select>
+    <!-- 从采购总单行中获取款式小类 -->
+    <select id="GatherOrder.getStyleOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_name as "text"
+		  from jas_bd_style_orna_class a
+		 where exists (select 1
+		          from jat_pl_gather_order_line b
+		         where b.style_orna_class_id = a.orna_class_id
+					<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+					<isEmpty property="headid">
+					 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+					 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+					</isEmpty>
+		           and b.item_class_id = #itemClassId#
+		           and b.orna_class_id = #ornaClassId#
+		           <!--and b.analysis_id = #analysisId#-->
+		           and b.style_item_class_id = #styleItemClassId#
+		           and b.style_middle_class_id = #styleMiddleClassId#)
+		 order by a.orna_class_code, a.orna_class_name
+    </select>
+    <!-- 从采购总单行中获取款式 -->
+    <select id="GatherOrder.getStyleIdForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.styleid as "value", a.stylename as "text" from jas_bd_style a where exists(
+			select 1 from jat_pl_gather_order_line b where b.style_id = a.styleid
+			<isNotEmpty property="headid">and b.headid = #headid#</isNotEmpty>
+			<isEmpty property="headid">
+			 	<isNotEmpty property="setLineId">and b.set_line_id = #setLineId#</isNotEmpty>
+			 	<isNotEmpty property="salableFlag">and b.salable_flag = #salableFlag#</isNotEmpty>
+			</isEmpty>
+		 	and b.item_class_id = #itemClassId#
+			and b.orna_class_id = #ornaClassId# <!--and b.analysis_id = #analysisId#-->
+			and b.style_item_class_id = #styleItemClassId# and b.style_middle_class_id = #styleMiddleClassId# and b.style_orna_class_id = #styleOrnaClassId#
+		) order by a.stylename
+    </select>
+    
+    
+    <sql id="GatherOrder.getGatherOrderLinePageDataCD">
+		<isNotEmpty property="headid">and a.headid = #headid#</isNotEmpty>
+		<isEmpty property="headid">
+		 	<isNotEmpty property="setLineId">and a.set_line_id = #setLineId#</isNotEmpty>
+		</isEmpty>
+	 	<isNotEmpty property="salableFlag">and a.salable_flag = #salableFlag#</isNotEmpty>
+		<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId#</isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId#</isNotEmpty>
+		<isNotEmpty property="analysisId" prepend="and"> a.analysis_id = #analysisId#</isNotEmpty>
+		<isNotEmpty property="styleItemClassId" prepend="and"> a.style_item_class_id = #styleItemClassId#</isNotEmpty>
+		<isNotEmpty property="styleMiddleClassId" prepend="and"> a.style_middle_class_id = #styleMiddleClassId#</isNotEmpty>
+		<isNotEmpty property="styleOrnaClassId" prepend="and"> a.style_orna_class_id = #styleOrnaClassId#</isNotEmpty>
+		<isNotEmpty property="styleId" prepend="and"> a.style_id = #styleId#</isNotEmpty>
+    </sql>
+    <select id="GatherOrder.getGatherOrderLinePageData" resultClass="com.jatools.vo.push.GatherOrderLine" parameterClass="map">
+    	select * from (select rownum rownum_ , AA.* from (
+		    	select a.lineid as "lineid", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a2.summarydescription as "analysisName", a.style_item_class_id as "styleItemClassId", a.style_middle_class_id as "styleMiddleClassId", a.style_orna_class_id as "styleOrnaClassId", a.style_id as "styleId", a3.stylename as "styleName", a3.isbiggraph as "bigGraph", a.quality_id as "qualityId", a.bracket_color_id as "bracketColorId", a.unit_id as "unitId", a.size_id as "sizeId", a4.size_name as "sizeName", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.color_grade_grade_id as "colorGradeGradeId", a.clean_grade_id as "cleanGradeId", a.order_num as "orderNum"
+	            from jat_pl_gather_order_line a left join jas_bd_analysis_arange a2 on a2.analysis_arange_id = a.analysis_id left join jas_bd_style a3 on a3.styleid = a.style_id left join jas_bd_size a4 on a4.size_id = a.size_id
+				where 1=1 <include refid="GatherOrder.getGatherOrderLinePageDataCD"/>
+				order by a.item_class_id, a.orna_class_id, a.analysis_id, a.style_item_class_id, a.style_middle_class_id, a.style_orna_class_id,
+					a.style_id, a.color_grade_id, a.clean_id, a.quality_id, a.bracket_color_id, a.size_id,a.unit_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+    </select>
+    <select id="GatherOrder.getGatherOrderLineTotalCount" resultClass="int" parameterClass="map">
+    		select count(1) from jat_pl_gather_order_line a left join jas_bd_analysis_arange a2 on a2.analysis_arange_id = a.analysis_id left join jas_bd_style a3 on a3.styleid = a.style_id left join jas_bd_size a4 on a4.size_id = a.size_id
+				where 1=1 <include refid="GatherOrder.getGatherOrderLinePageDataCD"/>
+    </select>
+    <delete id="GatherOrder.deleteGatherOrderLineBySetLineId" parameterClass="string">
+    	delete jat_pl_gather_order_line a where a.set_line_id = #value#
+    </delete>
+    <delete id="GatherOrder.deleteGatherOrderLineByHeadid" parameterClass="string">
+    	delete jat_pl_gather_order_line a where a.headid = #value#
+    </delete>
+    
+    
+	<resultMap id="PushSize.GatherOrderHeadMap" class="com.jatools.vo.push.GatherOrderHead">
+		<result property="headid" column="headid"/>
+		<result property="billNo" column="bill_no"/>
+		<result property="orgId" column="org_id"/>
+		<result property="regionId" column="region_id"/>
+		<result property="regionName" column="region_name"/>
+		<result property="cycleTypeId" column="cycle_type_id"/>
+		<result property="cycleTypeName" column="cycle_type_code"/>
+		<result property="articleTypeIds" column="article_type_ids"/>
+		<result property="purDateStart" column="pur_date_start"/>
+		<result property="purDateEnd" column="pur_date_end"/>
+		<result property="saleDateStart" column="sale_date_start"/>
+		<result property="saleDateEnd" column="sale_date_end"/>
+		<result property="purArriveDateEnd" column="pur_arrive_date_end"/>
+		<result property="saleDisRate" column="sale_dis_rate"/>
+		<result property="saleTurnRate" column="sale_turn_rate"/>
+		<result property="memo" column="memo"/>
+		<result property="createId" column="create_id"/>
+		<result property="createDate" column="create_date"/>
+		<result property="updateId" column="update_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="status" column="status"/>
+		<result property="ordertype" column="ordertype"/>
+		<result property="dispatchFlag" column="dispatch_flag"/>
+		<result property="purchaseFlag" column="purchase_flag"/>
+		<result property="dotype" column="dotype"/>
+        <result property="isLoveStyle" column="is_love_style"/>
+	</resultMap>
+	<sql id="GatherOrder.getGatherOrderPageDataCD">
+		where a.status in (34,35,8)
+		<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.status <> 8]]></isNotEqual>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="GatherOrder.getGatherOrderPageData" parameterClass="map" resultMap="PushSize.GatherOrderHeadMap">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid,
+			       a.bill_no,
+			       a.org_id,
+			       a.region_id,
+			       b.region_name,
+			       c.cycle_type_code,
+			       a.cycle_type_id,
+			       a.article_type_ids,
+			       a.pur_date_start,
+			       a.pur_date_end,
+			       a.sale_date_start,
+			       a.sale_date_end,
+			       a.pur_arrive_date_end,
+			       a.sale_dis_rate,
+			       a.sale_turn_rate,
+			       a.memo,
+			       a.create_id,
+			       a.create_date,
+			       a.update_id,
+			       a.update_date,
+			       a.status,
+                   a.is_love_style,
+			       4 as ordertype,
+			       (select case
+			                 when count(1) > 0 then
+			                  1
+			                 else
+			                  0
+			               end
+			          from jat_pl_dispatch_condition d
+			         where a.headid = d.gather_head_id
+			           and d.src_bill_code = 'PU') as dispatch_flag,
+			       (select case
+			                 when count(1) > 0 then
+			                  1
+			                 else
+			                  0
+			               end
+			          from jat_pur_gather_head e
+			         where e.gather_head_id = a.headid
+			           and e.src_bill_code = 'PU') as purchase_flag,
+			       a.dotype
+			  from jat_pl_gather_set_head a
+			  left join jas_pl_region b
+			    on a.region_id = b.region_id
+			  left join jas_pl_cycle_type c
+			    on a.cycle_type_id = c.cycle_type_id
+			 <include refid="GatherOrder.getGatherOrderPageDataCD"/>
+			 order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$ and rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="GatherOrder.getGatherOrderTotalCount" parameterClass="map" resultClass="int">
+		select count(1)
+			  from jat_pl_gather_set_head a
+			  left join jas_pl_region b
+			    on a.region_id = b.region_id
+			  left join jas_pl_cycle_type c
+			    on a.cycle_type_id = c.cycle_type_id
+			 <include refid="GatherOrder.getGatherOrderPageDataCD"/>
+	</select>
+	<update id='GatherOrder.updateGatherSetLineOrderNum'  parameterClass="map">
+		update jat_pl_gather_order_line a
+		   set a.order_num = #newOrderNum#
+		 where a.lineid = #lineid#
+	</update>
+	<update id='GatherOrder.updateGatherSetLineSizeId'  parameterClass="map">
+		update jat_pl_gather_order_line a
+		   set a.size_id = #newSizeId#
+		 where a.lineid = #lineid#
+	</update>
+    <select id="GatherOrder.checkSizeExists" parameterClass="map" resultClass="int">
+		<![CDATA[select count(1)
+		  from jat_pl_gather_order_line a
+		 where a.size_id = #newSizeId# and exists
+		  (select 1
+		           from jat_pl_gather_order_line b
+		          where b.lineid = #lineid#
+		            and a.lineid <> b.lineid
+		            and a.headid = b.headid
+		            and a.style_id = b.style_id
+		            and a.color_grade_id = b.color_grade_id
+		            and a.clean_id = b.clean_id
+		            and a.salable_flag = b.salable_flag)]]>
+	</select>
+	<select id="GatherOrder.getGatherOrderLine" parameterClass="string" resultClass="com.jatools.vo.push.GatherOrderLine">
+		select a.lineid                as "lineid",
+		       a.headid                as "headid",
+		       a.item_class_id         as "itemClassId",
+		       a.orna_class_id         as "ornaClassId",
+		       a2.summarydescription   as "analysisName",
+		       a.style_item_class_id   as "styleItemClassId",
+		       a.style_middle_class_id as "styleMiddleClassId",
+		       a.style_orna_class_id   as "styleOrnaClassId",
+		       a.style_id              as "styleId",
+		       a3.stylename            as "styleName",
+		       a3.isbiggraph           as "bigGraph",
+               a3.issmallgraph         as "smallGraph",
+		       a.quality_id            as "qualityId",
+		       a.bracket_color_id      as "bracketColorId",
+		       a.unit_id               as "unitId",
+		       a.size_id               as "sizeId",
+		       a4.size_name            as "sizeName",
+		       a.color_grade_id        as "colorGradeId",
+		       a.clean_id              as "cleanId",
+		       a.color_grade_grade_id  as "colorGradeGradeId",
+		       a.clean_grade_id        as "cleanGradeId",
+		       a.order_num             as "orderNum"
+		  from jat_pl_gather_order_line a
+		  left join jas_bd_analysis_arange a2
+		    on a2.analysis_arange_id = a.analysis_id
+		  left join jas_bd_style a3
+		    on a3.styleid = a.style_id
+		  left join jas_bd_size a4
+		    on a4.size_id = a.size_id
+		 where a.lineid = #lineid#
+	</select>
+	<select id="GatherOrder.getGatherOrderHead" parameterClass="string" resultMap="PushSize.GatherOrderHeadMap">
+		select a.headid,
+		       a.bill_no,
+		       a.org_id,
+		       a.region_id,
+		       b.region_name,
+		       c.cycle_type_code,
+		       a.cycle_type_id,
+		       a.article_type_ids,
+		       a.pur_date_start,
+		       a.pur_date_end,
+		       a.sale_date_start,
+		       a.sale_date_end,
+		       a.pur_arrive_date_end,
+		       a.sale_dis_rate,
+		       a.sale_turn_rate,
+		       a.memo,
+		       a.create_id,
+		       a.create_date,
+		       a.update_id,
+		       a.update_date,
+		       a.status,
+               a.is_love_style,
+			   4 as ordertype,
+		       (select case
+		                 when count(1) > 0 then
+		                  1
+		                 else
+		                  0
+		               end
+		          from jat_pl_dispatch_condition d
+		         where a.headid = d.gather_head_id
+		           and d.src_bill_code = 'PU') as dispatch_flag,
+		       (select case
+		                 when count(1) > 0 then
+		                  1
+		                 else
+		                  0
+		               end
+		          from jat_pur_gather_head e
+		         where e.gather_head_id = a.headid
+		           and e.src_bill_code = 'PU') as purchase_flag,
+		       a.dotype
+		  from jat_pl_gather_set_head a
+		  left join jas_pl_region b
+		    on a.region_id = b.region_id
+		  left join jas_pl_cycle_type c
+		    on a.cycle_type_id = c.cycle_type_id
+		 where a.headid = #value#
+	</select>
+	<select id="GatherOrder.getOrgByGatherOrder" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+    	select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       decode((select count(1)
+		                from jat_pl_gather_set_head b, jas_pl_region_org c
+		               where b.headid = #value#
+		                 and b.region_id = c.region_id
+		                 and c.org_id = a.org_id),
+		              0,
+		              1,
+		              0) as "nocheck"
+		  from jas_sm_org a
+		 start with a.parent_id = 0
+		        and a.org_type = 1
+		        and a.archiveflag = '0'
+		connect by prior a.org_id = a.parent_id
+		       and a.org_type = 1
+		       and a.archiveflag = '0'
+		 order by level, a.sort
+	</select>
+	<select id="GatherOrder.checkHasPushDispatch" parameterClass="string" resultClass="int">
+		select count(1)
+		  from jat_pl_dispatch_condition a
+		 where a.src_bill_code = 'PU'
+		   and a.gather_head_id = #value#
+	</select>
+	<update id="GatherOrder.closeGatherOrder" parameterClass="map">
+		update jat_pl_gather_set_head a set a.status = 8, a.update_id = #userid#, a.update_date = #date#
+		where a.headid = #headid#
+	</update>
+	<update id="GatherOrder.reopenGatherOrder" parameterClass="map">
+		update jat_pl_gather_set_head a set a.status = case
+                    when (select count(1)
+                            from jat_pur_gather_head b
+                           where b.src_bill_code = 'PU'
+                             and b.gather_head_id = a.headid) > 0 then
+                     35
+                    else
+                     34
+                  end, a.update_id = #userid#, a.update_date = #date#
+		where a.headid = #headid#
+	</update>
+
+    <insert id="GatherOrder.createOrderLineByHeadid" parameterClass="map">
+        insert into jat_pl_gather_order_line (
+            lineid, headid, set_line_id, item_class_id, orna_class_id, style_item_class_id, order_num,create_id, create_date, status
+        ) select jat_pl_gather_order_line_seq.nextval, a.headid, a.lineid, a.item_class_id, a.orna_class_id, a.style_item_class_id, a.order_num, #createId#, #createDate#, 1
+        from jat_pl_gather_set_line a where a.headid = #headid#
+    </insert>
+</sqlMap>

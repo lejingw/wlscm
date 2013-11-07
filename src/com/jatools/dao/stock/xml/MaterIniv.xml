@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MaterIniv">
+	<typeAlias alias="MaterIniv" type="com.jatools.vo.stock.MaterIniv"/>
+	
+	<select id="MaterIniv.getSumMaters" resultClass="int" parameterClass="map">
+		select sum(a.quantity) from jat_mater_iniv a where 1=1 
+		and a.src_bill_id = #srcBillId# and a.src_bill_code = #srcBillCode#
+	</select>
+	
+	
+	<!-- 修改入库单状态 根据 交接单id -->
+	<update id="MaterIniv.updateBillStatusBySourceId" parameterClass="map">
+		update jat_mater_iniv a 
+		set a.state = #toStatus# ,
+			a.updatedate = #updateDate#
+			where a.src_bill_code = #srcBillCode#
+			and a.src_bill_id = #srcBillId#
+			and a.state = #fromStatus#
+	</update>
+	<resultMap class="MaterIniv" id="resultMaterIniv">
+		<result property="id"               column="ID" />                
+		<result property="no"               column="NO" />                
+		<result property="allowInivType"    column="ALLOW_INIV_TYPE" />   
+		<result property="stockId"          column="STOCK_ID" />          
+		<result property="inivOrg"          column="INIV_ORG" />          
+		<result property="inivDirection"    column="INIV_DIRECTION" />    
+		<result property="inivDate"         column="INIV_DATE" />         
+		<result property="stockOrg"         column="STOCK_ORG" />         
+		<result property="preAllotOrg"      column="PRE_ALLOT_ORG" />     
+		<result property="deptId"           column="DEPT_ID" />           
+		<result property="salesman"         column="SALESMAN" />          
+		<result property="notes"            column="NOTES" />             
+		<result property="handoverBillId"   column="HANDOVER_BILL_ID" />  
+		<result property="venderId"         column="VENDER_ID" />         
+		<result property="articleTypeId"    column="ARTICLE_TYPE_ID" />   
+		<result property="itemClassId"      column="ITEM_CLASS_ID" />     
+		<result property="ornaClassId"      column="ORNA_CLASS_ID" />     
+		<result property="analysisArangeId" column="ANALYSIS_ARANGE_ID" />
+		<result property="styleItemId"      column="STYLE_ITEM_ID" />     
+		<result property="styleMiddleId"    column="STYLE_MIDDLE_ID" />   
+		<result property="styleId"          column="STYLE_ID" />          
+		<result property="unitId"           column="UNIT_ID" />           
+		<result property="quantity"         column="QUANTITY" />          
+		<result property="ornaName"         column="ORNA_NAME" />         
+		<result property="ornaCode"         column="ORNA_CODE" />         
+		<result property="sizeId"           column="SIZE_ID" />           
+		<result property="isConsign"        column="IS_CONSIGN" />        
+		<result property="isCustom"         column="IS_CUSTOM" />         
+		<result property="costPrice"        column="COST_PRICE" />        
+		<result property="totalCost"        column="TOTAL_COST" />        
+		<result property="smallLabelType"   column="SMALL_LABEL_TYPE" />  
+		<result property="decimalNum"       column="DECIMAL_NUM" />       
+		<result property="trackIame"        column="TRACK_NAME" />        
+		<result property="identId"          column="IDENT_ID" />          
+		<result property="hrdCert"          column="HRD_CERT" />          
+		<result property="giaCert"          column="GIA_CERT" />          
+		<result property="igiCert"          column="IGI_CERT" />          
+		<result property="agsCert"          column="AGS_CERT" />          
+		<result property="totalNum"         column="TOTAL_NUM" />         
+		<result property="qualityId"        column="QUALITY_ID" />        
+		<result property="basicPrice"       column="BASIC_PRICE" />       
+		<result property="groups"           column="GROUPS" />            
+		<result property="posAmount"        column="POS_AMOUNT" />        
+		<result property="specialWeight"    column="SPECIAL_WEIGHT" />    
+		<result property="weight"           column="WEIGHT" />            
+		<result property="summaryId"        column="SUMMARY_ID" />        
+		<result property="nuclearBillId"    column="NUCLEAR_BILL_ID" />   
+		<result property="mainModification" column="MAIN_MODIFICATION" /> 
+		<result property="mainShapeId"      column="MAIN_SHAPE_ID" />     
+		<result property="mainColorGradeId" column="MAIN_COLOR_GRADE_ID" />
+		<result property="cleanId"          column="CLEAN_ID" />          
+		<result property="colorId"          column="COLOR_ID" />          
+		<result property="cutId"            column="CUT_ID" />            
+		<result property="bracketcolorId"   column="BRACKETCOLOR_ID" />   
+		<result property="wearId"           column="WEAR_ID" />           
+		<result property="priceAttrGroup"   column="PRICE_ATTR_GROUP" />  
+		<result property="qltyId"           column="QLTY_ID" />           
+		<result property="specialWorkPrice" column="SPECIAL_WORK_PRICE" />
+		<result property="stringWorkPrice"  column="STRING_WORK_PRICE" /> 
+		<result property="cutWideScale"     column="CUT_WIDE_SCALE" />    
+		<result property="cutDeepScale"     column="CUT_DEEP_SCALE" />    
+		<result property="symmetryId"       column="SYMMETRY_ID" />       
+		<result property="polishineId"      column="POLISHINE_ID" />      
+		<result property="fluorescenceId"   column="FLUORESCENCE_ID" />   
+		<result property="waistlineId"      column="WAISTLINE_ID" />      
+		<result property="vertexId"         column="VERTEX_ID" />         
+		<result property="factoryFee"       column="FACTORY_FEE" />       
+		<result property="factoryFeePrice"  column="FACTORY_FEE_PRICE" /> 
+		<result property="mainWeight"       column="MAIN_WEIGHT" />       
+		<result property="mainStoneNum"     column="MAIN_STONE_NUM" />    
+		<result property="partStoneWeight"  column="PART_STONE_WEIGHT" /> 
+		<result property="partStoneContent" column="PART_STONE_CONTENT" />
+		<result property="partStoneNum"     column="PART_STONE_NUM" />    
+		<result property="zodiac"           column="ZODIAC" />            
+		<result property="allQty"           column="ALL_QTY" />           
+		<result property="avgNum"           column="AVG_NUM" />           
+		<result property="isUnder_3fen"     column="IS_UNDER_3FEN" />     
+		<result property="luckyDsc"         column="LUCKY_DSC" />         
+		<result property="inlayno"          column="INLAYNO" />           
+		<result property="updatedate"       column="UPDATEDATE" />        
+		<result property="createuserid"     column="CREATEUSERID" />      
+		<result property="createdate"       column="CREATEDATE" />        
+		<result property="factoryStyleId"   column="FACTORY_STYLE_ID" />  
+		<result property="approvaluserid"   column="APPROVALUSERID" />    
+		<result property="approvaldate"     column="APPROVALDATE" />      
+		<result property="srcBillNo"        column="SRC_BILL_NO" />       
+		<result property="srcBillId"        column="SRC_BILL_ID" />       
+		<result property="state"            column="STATE" />             
+		<result property="consignmentType"  column="CONSIGNMENT_TYPE" />  
+		<result property="factoryFeeType"   column="FACTORY_FEE_TYPE" />  
+		<result property="isOldOtc"         column="IS_OLD_OTC" />        
+		<result property="partContent"      column="PART_CONTENT" />      
+		<result property="luckyWord"        column="LUCKY_WORD" />        
+		<result property="isTearStone"      column="IS_TEAR_STONE" />     
+		<result property="styleType"        column="STYLE_TYPE" />        
+		<result property="isMutiPart"       column="IS_MUTI_PART" />      
+		<result property="styleOrnaId"      column="STYLE_ORNA_ID" />     
+		<result property="issuchinda"       column="ISSUCHINDA" />        
+		<result property="themeCoefficient" column="THEME_COEFFICIENT" /> 
+		<result property="ncoefficient"     column="NCOEFFICIENT" />      
+		<result property="calcpriceNo"      column="CALCPRICE_NO" />      
+		<result property="ornaBarcode"      column="ORNA_BARCODE" />      
+		<result property="customizeNo"      column="CUSTOMIZE_NO" />      
+		<result property="bracketStyleId"   column="BRACKET_STYLE_ID" />  
+		<result property="srcBillCode"   column="SRC_BILL_CODE" />  
+		<result property="isDblLabel"   	column="IS_DBL_LABEL" />      
+		<result property="inivFlag"       	column="INIV_FLAG" />         
+		<result property="oldOrnaCode"      column="OLD_ORNA_CODE" />  
+		<result property="costUnit"     column="COST_UNIT" />    
+		<result property="materialId"     column="MATERIAL_ID" />   
+		<result property="lockFlag"     column="LOCK_FLAG" />
+		<result property="colorGradeIdXq"     column="COLORGRADE_ID_XQ" />
+		<result property="cleanIdXq"     column="CLEAN_ID_XQ" />
+		<result property="inivCost"     column="INIV_COST" />
+		<result property="factoryOrnaCode"     column="FACTORY_ORNA_CODE" />
+		<result property="privateType"     column="PRIVATE_TYPE" />
+		<result property="fixedGoldPrice"     column="FIXED_GOLD_PRICE" />
+
+	</resultMap>
+	<sql id="MaterIniv.list.column">
+		ID ,                 
+		NO ,                 
+		ALLOW_INIV_TYPE ,    
+		STOCK_ID ,           
+		INIV_ORG ,           
+		INIV_DIRECTION ,     
+		INIV_DATE ,          
+		STOCK_ORG ,          
+		PRE_ALLOT_ORG ,      
+		DEPT_ID ,            
+		SALESMAN ,           
+		NOTES ,              
+		HANDOVER_BILL_ID ,   
+		VENDER_ID ,          
+		ARTICLE_TYPE_ID ,    
+		ITEM_CLASS_ID ,      
+		ORNA_CLASS_ID ,      
+		ANALYSIS_ARANGE_ID , 
+		STYLE_ITEM_ID ,      
+		STYLE_MIDDLE_ID ,    
+		STYLE_ID ,           
+		UNIT_ID ,            
+		QUANTITY ,           
+		ORNA_NAME ,          
+		ORNA_CODE ,          
+		SIZE_ID ,            
+		IS_CONSIGN ,         
+		IS_CUSTOM ,          
+		COST_PRICE ,         
+		TOTAL_COST ,         
+		SMALL_LABEL_TYPE ,   
+		DECIMAL_NUM ,        
+		TRACK_NAME ,         
+		IDENT_ID ,           
+		HRD_CERT ,           
+		GIA_CERT ,           
+		IGI_CERT ,           
+		AGS_CERT ,           
+		TOTAL_NUM ,          
+		QUALITY_ID ,         
+		BASIC_PRICE ,        
+		GROUPS ,             
+		POS_AMOUNT ,         
+		SPECIAL_WEIGHT ,     
+		WEIGHT ,             
+		SUMMARY_ID ,         
+		NUCLEAR_BILL_ID ,    
+		MAIN_MODIFICATION ,  
+		MAIN_SHAPE_ID ,      
+		MAIN_COLOR_GRADE_ID ,
+		CLEAN_ID ,           
+		COLOR_ID ,           
+		CUT_ID ,             
+		BRACKETCOLOR_ID ,    
+		WEAR_ID ,            
+		PRICE_ATTR_GROUP ,   
+		QLTY_ID ,            
+		SPECIAL_WORK_PRICE , 
+		STRING_WORK_PRICE ,  
+		CUT_WIDE_SCALE ,     
+		CUT_DEEP_SCALE ,     
+		SYMMETRY_ID ,        
+		POLISHINE_ID ,       
+		FLUORESCENCE_ID ,    
+		WAISTLINE_ID ,       
+		VERTEX_ID ,          
+		FACTORY_FEE ,        
+		FACTORY_FEE_PRICE ,  
+		MAIN_WEIGHT ,        
+		MAIN_STONE_NUM ,     
+		PART_STONE_WEIGHT ,  
+		PART_STONE_CONTENT , 
+		PART_STONE_NUM ,     
+		ZODIAC ,             
+		ALL_QTY ,            
+		AVG_NUM ,            
+		IS_UNDER_3FEN ,      
+		LUCKY_DSC ,          
+		INLAYNO ,            
+		UPDATEDATE ,         
+		CREATEUSERID ,       
+		CREATEDATE ,         
+		FACTORY_STYLE_ID ,   
+		APPROVALUSERID ,     
+		APPROVALDATE ,       
+		SRC_BILL_NO ,        
+		SRC_BILL_ID ,        
+		STATE ,              
+		CONSIGNMENT_TYPE ,   
+		FACTORY_FEE_TYPE ,   
+		IS_OLD_OTC ,         
+		PART_CONTENT ,       
+		LUCKY_WORD ,         
+		IS_TEAR_STONE ,      
+		STYLE_TYPE ,         
+		IS_MUTI_PART ,       
+		STYLE_ORNA_ID ,      
+		ISSUCHINDA ,         
+		THEME_COEFFICIENT ,  
+		NCOEFFICIENT ,       
+		CALCPRICE_NO ,       
+		ORNA_BARCODE ,       
+		CUSTOMIZE_NO ,       
+		BRACKET_STYLE_ID ,   
+		IS_DBL_LABEL ,       
+		INIV_FLAG ,          
+		OLD_ORNA_CODE,
+		SRC_BILL_CODE, 
+		COST_UNIT,
+		MATERIAL_ID,
+		LOCK_FLAG,
+		COLORGRADE_ID_XQ,
+		CLEAN_ID_XQ,
+		INIV_COST,
+		FACTORY_ORNA_CODE,
+		PRIVATE_TYPE,
+        FIXED_GOLD_PRICE
+	</sql>
+	<!-- 
+	<sql id="DispatchOrna.sql1">
+		where a.region_id = b.region_id and a.order_calender_id = c.order_calender_id and c.cycle_type_id = d.cycle_type_id
+			<isNotEmpty property="gatherNo" prepend="and"> a.headquarter_gather_no like '%$gatherNo$%'</isNotEmpty>
+			<isNotEmpty property="gatherDate" prepend="and"> a.gather_date = #gatherDate#</isNotEmpty>
+	</sql>
+	<include refid="DispatchOrna.sql1"/>
+	 -->
+	<sql id="MaterIniv.pageWhere">
+			<isNotEmpty property="wlCode" prepend="and"> a.orna_code like '%$wlCode$%' </isNotEmpty>
+			<isNotEmpty property="handoverBillId" prepend="and"> a.src_bill_no like '%$handoverBillId$%' </isNotEmpty>
+			<isNotEmpty property="caclType" prepend="and">  a.allow_iniv_type = #caclType# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="calcpriceNo" prepend="and"> a.calcprice_no like '%$calcpriceNo$%' </isNotEmpty>
+			<isNotEmpty property="verdorName" prepend="and"> a.vender_id = #verdorName# </isNotEmpty>
+			<isNotEmpty property="beginTime" prepend="and"> <![CDATA[ a.INIV_DATE >= #beginTime#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endTime" prepend="and"> <![CDATA[ a.INIV_DATE <= #endTime#]]> </isNotEmpty>
+		 	<isNotEmpty property="createId" prepend="and">  a.createuserid = #createId# </isNotEmpty>
+			<isNotEmpty property="beginWeight" prepend="and"> <![CDATA[ a.all_qty >= #beginWeight#]]>  </isNotEmpty>
+		   	<isNotEmpty property="endWeight" prepend="and"> <![CDATA[ a.all_qty <= #endWeight#]]> </isNotEmpty>
+		 	<isEqual compareValue="1" property="selectLabel"  prepend="and"> a.is_dbl_label=0 </isEqual>
+			<isEqual compareValue="2" property="selectLabel" prepend="and"> a.is_dbl_label=1 </isEqual>
+			<isEqual compareValue="3" property="selectLabel" prepend="and"> a.is_dbl_label=1 </isEqual>
+			<isNotEqual compareValue="on" property="stateId" prepend="and"> a.state=1 </isNotEqual>
+	</sql>
+	<select id="MaterIniv.getPageData" resultMap="resultMaterIniv" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="MaterIniv.list.column"/> from JAT_MATER_INIV a  where 1 = 1 and a.INIV_ORG=$inivOrg$
+			<include refid="MaterIniv.pageWhere"/>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.id desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="MaterIniv.getTotalCount" resultClass="int" >
+		select count(1) from JAT_MATER_INIV a where 1 = 1 and a.INIV_ORG=$inivOrg$
+		<include refid="MaterIniv.pageWhere"/>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<select id="MaterIniv.getMaterInivById" resultMap="resultMaterIniv" parameterClass="string">
+			select <include refid="MaterIniv.list.column"/> from JAT_MATER_INIV a where a.id = #value#
+	</select>
+	<select id="MaterIniv.getHangPriceByIniv" resultClass="string" parameterClass="map">
+		select t.gold_price "hangPrice"
+		  from jat_pur_handover_line t
+		 where t.billid = #handoverBillId#
+		   and t.item_class_id = #itemClassId#
+	</select>
+	<delete id="MaterIniv.deleteMaterIniv" parameterClass="string">
+		delete JAT_MATER_INIV m where m.id = #value# and m.state = 1
+	</delete>
+	<update id="MaterIniv.updatePriceStateByIniv" parameterClass="map">
+		update jat_calc_price_head p set p.state = #state# where p.id = #id#
+	</update>
+	<insert id="MaterIniv.saveMaterIniv" parameterClass="MaterIniv">
+		<selectKey resultClass="string" keyProperty="id" type="pre">
+			select jat_mater_iniv_seq.nextval as id from dual
+		</selectKey>
+		insert into jat_mater_iniv (
+			ID,                
+			NO,                
+			ALLOW_INIV_TYPE,   
+			STOCK_ID,          
+			INIV_ORG,          
+			INIV_DIRECTION,    
+			INIV_DATE,         
+			STOCK_ORG,         
+			PRE_ALLOT_ORG,     
+			DEPT_ID,           
+			SALESMAN,          
+			NOTES,             
+			HANDOVER_BILL_ID,  
+			VENDER_ID,         
+			ARTICLE_TYPE_ID,   
+			ITEM_CLASS_ID,     
+			ORNA_CLASS_ID,     
+			ANALYSIS_ARANGE_ID,
+			STYLE_ITEM_ID,     
+			STYLE_MIDDLE_ID,   
+			STYLE_ID,          
+			UNIT_ID,           
+			QUANTITY,          
+			ORNA_NAME,         
+			ORNA_CODE,         
+			SIZE_ID,           
+			IS_CONSIGN,        
+			IS_CUSTOM,         
+			COST_PRICE,        
+			TOTAL_COST,        
+			SMALL_LABEL_TYPE,  
+			DECIMAL_NUM,       
+			TRACK_NAME,        
+			IDENT_ID,          
+			HRD_CERT,          
+			GIA_CERT,          
+			IGI_CERT,          
+			AGS_CERT,          
+			TOTAL_NUM,         
+			QUALITY_ID,        
+			BASIC_PRICE,       
+			GROUPS,            
+			POS_AMOUNT,        
+			SPECIAL_WEIGHT,    
+			WEIGHT,            
+			SUMMARY_ID,        
+			NUCLEAR_BILL_ID,   
+			MAIN_MODIFICATION, 
+			MAIN_SHAPE_ID,     
+			MAIN_COLOR_GRADE_ID,
+			CLEAN_ID,          
+			COLOR_ID,          
+			CUT_ID,            
+			BRACKETCOLOR_ID,   
+			WEAR_ID,           
+			PRICE_ATTR_GROUP,  
+			QLTY_ID,           
+			SPECIAL_WORK_PRICE,
+			STRING_WORK_PRICE, 
+			CUT_WIDE_SCALE,    
+			CUT_DEEP_SCALE,    
+			SYMMETRY_ID,       
+			POLISHINE_ID,      
+			FLUORESCENCE_ID,   
+			WAISTLINE_ID,      
+			VERTEX_ID,         
+			FACTORY_FEE,       
+			FACTORY_FEE_PRICE, 
+			MAIN_WEIGHT,       
+			MAIN_STONE_NUM,    
+			PART_STONE_WEIGHT, 
+			PART_STONE_CONTENT,
+			PART_STONE_NUM,    
+			ZODIAC,            
+			ALL_QTY,           
+			AVG_NUM,           
+			IS_UNDER_3FEN,     
+			LUCKY_DSC,         
+			INLAYNO,           
+			UPDATEDATE,        
+			CREATEUSERID,      
+			CREATEDATE,        
+			FACTORY_STYLE_ID,  
+			APPROVALUSERID,    
+			APPROVALDATE,      
+			SRC_BILL_NO,       
+			SRC_BILL_ID,      
+			STATE,             
+			CONSIGNMENT_TYPE,  
+			FACTORY_FEE_TYPE,  
+			IS_OLD_OTC,        
+			PART_CONTENT,      
+			LUCKY_WORD,        
+			IS_TEAR_STONE,     
+			STYLE_TYPE,        
+			IS_MUTI_PART,      
+			STYLE_ORNA_ID,     
+			ISSUCHINDA,        
+			THEME_COEFFICIENT, 
+			NCOEFFICIENT,      
+			CALCPRICE_NO,      
+			ORNA_BARCODE,      
+			CUSTOMIZE_NO,      
+			BRACKET_STYLE_ID,  
+			IS_DBL_LABEL,      
+			INIV_FLAG,         
+			OLD_ORNA_CODE,
+			SRC_BILL_CODE, 
+			COST_UNIT,
+			MATERIAL_ID ,
+			LOCK_FLAG  ,
+			COLORGRADE_ID_XQ, 
+			CLEAN_ID_XQ,
+			INIV_COST,
+			FACTORY_ORNA_CODE,
+			PRIVATE_TYPE,
+            FIXED_GOLD_PRICE
+		)values(
+			#id#,               
+			#no#,               
+			#allowInivType#,    
+			#stockId#,          
+			#inivOrg#,          
+			#inivDirection#,    
+			#inivDate#,         
+			#stockOrg#,         
+			#preAllotOrg#,      
+			#deptId#,           
+			#salesman#,         
+			#notes#,            
+			#handoverBillId#,   
+			#venderId#,         
+			#articleTypeId#,    
+			#itemClassId#,      
+			#ornaClassId#,      
+			#analysisArangeId#, 
+			#styleItemId#,      
+			#styleMiddleId#,    
+			#styleId#,          
+			#unitId#,           
+			#quantity#,         
+			#ornaName#,         
+			#ornaCode#,         
+			#sizeId#,           
+			#isConsign#,        
+			#isCustom#,         
+			#costPrice#,        
+			#totalCost#,        
+			#smallLabelType#,   
+			#decimalNum#,       
+			#trackIame#,        
+			#identId#,          
+			#hrdCert#,          
+			#giaCert#,          
+			#igiCert#,          
+			#agsCert#,          
+			#totalNum#,         
+			#qualityId#,        
+			#basicPrice#,       
+			#groups#,           
+			#posAmount#,        
+			#specialWeight#,    
+			#weight#,           
+			#summaryId#,        
+			#nuclearBillId#,    
+			#mainModification#, 
+			#mainShapeId#,      
+			#mainColorGradeId#, 
+			#cleanId#,          
+			#colorId#,          
+			#cutId#,            
+			#bracketcolorId#,   
+			#wearId#,           
+			#priceAttrGroup#,   
+			#qltyId#,           
+			#specialWorkPrice#, 
+			#stringWorkPrice#,  
+			#cutWideScale#,     
+			#cutDeepScale#,     
+			#symmetryId#,       
+			#polishineId#,      
+			#fluorescenceId#,   
+			#waistlineId#,      
+			#vertexId#,         
+			#factoryFee#,       
+			#factoryFeePrice#,  
+			#mainWeight#,       
+			#mainStoneNum#,     
+			#partStoneWeight#,  
+			#partStoneContent#, 
+			#partStoneNum#,     
+			#zodiac#,           
+			#allQty#,           
+			#avgNum#,           
+			#isUnder_3fen#,     
+			#luckyDsc#,         
+			#inlayno#,          
+			#updatedate#,       
+			#createuserid#,     
+			#createdate#,       
+			#factoryStyleId#,   
+			#approvaluserid#,   
+			#approvaldate#,     
+			#srcBillNo#,        
+			#srcBillId#,        
+			#state#,            
+			#consignmentType#,  
+			#factoryFeeType#,   
+			#isOldOtc#,         
+			#partContent#,      
+			#luckyWord#,        
+			#isTearStone#,      
+			#styleType#,        
+			#isMutiPart#,       
+			#styleOrnaId#,      
+			#issuchinda#,       
+			#themeCoefficient#, 
+			#ncoefficient#,     
+			#calcpriceNo#,      
+			#ornaBarcode#,      
+			#customizeNo#,      
+			#bracketStyleId#,   
+			#isDblLabel#,   		
+			#inivFlag#,       	
+			#oldOrnaCode#, 
+			#srcBillCode#,     
+			#costUnit#,
+			#materialId# ,
+			#lockFlag#   ,
+			#colorGradeIdXq#,
+			#cleanIdXq#,
+			#inivCost# ,
+			#factoryOrnaCode#,
+			#privateType#,
+            #fixedGoldPrice#
+		) 
+	</insert>
+	<update id="MaterIniv.updateMaterIniv" parameterClass="MaterIniv">
+		update jat_mater_iniv set            
+			NO=                #no#,               
+			ALLOW_INIV_TYPE=   #allowInivType#,    
+			STOCK_ID=          #stockId#,          
+			INIV_ORG=          #inivOrg#,          
+			INIV_DIRECTION=    #inivDirection#,    
+			INIV_DATE=         #inivDate#,         
+			STOCK_ORG=         #stockOrg#,         
+			PRE_ALLOT_ORG=     #preAllotOrg#,      
+			DEPT_ID=           #deptId#,           
+			SALESMAN=          #salesman#,         
+			NOTES=             #notes#,            
+			HANDOVER_BILL_ID=  #handoverBillId#,   
+			VENDER_ID=         #venderId#,         
+			ARTICLE_TYPE_ID=   #articleTypeId#,    
+			ITEM_CLASS_ID=     #itemClassId#,      
+			ORNA_CLASS_ID=     #ornaClassId#,      
+			ANALYSIS_ARANGE_ID=#analysisArangeId#, 
+			STYLE_ITEM_ID=     #styleItemId#,      
+			STYLE_MIDDLE_ID=   #styleMiddleId#,    
+			STYLE_ID=          #styleId#,          
+			UNIT_ID=           #unitId#,           
+			QUANTITY=          #quantity#,         
+			ORNA_NAME=         #ornaName#,         
+			ORNA_CODE=         #ornaCode#,         
+			SIZE_ID=           #sizeId#,           
+			IS_CONSIGN=        #isConsign#,        
+			IS_CUSTOM=         #isCustom#,         
+			COST_PRICE=        #costPrice#,        
+			TOTAL_COST=        #totalCost#,        
+			SMALL_LABEL_TYPE=  #smallLabelType#,   
+			DECIMAL_NUM=       #decimalNum#,       
+			TRACK_NAME=        #trackIame#,        
+			IDENT_ID=          #identId#,          
+			HRD_CERT=          #hrdCert#,          
+			GIA_CERT=          #giaCert#,          
+			IGI_CERT=          #igiCert#,          
+			AGS_CERT=          #agsCert#,          
+			TOTAL_NUM=         #totalNum#,         
+			QUALITY_ID=        #qualityId#,        
+			BASIC_PRICE=       #basicPrice#,       
+			GROUPS=            #groups#,           
+			POS_AMOUNT=        #posAmount#,        
+			SPECIAL_WEIGHT=    #specialWeight#,    
+			WEIGHT=            #weight#,           
+			SUMMARY_ID=        #summaryId#,        
+			NUCLEAR_BILL_ID=   #nuclearBillId#,    
+			MAIN_MODIFICATION= #mainModification#, 
+			MAIN_SHAPE_ID=     #mainShapeId#,      
+			MAIN_COLOR_GRADE_ID=#mainColorGradeId#, 
+			CLEAN_ID=          #cleanId#,          
+			COLOR_ID=          #colorId#,          
+			CUT_ID=            #cutId#,            
+			BRACKETCOLOR_ID=   #bracketcolorId#,   
+			WEAR_ID=           #wearId#,           
+			PRICE_ATTR_GROUP=  #priceAttrGroup#,   
+			QLTY_ID=           #qltyId#,           
+			SPECIAL_WORK_PRICE=#specialWorkPrice#, 
+			STRING_WORK_PRICE= #stringWorkPrice#,  
+			CUT_WIDE_SCALE=    #cutWideScale#,     
+			CUT_DEEP_SCALE=    #cutDeepScale#,     
+			SYMMETRY_ID=       #symmetryId#,       
+			POLISHINE_ID=      #polishineId#,      
+			FLUORESCENCE_ID=   #fluorescenceId#,   
+			WAISTLINE_ID=      #waistlineId#,      
+			VERTEX_ID=         #vertexId#,         
+			FACTORY_FEE=       #factoryFee#,       
+			FACTORY_FEE_PRICE= #factoryFeePrice#,  
+			MAIN_WEIGHT=       #mainWeight#,       
+			MAIN_STONE_NUM=    #mainStoneNum#,     
+			PART_STONE_WEIGHT= #partStoneWeight#,  
+			PART_STONE_CONTENT=#partStoneContent#, 
+			PART_STONE_NUM=    #partStoneNum#,     
+			ZODIAC=            #zodiac#,           
+			ALL_QTY=           #allQty#,           
+			AVG_NUM=           #avgNum#,           
+			IS_UNDER_3FEN=     #isUnder_3fen#,     
+			LUCKY_DSC=         #luckyDsc#,         
+			INLAYNO=           #inlayno#,          
+			UPDATEDATE=        #updatedate#,       
+			CREATEUSERID=      #createuserid#,     
+			CREATEDATE=        #createdate#,       
+			FACTORY_STYLE_ID=  #factoryStyleId#,   
+			APPROVALUSERID=    #approvaluserid#,   
+			APPROVALDATE=      #approvaldate#,     
+			SRC_BILL_NO=       #srcBillNo#,        
+			SRC_BILL_ID=       #srcBillId#,
+			CONSIGNMENT_TYPE=  #consignmentType#,  
+			FACTORY_FEE_TYPE=  #factoryFeeType#,   
+			IS_OLD_OTC=        #isOldOtc#,         
+			PART_CONTENT=      #partContent#,      
+			LUCKY_WORD=        #luckyWord#,        
+			IS_TEAR_STONE=     #isTearStone#,      
+			STYLE_TYPE=        #styleType#,        
+			IS_MUTI_PART=      #isMutiPart#,       
+			STYLE_ORNA_ID=     #styleOrnaId#,      
+			ISSUCHINDA=        #issuchinda#,       
+			THEME_COEFFICIENT= #themeCoefficient#, 
+			NCOEFFICIENT=      #ncoefficient#,     
+			CALCPRICE_NO=      #calcpriceNo#,      
+			ORNA_BARCODE=      #ornaBarcode#,      
+			CUSTOMIZE_NO=      #customizeNo#,      
+			BRACKET_STYLE_ID=  #bracketStyleId#,   
+			IS_DBL_LABEL=      #isDblLabel#,   		 
+			INIV_FLAG=         #inivFlag#,       	 
+			OLD_ORNA_CODE=     #oldOrnaCode#, 
+			SRC_BILL_CODE=     #srcBillCode#, 
+			COST_UNIT=     #costUnit#,
+			MATERIAL_ID=	#materialId#,
+			LOCK_FLAG=	#lockFlag# ,  
+			COLORGRADE_ID_XQ=	#colorGradeIdXq#,
+			CLEAN_ID_XQ=	#cleanIdXq#,
+			INIV_COST=		#inivCost#   ,
+			FACTORY_ORNA_CODE = #factoryOrnaCode#,
+			PRIVATE_TYPE = #privateType#,
+        FIXED_GOLD_PRICE = #fixedGoldPrice#
+			where  ID=#id#
+	</update>
+
+    <select id="MaterIniv.getFashionGoldPrice" parameterClass="string" resultClass="double">
+        select a.gold_price from  JAT_BASIC_FASHION_gold_price a where a.item_class_id = #value# and rownum=1
+    </select>
+</sqlMap>

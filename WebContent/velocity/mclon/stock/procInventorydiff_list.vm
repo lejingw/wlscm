@@ -1,0 +1,76 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" name="frm" method="post">
+	#set($cond = $form.condition)
+	#set($sourceNo = $cond.sourceNo)
+    <table class="title">
+    	<tr><td>差异单#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='返回盘点单' class='btn' id='btnBackList'/>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08030904','1')>
+			</td>
+		</tr>
+    </table>
+	<input type="hidden" id="user_action" name="user_action" value="showDiffBill"/>
+	<input type="hidden" name="sourceNo" value = "$!sourceNo"/>
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='30px'>序号</th>
+				<th width="60px">状态</th>
+                <th width="120px">差异单号</th>
+        		<th width="180px">组织</th>
+				<th width="120px">创建时间</th>
+                <th width="90px">创建人员</th>
+                <th width="60px">件数合计</th>
+        		<th width="60px">子库</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td>$velocityCounter</td>
+				<td style="color:blue;">$!DictUtil.getValue('status', $!map.status)
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="billid" value="$!map.billid"/>
+				</td>
+				<td><a href='javascript:toShowPage($!{map.billid});'>$!{map.billno}</a></td>
+				<td>$!BdCommon.getOrgName($!map.orgId)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.sumCount</td>
+				<td>$!DictUtil.getValue('invcode', $!map.stockId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+jQuery(function(){
+	
+	checkAll("chkall",'chk', true)
+	altRowCSS('tbl');//为列表添加换行样式
+	
+	jQuery("#btnBackList").click(function(){
+		window.location = "procInventory.vm";
+	});
+});
+
+function toShowPage(billid) {
+	window.location = "procInventory.vm?user_action=toShowDiff&billid="+billid;
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportDiffExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("showDiffBill");
+}
+</script>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OrgGroup">
+	<typeAlias alias="OrgGroup" type="com.jatools.vo.basic.OrgGroup" />
+	
+	<resultMap id="result" class="OrgGroup">
+		<result property="groupId" column="group_id"/>
+		<result property="orgId" column="org_id"/>
+		<result property="itemClassId" column="item_class_id"/>
+		<result property="ornaClassId" column="orna_class_id"/>
+		<result property="groups" column="groups"/>
+		<result property="status" column="status"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+	</resultMap>
+	<sql id="OrgGroup_columns_all">
+		group_id, org_id, item_class_id, orna_class_id, 
+		groups, status, memo, create_date, create_id, update_date, update_id
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="OrgGroup.getOrgGroupPageData" resultMap="result" parameterClass="map">
+		select <include refid="OrgGroup_columns_all"/> from (select rownum rownum_ , AA.* from (
+			
+			select <include refid="OrgGroup_columns_all"/> from jat_basic_org_group a 
+			where 1 = 1
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.org_id, a.item_class_id, a.orna_class_id, a.groups
+			
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	
+	</select>
+	<!-- 获取总条数 -->
+    <select id="OrgGroup.getOrgGroupTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_org_group a
+		where 1 = 1
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and"> a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and"> a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+    <!-- 保存数据 -->
+    <insert id="OrgGroup.saveOrgGroup" parameterClass="OrgGroup">
+    	<selectKey resultClass="string" keyProperty="groupId" type="pre">
+			select JAT_BASIC_ORG_GROUP_SEQ.nextval as groupId from dual
+		</selectKey>
+		insert into jat_basic_org_group(group_id, org_id, item_class_id, orna_class_id, groups, status, memo, create_date, create_id, update_date, update_id)
+		 values(#groupId#, #orgId#, #itemClassId#, #ornaClassId#, #groups#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="OrgGroup.getOrgGroup" resultClass="OrgGroup" resultMap="result" parameterClass="string">
+    	select <include refid="OrgGroup_columns_all"/> from jat_basic_org_group a where a.group_id = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="OrgGroup.updateOrgGroup" parameterClass="OrgGroup">
+		update jat_basic_org_group a set 
+			a.org_id = #orgId#, 
+			a.item_class_id = #itemClassId#, a.orna_class_id = #ornaClassId#, 
+			a.groups = #groups#, a.memo = #memo#, 
+			a.update_date = #updateDate#, a.update_id = #updateId#
+		where a.group_id = #groupId#
+	</update>
+	<delete id="OrgGroup.deleteOrgGroup" parameterClass="string">
+		delete jat_basic_org_group a where a.group_id = #value#
+	</delete>
+	
+	<select id="OrgGroup.selectOrgGroupCount" parameterClass="OrgGroup" resultClass="int">
+		select count(1) from jat_basic_org_group a
+		where 1 = 1
+			and a.org_id = #orgId# 
+			and a.item_class_id = #itemClassId#
+			and a.orna_class_id = #ornaClassId#
+			<isNotEmpty property="groupId" prepend="and"> <![CDATA[a.group_id <> #groupId#]]> </isNotEmpty>
+	</select>
+	
+	
+	<sql id="OrgGroup_orgId">
+		select  #dest# as org_id, a.item_class_id, a.orna_class_id, a.groups
+		from jat_basic_org_group a where a.org_id = #source#
+	</sql>
+	
+	<sql id="OrgGroup_itemClass">
+		select a.org_id, #dest# as item_class_id, a.orna_class_id, a.groups
+		from jat_basic_org_group a where a.item_class_id = #source#
+	</sql>
+	
+	<sql id="OrgGroup_ornaClass">
+		select  a.org_id, a.item_class_id, #dest# as orna_class_id, a.groups
+		from jat_basic_org_group a where a.orna_class_id = #source#
+	</sql>
+	
+	<insert id="OrgGroup.CopyOrgGroup" parameterClass="map">
+		insert into jat_basic_org_group (
+			group_id, 
+			org_id, item_class_id, orna_class_id, groups, 
+			status, create_date, create_id, update_date, update_id
+		)
+		select 
+			jat_basic_org_group_seq.nextval, 
+			aa.org_id, aa.item_class_id, aa.orna_class_id, aa.groups,
+			1, #createDate#, #createId#, #updateDate#, #updateId#
+		from (
+			<isEqual property="type" compareValue="org"> <include refid="OrgGroup_orgId"/> </isEqual>
+			<isEqual property="type" compareValue="itemClass"> <include refid="OrgGroup_itemClass"/> </isEqual>
+			<isEqual property="type" compareValue="ornaClass"> <include refid="OrgGroup_ornaClass"/> </isEqual>
+		) aa 
+		where not exists (
+		   select 1 from jat_basic_org_group b 
+		   where 1=1
+		    and aa.org_id = b.org_id
+		    and aa.item_class_id = b.item_class_id
+		    and aa.orna_class_id = b.orna_class_id
+		)
+	</insert>
+	
+</sqlMap>

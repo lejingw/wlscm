@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="StandardDispatch">
+	<select id='StandardDispatch.getStandardDispatchPageData' parameterClass='map' resultClass="com.jatools.vo.move.StandardDispatch">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.headid as "headid",
+			       a.billno as "billno",
+			       decode((select count(1)
+			                from jat_pl_dispatch_condition b
+			               where b.status = 1
+			                 and b.src_bill_code = 'SD'
+			                 and b.gather_head_id = a.headid),
+			              0,
+			              0,
+			              1) as "lockFlag",
+			       (select wm_concat(b.create_id)
+			                from jat_pl_dispatch_condition b
+			               where b.status = 1
+			                 and b.src_bill_code = 'SD'
+			                 and b.gather_head_id = a.headid) as "lockUserIds",
+			       a.create_id   as "createId",
+			       a.create_date as "createDate",
+			       a.update_id   as "updateId",
+			       a.update_date as "updateDate",
+			       a.status      as "status"
+			  from jat_pl_standard_dispatch a
+			 where a.status in(1,8) <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			 order by a.headid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+    <select id="StandardDispatch.getStandardDispatchTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_standard_dispatch a
+			 where a.status in(1,8) <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	<select id='StandardDispatch.getStandardDispatch' parameterClass='string' resultClass="com.jatools.vo.move.StandardDispatch">
+		select a.headid as "headid",
+		       a.billno as "billno",
+		       a.create_id   as "createId",
+		       a.create_date as "createDate",
+		       a.update_id   as "updateId",
+		       a.update_date as "updateDate",
+		       a.status      as "status"
+		  from jat_pl_standard_dispatch a
+		where a.headid = #value#
+	</select>
+    <!-- 根据饰品编码获取配货饰品信息 -->
+    <select id="StandardDispatch.getStandardDispatchOrnaInfo" resultClass="com.jatools.vo.move.StandardDispatchOrna" parameterClass="map">
+    	select a.orna_code as "ornaCode",
+		       a.item_class_id as "itemClassId",
+		       a.orna_class_id as "ornaClassId",
+		       a.org_id as "orgId",
+		       a.stock_id as "stockId",
+		       a.is_material as "materialFlag",
+		       a.alaysis_id as "analysisId",
+		       e.summarydescription as "analysisName",
+		       b.styleitemclass as "styleItemClassId",
+		       b.stylemiddleclass as "styleMiddleClassId",
+		       b.styleornaclass as "styleOrnaClassId",
+		       a.style_id as "styleId",
+		       b.stylename as "styleName",
+		       b.isbiggraph as "bigGraph",
+		       a.main_color_grade_id as "colorGradeId",
+		       a.clean_id as "cleanId",
+		       a.color_grade_grade_id as "colorGradeGradeId",
+		       a.clean_grade_id as "cleanGradeId",
+		       decode(c.size_name, 'ZZ', null, a.size_id) as "sizeId",
+		       decode(c.size_name, 'ZZ', null, c.size_num) as "sizeName",
+		       a.quality_id as "qualityId",
+		       a.bracketcolor_id as "bracketcolorId",
+		       a.sale_unit_id as "unitId",
+		       nvl(a.basic_price, 0) as "basicPrice",
+		       nvl(a.pos_amount,0) as "posAmount",
+		       a.state as "status"
+		  from ic_mater_active a
+		  left join jas_bd_style b
+		    on a.style_id = b.styleid
+		  left join jas_bd_size c
+		    on a.size_id = c.size_id
+		  left join jas_bd_analysis_unit d
+		    on a.item_class_id = d.item_class_id
+		   and a.orna_class_id = d.orna_class_id
+		   and d.archiveflag = '0'
+		  left join jas_bd_analysis_arange e
+		    on a.alaysis_id = e.analysis_arange_id
+    	where <isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+    <!-- 配货sql -->
+	<select id='StandardDispatch.getMatchDispatchOrgPageData' parameterClass='map' resultClass="com.jatools.vo.move.StandardDispatchOrg">
+        select * from (select rownum rownum_ , ff.* from (
+        <![CDATA[select to_char(aaa.dispatch_flag) as "dispatchFlag",
+                   to_char(case
+                             when aaa.dispatch_flag <> 0 then
+                               (case
+                                when (aaa.stock_num + aaa.onway_num + aaa. dispatch_num) <
+                                     aaa.disp_min then
+                                    10000+(aaa.stock_num + aaa.onway_num + aaa. dispatch_num) / aaa.disp_min
+                                else
+                                    20000+(aaa.stock_num + aaa.onway_num + aaa. dispatch_num) /aaa.disp_max
+                              end)
+                             else
+                              0
+                           end) as "coef",
+                   to_char(aaa.disp_min) as "dispMin",
+                   to_char(aaa.disp_max) as "dispMax",
+                   to_char(aaa.stock_num) as "stockNum",
+                   to_char(aaa.onway_num) as "onwayNum",
+                   to_char(aaa.dispatch_num) as "dispatchNum",
+                   to_char(aaa.org_id) as "orgId"
+              from (select aa.org_id,
+                           aa.new_pos_money,
+                           case
+                             when aa.style_flag = 1 then
+                              2
+                             when nvl2(bb.billid, 1, 0) = 1 then
+                              1
+                             else
+                              0
+                           end as dispatch_flag,
+                           case
+                             when aa.style_flag = 1 then
+                              aa.disp_min
+                             when nvl2(bb.billid, 1, 0) = 1 then
+                              bb.disp_min
+                             else
+                              0
+                           end as disp_min,
+                           case
+                             when aa.style_flag = 1 then
+                              aa.disp_max
+                             when nvl2(bb.billid, 1, 0) = 1 then
+                              bb.disp_max
+                             else
+                              0
+                           end as disp_max,
+                           case
+                             when aa.style_flag = 1 then
+                                 (select count(1)
+                                    from ic_mater_active cc
+                                   where cc.org_id = aa.org_id
+                                     and cc.stock_id = 1
+                                     and cc.state = 900
+                                     and cc.item_class_id = $itemClassId$
+                                     and cc.orna_class_id = $ornaClassId$
+                                     and cc.alaysis_id = $analysisId$
+                                     and cc.style_id = $styleId$)
+                               when nvl2(bb.billid, 1, 0) = 1 then
+                                 (select count(1)
+                                    from ic_mater_active cc
+                                   where cc.org_id = aa.org_id
+                                     and cc.stock_id = 1
+                                     and cc.state = 900
+                                     and cc.item_class_id = $itemClassId$
+                                     and cc.orna_class_id = $ornaClassId$
+                                     and cc.alaysis_id = $analysisId$
+                                     and decode((select d.org_type
+                                                   from jat_pl_basic_special_diam_org d
+                                                  where d.org_id = cc.org_id),
+                                                 1,
+                                                  $basicPrice$,
+                                                 (select e.store_price
+                                                    from jat_pl_basic_special_diam e
+                                                   where e.item_class_id = $itemClassId$
+                                                     and e.orna_class_id = $ornaClassId$
+                                                     and e.analysis_id = $analysisId$
+                                                     and e.start_basic_price <= $basicPrice$
+                                                     and e.end_basic_price >=  $basicPrice$)) = cc.pos_amount
+                                   )
+                                 else
+                                   0
+                               end as stock_num,
+                           case
+                             when aa.style_flag = 1 then
+                                 (select count(1)
+                                    from jav_pl_onway_statistics_grade dd
+                                   where dd.org_id = aa.org_id
+                                     and dd.item_class_id = $itemClassId$
+                                     and dd.orna_class_id = $ornaClassId$
+                                     and dd.analysis_id = $analysisId$
+                                     and dd.style_id = $styleId$)
+                              when nvl2(bb.billid, 1, 0) = 1 then
+                                   (select count(1)
+                                    from jav_pl_onway_statistics_grade dd
+                                   where dd.org_id = aa.org_id
+                                     and dd.item_class_id = $itemClassId$
+                                     and dd.orna_class_id = $ornaClassId$
+                                     and dd.analysis_id = $analysisId$
+                                     and $basicPrice$ = dd.pos_amount
+                                    )
+                              else
+                                0
+                              end as onway_num,
+                              case
+                                when aa.style_flag = 1 then
+                                   (select count(1)
+                                    from jat_pl_dispatch_orna_log ee
+                                   where ee.org_id = aa.org_id
+                                     and ee.item_class_id = $itemClassId$
+                                     and ee.orna_class_id = $ornaClassId$
+                                     and ee.analysis_id = $analysisId$
+                                     and ee.style_id = $styleId$
+                                     and ee.status = 2
+                                     and ee.src_bill_code = 'SD')
+                               when nvl2(bb.billid, 1, 0) = 1 then
+                                 (select count(1)
+                                    from jat_pl_dispatch_orna_log ee
+                                   where ee.org_id = aa.org_id
+                                     and ee.item_class_id = $itemClassId$
+                                     and ee.orna_class_id = $ornaClassId$
+                                     and ee.analysis_id = $analysisId$
+                                     and $basicPrice$ = ee.pos_amount
+                                    and ee.status = 2
+                                     and ee.src_bill_code = 'SD')
+                                else
+                                  0
+                              end as dispatch_num
+                      from (select a.org_id,
+                                   nvl2(b.billid, 1, 0) as style_flag,
+                                   b.disp_min,
+                                   b.disp_max,
+                                   (case
+                                     when nvl((select d.org_type
+                                                from jat_pl_basic_special_diam_org d
+                                               where d.org_id = a.org_id),
+                                              1) = 1 then
+                                      $basicPrice$
+                                     else
+                                      nvl((select e.store_price
+                                            from jat_pl_basic_special_diam e
+                                           where e.item_class_id = $itemClassId$
+                                             and e.orna_class_id = $ornaClassId$
+                                             and e.analysis_id = $analysisId$
+                                             and e.start_basic_price <= $basicPrice$
+                                             and e.end_basic_price >= $basicPrice$),
+                                          $basicPrice$)
+                                   end) as new_pos_money
+                              from jas_sm_org a
+                              left join jat_pl_basic_dispatch_style b
+                                on b.org_id = a.org_id
+                               and b.item_class_id = $itemClassId$
+                               and b.orna_class_id = $ornaClassId$
+                               and b.analysis_id = $analysisId$
+                               and b.style_id = $styleId$
+                             where a.org_type = 1
+                               and a.isfranchise = 0
+                               and not exists (select 1
+                                      from jat_sys_dict_item c
+                                     where c.entry_code = 'hqorgs'
+                                       and a.org_id = c.item_key)) aa
+                      left join jat_pl_basic_dispatch_price bb
+                        on bb.org_id = aa.org_id
+                       and bb.item_class_id = $itemClassId$
+                       and bb.orna_class_id = $ornaClassId$
+                       and bb.analysis_id = $analysisId$
+                       and bb.price_start <= aa.new_pos_money
+                       and bb.price_end >= aa.new_pos_money) aaa
+                       where aaa.dispatch_flag <> 0
+             order by 1 desc, 2, 3 desc, 4 desc ]]>
+        ) ff ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+    <select id="StandardDispatch.getMatchDispatchOrgTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jas_sm_org a
+                 where a.org_type = 1 and a.isfranchise=0
+                   and not exists (select 1
+                          from jat_sys_dict_item c
+                         where c.entry_code = 'hqorgs'
+                           and a.org_id = c.item_key)
+	</select>
+	<insert id="StandardDispatch.saveDispatchOrnaLog" parameterClass="map">
+		<selectKey keyProperty="id" type="pre" resultClass="string">
+    		select jat_pl_dispatch_orna_log_seq.nextval as id from dual
+    	</selectKey>
+    	insert into jat_pl_dispatch_orna_log(ID,ORNA_CODE,GATHER_HEAD_ID,GATHER_LINE_ID,ORDER_HEAD_ID,ORDER_LINE_ID,ORG_ID,
+    		ITEM_CLASS_ID,ORNA_CLASS_ID,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,STATUS,NOW_QTY,ALL_QTY,REAL_TOTAL_COST, OLD_FLAG,
+    		orna_dsc, unit_id, style_id, style_name, main_weight, part_weight, size_id, size_name, basic_price, dispatch_flag, color_grade_id, clean_id,
+    		is_perfect_match, match_rule_dsc, analysis_id, analysis_name, quality_id, bracketcolor_id, POS_AMOUNT, src_bill_code)
+		select #id#, a.orna_code, #gheadid#, null, null, null, #orgId#,
+			a.item_class_id, a.orna_class_id, #userid#, #date#, #userid#, #date#, 2, a.now_qty, a.all_qty, a.real_total_cost, 0,
+			a.orna_dsc, a.sale_unit_id, a.style_id, b.stylename, a.main_weight, a.part_weight, a.size_id, c.size_name, a.basic_price, #dispatchFlag#, a.main_color_grade_id, a.clean_id,
+			1, null, a.alaysis_id,  d.summarydescription, a.quality_id, a.bracketcolor_id, a.pos_amount, 'SD'
+		 from ic_mater_active a
+			left join jas_bd_style b on a.style_id = b.styleid
+			left join jas_bd_size c on a.size_id = c.size_id
+			left join jas_bd_analysis_arange d on a.alaysis_id = d.analysis_arange_id
+		where a.orna_code = #ornaCode#
+	</insert>
+	
+	<sql id="StandardDispatch.getShowDispatchedPageDataCD">
+		where a.status in (2,3,4) and a.src_bill_code = 'SD' and a.gather_head_id = #gheadid#
+			<isNotEmpty property="conditionId"> and exists(select 1 from jat_pl_dispatch_condition f where f.src_bill_code = 'SD' and f.id = #conditionId# and a.item_class_id = f.item_class_id and a.orna_class_id = f.orna_class_id)</isNotEmpty>
+			<isNotEmpty property="itemClassId">and a.item_class_id = #itemClassId#</isNotEmpty>
+			<isNotEmpty property="ornaClassId">and a.orna_class_id = #ornaClassId#</isNotEmpty>
+			<isNotEmpty property="analysisId">and a.analysis_id = #analysisId#</isNotEmpty>
+			<isNotEmpty property="styleItemClassId">and e.styleitemclass = #styleItemClassId#</isNotEmpty>
+			<isNotEmpty property="styleMiddleClassId">and e.stylemiddleclass = #styleMiddleClassId#</isNotEmpty>
+			<isNotEmpty property="styleOrnaClassId">and e.styleornaclass = #styleOrnaClassId#</isNotEmpty>
+			<isNotEmpty property="styleId">and e.styleid = #styleId#</isNotEmpty>
+	</sql>
+	<!-- 获取已分配饰品分页数据信息 -->
+	<select id="StandardDispatch.getShowDispatchedPageData" parameterClass="map" resultClass="com.jatools.vo.stock.DispatchOrnaLog">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.id as "id", a.orna_code as "ornaCode", a.orna_dsc as "ornaDsc", a.unit_id as "unitId", a.style_id as "styleId", a.style_name as "styleName", e.isbiggraph as "bigGraph", a.color_grade_id as "colorGradeId", a.clean_id as "cleanId", a.all_qty as "allQty", a.main_weight as "mainWeight", a.part_weight as "partWeight", a.size_name as "sizeName", a.basic_price as "basicPrice", a.status as "status",
+				<![CDATA[decode(b.is_lock, 1, a.pos_amount, a.basic_price * (select nvl(max(d.move_coef), 1) from jat_move_salecoef_head c, jat_move_salecoef_line d
+	                where c.headid = d.headid and c.in_org_id = a.org_id and c.item_class_id = b.item_class_id
+	                  and c.orna_class_id = b.orna_class_id and (instr(',' || c.style_item_ids || ',', ',' || e.styleitemclass || ',') > 0 or c.style_item_ids is null)
+	                  and d.mainwt_str <= b.main_weight and b.main_weight < d.mainwt_end)) as "newPosMoney", nvl(a.is_perfect_match,0) as "isPerfectMatch", a.match_rule_dsc as "matchRuleDsc", a.dispatch_flag as "dispatchFlag",
+	                  a.org_id as "orgId"
+	                  ]]>
+			from jat_pl_dispatch_orna_log a left join ic_mater_active b on a.orna_code = b.orna_code left join jas_bd_style e on a.style_id = e.styleid
+			<include refid="StandardDispatch.getShowDispatchedPageDataCD"/>
+			order by a.id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="StandardDispatch.getShowDispatchedTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_dispatch_orna_log a left join ic_mater_active b on a.orna_code = b.orna_code left join jas_bd_style e on a.style_id = e.styleid <include refid="StandardDispatch.getShowDispatchedPageDataCD"/>
+	</select>
+	<update id="StandardDispatch.deleteDispatchOrnaLog" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.status = 0, a.update_id = #userid#, a.update_date = #date#
+		where a.gather_head_id = #gheadid# and a.orna_code = #ornaCode# and a.status = 2 and a.src_bill_code = 'SD'
+	</update>
+	<update id="StandardDispatch.exchangeDispatching" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.org_id = #orgId#, a.update_id = #userid#, a.update_date = #date#
+		where a.gather_head_id = #gheadid# and a.orna_code = #ornaCode# and a.status = 2
+	</update>
+	<insert id='StandardDispatch.saveStandardDispatch' parameterClass="com.jatools.vo.move.StandardDispatch">
+		<selectKey keyProperty="headid" type="pre" resultClass="string">
+    		select jat_pl_standard_dispatch_seq.nextval as headid from dual
+    	</selectKey>
+    	insert into jat_pl_standard_dispatch(headid, billno, create_id, create_date, update_id, update_date, status)
+		values(#headid#, #billno#, #createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id='StandardDispatch.deleteStandardDispatch' parameterClass="map">
+		update jat_pl_standard_dispatch a set a.status = 0, a.update_id = #userid#, a.update_date = #date#
+		where a.headid = #gheadid#
+	</update>
+	<update id="StandardDispatch.deleteDispatchOrnaLogByGheadid" parameterClass="map">
+		update jat_pl_dispatch_orna_log a set a.status = 0, a.update_id = #userid#, a.update_date = #date#
+		where a.gather_head_id = #gheadid# and a.status = 2 and a.src_bill_code = 'SD'
+	</update>
+	<select id="StandardDispatch.getCreateMovebillInorgs" parameterClass="string" resultClass="string">
+		select distinct a.org_id from jat_pl_dispatch_orna_log a where a.status = 2 and a.src_bill_code = 'SD' and a.gather_head_id in ($value$)
+	</select>
+	<select id="StandardDispatch.getOrnaClodeFromMove" parameterClass="map" resultClass="string">
+		select a.orna_code
+		  from jat_pl_dispatch_orna_log a
+		 where a.status = 2
+		   and a.src_bill_code = 'SD'
+		   and a.gather_head_id in ($gheadids$)
+		   and a.org_id = #inOrgId#
+	</select>
+	<update id="StandardDispatch.updateDispatchOrnaStatusToMoved" parameterClass="map">
+		 update jat_pl_dispatch_orna_log a
+		   set a.status = 3, a.update_id = #userid#, a.update_date = #date#
+		 where a.status = 2
+		   and a.src_bill_code = 'SD'
+		   and a.gather_head_id in ($gheadids$)
+	</update>
+	<update id="StandardDispatch.closeStandardDispatch" parameterClass="map">
+		update jat_pl_standard_dispatch a set a.status = 8, a.update_id = #userid#, a.update_date = #date#
+		where a.headid in ($gheadids$)
+	</update>
+    <!-- 从标准配货记录表中获取所有大类 -->
+    <select id="StandardDispatch.getItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="string">
+    	select a.item_class_id as "value", a.item_class_dsc as "text" from jas_bd_item_class a
+		where exists (select 1 from jat_pl_dispatch_orna_log b where a.item_class_id = b.item_class_id and b.gather_head_id = #value# and b.src_bill_code='SD')
+		order by a.sort, a.item_class_code
+    </select>
+    <!-- 从标准配货记录表中获取小类 -->
+    <select id="StandardDispatch.getOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_dsc as "text" from jas_bd_orna_class a where exists(
+    		select 1 from jat_pl_dispatch_orna_log b where a.orna_class_id = b.orna_class_id
+			and b.gather_head_id = #headid# and b.src_bill_code='SD' and b.item_class_id = #itemClassId#
+		) order by a.sort, a.orna_class_code
+    </select>
+    <!-- 从标准配货记录表中获取分析范围 -->
+    <select id="StandardDispatch.getAnalysisForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.analysis_arange_id as "value", a.summarydescription as "text" from jas_bd_analysis_arange a where exists(
+			select 1 from jat_pl_dispatch_orna_log b where a.analysis_arange_id = b.analysis_id
+			and b.gather_head_id = #headid# and b.src_bill_code='SD' and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId#
+		) order by a.summarydescription, a.analysis_arange_code
+    </select>
+    <!-- 从标准配货记录表中获取款式大类 -->
+    <select id="StandardDispatch.getStyleItemClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+		select a.item_class_id as "value", a.item_class_name as "text"
+		  from jas_bd_style_item_class a
+		 where exists (select 1
+		          from jat_pl_dispatch_orna_log b, jas_bd_style c
+		         where c.styleitemclass = a.item_class_id
+		            and b.style_id = c.styleid
+			        and b.gather_head_id = #headid#
+			        and b.src_bill_code='SD'
+			        and b.item_class_id = #itemClassId#
+			        and b.orna_class_id = #ornaClassId#
+			        and b.analysis_id = #analysisId#
+		        )
+		 order by a.item_class_code, a.item_class_id
+    </select>
+    <!-- 从标准配货记录表中获取款式中类 -->
+    <select id="StandardDispatch.getStyleMiddleClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.middle_class_id as "value", a.middle_class_name as "text" from jas_bd_style_middle_class a where exists(
+			select 1 from jat_pl_dispatch_orna_log b, jas_bd_style c where c.stylemiddleclass = a.middle_class_id and b.style_id = c.styleid
+			and b.gather_head_id = #headid# and b.src_bill_code='SD' and b.item_class_id = #itemClassId# and b.orna_class_id = #ornaClassId# and b.analysis_id = #analysisId#
+			and c.styleitemclass = #styleItemClassId#
+		) order by a.middle_class_code, a.middle_class_id
+    </select>
+    <!-- 从标准配货记录表中获取款式小类 -->
+    <select id="StandardDispatch.getStyleOrnaClassForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.orna_class_id as "value", a.orna_class_name as "text"
+		  from jas_bd_style_orna_class a
+		 where exists (select 1
+		          from jat_pl_dispatch_orna_log b, jas_bd_style c
+		         where c.styleornaclass = a.orna_class_id
+		           and b.style_id = c.styleid
+		           and b.gather_head_id = #headid#
+		           and b.src_bill_code='SD'
+		           and b.item_class_id = #itemClassId#
+		           and b.orna_class_id = #ornaClassId#
+		           and b.analysis_id = #analysisId#
+		           and c.styleitemclass = #styleItemClassId#
+		           and c.stylemiddleclass = #styleMiddleClassId#)
+		 order by a.orna_class_code, a.orna_class_name
+    </select>
+    <!-- 从标准配货记录表中获取款式 -->
+    <select id="StandardDispatch.getStyleIdForSlt" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	select a.styleid as "value", a.stylename as "text" from jas_bd_style a where exists(
+			select 1 from jat_pl_dispatch_orna_log b, jas_bd_style c where b.style_id = a.styleid and b.style_id = c.styleid and b.gather_head_id = #headid# and b.src_bill_code='SD' and b.item_class_id = #itemClassId#
+			and b.orna_class_id = #ornaClassId# and b.analysis_id = #analysisId#
+			and c.styleitemclass = #styleItemClassId# and c.stylemiddleclass = #styleMiddleClassId# and c.styleornaclass = #styleOrnaClassId#
+		) order by a.stylename
+    </select>
+</sqlMap>

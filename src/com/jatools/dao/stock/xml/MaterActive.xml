@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MaterActive">
+	<resultMap id="MaterActive.MaterActiveResult" class="com.jatools.vo.stock.MaterActive">
+		<result property="ornaCode"			column="ORNA_CODE"/>
+		<result property="ornaBarcode"		column="ORNA_BARCODE"/>
+		<result property="ornaDsc"			column="ORNA_DSC"/>
+		<result property="stockId"			column="STOCK_ID"/>
+		<result property="groups"			column="GROUPS"/>
+		<result property="styleId"			column="STYLE_ID"/>
+		<result property="nowQty"			column="NOW_QTY"/>
+		<result property="allQty"			column="ALL_QTY"/>
+		<result property="itemClassId"		column="ITEM_CLASS_ID"/>
+		<result property="ornaClassId"		column="ORNA_CLASS_ID"/>
+		<result property="alaysisId"		column="ALAYSIS_ID"/>
+		<result property="styleNoId"		column="STYLE_NO_ID"/>
+		<result property="qualityId"		column="QUALITY_ID"/>
+		<result property="tagType"			column="TAG_TYPE"/>
+		<result property="saleUnitId"		column="SALE_UNIT_ID"/>
+		<result property="buyUnitId"		column="BUY_UNIT_ID"/>
+		<result property="pricUnitId"		column="PRIC_UNIT_ID"/>
+		<result property="priceAttrGroup"	column="PRICE_ATTR_GROUP"/>
+		<result property="state"			column="STATE"/>
+		<result property="basicPrice"		column="BASIC_PRICE"/>
+		<result property="rebate"			column="REBATE"/>
+		<result property="rebateType"		column="REBATE_TYPE"/>
+		<result property="storeUnitCost"	column="STORE_UNIT_COST"/>
+		<result property="realUnitCost"		column="REAL_UNIT_COST"/>
+		<result property="posAmount"		column="POS_AMOUNT"/>
+		<result property="realTotalCost"	column="REAL_TOTAL_COST"/>
+		<result property="storeTotalCost"	column="STORE_TOTAL_COST"/>
+		<result property="productdate"		column="PRODUCTDATE"/>
+		<result property="oldResponsible"	column="OLD_RESPONSIBLE"/>
+		<result property="storeColor"		column="STORE_COLOR"/>
+		<result property="comStore"			column="COM_STORE"/>
+		<result property="storagedate"		column="STORAGEDATE"/>
+		<result property="toshopdate"		column="TOSHOPDATE"/>
+		<result property="nuclearBillId"	column="NUCLEAR_BILL_ID"/>
+		<result property="mainShapeId"		column="MAIN_SHAPE_ID"/>
+		<result property="colorId"			column="COLOR_ID"/>
+		<result property="mainWeight"		column="MAIN_WEIGHT"/>
+		<result property="partWeight"		column="PART_WEIGHT"/>
+		<result property="partContent"		column="PART_CONTENT"/>
+		<result property="cleanId"			column="CLEAN_ID"/>
+		<result property="mainColorGradeId"	column="MAIN_COLOR_GRADE_ID"/>
+		<result property="qltyId"			column="QLTY_ID"/>
+		<result property="stoneTotalNum"	column="STONE_TOTAL_NUM"/>
+		<result property="stoneNowNum"		column="STONE_NOW_NUM"/>
+		<result property="specialWorkPrice"	column="SPECIAL_WORK_PRICE"/>
+		<result property="stringWorkPrice"	column="STRING_WORK_PRICE"/>
+		<result property="summaryId"		column="SUMMARY_ID"/>
+		<result property="isConsign"		column="IS_CONSIGN"/>
+		<result property="isCustom"			column="IS_CUSTOM"/>
+		<result property="handoverBillId"	column="HANDOVER_BILL_ID"/>
+		<result property="manufacturerId"	column="MANUFACTURER_ID"/>
+		<result property="supplierId"		column="SUPPLIER_ID"/>
+		<result property="zodiac"			column="ZODIAC"/>
+		<result property="identId"			column="IDENT_ID"/>
+		<result property="factoryStyleId"	column="FACTORY_STYLE_ID"/>
+		<result property="storagePricAttrGroup"	column="STORAGE_PRIC_ATTR_GROUP"/>
+		<result property="rebateAmount"		column="REBATE_AMOUNT"/>
+		<result property="specialWeight"	column="SPECIAL_WEIGHT"/>
+		<result property="cutId"			column="CUT_ID"/>
+		<result property="cutWideScale"		column="CUT_WIDE_SCALE"/>
+		<result property="cutDeepScale"		column="CUT_DEEP_SCALE"/>
+		<result property="symmetryId"		column="SYMMETRY_ID"/>
+		<result property="polishineId"		column="POLISHINE_ID"/>
+		<result property="fluorescenceId"	column="FLUORESCENCE_ID"/>
+		<result property="waistlineId"		column="WAISTLINE_ID"/>
+		<result property="vertexId"			column="VERTEX_ID"/>
+		<result property="hrdCert"			column="HRD_CERT"/>
+		<result property="giaCert"			column="GIA_CERT"/>
+		<result property="igiCert"			column="IGI_CERT"/>
+		<result property="bracketcolorId"	column="BRACKETCOLOR_ID"/>
+		<result property="updatedate"		column="UPDATEDATE"/>
+		<result property="wearId"			column="WEAR_ID"/>
+		<result property="styleTypeId"		column="STYLE_TYPE_ID"/>
+		<result property="isMutiPart"		column="IS_MUTI_PART"/>
+		<result property="currencyPrice"	column="CURRENCY_PRICE"/>
+		<result property="currencyMoney"	column="CURRENCY_MONEY"/>
+		<result property="currencyTax"		column="CURRENCY_TAX"/>
+		<result property="tax"				column="TAX"/>
+		<result property="totalCurrencyTax"	column="TOTAL_CURRENCY_TAX"/>
+		<result property="sizeId"			column="SIZE_ID"/>
+		<result property="mainNum"			column="MAIN_NUM"/>
+		<result property="partNum"			column="PART_NUM"/>
+		<result property="materialId"		column="MATERIAL_ID"/>
+		<result property="orgId"			column="ORG_ID"/>
+		<result property="useQtyTemp"		column="USE_QTY_TEMP"/>
+		<result property="agsCert"			column="AGS_CERT"/>
+		<result property="realCost"			column="REAL_COST"/>
+		<result property="customizeNo"		column="CUSTOMIZE_NO"/>
+		<result property="isDblLabel"		column="IS_DBL_LABEL"/>
+		<result property="billCode"			column="BILL_CODE"/>
+		<result property="billNo"			column="BILL_NO"/>
+		<result property="isMaterial"		column="IS_MATERIAL"/>
+		<result property="materialType"		column="MATERIAL_TYPE"/>
+		<result property="colorGradeGradeId"	column="COLOR_GRADE_GRADE_ID"/>
+		<result property="cleanGradeId"		column="CLEAN_GRADE_ID"/>
+	</resultMap>
+	<sql id="MaterActive.columnall">
+		orna_code, orna_barcode, orna_dsc, stock_id, groups, style_id, now_qty, all_qty, item_class_id, orna_class_id, alaysis_id, style_no_id, quality_id, tag_type, sale_unit_id, buy_unit_id, pric_unit_id, price_attr_group, state, basic_price, rebate, rebate_type, store_unit_cost, real_unit_cost, pos_amount, real_total_cost, store_total_cost, productdate, old_responsible, store_color, com_store, storagedate, toshopdate, nuclear_bill_id, main_shape_id, color_id, main_weight, part_weight, part_content, clean_id, main_color_grade_id, qlty_id, stone_total_num, stone_now_num, special_work_price, string_work_price, summary_id, is_consign, is_custom, handover_bill_id, manufacturer_id, supplier_id, zodiac, ident_id, factory_style_id, storage_pric_attr_group, rebate_amount, special_weight, cut_id, cut_wide_scale, cut_deep_scale, symmetry_id, polishine_id, fluorescence_id, waistline_id, vertex_id, hrd_cert, gia_cert, igi_cert, bracketcolor_id, updatedate, wear_id, style_type_id, is_muti_part, currency_price, currency_money, currency_tax, tax, total_currency_tax, size_id, main_num, part_num, material_id, org_id, use_qty_temp, ags_cert, real_cost, customize_no, is_dbl_label, bill_code, bill_no, is_material, material_type, color_grade_grade_id, clean_grade_id
+	</sql>
+	<!-- 只根据饰品编码获取饰品信息 -->
+	<select id="MaterActive.getMaterActiveByOrnaCode" parameterClass="map" resultMap="MaterActive.MaterActiveResult">
+		select <include refid="MaterActive.columnall"/> from ic_mater_active a where a.orna_code = #ornaCode# and a.stock_id = 1
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+	</select>
+	<!-- 只根据饰品条码获取饰品信息 -->
+	<select id="MaterActive.getMaterActiveByBarCode" parameterClass="map" resultMap="MaterActive.MaterActiveResult">
+		select <include refid="MaterActive.columnall"/> from ic_mater_active a where a.orna_barcode = #barCode# and a.stock_id = 1
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+	</select>
+
+    <!-- 只根据饰品编码获取饰品信息 标签打印单 -->
+    <select id="MaterActive.getMaterActiveByOrnaCodeTagPrint" parameterClass="string" resultMap="MaterActive.MaterActiveResult">
+        select <include refid="MaterActive.columnall"/> from ic_mater_active a where a.orna_code = #value#
+    </select>
+
+	<!-- 标记现有量饰品状态为"保留"901 -->
+	<update id="MaterActive.markMaterActiveUsed" parameterClass="map">
+		update ic_mater_active a set a.state = 901, a.bill_code = #billCode#, a.bill_no = #billNo#
+		where a.orna_code = #ornaCode#
+	</update>
+	<!-- 标记现有量饰品状态为"有效"900 -->
+	<update id="MaterActive.markMaterActiveValid" parameterClass="string">
+		update ic_mater_active a set a.state = 900, a.bill_code = null, a.bill_no = null
+		where a.orna_code = #value#
+	</update>
+	
+	<!-- 从现有量表中移入非现有量表中 -->
+	<insert id="MaterActive.copyMaterActive2NoActive" parameterClass="string">
+		insert into ic_mater_noactive select * from ic_mater_active a where a.orna_code = #value# and a.state = 901
+	</insert>
+	<update id="MaterActive.deleteMaterActive" parameterClass="string">
+		delete from ic_mater_active a where a.orna_code = #value# 
+	</update>
+	
+	<resultMap id="MaterActive.MPackageResult" class="com.jatools.vo.stock.PackageMaterActive">
+		<result property="isConsign"		column="IS_CONSIGN"/>
+		<result property="isDblLabel"		column="IS_DBL_LABEL"/>
+		<result property="isMutiPart"		column="IS_MUTI_PART"/>
+		<result property="ornaBarcode"		column="ORNA_BARCODE"/>
+		<result property="itemClassId" 		column="item_class_id"/>
+		<result property="ornaClassId" 		column="orna_class_id"/>
+		<result property="styleId" 			column="style_id"/>
+		<result property="alaysisId" 		column="alaysis_id"/>
+		<result property="ornaCode" 		column="orna_code"/>
+		<result property="ornaDsc" 			column="orna_dsc"/>
+		<result property="saleUnitId" 		column="sale_unit_id"/>
+		<result property="nowQty" 			column="now_qty"/>
+		<result property="allQty" 			column="all_qty"/>
+		<result property="stoneNowNum" 		column="stone_now_num"/>
+		<result property="posAmount" 		column="pos_amount"/>
+		<result property="mainWeight" 		column="main_weight"/>
+		<result property="partWeight" 		column="part_weight"/>
+		<result property="realTotalCost" 	column="real_total_cost"/>
+		<result property="stockId" 			column="stock_id"/>
+	</resultMap>
+	
+	<resultMap id="MaterActive.MPackageResult2" class="com.jatools.vo.stock.PackageMaterActive">
+		<result property="isConsign"		column="IS_CONSIGN"/>
+		<result property="isDblLabel"		column="IS_DBL_LABEL"/>
+		<result property="isMutiPart"		column="IS_MUTI_PART"/>
+		<result property="ornaBarcode"		column="ORNA_BARCODE"/>
+		<result property="itemClassId" 		column="item_class_id" />
+		<result property="ornaClassId" 		column="orna_class_id" />
+		<result property="styleId" 			column="style_id" />
+		<result property="alaysisId" 		column="alaysis_id" />
+		<result property="ornaCode" 		column="orna_code" />
+		<result property="ornaDsc" 			column="orna_dsc" />
+		<result property="saleUnitId" 		column="sale_unit_id" />
+		<result property="nowQty" 			column="now_qty" />
+		<result property="allQty" 			column="all_qty" />
+		<result property="stoneNowNum" 		column="stone_now_num" />
+		<result property="posAmount" 		column="pos_amount" />
+		<result property="mainWeight" 		column="main_weight" />
+		<result property="partWeight" 		column="part_weight" />
+		<result property="realTotalCost" 	column="real_total_cost"/>
+		<result property="stockId"			column="stock_id"/>
+		<result property="isMaterial"		column="is_material"/>
+		<result property="groups"			column="groups"/>
+		<result property="orgId"			column="org_id"/>
+	</resultMap>
+	
+	<sql id="MaterActive.packageColumn">
+		item_class_id, orna_class_id, style_id, alaysis_id, orna_code, orna_dsc, orna_barcode, is_muti_part,
+		sale_unit_id, now_qty, all_qty, stone_now_num, pos_amount, main_weight, part_weight, is_dbl_label,
+		is_consign, real_total_cost, stock_id
+	</sql>
+	<sql id="MaterActive.packageColumn_1">
+		a.item_class_id, a.orna_class_id, a.style_id, a.alaysis_id, a.orna_code, a.orna_dsc, a.orna_barcode, a.is_muti_part, a.sale_unit_id, a.now_qty, a.all_qty, a.stone_now_num, a.pos_amount, a.main_weight, a.part_weight, a.is_dbl_label, a.is_consign, a.real_total_cost, a.stock_id
+	</sql>
+	
+	<sql id="MaterActive.packageColumn_2">
+		item_class_id as "itemClassId", orna_class_id as "ornaClassId", style_id as "styleId", alaysis_id as "alaysisId", 
+		orna_code as "ornaCode", orna_dsc as "ornaDsc", orna_barcode as "ornaBarcode", is_muti_part as "isMutiPart",
+		sale_unit_id as "saleUnitId", now_qty as "nowQty", all_qty as "allQty", stone_now_num as "stoneNowNum", pos_amount as "posAmount", 
+		main_weight as "mainWeight", part_weight as "partWeight", is_dbl_label as "isDblLabel", is_consign as "isConsign", 
+		real_total_cost as "realTotalCost", stock_id as "stockId", iniv_cost as "inivCost", groups as "groups", 
+		state as "state", org_id as "orgId", is_material as "isMaterial", color_id as "colorId", main_shape_id as "mainShapeId"
+	</sql>
+	
+	<sql id="MaterActive.packageColumn_3">
+		item_class_id as "itemClassId", orna_class_id as "ornaClassId", style_id as "styleId", alaysis_id as "alaysisId", 
+		orna_code as "ornaCode", orna_dsc as "ornaDsc", orna_barcode as "ornaBarcode", is_muti_part as "isMutiPart",
+		sale_unit_id as "saleUnitId", now_qty as "nowQty", all_qty as "allQty", stone_now_num as "stoneNowNum", pos_amount as "posAmount", 
+		main_weight as "mainWeight", part_weight as "partWeight", is_dbl_label as "isDblLabel", is_consign as "isConsign", 
+		real_total_cost as "realTotalCost", stock_id as "stockId", iniv_cost as "inivCost", groups as "groups", 
+		state as "state", org_id as "orgId", is_material as "isMaterial", color_id as "colorId", main_shape_id as "mainShapeId",
+		c.stylename as "styleName", c.isbiggraph as "bigGraph", supplier_id as "supplierId", is_lock as "isLock"
+	</sql>
+	
+	<sql id="MaterActive_color_id">
+		(select b.item_value from jat_sys_dict_item b where a.color_id = b.item_key and b.entry_code='diacolor') as "colorName"
+	</sql>
+	<sql id="MaterActive_main_shap_id">
+		(select b.item_value from jat_sys_dict_item b where a.main_shape_id = b.item_key and b.entry_code='diashape') as "mainShapName"		
+	</sql>
+	<select id="MaterActive.getPackageMAByBarCode" parameterClass="map" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="MaterActive.packageColumn_3"/>, 
+			<include refid="MaterActive_color_id"/>,
+			<include refid="MaterActive_main_shap_id"/>
+		from ic_mater_active a 
+		left join jas_bd_style c on a.style_id = c.styleid
+		where a.orna_barcode = #barCode#
+	</select>
+	<select id="MaterActive.getPackageMAByOrnaCode" parameterClass="map" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="MaterActive.packageColumn_3"/>, 
+			<include refid="MaterActive_color_id"/>,
+			<include refid="MaterActive_main_shap_id"/>
+		from ic_mater_active a 
+		left join jas_bd_style c on a.style_id = c.styleid
+		where a.orna_code = #ornaCode#
+	</select>
+	
+	<!-- 根据饰品编码从现有量和非现有量库中查询饰品信息 -->
+	<select id="MaterActive.getMaterActiveFromAllByOrnaCode" parameterClass="string" resultMap="MaterActive.MPackageResult">
+		select <include refid="MaterActive.packageColumn"/> from (
+			select <include refid="MaterActive.packageColumn"/> from ic_mater_active 
+			union select <include refid="MaterActive.packageColumn"/> from ic_mater_noactive
+		) a
+		where a.orna_code = #value#
+	</select>
+	
+
+	<!-- 拆混包入库 -->
+	<typeAlias alias="MaterInStock" type="com.jatools.vo.stock.MaterInStock"/>
+	<insert id="MaterActive.packageInStock" parameterClass="MaterInStock">
+		insert into ic_mater_active 
+		(
+			ID, ORNA_CODE, ORNA_BARCODE, ORNA_DSC, STOCK_ORG_ID, STOCK_ID, GROUPS, 
+			STYLE_ID, NOW_QTY, ALL_QTY, ITEM_CLASS_ID, ORNA_CLASS_ID, ALAYSIS_ID, STYLE_NO_ID, 
+			QUALITY_ID, TAG_TYPE, SALE_UNIT_ID, BUY_UNIT_ID, PRIC_UNIT_ID, PRICE_ATTR_GROUP, 
+			STATE, BASIC_PRICE, REBATE, REBATE_TYPE, STORE_UNIT_COST, REAL_UNIT_COST, 
+			POS_AMOUNT, REAL_TOTAL_COST, STORE_TOTAL_COST, PRODUCTDATE, OLD_RESPONSIBLE, 
+			STORE_COLOR, COM_STORE, 
+			STORAGEDATE, TOSHOPDATE, 
+			NUCLEAR_BILL_ID, MAIN_SHAPE_ID, 
+			COLOR_ID, MAIN_WEIGHT, PART_WEIGHT, PART_CONTENT, CLEAN_ID, MAIN_COLOR_GRADE_ID, 
+			QLTY_ID, STONE_TOTAL_NUM, STONE_NOW_NUM, SPECIAL_WORK_PRICE, STRING_WORK_PRICE, 
+			SUMMARY_ID, IS_CONSIGN, IS_CUSTOM, HANDOVER_BILL_ID, MANUFACTURER_ID, SUPPLIER_ID, 
+			ZODIAC, IDENT_ID, FACTORY_STYLE_ID, STORAGE_PRIC_ATTR_GROUP, REBATE_AMOUNT, 
+			SPECIAL_WEIGHT, CUT_ID, CUT_WIDE_SCALE, CUT_DEEP_SCALE, SYMMETRY_ID, POLISHINE_ID, 
+			FLUORESCENCE_ID, WAISTLINE_ID, VERTEX_ID, HRD_CERT, GIA_CERT, IGI_CERT, BRACKETCOLOR_ID, 
+			UPDATEDATE, WEAR_ID, STYLE_TYPE_ID, IS_MUTI_PART, CURRENCY_PRICE, CURRENCY_MONEY, 
+			CURRENCY_TAX, TAX, TOTAL_CURRENCY_TAX, SIZE_ID, MAIN_NUM, PART_NUM, MATERIAL_ID, 
+			ORG_ID, USE_QTY_TEMP, AGS_CERT, REAL_COST, CUSTOMIZE_NO, IS_DBL_LABEL, BILL_NO, 
+			IS_MATERIAL, MATERIAL_TYPE, COLOR_GRADE_GRADE_ID, CLEAN_GRADE_ID, IS_LOCK, COST_UNIT,
+			INIV_COST
+		) 
+		select 
+			ic_mater_active_seq.nextval, #ornaCode#, #ornaBarcode#, ORNA_DSC, STOCK_ORG_ID, #stockId#, GROUPS, 
+			STYLE_ID, #nowQty#, #allQty#, ITEM_CLASS_ID, ORNA_CLASS_ID, #alaysisId#, STYLE_NO_ID, 
+			QUALITY_ID, TAG_TYPE, SALE_UNIT_ID, BUY_UNIT_ID, PRIC_UNIT_ID, PRICE_ATTR_GROUP, 
+			#state#, BASIC_PRICE, REBATE, REBATE_TYPE, STORE_UNIT_COST, REAL_UNIT_COST, 
+			POS_AMOUNT, #realTotalCost#, STORE_TOTAL_COST, PRODUCTDATE, OLD_RESPONSIBLE, 
+			STORE_COLOR, COM_STORE, 
+			#updateTime#, #updateTime#, 
+			NUCLEAR_BILL_ID, MAIN_SHAPE_ID, 
+			COLOR_ID, MAIN_WEIGHT, PART_WEIGHT, PART_CONTENT, CLEAN_ID, MAIN_COLOR_GRADE_ID, 
+			QLTY_ID, #stoneTotalNum#, #stoneNowNum#, SPECIAL_WORK_PRICE, STRING_WORK_PRICE, 
+			SUMMARY_ID, IS_CONSIGN, IS_CUSTOM, HANDOVER_BILL_ID, MANUFACTURER_ID, SUPPLIER_ID, 
+			ZODIAC, IDENT_ID, FACTORY_STYLE_ID, STORAGE_PRIC_ATTR_GROUP, REBATE_AMOUNT, 
+			SPECIAL_WEIGHT, CUT_ID, CUT_WIDE_SCALE, CUT_DEEP_SCALE, SYMMETRY_ID, POLISHINE_ID, 
+			FLUORESCENCE_ID, WAISTLINE_ID, VERTEX_ID, HRD_CERT, GIA_CERT, IGI_CERT, BRACKETCOLOR_ID, 
+			#updateTime#, WEAR_ID, STYLE_TYPE_ID, IS_MUTI_PART, CURRENCY_PRICE, CURRENCY_MONEY, 
+			CURRENCY_TAX, TAX, TOTAL_CURRENCY_TAX, SIZE_ID, MAIN_NUM, PART_NUM, MATERIAL_ID, 
+			ORG_ID, USE_QTY_TEMP, AGS_CERT, REAL_COST, CUSTOMIZE_NO, IS_DBL_LABEL, null, 
+			IS_MATERIAL, MATERIAL_TYPE, COLOR_GRADE_GRADE_ID, CLEAN_GRADE_ID, 0, COST_UNIT,
+			#inivCost#
+		from ic_mater_noactive a 
+		where a.orna_code = #oldOrnaCode#
+	</insert>
+
+	<insert id="MaterActive.inStockFormIniv" parameterClass="map">
+		insert into ic_mater_active   
+		(
+			ID, ORNA_CODE, ORNA_BARCODE, ORNA_DSC, STOCK_ORG_ID, STOCK_ID, GROUPS, STYLE_ID, 
+			NOW_QTY, ALL_QTY, ITEM_CLASS_ID, ORNA_CLASS_ID, ALAYSIS_ID, STYLE_NO_ID, QUALITY_ID, 
+			TAG_TYPE, SALE_UNIT_ID, BUY_UNIT_ID, PRIC_UNIT_ID, PRICE_ATTR_GROUP, STATE, 
+			BASIC_PRICE, REBATE, REBATE_TYPE, STORE_UNIT_COST, REAL_UNIT_COST, POS_AMOUNT, 
+			REAL_TOTAL_COST, STORE_TOTAL_COST, PRODUCTDATE, OLD_RESPONSIBLE, STORE_COLOR, 
+			COM_STORE, STORAGEDATE, TOSHOPDATE, NUCLEAR_BILL_ID, MAIN_SHAPE_ID, COLOR_ID, 
+			MAIN_WEIGHT, PART_WEIGHT, PART_CONTENT, CLEAN_ID, MAIN_COLOR_GRADE_ID, QLTY_ID, 
+			STONE_TOTAL_NUM, STONE_NOW_NUM, SPECIAL_WORK_PRICE, STRING_WORK_PRICE, SUMMARY_ID, 
+			IS_CONSIGN, IS_CUSTOM, HANDOVER_BILL_ID, MANUFACTURER_ID, SUPPLIER_ID, ZODIAC, 
+			IDENT_ID, FACTORY_STYLE_ID, STORAGE_PRIC_ATTR_GROUP, REBATE_AMOUNT, SPECIAL_WEIGHT, 
+			CUT_ID, CUT_WIDE_SCALE, CUT_DEEP_SCALE, SYMMETRY_ID, POLISHINE_ID, FLUORESCENCE_ID, 
+			WAISTLINE_ID, VERTEX_ID, HRD_CERT, GIA_CERT, IGI_CERT, BRACKETCOLOR_ID, UPDATEDATE, 
+			WEAR_ID, STYLE_TYPE_ID, IS_MUTI_PART, CURRENCY_PRICE, CURRENCY_MONEY, CURRENCY_TAX, 
+			TAX, TOTAL_CURRENCY_TAX, SIZE_ID, MAIN_NUM, PART_NUM, MATERIAL_ID, ORG_ID, USE_QTY_TEMP, 
+			AGS_CERT, REAL_COST, CUSTOMIZE_NO, IS_DBL_LABEL, BILL_NO, IS_MATERIAL, MATERIAL_TYPE, 
+			COLOR_GRADE_GRADE_ID, CLEAN_GRADE_ID, IS_LOCK, COST_UNIT, INIV_COST,FACTORY_ORNA_CODE,PRIVATE_TYPE
+		) select 
+			ic_mater_active_seq.nextval, ORNA_CODE, ORNA_BARCODE, ORNA_NAME as ORNA_DSC, null, STOCK_ID, GROUPS, STYLE_ID, 
+			QUANTITY, ALL_QTY, ITEM_CLASS_ID, ORNA_CLASS_ID, ANALYSIS_ARANGE_ID as ALAYSIS_ID, FACTORY_STYLE_ID as STYLE_NO_ID, QUALITY_ID, 
+			SMALL_LABEL_TYPE as TAG_TYPE, UNIT_ID, null, null, PRICE_ATTR_GROUP, 900, 
+			BASIC_PRICE, null, null, null, COST_PRICE as REAL_UNIT_COST, POS_AMOUNT, 
+			TOTAL_COST as REAL_TOTAL_COST, null, null, null, null, 
+			null, CREATEDATE as STORAGEDATE, CREATEDATE as TOSHOPDATE, NUCLEAR_BILL_ID, MAIN_SHAPE_ID, COLOR_ID, 
+			MAIN_WEIGHT, PART_STONE_WEIGHT as PART_WEIGHT,  PART_CONTENT, CLEAN_ID, MAIN_COLOR_GRADE_ID, null, 
+			TOTAL_NUM as STONE_TOTAL_NUM, TOTAL_NUM as STONE_NOW_NUM, SPECIAL_WORK_PRICE, STRING_WORK_PRICE, SUMMARY_ID, 
+			IS_CONSIGN, IS_CUSTOM, SRC_BILL_ID as HANDOVER_BILL_ID, null, VENDER_ID as SUPPLIER_ID, ZODIAC, 
+			IDENT_ID, FACTORY_STYLE_ID, PRICE_ATTR_GROUP as STORAGE_PRIC_ATTR_GROUP, null, SPECIAL_WEIGHT, 
+			CUT_ID, CUT_WIDE_SCALE, CUT_DEEP_SCALE, SYMMETRY_ID, POLISHINE_ID, FLUORESCENCE_ID, 
+			WAISTLINE_ID, VERTEX_ID, HRD_CERT, GIA_CERT, IGI_CERT, BRACKETCOLOR_ID, to_char(sysdate,'yyyy-mm-dd'), 
+			WEAR_ID, STYLE_TYPE as STYLE_TYPE_ID, IS_MUTI_PART, COST_PRICE as CURRENCY_PRICE, POS_AMOUNT as CURRENCY_MONEY, null, 
+			null, null, SIZE_ID, MAIN_STONE_NUM as MAIN_NUM, PART_STONE_NUM as PART_NUM, MATERIAL_ID, INIV_ORG as ORG_ID, null, 
+			AGS_CERT, TOTAL_COST, CUSTOMIZE_NO, IS_DBL_LABEL, null, 0, null, 
+			(
+				select GRADE_ID as COLOR_GRADE_GRADE_ID from JAT_BASIC_COLOR_GRADE_GRADE where COLOR_GRADE_ID = a.MAIN_COLOR_GRADE_ID
+			), 
+			(
+				select GRADE_ID as CLEAN_GRADE_ID from JAT_BASIC_CLEAN_GRADE where CLEAN_ID = a.CLEAN_ID
+			), 0, COST_UNIT, INIV_COST,FACTORY_ORNA_CODE,PRIVATE_TYPE
+		from jat_mater_iniv a where 1 = 1
+		and a.src_bill_id = #srcBillId# and a.src_bill_code = #srcBillCode#
+		and a.state = 901
+	</insert>
+	
+	
+	<!-- 获取分页数据 -->
+	<select id="MaterActive.getMaterActivePageData" resultMap="MaterActive.MPackageResult2" parameterClass="map">
+		select <include refid="MaterActive.packageColumn"/>, is_material, groups, org_id from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="MaterActive.packageColumn_1"/>, is_material, groups, org_id
+			from ic_mater_active a,
+				jas_bd_analysis_arange b,
+	  			jas_bd_style c
+			where 1 = 1
+				and a.alaysis_id = b.ANALYSIS_ARANGE_ID
+	   			and a.style_id = c.STYLEID
+			<isNotEmpty property="state" prepend="and">  a.state = #state# </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+			<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+			<isNotEmpty property="barCode" prepend="and">  a.orna_barcode = #barCode# </isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="groups" prepend="and">  a.groups = #groups# </isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+			<!-- 使用在盘点单中 查询未盘点饰品 -->
+			<isNotEmpty property="noStock" prepend="and">  
+				a.orna_code not in (select l.orna_code from jat_proc_inventory_line l 
+					left join jat_proc_inventory_head h on h.billid = l.billid 
+					where l.status = 1 and h.status = 1 ) 
+			</isNotEmpty>
+			order by a.id
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MaterActive.getMaterActiveTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from ic_mater_active a,
+			jas_bd_analysis_arange b,
+  			jas_bd_style c
+		where 1 = 1
+			and a.alaysis_id = b.ANALYSIS_ARANGE_ID
+   			and a.style_id = c.STYLEID
+		<isNotEmpty property="state" prepend="and">  a.state = #state# </isNotEmpty>
+		<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+		<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+		<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+		<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+		<isNotEmpty property="barCode" prepend="and">  a.orna_barcode = #barCode# </isNotEmpty>
+		<isNotEmpty property="ornaCode" prepend="and">  a.orna_code = #ornaCode# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and">  a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="groups" prepend="and">  a.groups = #groups# </isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+		<!-- 使用在盘点单中 查询未盘点饰品 -->
+		<isNotEmpty property="noStock" prepend="and">  
+			a.orna_code not in (select l.orna_code from jat_proc_inventory_line l 
+				left join jat_proc_inventory_head h on h.billid = l.billid 
+				where l.status = 1 and h.status = 1 ) 
+		</isNotEmpty>
+	</select>
+	
+	<update id="MaterActive.modifyMaterial" parameterClass="map">
+		update ic_mater_active a set a.is_material = #isMaterial# where a.orna_code = #ornaCode#
+	</update>
+	
+	<select id="MaterActive.getStockCount" resultClass="string" parameterClass="map">
+		select count(*) 
+		from ic_mater_active a ,
+			jas_bd_analysis_arange b,
+	  		jas_bd_style c
+		where 1 = 1
+			and a.alaysis_id = b.ANALYSIS_ARANGE_ID
+   			and a.style_id = c.STYLEID
+			and a.org_id = #orgId# 
+		<isNotEmpty property="stockId" prepend="and">  a.stock_id = #stockId# </isNotEmpty>
+		order by a.id
+	</select>
+	
+	<select id="MaterActive.getPackageMA" parameterClass="map" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="MaterActive.packageColumn_3"/>, 
+			(select t.summarydescription from jas_bd_analysis_arange t where t.analysis_arange_id = a.alaysis_id) as "alaysisName"
+		from ic_mater_active a 
+			left join jas_bd_style c on a.style_id = c.styleid
+		where  1=1 
+			<isNotEmpty property="ornaCode" prepend="and"> a.orna_code = #ornaCode#</isNotEmpty>
+			<isNotEmpty property="barCode" prepend="and"> a.orna_barcode = #barCode#</isNotEmpty>
+			<isNotEmpty property="stockId" prepend="and"> a.stock_id = #stockId#</isNotEmpty>
+			<isNotEmpty property="state" prepend="and"> a.state = #state#</isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId#</isNotEmpty>
+	</select>
+	<!-- 形态转换|料提纯|拆石 行表 出库操作 -->
+	<insert id="MaterActive.moveActive2NoActiveForChange" parameterClass="string">
+		insert into ic_mater_noactive select * from ic_mater_active a
+		where exists (select 1  from jat_proc_change_line b where a.orna_code = b.orna_code and  b.billid = #value#)
+	</insert>
+	
+	<update id="MaterActive.deleteActive2NoActiveForChange" parameterClass="string">
+		delete from ic_mater_active a
+		where exists (select 1  from jat_proc_change_line b where a.orna_code = b.orna_code and  b.billid = #value#)
+	</update>
+	
+	<!-- 已接收的饰品调拨单入库,改现有量饰品组织、仓库、柜组、网点金额段 -->
+	<update id="MaterActive.updateOrgGroupFromMoveBill" parameterClass="map">
+		update ic_mater_active a set (a.org_id, a.stock_id, a.groups, a.pos_amount, a.real_total_cost, a.real_unit_cost, a.state, a.bill_code, a.bill_no)=(
+			select d.in_org_id, d.in_stock_id, c.in_group_no, c.new_pos_money, c.new_pos_cost, c.new_pos_cost / c.now_qty, 900, null, null
+			from jat_move_line c, jat_move_head d
+			where c.headid = d.headid and c.orna_code = a.orna_code and d.headid = #headid#),
+            <isNotEqual property="isJmMove" compareValue="1"> a.toshopdate = #toshopdate#, </isNotEqual><!-- 加盟门店之间的调拨 不需要修改到店时间 -->
+			a.rebate = null, a.rebate_type = null, a.rebate_amount = null,
+			a.price_attr_group = a.storage_pric_attr_group
+		where exists(select 1 from jat_move_line b where b.headid = #headid# and b.status = 10 and a.orna_code = b.orna_code)
+		      and a.state = 901
+	</update>
+	<update id="MaterActive.updateStatusFromMoveBill" parameterClass="map">
+		update ic_mater_active a set a.state = 900, a.bill_code = null, a.bill_no = null
+		where exists(select 1 from jat_move_line b where b.headid = #headid# and b.status = 13 and a.orna_code = b.orna_code)
+		      and a.state = 901
+	</update>
+	<update id="MaterActive.updateStockFromMoveBill" parameterClass="map">
+		update ic_mater_active a
+		   set a.stock_id  = #stockId#,
+		       a.state     = 900,
+		       a.bill_code = null,
+		       a.bill_no   = null
+		 where exists (select 1
+		          from jat_move_line b, jat_move_head c
+		         where b.headid = c.headid
+		           and a.orna_code = b.orna_code
+		           and c.out_org_id = a.org_id
+		           and b.status = 10
+		           and c.headid = #headid#)
+		       and a.state = 901
+	</update>
+	<update id="MaterActive.updateGroupsFromMoveBill" parameterClass="map">
+		update ic_mater_active a
+		   set a.groups    = #groups#,
+		       a.state     = 900,
+		       a.bill_code = null,
+		       a.bill_no   = null
+		 where exists (select 1
+		          from jat_move_line b, jat_move_head c
+		         where b.headid = c.headid
+		           and a.orna_code = b.orna_code
+		           and c.out_org_id = a.org_id
+		           and b.status = 10
+		           and c.headid = #headid#)
+		       and a.state = 901
+	</update>
+	<!-- 价格锁定单，更新锁定状态 -->
+	<update id="MaterActive.updateLockStatusFromPriceLock" parameterClass="map">
+		update ic_mater_active a set a.is_lock = #lockFlag#
+		where exists(select 1 from jat_basic_price_lock_line b where b.headid = #headid# and a.orna_code = b.orna_code)
+	</update>
+	<!-- 改总部状态为已到店， 改饰品状态为有效，并标志为备货 -->
+	<update id="MaterActive.updateHqOrnaStatus" parameterClass="map">
+		update ic_mater_active a
+		   set a.state = 900, a.bill_code = null, a.bill_no = null, a.is_material = 1
+		 where exists (select 1
+		          from jat_pl_dispatch_orna_log b
+		         where b.orna_code = a.orna_code
+		           and b.gather_head_id = #gheadid#
+		           and b.status = 2
+		           and b.src_bill_code = #srcBillCode#
+		           and exists (select 1
+		                  from jat_sys_dict_item c
+		                 where c.entry_code = 'hqorgs'
+		                   and c.status = 1
+		                   and c.item_key = b.org_id))
+	</update>
+	
+	<select id="MaterActive.getMaterActiveForLabel" resultClass="com.jatools.vo.stock.MaterActive" parameterClass="map">
+		select 
+			a.item_class_id     as "itemClassId",
+			a.orna_class_id     as "ornaClassId",
+			a.orna_code         as "ornaCode",
+			a.orna_dsc          as "ornaDsc",
+			a.sale_unit_id      as "saleUnitId",
+			a.now_qty           as "nowQty",
+			a.all_qty           as "allQty",
+			a.pos_amount        as "posAmount",
+			a.ident_id          as "identId",
+			a.gia_cert          as "giaCert",
+			a.hrd_cert          as "hrdCert",
+			a.igi_cert          as "igiCert",
+			a.zodiac            as "zodiac",
+			a.special_work_price as "specialWorkPrice",
+			a.basic_price        as "basicPrice",
+			a.is_dbl_label       as "isDblLabel",
+			a.tag_type           as "tagType",
+			a.state				as "state",
+			a.org_id			as "orgId",
+			a.stock_id			as "stockId",
+			b.ITEM_CLASS_DSC     as "itemClassName",
+			c.ORNA_CLASS_DSC     as "ornaClassName",
+		 	d.UNITNAME           as "unitName",
+		 	a.size_id			as "sizeId",
+		 	e.size_name			as "sizeName"
+	    from ic_mater_active a
+		    left join jas_bd_item_class b on a.item_class_id = b.ITEM_CLASS_ID
+		    left join jas_bd_orna_class c on a.orna_class_id = c.ORNA_CLASS_ID
+		    left join jas_bd_unit d on a.sale_unit_id = d.UNITID
+		    left join jas_bd_size e on a.size_id = e.SIZE_ID
+		where 1=1
+		and not exists( 
+	       select 1 from jat_lable_tag_apply_line l 
+	       left join jat_lable_tag_apply h on h.id=l.head_id
+	       where <![CDATA[h.state <> 8]]> and l.orna_code=a.orna_code
+	       union
+	       select 1 from jat_lable_tag_print_line p
+	       left join jat_lable_tag_print ph on ph.id=p.head_id
+	       where <![CDATA[ph.state <> 8]]> and p.orna_code=a.orna_code
+	      )
+		<isNotEmpty property="ornaCode" prepend="and"> a.orna_code = #ornaCode#</isNotEmpty>
+		<isNotEmpty property="ornaBarcode" prepend="and"> a.orna_barcode = #ornaBarcode#</isNotEmpty>
+	</select>
+	
+	<!-- 生成调拨单修改现拥有量表中的引用单据编码和单据编号段 -->
+	<update id="MaterActive.updateBillCodeFromDispatch" parameterClass="string">
+		update ic_mater_active a
+		   set (a.bill_code, a.bill_no) =
+		       (select decode(d.jm_flag, 1, 'DB', 'TB'), d.billno
+		          from jat_move_line c, jat_move_head d
+		         where c.headid = d.headid
+		           and c.orna_code = a.orna_code
+		           and d.headid in ($value$))
+		 where exists (select 1
+		          from jat_move_line b
+		         where b.orna_code = a.orna_code
+		           and b.headid in ($value$))
+	</update>
+	
+	<!-- 修改饰品代销状态为非代销  2012-07-17   added by renming -->
+	<update id="MaterActive.updateConsignByPlSale" parameterClass="map">
+		update ic_mater_active a 
+		set 
+			a.is_consign = #isConsign#
+		where exists(
+		      select 1 from jat_plsale_line b where b.orna_code = a.orna_code and b.billid = #billid#
+		)
+	</update>
+	
+	<!-- 修改饰品代销状态为非代销  2012-07-17   added by renming -->
+	<update id="MaterActive.updateNoActiveConsignByPlSale" parameterClass="map">
+		update ic_mater_noactive a 
+		set 
+			a.is_consign = #isConsign#
+		where exists(
+		      select 1 from jat_plsale_line b where b.orna_code = a.orna_code and b.billid = #billid#
+		)
+	</update>
+	
+	<!-- 修改饰品代销状态为非代销  2012-08-14   added by renming -->
+	<update id="MaterActive.updateSaleListConsignByPlSale" parameterClass="map">
+		update jav_report_sale_list a 
+	    set 
+	      a.is_consign = #isConsign#
+	    where exists(
+	          select 1 from jat_plsale_line b where b.orna_code = a.orna_code and b.billid = #billid#
+			)
+	</update>
+	
+	<update id="MaterActive.updatePosMoneyByJmSale" parameterClass="map">
+		update ic_mater_active a 
+	    set 
+	      a.pos_amount = (select b.jmsale_money from jat_jmsale_line b where b.orna_code = a.orna_code and b.billid = #billid#), 
+	      a.updatedate = #updateDate#
+	    where exists(
+	          select 1 from jat_jmsale_line b where b.orna_code = a.orna_code and b.billid = #billid#
+	    )
+	</update>
+	
+	<select id="MaterActive.getMaterNoactiveByOrnaCode" parameterClass="map" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="MaterActive.packageColumn_3"/>, 
+			<include refid="MaterActive_color_id"/>,
+			<include refid="MaterActive_main_shap_id"/>
+		from ic_mater_noactive a 
+		left join jas_bd_style c on a.style_id = c.styleid
+		where a.orna_code = #ornaCode#
+	</select>
+	
+	<select id="MaterActive.getMaterNoactiveByBarCode" parameterClass="map" resultClass="com.jatools.vo.stock.PackageMaterActive">
+		select <include refid="MaterActive.packageColumn_3"/>, 
+			<include refid="MaterActive_color_id"/>,
+			<include refid="MaterActive_main_shap_id"/>
+		from ic_mater_noactive a 
+		left join jas_bd_style c on a.style_id = c.styleid
+		where a.orna_barcode = #barCode#
+	</select>
+	<!-- 标记现有量饰品状态为"有效"900 -->
+	<update id="MaterActive.markMaterActiveValidByStandardDispatch" parameterClass="string">
+		update ic_mater_active a
+		   set a.state = 900, a.bill_code = null, a.bill_no = null
+		 where exists (select 1
+		          from jat_pl_dispatch_orna_log b
+		         where a.orna_code = b.orna_code
+		           and b.gather_head_id = #value#
+		           and b.src_bill_code = 'SD')
+	</update>
+
+    <!-- 修改饰品状态为901 保留，标准配货 推式配货 订单配货 -->
+    <update id="MaterActive.markMaterActiveUsedByDistatch" parameterClass="map">
+        update ic_mater_active a
+        set
+            a.state = 901,
+            a.bill_code = #billCode#,
+            a.bill_no = (
+                <isEqual property="type" compareValue="1"> select nvl(max(a.billno), $headid$) from jat_pl_standard_dispatch a where a.headid = #headid# </isEqual>
+                <isEqual property="type" compareValue="2"> select nvl(max(a.HEADQUARTER_GATHER_NO), $headid$) from jas_pl_headquarter_gather_head a where a.HEADQUARTER_GATHER_HEAD_ID=#headid# </isEqual>
+                <isEqual property="type" compareValue="3"> select nvl(max(a.bill_no), $headid$) from jat_pl_gather_set_head a where a.headid = #headid# </isEqual>
+            )
+        where a.orna_code = #ornaCode#
+    </update>
+</sqlMap>

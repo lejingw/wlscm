@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"-->
+<!--
+  - Application context definition for JPetStore's business layer.
+  - Contains bean references to the transaction manager and to the DAOs in
+  - dataAccessContext-local/jta.xml (see web.xml's "contextConfigLocation").
+  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+	
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, mail and JDBC related properties) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:global.properties</value>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 
+	<context:component-scan base-package="com.jatools" use-default-filters="false">
+   		<context:exclude-filter type="regex" expression="com.jatools.db.dao.*.impl.*"/>
+ 		<context:exclude-filter type="regex" expression="com.jatools.*.service.impl.*"/> 
+ 	</context:component-scan>
+	 -->
+	 
+	<!-- ======================================================================== -->
+	<!--  持久层及事务模板定义。                                                      -->
+	<!-- ======================================================================== -->
+	<!-- 1 、Spring的数据源设置 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+		<property name="url" value="${oracle.url}"/>
+		<property name="username" value="${oracle.username}"/>
+		<property name="password" value="${oracle.password}"/>
+	</bean>
+	
+	<!-- 2 、Spring对iBATIS的支持 -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="/WEB-INF/sql-map-config.xml"/>
+	</bean>
+	
+	<!-- 3 、Spring对iBATIS DAO的支持 -->
+	<bean id="sqlMapClientDao" class="com.jatools.dao.BaseDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+	
+	<!-- 4、Spring 配置事务 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- 5、AOP XML配置事务管理 -->
+	<!-- 5.1、配置事务通知 -->
+	<tx:advice id="transactionManagerAdivice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*" isolation="DEFAULT" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- 5.2、配置切入点和方面 -->
+	<aop:config>
+		<aop:pointcut id="servicePointCut" expression="execution(* com.jatools.manager.*.impl.*Manager*.*(..))"/>
+		<aop:advisor advice-ref="transactionManagerAdivice" pointcut-ref="servicePointCut"/>
+	</aop:config>
+	
+	
+	<bean id="contextRefreshedEventListener" class="com.jatools.web.listener.ContextRefreshedEventListener">
+		<!-- <property name="dictDwr" ref="dictDwr"></property> -->
+	</bean>
+</beans>

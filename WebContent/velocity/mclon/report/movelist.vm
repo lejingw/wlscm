@@ -1,0 +1,239 @@
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>	
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【调拔查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>					
+
+				<input type='reset' value='重置' class='btn' id='btnReset' onclick="setnull()">
+  	        	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08052401','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08052401','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+			<td class='body1'>调出组织</td>
+			<td class='body2'><input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='hidden' id="OutOrgId" name='OutOrgId' value="">
+				<input type='text'  id="OutOrgName" name='OutOrgName' value="" readonly class="target" onclick="showSelectOrgWin()">
+			</td>
+	       <td class='body1'>调出仓库</td>
+			<td class='body2'>
+				<select id="Outstockid" name='Outstockid'  value="" >
+			
+				<option value='1'>饰品库</option>
+				<option value='2'>旧品库</option>
+				</select>
+			</td>
+	         <td class='body1'>调入组织</td>
+			<td class='body2'>
+				<input type='hidden' id="InOrgId" name='InOrgId' value="">
+				<input type='text'  id="InOrgName" name='InOrgName' value="" readonly class="target" onclick="showSelectOrgWin2()">
+			</td>
+	        <td class='body1'>调入仓库</td>
+			<td class='body2'>
+				<select id="Instockid" name='Instockid'  value="" >
+			
+				<option value='1'>饰品库</option>
+				<option value='2'>旧品库</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>商品类别</td>
+			<td class='body2'>
+				<select id="articleTypeId" name='articleTypeId'  value="" onchange="changeArticleTypeId()">$StringUtil.emptyOption()</select></td>
+			<td class='body1'>大类</td>
+			<td class='body2'>
+				<select id="itemClassId" name='itemClassId'  value="">$StringUtil.emptyOption()</select>
+			</td>
+	    	<td class='body1'>饰品编码</td>
+			<td class='body2'>
+				<input type='text' id="ornaCode" name='ornaCode' value="">
+			</td>		
+		
+		</tr>
+		<tr>
+				<tr>
+	
+			<td class='body1'>时间起</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="">
+			</td>
+				<td class='body1'>时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+			
+		</tr>
+		
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th>调出组织</th>
+				<th>调出仓库</th>
+				<th>调入组织</th>
+				<th>调入仓库</th>
+				<th>调拔单号</th>
+				<th>饰品编码</th>
+				<th>饰品名称</th>
+				<th>大类</th>
+				<th>小类</th>
+				<th>重量</th>
+				<th>状态</th>
+            </tr>
+        </thead>
+
+				
+		#foreach($map in $form.list)
+			<tr>
+			    <td>$!map.OUT_ORG_NAME</td>
+				<td>$!map.OUT_STOCK_NAME</td>
+				<td>$!map.IN_ORG_NAME</td>
+				<td>$!map.IN_STOCK_NAME</td>
+				<td>$!map.BILLNO</td>
+				<td>$!map.ORNA_CODE</td>
+				<td>$!map.ORNA_DSC</td>
+				<td>$!map.ITEM_CLASS_DSC</td>
+				<td>$!map.ORNA_CLASS_DSC</td>
+				<td>$!map.ALL_WEIGHT</td>
+				<td>$!map.STATUS</td>
+			</tr>
+		#end
+	
+		#foreach($map in $form.listSum)
+			<tr>
+			    <td>总计</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>	
+				<td>$!map.TOTALWEIGHT</td>
+				<td></td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#OutOrgId").val(idArr.join(","));
+			jQuery("#OutOrgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#OutOrgId").val());
+}
+//显示库存组织选择窗口
+function showSelectOrgWin2(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#InOrgId").val(idArr.join(","));
+			jQuery("#InOrgName").val(nameArr.join(","));
+		}, null, null, true, jQuery("#InOrgId").val());
+}
+/**
+ * 改变商品类别
+ */
+function changeArticleTypeId(){
+	//获取大类
+	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+}
+
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+function setnull(){
+	jQuery("#OutOrgId").val("");
+	jQuery("#InOrgId").val("");
+}
+
+function setValues(){
+    altRowCSS("tbl");
+
+	jQuery("#OutOrgId").val("$!form.condition.OutOrgId");
+	jQuery("#OutOrgName").val("$!BdCommon.getOrgName($!form.condition.OutOrgId)");
+    jQuery("#Outstockid").val("$!form.condition.Outstockid");
+	
+	jQuery("#InOrgId").val("$!form.condition.InOrgId");
+	jQuery("#InOrgName").val("$!BdCommon.getOrgName($!form.condition.InOrgId)");
+    jQuery("#Instockid").val("$!form.condition.Instockid");
+	
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+	jQuery("#ornaCode").val("$!form.condition.ornaCode");
+	
+	
+	BdCommonDwr.getArticleTypeForSlt(function(data){
+		addOptions("articleTypeId", data, null, null, true, true, "$!form.condition.articleTypeId");
+		if("$!form.condition.articleTypeId"){
+        	BdCommonDwr.getItemClassForSlt(jQuery("#articleTypeId").val(), function(data){
+        		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+	    	});
+		}
+	});
+}
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('时间止必须大于时间始');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+
+	newCalendar();	
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

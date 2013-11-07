@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-autowire="byName">
+	<!--  ***********************************************系统管理sys******************************************* -->
+	<bean id="userManager" class="com.jatools.manager.sys.impl.UserManagerImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+	<bean id="dictManager" class="com.jatools.manager.sys.impl.DictManagerImpl">
+		<property name="dictDao" ref="dictDao"></property>
+	</bean>
+	<bean id="bdCommonManager" class="com.jatools.manager.bd.impl.BdCommonManagerImpl">
+		<property name="bdCommonDao" ref="bdCommonDao"></property>
+	</bean>
+	<bean id="commonManager" class="com.jatools.manager.util.impl.CommonManagerImpl">
+		<property name="commonDao" ref="commonDao"></property>
+	</bean>
+	<bean id="excelUtilManager" class="com.jatools.manager.util.impl.ExcelUtilManagerImpl">
+		<property name="excelUtilDao" ref="excelUtilDao"></property>
+	</bean>
+	<bean id="billReviewManager" class="com.jatools.manager.sys.impl.BillReviewManagerImpl">
+		<property name="billReviewDao" ref="billReviewDao"></property>
+	</bean>
+	<bean id="selectCommonManager" class="com.jatools.manager.common.impl.SelectCommonManagerImpl">
+		<property name="selectCommonDao" ref="selectCommonDao"></property>
+	</bean>
+	<bean id="selectEmpManager" class="com.jatools.manager.common.impl.SelectEmpManagerImpl">
+		<property name="selectEmpDao" ref="selectEmpDao"></property>
+	</bean>
+	<bean id="selectStyleManager" class="com.jatools.manager.common.impl.SelectStyleManagerImpl">
+		<property name="selectStyleDao" ref="selectStyleDao"></property>
+	</bean>
+	<bean id="parameterManager" class="com.jatools.manager.sys.impl.ParameterManagerImpl">
+		<property name="parameterDao" ref="parameterDao"></property>
+	</bean>
+	<bean id="queryConditionManager" class="com.jatools.manager.sys.impl.QueryConditionManagerImpl">
+		<property name="queryConditionDao" ref="queryConditionDao"></property>
+	</bean>
+	
+	
+	<!--  **********************************************基础单据basic****************************************** -->
+	<bean id="vendorCoefManager" class="com.jatools.manager.basic.impl.VendorCoefManagerImpl">
+		<property name="vendorCoefDao" ref="vendorCoefDao"></property>
+	</bean>
+	<bean id="labelTypeManager" class="com.jatools.manager.basic.impl.LabelTypeManagerImpl">
+		<property name="labelTypeDao" ref="labelTypeDao"></property>
+	</bean>
+	<bean id="billnoRuleManager" class="com.jatools.manager.basic.impl.BillnoRuleManagerImpl"><!-- 单号编码柜组 -->
+		<property name="billnoRuleDao" ref="billnoRuleDao"></property>
+	</bean>
+	<bean id="orgGroupManager" class="com.jatools.manager.basic.impl.OrgGroupManagerImpl"><!-- 单位柜组 -->
+		<property name="orgGroupDao" ref="orgGroupDao"></property>
+	</bean>
+	<bean id="chargeManager" class="com.jatools.manager.basic.impl.ChargeManagerImpl"><!-- 工费核算标准 -->
+		<property name="chargeDao" ref="chargeDao"></property>
+	</bean>
+	<bean id="ptChargeManager" class="com.jatools.manager.basic.impl.PtChargeManagerImpl"><!-- RT工费核算标准 -->
+		<property name="ptChargeDao" ref="ptChargeDao"></property>
+	</bean>
+	<bean id="orgItemManager" class="com.jatools.manager.basic.impl.OrgItemManagerImpl"><!-- 采购组织与大类 -->
+		<property name="orgItemDao" ref="orgItemDao"></property>
+	</bean>
+	<bean id="expressReceuserManager" class="com.jatools.manager.basic.impl.ExpressReceuserManagerImpl">
+		<property name="expressReceuserDao" ref="expressReceuserDao"></property>
+	</bean>
+	<bean id="priceLockManager" class="com.jatools.manager.basic.impl.PriceLockManagerImpl">
+		<property name="priceLockDao" ref="priceLockDao"></property>
+	</bean>
+	<bean id="materialItemManager" class="com.jatools.manager.basic.impl.MaterialItemManagerImpl">
+		<property name="materialItemDao" ref="materialItemDao"></property>
+	</bean>
+	<bean id="stoneMainCoefficientManager" class="com.jatools.manager.basic.impl.StoneMainCoefficientManagerImpl">
+		<property name="stoneMainCoefficientDao" ref="stoneMainCoefficientDao"></property>
+	</bean>
+	<bean id="colorGradeGradeManager" class="com.jatools.manager.basic.impl.ColorGradeGradeManagerImpl">
+		<property name="colorGradeGradeDao" ref="colorGradeGradeDao"></property>
+	</bean>
+	<bean id="cleanGradeManager" class="com.jatools.manager.basic.impl.CleanGradeManagerImpl">
+		<property name="cleanGradeDao" ref="cleanGradeDao"></property>
+	</bean>
+	<bean id="createOldbarCodeManager" class="com.jatools.manager.basic.impl.CreateOldbarCodeManagerImpl">
+		<property name="createOldbarCodeDao" ref="createOldbarCodeDao"></property>
+	</bean>
+	<bean id="purEmpArticleTypeManager" class="com.jatools.manager.basic.impl.PurEmpArticleTypeManagerImpl">
+		<property name="purEmpArticleTypeDao" ref="purEmpArticleTypeDao"></property>
+	</bean>
+	<bean id="safeStockManager" class="com.jatools.manager.basic.impl.SafeStockManagerImpl">
+		<property name="safeStockDao" ref="safeStockDao"></property>
+	</bean>
+	<bean id="ornaDescManager" class="com.jatools.manager.basic.impl.OrnaDescManagerImpl">
+		<property name="ornaDescDao" ref="ornaDescDao"></property>
+	</bean>
+	<bean id="saleChangeLabelManager" class="com.jatools.manager.basic.impl.SaleChangeLabelManagerImpl">
+		<property name="saleChangeLabelDao" ref="saleChangeLabelDao"></property>
+	</bean>
+	<bean id="unsaleOrnaManager" class="com.jatools.manager.basic.impl.UnsaleOrnaManagerImpl">
+		<property name="unsaleOrnaDao" ref="unsaleOrnaDao"></property>
+	</bean>
+	<bean id="verdorChargeManager" class="com.jatools.manager.basic.impl.VerdorChargeManagerImpl">
+		<property name="verdorChargeDao" ref="verdorChargeDao"></property>
+	</bean>
+	<bean id="goldSpecialChargeManager" class="com.jatools.manager.basic.impl.GoldSpecialChargeManagerImpl">
+		<property name="goldSpecialChargeDao" ref="goldSpecialChargeDao"></property>
+	</bean>
+	<bean id="fashionGoldPriceManager" class="com.jatools.manager.basic.impl.FashionGoldPriceManagerImpl">
+		<property name="fashionGoldPriceDao" ref="fashionGoldPriceDao"></property>
+	</bean>
+	
+	
+	<!--  **********************************************采购管理pur****************************************** -->
+	<bean id="purGatherManager" class="com.jatools.manager.pur.impl.PurGatherManagerImpl"><!-- 采购总单管理 -->
+		<property name="purGatherDao" ref="purGatherDao"></property>
+	</bean>
+	<bean id="purchaseManager" class="com.jatools.manager.pur.impl.PurchaseManagerImpl"><!-- 采购单管理 -->
+		<property name="purchaseDao" ref="purchaseDao"></property>
+	</bean>
+	<bean id="purchaseCustManager" class="com.jatools.manager.pur.impl.PurchaseCustManagerImpl"><!-- 订做生成采购单 -->
+		<property name="purchaseCustDao" ref="purchaseCustDao"></property>
+	</bean>
+	<bean id="handoverManager" class="com.jatools.manager.pur.impl.HandoverManagerImpl">
+		<property name="handoverDao" ref="handoverDao"></property>
+	</bean>
+	<bean id="handoverCashManager" class="com.jatools.manager.pur.impl.HandoverCashManagerImpl">
+		<property name="handoverCashDao" ref="handoverCashDao"></property>
+	</bean>
+	<bean id="handoverChildManager" class="com.jatools.manager.pur.impl.HandoverChildManagerImpl">
+		<property name="handoverChildDao" ref="handoverChildDao"></property>
+	</bean>
+	<bean id="payMoneyManager" class="com.jatools.manager.pur.cash.impl.PayMoneyManagerImpl">
+		<property name="payMoneyDao" ref="payMoneyDao"></property>
+	</bean>
+	<bean id="cashMoneyAccountManager" class="com.jatools.manager.out.impl.CashMoneyAccountManagerImpl">
+		<property name="cashMoneyAccountDao" ref="cashMoneyAccountDao"></property>
+	</bean>
+	<bean id="cashProdAccountManager" class="com.jatools.manager.out.impl.CashProdAccountManagerImpl">
+		<property name="cashProdAccountDao" ref="cashProdAccountDao"></property>
+	</bean>
+	
+	<bean id="cashHeadManager" class="com.jatools.manager.pur.cash.impl.CashHeadManagerImpl">
+		<property name="cashHeadDao" ref="cashHeadDao"></property>
+	</bean>
+	<bean id="cashLineManager" class="com.jatools.manager.pur.cash.impl.CashLineManagerImpl">
+		<property name="cashLineDao" ref="cashLineDao"></property>
+	</bean>
+	<bean id="cashProdProdManager" class="com.jatools.manager.pur.cash.impl.CashProdProdManagerImpl">
+		<property name="cashProdProdDao" ref="cashProdProdDao"></property>
+	</bean>
+	<bean id="cashProdChangeManager" class="com.jatools.manager.pur.cash.impl.CashProdChangeManagerImpl">
+		<property name="cashProdChangeDao" ref="cashProdChangeDao"></property>
+	</bean>
+	<bean id="cashPayChangeManager" class="com.jatools.manager.pur.cash.impl.CashPayChangeManagerImpl">
+		<property name="cashPayChangeDao" ref="cashPayChangeDao"></property>
+	</bean>
+	
+	
+	<!--  **********************************************调拨管理move******************************************* -->
+	<bean id="moveCostcoefManager" class="com.jatools.manager.move.impl.MoveCostcoefManagerImpl">
+		<property name="moveCostcoefDao" ref="moveCostcoefDao"></property>
+	</bean>
+	<bean id="moveSalecoefManager" class="com.jatools.manager.move.impl.MoveSalecoefManagerImpl">
+		<property name="moveSalecoefDao" ref="moveSalecoefDao"></property>
+	</bean>
+	<bean id="moveNetManager" class="com.jatools.manager.move.impl.MoveNetManagerImpl">
+		<property name="moveNetDao" ref="moveNetDao"></property>
+	</bean>
+	<bean id="moveBillManager" class="com.jatools.manager.move.impl.MoveBillManagerImpl">
+		<property name="moveBillDao" ref="moveBillDao"></property>
+	</bean>
+	<bean id="movePackManager" class="com.jatools.manager.move.impl.MovePackManagerImpl">
+		<property name="movePackDao" ref="movePackDao"></property>
+	</bean>
+	<bean id="moveReceiveManager" class="com.jatools.manager.move.impl.MoveReceiveManagerImpl">
+		<property name="moveReceiveDao" ref="moveReceiveDao"></property>
+	</bean>
+	<bean id="moveCmdManager" class="com.jatools.manager.move.impl.MoveCmdManagerImpl">
+		<property name="moveCmdDao" ref="moveCmdDao"></property>
+	</bean>
+	<bean id="specialDiamManager" class="com.jatools.manager.move.impl.SpecialDiamManagerImpl">
+		<property name="specialDiamDao" ref="specialDiamDao"></property>
+	</bean>
+	<bean id="dispatchWayManager" class="com.jatools.manager.move.impl.DispatchWayManagerImpl">
+		<property name="dispatchWayDao" ref="dispatchWayDao"></property>
+	</bean>
+	<bean id="standardDispatchManager" class="com.jatools.manager.move.impl.StandardDispatchManagerImpl">
+		<property name="standardDispatchDao" ref="standardDispatchDao"></property>
+	</bean>
+	<bean id="moveDeleteApplyManager" class="com.jatools.manager.move.impl.MoveDeleteApplyManagerImpl">
+		<property name="moveDeleteApplyDao" ref="moveDeleteApplyDao"></property>
+	</bean>
+	
+	
+	<!-- ***********************************************库存管理stock***************************************** -->
+	<bean id="dispatchOrnaManager" class="com.jatools.manager.stock.impl.DispatchOrnaManagerImpl">
+		<property name="dispatchOrnaDao" ref="dispatchOrnaDao"></property>
+	</bean>
+	<bean id="materActiveManager" class="com.jatools.manager.stock.impl.MaterActiveManagerImpl">
+		<property name="materActiveDao" ref="materActiveDao"></property>
+	</bean>
+	<bean id="procPackageHeadManager" class="com.jatools.manager.stock.impl.ProcPackageHeadManagerImpl">
+		<property name="procPackageHeadDao" ref="procPackageHeadDao"></property>
+	</bean>
+	<bean id="procPackageNewlineManager" class="com.jatools.manager.stock.impl.ProcPackageNewlineManagerImpl">
+		<property name="procPackageNewlineDao" ref="procPackageNewlineDao"></property>
+	</bean>
+	<bean id="procPackageOldlineManager" class="com.jatools.manager.stock.impl.ProcPackageOldlineManagerImpl">
+		<property name="procPackageOldlineDao" ref="procPackageOldlineDao"></property>
+	</bean>
+	<bean id="procExitHeadManager" class="com.jatools.manager.stock.impl.ProcExitHeadManagerImpl">
+		<property name="procExitHeadDao" ref="procExitHeadDao"></property>
+	</bean>
+	<bean id="procExitLineManager" class="com.jatools.manager.stock.impl.ProcExitLineManagerImpl">
+		<property name="procExitLineDao" ref="procExitLineDao"></property>
+	</bean>
+	<bean id="outVendorBillManager" class="com.jatools.manager.stock.impl.OutVendorManagerImpl">
+		<property name="outVendorBillDao" ref="outVendorBillDao"></property>
+	</bean>
+	<bean id="procChangeHeadManager" class="com.jatools.manager.stock.impl.ProcChangeHeadManagerImpl">
+		<property name="procChangeHeadDao" ref="procChangeHeadDao"></property>
+	</bean>
+	<bean id="procChangeLineManager" class="com.jatools.manager.stock.impl.ProcChangeLineManagerImpl">
+		<property name="procChangeLineDao" ref="procChangeLineDao"></property>
+	</bean>
+	<bean id="procInventoryHeadManager" class="com.jatools.manager.stock.impl.ProcInventoryHeadManagerImpl">
+		<property name="procInventoryHeadDao" ref="procInventoryHeadDao"></property>
+	</bean>
+	<bean id="procInventoryLineManager" class="com.jatools.manager.stock.impl.ProcInventoryLineManagerImpl">
+		<property name="procInventoryLineDao" ref="procInventoryLineDao"></property>
+	</bean>
+	<bean id="procInventoryDiffheadManager" class="com.jatools.manager.stock.impl.ProcInventoryDiffheadManagerImpl">
+		<property name="procInventoryDiffheadDao" ref="procInventoryDiffheadDao"></property>
+	</bean>
+	<bean id="procInventoryDifflineManager" class="com.jatools.manager.stock.impl.ProcInventoryDifflineManagerImpl">
+		<property name="procInventoryDifflineDao" ref="procInventoryDifflineDao"></property>
+	</bean>
+	<bean id="materInivManager" class="com.jatools.manager.stock.impl.MaterInivManagerImpl">
+		<property name="materInivDao" ref="materInivDao"></property>
+		<property name="bdCommonManager" ref="bdCommonManager"></property>
+	</bean>
+	<bean id="cargoManager" class="com.jatools.manager.stock.impl.CargoManagerImpl">
+		<property name="cargoDao" ref="cargoDao"></property>
+	</bean>
+	<bean id="plSaleManager" class="com.jatools.manager.stock.impl.PlSaleManagerImpl">
+		<property name="plSaleDao" ref="plSaleDao"></property>
+	</bean>
+	<bean id="jmSaleManager" class="com.jatools.manager.stock.impl.JmSaleManagerImpl">
+		<property name="jmSaleDao" ref="jmSaleDao"></property>
+	</bean>
+	
+	
+	
+	<!--  **********************************************核价管理calc******************************************* -->
+	<bean id="coefficientManager" class="com.jatools.manager.calc.impl.CoefficientManagerImpl"><!-- 总系数 -->
+		<property name="coefficientDao" ref="coefficientDao"></property>
+	</bean>
+	<bean id="coefficientWWManager" class="com.jatools.manager.calc.impl.CoefficientWWManagerImpl"><!-- 总系数 -->
+		<property name="coefficientWWDao" ref="coefficientWWDao"></property>
+	</bean>
+	<bean id="sbraCoefficientManager" class="com.jatools.manager.calc.impl.SbraCoefficientManagerImpl"><!-- 托架系数 -->
+		<property name="sbraCoefficientDao" ref="sbraCoefficientDao"></property>
+	</bean>
+	<bean id="accessoryManager" class="com.jatools.manager.calc.impl.AccessoryManagerImpl"><!-- 辅料 -->
+		<property name="accessoryDao" ref="accessoryDao"></property>
+	</bean>
+	<bean id="stoneCoefficientManager" class="com.jatools.manager.calc.impl.StoneCoefficientManagerImpl"><!-- 石头系数 -->
+		<property name="stoneCoefficientDao" ref="stoneCoefficientDao"></property>
+	</bean>
+	<bean id="sbraPriceManager" class="com.jatools.manager.calc.impl.SbraPriceManagerImpl"><!-- 托架市场价 -->
+		<property name="sbraPriceDao" ref="sbraPriceDao"></property>
+	</bean>
+	<bean id="stonePriceManager" class="com.jatools.manager.calc.impl.StonePriceManagerImpl"><!-- 托架市场价 -->
+		<property name="stonePriceDao" ref="stonePriceDao"></property>
+	</bean>
+	<bean id="sbraTypeManager" class="com.jatools.manager.calc.impl.SbraTypeManagerImpl"><!-- 配件类型 -->
+		<property name="sbraTypeDao" ref="sbraTypeDao"></property>
+	</bean>
+	<bean id="priceHeadManager" class="com.jatools.manager.calc.impl.PriceHeadManagerImpl"><!-- 核价单 -->
+		<property name="priceHeadDao" ref="priceHeadDao"></property>
+		<property name="bdCommonDao" ref="bdCommonDao"></property>
+	</bean>
+	<bean id="fashionCoefficientManager" class="com.jatools.manager.calc.impl.FashionCoefficientManagerImpl"><!-- 托架系数 -->
+		<property name="fashionCoefficientDao" ref="fashionCoefficientDao"></property>
+	</bean>
+	<bean id="materAttrUpdateManager" class="com.jatools.manager.calc.impl.MaterAttrUpdateManagerImpl"><!-- 托架系数 -->
+		<property name="materAttrUpdateDao" ref="materAttrUpdateDao"></property>
+		<property name="commonManager" ref="commonManager"></property>
+	</bean>
+	<bean id="basicPriceJadeManager" class="com.jatools.manager.calc.impl.BasicPriceJadeManagerImpl"><!-- 托架系数 -->
+		<property name="basicPriceJadeDao" ref="basicPriceJadeDao"></property>
+	</bean>
+	<bean id="basicPriceOneManager" class="com.jatools.manager.calc.impl.BasicPriceOneManagerImpl"><!-- 托架系数 -->
+		<property name="basicPriceOneDao" ref="basicPriceOneDao"></property>
+	</bean>
+	<bean id="basicPriceTwoManager" class="com.jatools.manager.calc.impl.BasicPriceTwoManagerImpl"><!-- 托架系数 -->
+		<property name="basicPriceTwoDao" ref="basicPriceTwoDao"></property>
+	</bean>
+	<bean id="specialChargeManager" class="com.jatools.manager.calc.impl.SpecialChargeManagerImpl"><!-- 托架系数 -->
+		<property name="specialChargeDao" ref="specialChargeDao"></property>
+	</bean>
+	
+	
+	<!--  **********************************************出库管理out******************************************* -->
+	<bean name="outVendorManager" class="com.jatools.manager.out.impl.OutVendorManagerImpl"><!-- 报表管理 -->
+		<property name="outVendorDao" ref="outVendorDao"/>
+	</bean>
+	<bean name="outStockManager" class="com.jatools.manager.out.impl.OutStockManagerImpl"><!-- 报表管理 -->
+		<property name="outStockDao" ref="outStockDao"/>
+		<property name="outVendorDao" ref="outVendorDao"/>
+		<property name="commonDao" ref="commonDao"/>
+	</bean>
+	<bean name="outBackManager" class="com.jatools.manager.out.impl.OutBackManagerImpl"><!-- 报表管理 -->
+		<property name="outBackDao" ref="outBackDao"/>
+		<property name="outVendorDao" ref="outVendorDao"/>
+	</bean>
+	<bean name="consumeManager" class="com.jatools.manager.out.impl.ConsumeManagerImpl"><!-- 报表管理 -->
+		<property name="consumeDao" ref="consumeDao"/>
+		<property name="commonDao" ref="commonDao"/>
+	</bean>
+	
+	
+	<!--  **********************************************报表管理report******************************************* -->
+	<bean name="reportManager" class="com.jatools.manager.report.impl.ReportManagerImpl"><!-- 报表管理 -->
+		<property name="reportDao" ref="reportDao"/>
+	</bean>
+	<bean name="unsaleReportManager" class="com.jatools.manager.report.impl.UnsaleReportManagerImpl">
+		<property name="unsaleReportDao" ref="unsaleReportDao"/>
+	</bean>
+	
+	
+	<!-- ***********************************************收票出票 inout***************************************** -->
+	<bean name="receiveHeadManager" class="com.jatools.manager.inout.impl.ReceiveHeadManagerImpl">
+		<property name="receiveHeadDao" ref="receiveHeadDao"/>
+	</bean>
+	<bean name="receiveLineManager" class="com.jatools.manager.inout.impl.ReceiveLineManagerImpl">
+		<property name="receiveLineDao" ref="receiveLineDao"/>
+	</bean>
+	<bean name="sendHeadManager" class="com.jatools.manager.inout.impl.SendHeadManagerImpl">
+		<property name="sendHeadDao" ref="sendHeadDao"/>
+	</bean>
+	<bean name="sendLineManager" class="com.jatools.manager.inout.impl.SendLineManagerImpl">
+		<property name="sendLineDao" ref="sendLineDao"/>
+	</bean>
+	
+	
+	<!-- ***********************************************标签相关 tag***************************************** -->
+	<bean name="labelTagApplyManager" class="com.jatools.manager.tag.impl.LabelTagApplyManagerImpl">
+		<property name="labelTagApplyDao" ref="labelTagApplyDao"/>
+		<property name="labelTagApplyLineDao" ref="labelTagApplyLineDao"/>
+	</bean>
+	<bean name="labelTagApplyPrintManager" class="com.jatools.manager.tag.impl.LabelTagApplyPrintManagerImpl">
+		<property name="labelTagApplyPrintDao" ref="labelTagApplyPrintDao"/>
+		<property name="labelTagApplyPrintLineDao" ref="labelTagApplyPrintLineDao"/>
+	</bean>
+	<bean name="labelTagImportManager" class="com.jatools.manager.tag.impl.LabelTagImportManagerImpl">
+		<property name="labelTagImportHeadDao" ref="labelTagImportHeadDao"/>
+		<property name="labelTagImportLineDao" ref="labelTagImportLineDao"/>
+	</bean>
+	
+	
+	<!--  ***********************************************推式管理push******************************************* -->
+	<bean id="excludeOrnaManager" class="com.jatools.manager.push.impl.ExcludeOrnaManagerImpl"></bean>
+	<bean id="pushGradeManager" class="com.jatools.manager.push.impl.PushGradeManagerImpl"></bean>
+	<bean id="pushSizeManager" class="com.jatools.manager.push.impl.PushSizeManagerImpl"></bean>
+	<bean id="distributeNumManager" class="com.jatools.manager.push.impl.DistributeNumManagerImpl"></bean>
+	<bean id="turnoverNumManager" class="com.jatools.manager.push.impl.TurnoverNumManagerImpl"></bean>
+	<bean id="salableRateManager" class="com.jatools.manager.push.impl.SalableRateManagerImpl"></bean>
+	<bean id="gatherSetManager" class="com.jatools.manager.push.impl.GatherSetManagerImpl"></bean>
+	<bean id="gatherOrderManager" class="com.jatools.manager.push.impl.GatherOrderManagerImpl"></bean>
+	<bean id="pushDispatchManager" class="com.jatools.manager.push.impl.PushDispatchManagerImpl"></bean>
+	<bean id="displayStandardManager" class="com.jatools.manager.push.impl.DisplayStandardManagerImpl"></bean>
+	<bean id="wearSizeManager" class="com.jatools.manager.push.impl.WearSizeManagerImpl"></bean>
+	<bean id="salableManager" class="com.jatools.manager.push.impl.SalableManagerImpl"></bean>
+	<bean id="pushStyleManager" class="com.jatools.manager.push.impl.PushStyleManagerImpl"></bean>
+
+</beans>

@@ -1,0 +1,4 @@
+例子见：调拨模块->调拨单
+1、在列表上的状态列，添加超链接，点击调用js方法
+	viewReviewLog(billCode, billId)(commonSelector.js中定义)
+如：<a href="javascript:viewReviewLog('TB', '$!{item.headid}')">$!DictUtil.getValue('status', $!item.status)</a>

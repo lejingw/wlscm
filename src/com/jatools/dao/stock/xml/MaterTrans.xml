@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MaterTrans">
+	<typeAlias alias="MaterTrans" type="com.jatools.vo.stock.MaterTrans"/>
+	
+	<!-- 入库事务 -->
+	<insert id="MaterTrans.insertStock" parameterClass="MaterTrans">
+		<selectKey resultClass="string" keyProperty="transId" type="pre">
+			select JAT_MATER_TRANS_SEQ.NEXTVAL as transId from dual
+		</selectKey>
+		INSERT INTO  JAT_MATER_TRANS 
+		( 	
+			TRANS_ID, ORG_ID, STOCK_ID, LOCATOR, ITEM_CLASS_ID, ORNA_CLASS_ID, 
+			STYLEITEMCLASS, STYLEMIDDLECLASS, STYLEORNACLASS, STYLE_ID, ALAYSIS_ID, 
+			ORNA_CODE, ORNA_BARCODE, ORNA_DSC, UNIT_ID, NOW_QTY, ALL_QTY, GRAINS, 
+			POS_COST, POS_MONEY, TRANS_FLAG, TRANS_SOURCE_TYPE, TRANS_SOURCE_NO, 
+			TRANS_BODY, TRANS_FINANCE, TRANS_DATE, TRANS_COST, TRANS_MONEY, TRANS_QTY, 
+			IS_PSALE, MOVE_ORG_ID, ORNA_CODE_SOURCE, CREATE_DATE, CREATE_ID
+		) 
+			VALUES 
+		(
+		  	#transId#,
+			#orgId#,      <!--库存组织-->                                   
+			#stockId#,          <!--仓库 -->                                      
+			#locator#,           <!--货位，预留现在空 -->                          
+			#itemClassId#,     <!--大类 -->                                      
+			#ornaClassId#,     <!--小类 -->                                      
+			#styleitemclass#,    <!--款式大类 -->                                  
+			#stylemiddleclass#,  <!--款式中类 -->                                  
+			#styleornaclass#,    <!--款式小类 -->                                  
+			#styleId#,          <!--款式 -->                                      
+			#alaysisId#,        <!--分析范围 -->                                  
+			#ornaCode#,         <!--饰品编码 -->                                  
+			#ornaBarcode#,      <!--饰品条码 -->                                  
+			#ornaDsc#,          <!--饰品名称 -->                                  
+			#unitId#,           <!--计量单位 -->                                  
+			#nowQty#,           <!--现有量 -->                                    
+			#allQty#,           <!--总重量 -->                                    
+			#grains#,            <!--粒数 -->                                      
+			#posCost#,          <!--成本 -->                                      
+			#posMoney#,         <!--销价 -->                                      
+			#transFlag#,         <!--事务标志，出库为-1，入库为1 -->              
+			#transSourceType#, <!--事务类型 -->                                  
+			#transSourceNo#,   <!--事务单号 -->                                  
+			#transBody#,        <!--事务说明 -->                                  
+			#transFinance#,     <!--单据与财务对应关系，从单据对应财务类型从取 -->
+			#transDate#,        <!--事务日期即单据日期 -->                        
+			#transCost#,        <!--事务成本即饰品成本 -->                        
+			#transMoney#,       <!--事务金额即销价 -->                            
+			#transQty#,         <!--事务数量即现有量 -->                          
+			#isPsale#,          <!--是否代销 -->                                  
+			#moveOrgId#,       <!--调拔对应组织 -->                              
+			#ornaCodeSource#,  <!--饰品原编码 -->                                
+		  	#createDate#,
+		   	#createId#
+		  )
+	</insert>
+	<!-- 从入库单 入库时 插入事务 -->
+	<insert id="MaterTrans.insertFromMaterIniv" parameterClass="map">
+		insert into jat_mater_trans (
+			trans_id, org_id, stock_id, locator, item_class_id, orna_class_id, styleitemclass, 
+			stylemiddleclass, styleornaclass, style_id, alaysis_id, orna_code, orna_barcode, orna_dsc, 
+			unit_id, now_qty, all_qty, grains, pos_cost, pos_money, trans_flag, trans_source_bill, 
+			trans_source_no, trans_body, trans_source_type, 
+			trans_finance, 
+			trans_date, trans_cost, trans_money, 
+			trans_qty, is_psale, move_org_id, orna_code_source, create_date, create_id	
+		) select 
+			JAT_MATER_TRANS_SEQ.NEXTVAL, a.iniv_org, a.stock_id, null, a.item_class_id, a.orna_class_id, a.style_item_id, 
+			a.style_middle_id, a.style_orna_id, a.style_id, a.analysis_arange_id, a.orna_code, a.orna_barcode, a.orna_name, 
+			a.unit_id, a.quantity, a.all_qty, a.total_num, a.total_cost, a.pos_amount, 1, #transSrcBillCode#, 
+			#transSrcBillNo#, null, a.iniv_flag, 
+			(
+				select finance from jat_basic_billno_rule r where r.bill_code = #transSrcBillCode# 
+			) as trans_finance,
+			#transDate#, a.total_cost, a.pos_amount, 
+			a.quantity, a.is_consign, null, a.old_orna_code, #createDate#, #createId#	
+		from jat_mater_iniv a where 1=1 
+		and a.src_bill_id = #srcBillId# and a.src_bill_code = #srcBillCode# 
+		and a.state = 901
+	</insert>
+	
+	<!-- 根据 形态转换|料提纯|拆石 行表进行出库 写事务 -->
+	<insert id="MaterTrans.insertFromChangeLine" parameterClass="map">
+		insert into jat_mater_trans (
+			TRANS_ID, 
+			ORG_ID, STOCK_ID, TRANS_SOURCE_NO, 
+			LOCATOR, ITEM_CLASS_ID, ORNA_CLASS_ID, STYLEITEMCLASS, 
+			STYLEMIDDLECLASS, STYLEORNACLASS, STYLE_ID, ALAYSIS_ID, ORNA_CODE, ORNA_BARCODE, ORNA_DSC, 
+			UNIT_ID, NOW_QTY, ALL_QTY, GRAINS, POS_COST, POS_MONEY, TRANS_FLAG, TRANS_SOURCE_BILL, 
+			TRANS_BODY, TRANS_SOURCE_TYPE, 
+			TRANS_FINANCE, 
+			TRANS_DATE, TRANS_COST, TRANS_MONEY, TRANS_QTY, IS_PSALE, MOVE_ORG_ID, ORNA_CODE_SOURCE, 
+			CREATE_DATE, CREATE_ID	
+		) select 
+			JAT_MATER_TRANS_SEQ.NEXTVAL	,
+			h.org_id as ORG_ID, h.stock_id as STOCK_ID, h.billno as TRANS_SOURCE_NO , 
+			null, ITEM_CLASS_ID, ORNA_CLASS_ID, STYLEITEMCLASS, 
+			STYLEMIDDLECLASS, STYLEORNACLASS, STYLE_ID, ALAYSIS_ID, ORNA_CODE, ORNA_BARCODE, ORNA_DSC, 
+			UNIT_ID, NOW_QTY, ALL_QTY, GRAINS, POS_COST, POS_MONEY, -1, #srcBillCode#, 
+			null, null, 
+			(
+				select finance as TRANS_FINANCE from jat_basic_billno_rule r where r.bill_code = #srcBillCode# 
+			),
+			#transDate#, pos_cost as TRANS_COST, pos_money as TRANS_MONEY, now_qty as TRANS_QTY, is_psale, null, null, 
+			#createDate#, #createId#
+		from jat_proc_change_line a left join jat_proc_change_head h on a.billid = h.billid 
+		where 1=1 and a.billid = #srcBillId#
+	</insert>
+	
+	<!-- 调拨单写事物出库、入库 -->
+	<insert id="MaterTrans.insertFromMoveBill" parameterClass="map">
+		<isEqual property="outFlag" compareValue="1"></isEqual>
+		<isNotEqual property="outFlag" compareValue="1"></isNotEqual>
+		insert into jat_mater_trans(trans_id, org_id, stock_id, locator,
+			item_class_id, orna_class_id, styleitemclass, stylemiddleclass, styleornaclass,
+			style_id, alaysis_id, orna_code, orna_barcode, orna_dsc,
+			unit_id, now_qty, all_qty, grains, pos_cost, pos_money,
+			trans_flag, trans_source_bill, trans_source_no, trans_body,
+			trans_source_type, trans_finance, trans_date, trans_cost, trans_money, trans_qty, is_psale, move_org_id,
+			orna_code_source, create_date, create_id)
+		select jat_mater_trans_seq.nextval, 
+			<isEqual property="outFlag" compareValue="1">b.out_org_id, </isEqual>
+			<isNotEqual property="outFlag" compareValue="1">b.in_org_id, </isNotEqual>
+			<isEqual property="outFlag" compareValue="1">b.out_stock_id, </isEqual>
+			<isNotEqual property="outFlag" compareValue="1">b.in_stock_id, </isNotEqual>
+			null, a.item_class_id, a.orna_class_id, a.style_item_class, a.style_middle_class, a.style_orna_class,
+			a.style_id, a.analysis_id, a.orna_code, a.bar_code, a.orna_dsc,
+			a.unit_id, a.now_qty, a.all_weight, a.grains, a.pos_cost, a.pos_amount,
+			<isEqual property="outFlag" compareValue="1">-1, </isEqual>
+			<isNotEqual property="outFlag" compareValue="1">1, </isNotEqual>
+			 #billCode#, b.billno, null, null, c.finance, #transDate#,
+			<isEqual property="outFlag" compareValue="1"> a.pos_cost, a.pos_amount, </isEqual>
+			<isNotEqual property="outFlag" compareValue="1"> a.new_pos_cost,  a.new_pos_money, </isNotEqual>
+			a.now_qty, '0',
+			<isEqual property="outFlag" compareValue="1">b.in_org_id, </isEqual>
+			<isNotEqual property="outFlag" compareValue="1">b.out_org_id, </isNotEqual>
+			null, #date#, #userid#
+		from jat_move_line a, jat_move_head b left join jat_basic_billno_rule c on c.bill_code = #billCode#
+		where a.status = 10 and a.headid = b.headid and b.headid = #headid#
+	</insert>
+</sqlMap>

@@ -1,0 +1,112 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/PriceLockDwr.js"])
+<form id="frm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value=''/>
+    <table class="title">
+    	<tr><td>价格锁定单</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08011102','1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08011102','2')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()">
+				<input type='button' value='查询' class='btn' id='btnQuery' $RightUtil.able($session, '08011102','3')>
+				<input type='button' value='批量锁定' class='btn' id='btnBatchCreate' $RightUtil.able($session, '08011102','4')>
+				<input type="checkbox" name='showAllFlag' #if("1" == "$!{form.condition.showAllFlag}") checked #end value='1' onclick="showAllBill('frm')">显示所有单据
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list' style="width:1300px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width="90px;">状态</th>
+                <th width="120px;">单据编号</th>
+                <th width="180px;">组织</th>
+                <th width="90px;">是否锁定</th>
+                <th width="90px;">件数合计</th>
+                <th width="180px;">锁定原因</th>
+        		<th width="120px;">创建时间</th>
+        		<th width="90px;">创建人</th>
+        		<th width="120px;">修改时间</th>
+        		<th width="90px;">修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td>
+					<input type='checkbox' name='chk' value="$!{map.headid}"/>
+					<input type='hidden' name='status' value="$!map.status">$velocityCounter
+				</td>
+				<td><a href="javascript:viewReviewLog('PL', '$!{map.headid}')">$!DictUtil.getValue('status', $!map.status)</a></td>
+				<td><a href="javascript:toEditPage('$!{map.headid}');">${map.billno}</a></td>
+    			<td>$!BdCommon.getOrgName(${map.orgId})</td>
+				<td>$!DictUtil.getValue('yesorno', $!map.lockFlag)</td>
+				<td>$!map.sumCount</td>
+				<td><input type='text' class='none' readonly value="$!map.lockReason"></td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function showAllBill(formId){
+	jQuery("#" + formId).submit();
+}
+function changeButton(checked, index){
+	jQuery("#btnDelete").attr('disabled', true);
+	if(!checked)	return;
+	jQuery("#btnDelete").attr('disabled', "1" != $n("status")[index].value);
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, changeButton, function(index){
+		toEditPage($n("chk")[index].value);
+	});
+	
+	initQuery2('PL01', "frm", 'btnQuery');
+	jQuery("#btnAdd").click(function(){
+		window.location = "priceLock.vm?user_action=toAdd";
+	});
+	jQuery("#btnDelete").click(function(){
+		var index = getSelectIndex('chk');
+		if(index<0){
+			alert("请先选择要删除的单据");
+			return ;
+		}
+		confirm("确定删除?", function(){
+    		PriceLockDwr.deletePriceLock($n("chk")[index].value, function(data){
+    			alert(data?data:"删除成功", function(){
+        			window.location = "priceLock.vm";
+    			});
+    		});
+		});
+	});
+	jQuery("#btnBatchCreate").click(function(){
+		window.location = "priceLock.vm?user_action=toQuery";
+	});
+	changeButton(false);
+});
+function toEditPage(headid){
+	window.location = "priceLock.vm?user_action=toEdit&headid=" + headid;
+}
+function deleteBillnoRule(headid){
+	confirm("确定删除?", function(){
+		window.location = "priceLock.vm?user_action=delete&headid=" + headid;
+	});
+}
+</script>

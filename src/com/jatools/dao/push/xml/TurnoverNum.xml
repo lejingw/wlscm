@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="TurnoverNum">
+	<sql id="TurnoverNum.getTurnoverNumPageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="TurnoverNum.getTurnoverNumPageData" parameterClass="map" resultClass="com.jatools.vo.push.TurnoverNum">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.billid              as "billId",
+			       a.org_id              as "orgId",
+			       a.item_class_id       as "itemClassId",
+			       a.orna_class_id       as "ornaClassId",
+			       a.analysis_id         as "analysisId",
+			       b.summarydescription  as "analysisName",
+			       a.style_item_class_id as "styleItemClassId",
+			       a.end_date            as "endDate",
+			       a.start_date          as "startDate",
+			       a.turnover_num        as "turnoverNum",
+			       a.create_id           as "createId",
+			       a.create_date         as "createDate",
+			       a.update_id           as "updateId",
+			       a.update_date         as "updateDate",
+			       a.status              as "status"
+			  from jat_pl_basic_turnover_num a
+			  left join jas_bd_analysis_arange b
+			    on a.analysis_id = b.analysis_arange_id
+			  <include refid="TurnoverNum.getTurnoverNumPageDataCD"/>
+			 order by a.start_date desc,
+			          a.end_date,
+			          a.org_id,
+			          a.item_class_id,
+			          a.orna_class_id,
+			          b.summarydescription,
+			          a.style_item_class_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="TurnoverNum.getTurnoverNumTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_turnover_num a
+			  left join jas_bd_analysis_arange b
+			    on a.analysis_id = b.analysis_arange_id
+			  <include refid="TurnoverNum.getTurnoverNumPageDataCD"/>
+	</select>
+	<insert id="TurnoverNum.saveTurnoverNum" parameterClass="com.jatools.vo.push.TurnoverNum">
+		<selectKey keyProperty="billId" resultClass="string">select jat_pl_turnover_num_seq.nextval from dual</selectKey>
+		insert into jat_pl_basic_turnover_num (billid, org_id, item_class_id, orna_class_id, analysis_id, style_item_class_id, start_date, end_date, turnover_num,
+			create_id, create_date, update_id, update_date,  status)
+		values (#billId#, #orgId#, #itemClassId#, #ornaClassId#, #analysisId#, #styleItemClassId#, #startDate#, #endDate#, #turnoverNum#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="TurnoverNum.updateTurnoverNum" parameterClass="com.jatools.vo.push.TurnoverNum">
+		update jat_pl_basic_turnover_num
+		set org_id = #orgId#, item_class_id = #itemClassId#, orna_class_id = #ornaClassId#, analysis_id = #analysisId#,
+			style_item_class_id = #styleItemClassId#, start_date = #startDate#, end_date = #endDate#, turnover_num = #turnoverNum#,
+			update_id = #updateId#, update_date = #updateDate#
+		where billid = #billId#
+	</update>
+	<select id="TurnoverNum.checkTurnoverNumRepeat" parameterClass="com.jatools.vo.push.TurnoverNum" resultClass="com.jatools.vo.push.TurnoverNum">
+		select a.end_date as "endDate", a.start_date as "startDate"
+		  from jat_pl_basic_turnover_num a
+		 where a.org_id = #orgId#
+		   and a.item_class_id = #itemClassId#
+		   and a.orna_class_id = #ornaClassId#
+		   and a.analysis_id = #analysisId#
+		   and a.style_item_class_id = #styleItemClassId#
+		<isNotEmpty property="billId"><![CDATA[and a.billid <> #billId#]]></isNotEmpty>
+	</select>
+	<delete id="TurnoverNum.deleteTurnoverNum" parameterClass="string">
+		delete jat_pl_basic_turnover_num where billid = #value#
+	</delete>
+	<delete id="TurnoverNum.deleteTurnoverNumByDate" parameterClass="map">
+		delete jat_pl_basic_turnover_num where start_date = #startDate# and end_date = #endDate#
+	</delete>
+	<insert id="TurnoverNum.copyTurnoverNum" parameterClass="map">
+		insert into jat_pl_basic_turnover_num
+		  (billid,
+		   org_id,
+		   item_class_id,
+		   orna_class_id,
+		   analysis_id,
+		   style_item_class_id,
+		   start_date,
+		   end_date,
+		   turnover_num,
+		   create_id,
+		   create_date,
+		   update_id,
+		   update_date,
+		   status)
+		  select jat_pl_turnover_num_seq.nextval,
+		         a.org_id,
+		         a.item_class_id,
+		         a.orna_class_id,
+		         a.analysis_id,
+		         a.style_item_class_id,
+		         #targetStartDate#,
+		         #targetEndDate#,
+		         a.turnover_num,
+		         #userId#,
+		         #date#,
+		         #userId#,
+		         #date#,
+		         1
+		    from jat_pl_basic_turnover_num a
+		   where a.start_date = #srcStartDate#
+		     and a.end_date = #srcEndDate#
+	</insert>
+	<insert id="TurnoverNum.saveTurnoverNumFromExcel" parameterClass="map">
+		insert into jat_pl_basic_turnover_num
+		  (billid,
+		   start_date,
+		   end_date,
+		   org_id,
+		   item_class_id,
+		   orna_class_id,
+		   analysis_id,
+		   style_item_class_id,
+		   turnover_num,
+		   create_id,
+		   create_date,
+		   update_id,
+		   update_date,
+		   status)
+		  select jat_pl_turnover_num_seq.nextval,
+		         a.col0,
+		         a.col1,
+		         a.col2,
+		         a.col3,
+		         a.col4,
+                 a.col5,
+		         a.col6,
+		         a.col7,
+		         #userId#,
+		         #date#,
+		         #userId#,
+		         #date#,
+		         1
+		    from jat_sys_excel_temp_data a
+		   where a.seq_id = #seqId#
+		   and a.sheetindex = 0
+		   and not exists
+		        (select 1
+		          from jat_pl_basic_turnover_num c
+		         where c.start_date = a.col0
+		           and c.end_date = a.col1
+		           and c.org_id = a.col2
+		           and c.item_class_id = a.col3
+		           and c.orna_class_id = a.col4
+		           and c. analysis_id = a.col5
+		           and c.style_item_class_id = a.col6)
+	</insert>
+</sqlMap>

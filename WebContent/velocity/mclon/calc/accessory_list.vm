@@ -1,0 +1,120 @@
+<form id="myForm" method="post">
+	<input type='hidden' id='user_action' name='user_action' value=''/>
+	<table class="title">
+		<tr>
+			<td >
+				<tr><td>辅料系数#if($!form.message)[<font color='blue'>$!form.message</font>]#else[<font color='red'>$!form.message</font>]#end</td></tr>
+            </td>
+        </tr>
+    </table>
+	<div id="queryDiv">
+        <table class="control">
+        	<tr>
+        		<td>
+        			<input type='button' value='确定' id='btnQueryOk'>
+        			<input type='button' value='重置' id='btnQueryReset'>
+        			<input type='button' value='取消' id='btnQueryCancel'>
+        		</td>
+        	</tr>
+        </table>
+        <table class='content'>
+			<tr>
+        		<td class="body1">辅料</td>
+        		<td class='body2'>
+					<select id="accessoryId" name="accessoryId">$StringUtil.emptyOption()</select>
+				</td>
+        	</tr>
+        </table>
+    </div>
+	<table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08060401','1')>
+				<input type='button' value='删除' class='btn' onclick='deleteLine()'  $RightUtil.able($session, '08060401','2')>
+				<input type='button' value='查询' class='btn' id="btnQueryShow"  $RightUtil.able($session, '08060401','3')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()"  $RightUtil.able($session, '08060401','4')>
+			</td>
+		</tr>
+    </table>
+	    <div class="scroll">
+	    <table class='list' >
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+                <th width='90px'>辅料</th>
+				<th width='60px'>系数</th>
+				<th width='120px'>创建时间</th>
+        		<th width='90px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.id}"/>$velocityCounter</td>
+                <td><a href='javascript:toEditPage($!{map.id});'>$!DictUtil.getValue('accessories',$!map.accessoryId)</a></td>
+				<td>$!map.coefficient</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createUserId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateUserId)</td> 
+			</tr>
+		#end
+    	</tbody>
+    </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+function executeQuery(){
+	jQuery("#myForm").submit();
+}
+function resetQuery(){
+	jQuery("#accessoryId").val("");
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false,null, function(index){
+		window.location = "accessory.vm?user_action=toEditAccessory&id=" + $n("chk")[index].value;
+	});
+	//initQuery("btnQueryShow", "btnQueryCancel");
+	initQuery2("FX01", 'myForm', 'btnQueryShow');
+	jQuery("#btnQueryOk").click(executeQuery);
+	jQuery("#btnQueryReset").click(resetQuery);
+	
+	DictDwr.getDictsForSlt("accessories", function(data){
+		addOptions("accessoryId", data, null, null, true, true,"$!{form.condition.accessoryId}");
+	});
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "accessory.vm?user_action=toEditAccessory";
+	});
+});
+function toEditPage(id){
+	window.location = "accessory.vm?user_action=toEditAccessory&id=" + id;
+}
+function deleteAccessory(id){
+	confirm("确定删除?", function(){
+		window.location = "accessory.vm?user_action=deleteAccessory&id=" + id;
+	});
+}
+function deleteLine(){
+	var index = getSelectIndexs('chk');
+	if(index.length!=1){
+		alert("请选择一行");
+		return;
+	}
+	var id = $n("chk")[index[0]].value;
+	confirm("确定删除?", function(){
+		window.location = "accessory.vm?user_action=deleteAccessory&id=" + id;
+	});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#myForm").submit();
+	//user_action改回之前的值，否则之后的任何提交如果不重新设置user_action，则都将是导出excel，比如上下翻页
+	jQuery("#user_action").val("");
+}
+</script>

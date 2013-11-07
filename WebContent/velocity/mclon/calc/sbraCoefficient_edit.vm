@@ -1,0 +1,76 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/calc/sbraCoefficient.js", "$StringUtil.getContextPath()/dwr/interface/SbraCoefficientDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="id" value="$!{form.sc.id}"/>
+    <table class="title">
+    	<tr><td>托架系数</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08060602','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+		<tr>
+			<td class='body1'>大类</td>	
+			<td class='body2'>
+				<!--<input type='hidden' id='styleId' value="1">class='target' ondblclick="showSelectStyleWin()"-->
+				<select id="itemClassId" dataType="Require" msg="不能为空" onchange="loadQ()">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>材质</td>	
+			<td class='body2'>
+				<!--<input type='hidden' id='styleId' value="1">class='target' ondblclick="showSelectStyleWin()"-->
+				<select id="qualityId" dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>系数</td><td class='body2'><input type='text' id='coefficient' dataType="Require" msg="不能为空" value="$!{form.sc.coefficient}">$StringUtil.star()</td>
+		</tr>
+    	<tr>
+			<td class='body1'>启始重量</td><td class='body2'><input type='text' id='startWeight' dataType="Require" msg="不能为空" value="$!{form.sc.startWeight}">$StringUtil.star()</td>
+		</tr>
+    	<tr>
+			<td class='body1'>截止重量</td><td class='body2'><input type='text' id='endWeight' dataType="Require" msg="不能为空" value="$!{form.sc.endWeight}">$StringUtil.star()</td>
+		</tr>
+    </table>
+</form>
+
+<script>
+function setPageContent(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true);
+	});
+	BdCommonDwr.getAllQualityForSlt(function(data){
+		addOptions("qualityId", data, null, null, true, true);
+	});
+}
+
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveSbraCoefficient();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "sbraCoefficient.vm";
+	});
+	if("$!form.sc.id"){
+		setValues();
+	}else{
+		setPageContent();
+	}
+});
+function setValues(){
+	//SbraCoefficientDwr.getQualityByItemClassId("$!{form.sc.itemClassId}",function(data){
+	//	addOptions("qualityId", data, null, null, true, true,"$!{form.sc.qualityId}");
+	//});
+	BdCommonDwr.getAllQualityForSlt(function(data){
+		addOptions("qualityId", data, null, null, true, true,"$!{form.sc.qualityId}");
+	});
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true,"$!{form.sc.itemClassId}");
+	});
+}
+
+</script>

@@ -1,0 +1,246 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/OrgGroupDwr.js",
+"$StringUtil.getContextPath()/js/basic/orgGroup_list.js?t=201203261848.js"])
+
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>单位柜组#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08011901','1')/>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08011901','2')/>
+				##<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '08011901','3')/>
+				<input type='button' value='查询' class='btn' id='btnSearch2' $RightUtil.able($session, '08011901','3')/>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08011901','4')/>
+				<input type='button' value='复制' class='btn' id='btnCopyData' $RightUtil.able($session, '08011902','2')/>
+			</td>
+		</tr>
+    </table>
+		#set($cond = $form.condition)
+		#set($orgId = $!cond.get('orgId'))
+		#set($itemClassId = $!cond.get('itemClassId'))
+		#set($ornaClassId = $!cond.get('ornaClassId'))
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+				<td class="body1">组织</td>
+    			<td class="body2">
+    				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+    				<input type='text' id="orgName" name='orgName' value="$!BdCommon.getOrgName($!orgId)" readonly class="target">
+    			</td>
+				<td class="body1"></td>
+    			<td class="body2"></td>
+    		</tr>
+			<tr>
+				<td class="body1">大类</td>
+    			<td class="body2">
+					<select id="itemClassId" name='itemClassId'  value="$!{itemClassId}" >$StringUtil.emptyOption()</select>
+				</td>
+				<td class="body1">小类</td>
+    			<td class="body2">
+					<select id="ornaClassId" name="ornaClassId"  value="$!{ornaClassId}" >$StringUtil.emptyOption()</select>
+				</td>
+			</tr>
+        </table>
+	</div>
+	
+	<div class='scroll'>
+    <table class='list'>
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th style='width:60px;'>状态</th>
+                <th style='width:180px;'>组织</th>
+        		<th style='width:90px;'>大类</th>
+        		<th style='width:90px;'>小类</th>
+				<th style='width:30px;'>柜组</th>
+        		<th style='width:120px;'>创建时间</th>
+        		<th style='width:90px;'>创建人</th>
+        		<th style='width:120px;'>修改时间</th>
+        		<th style='width:90px;'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk'/>$velocityCounter</td>
+				<td>$!DictUtil.getValue('status', $!map.status)
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="groupId" value="$!map.groupId"/>
+				</td>
+				<td><a href='javascript:toEditPage($!{map.groupId});'>$!BdCommon.getOrgName($map.orgId)</a></td>
+				<td>$!BdCommon.getItemClassDesc($map.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($map.ornaClassId)</td>
+				<td>$!DictUtil.getValue('group', $map.groups)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<div id="copyDataDiv" style="display:none;">
+	<table class='content'>
+		<tr>
+            <td class='body1' >&nbsp;</td>
+    		<td class='body2' style="text-align:center;">源</td>
+    		<td class='body2' style="text-align:center;">目标</td>
+        </tr>
+    	<tr>
+			<td class='body1'>
+				<input type='checkbox' id="chk_org" onclick="orgClick()"/>
+				组织&nbsp;&nbsp;
+				<input type='hidden' id="chk_type" />
+			</td>
+			<td class='body2'>
+				<input type='hidden' id="orgId_s" name='orgId_s' >
+    			<input type='text' id="orgName_s" name='orgName_s' readonly class="target" onclick="showSourceOrgWin()">
+			</td>
+			<td class='body2'>
+				<input type='hidden' id="orgId_d" name='orgId_d' >
+    			<input type='text' id="orgName_d" name='orgName_d' readonly class="target" onclick="showDestOrgWin()">
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>
+				<input type='checkbox' id="chk_itemClass" onclick="itemClassClick()"/>
+				大类&nbsp;&nbsp;
+			</td>
+			<td class='body2'>
+				<select id="itemClassId_s" name='itemClassId_s'  disabled>$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body2'>
+				<select id="itemClassId_d" name='itemClassId_d'  disabled>$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+		<tr>
+			<td class='body1'>
+				<input type='checkbox' id="chk_ornaClass" onclick="ornaClassClick()"/>
+				小类&nbsp;&nbsp;
+			</td>
+			<td class='body2'>
+				<select id="ornaClassId_s" name='ornaClassId_s' disabled >$StringUtil.emptyOption()</select>
+			</td>
+			<td class='body2'>
+				<select id="ornaClassId_d" name='ornaClassId_d' disabled >$StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+    </table>
+</div>
+	
+<script>
+//显示组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());
+}
+function changeItemClass(ornaValue){
+	BdCommonDwr.getOrnaClassByItemClassIdForSlt(jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true, ornaValue);
+	});
+}
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#orgName").val("$!BdCommon.getOrgName($!orgId)");
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!itemClassId");
+    	changeItemClass("$!ornaClassId");
+	});
+	jQuery("#itemClassId").change(changeItemClass);
+}
+
+
+function disableDeleteBtn(checked, index){
+	jQuery("#btnDelete").attr("disabled", true);
+	if(checked ){
+		if($n("status_list")[index].value==="1"){
+			jQuery("#btnDelete").attr("disabled", false);
+		}
+	}
+}
+
+jQuery(function(){
+	setValues();
+	
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+    	window.location = "orgGroup.vm?user_action=toEdit&groupId=" + $n("groupId")[index].value;
+    });
+	//initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("DWGZ01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "orgGroup.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deleteOrgGroup);
+	jQuery("#btnCopyData").click(showCopyData);
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	#set($curOrgId = $StringUtil.getOrgId($session))
+	var curOrgId = "$!curOrgId";
+	if(curOrgId == "$!BdCommon.getMainOrg()"){
+		jQuery("#orgName").click(showSelectOrgWin);
+	} else {
+		jQuery("#orgId").val(curOrgId);
+		jQuery("#orgName").val("$!BdCommon.getOrgName($!curOrgId)");
+	}
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#ornaClassId").val("");
+		jQuery("#itemClassId").val("");
+		jQuery("#orgName").val("");
+		jQuery("#orgId").val("");
+	});
+});
+
+function toEditPage(groupId){
+	window.location = "orgGroup.vm?user_action=toEdit&groupId=" + groupId;
+}
+function deleteOrgGroup(){
+	var idxs = getSelectIndexs("chk");
+	if(idxs.length <= 0){
+		alert("请选择要删除的数据");
+	} else {
+		confirm("确定删除?", function(){
+			var groupids = "";
+			for(var i=0; i<idxs.length;i++){
+				if(groupids) groupids = groupids + ";" + $n("groupId")[idxs[i]].value;
+				else groupids = $n("groupId")[idxs[i]].value;
+			}
+			showLayer(true);
+			OrgGroupDwr.deleteOrgGroup(groupids, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	})
+	}
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

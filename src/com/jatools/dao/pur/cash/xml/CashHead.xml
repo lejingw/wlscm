@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashHead">
+	<typeAlias alias="CashHead" type="com.jatools.vo.pur.cash.CashHead" />
+	
+	<resultMap class="CashHead" id="CashHead.result">
+		<result property = "cashId"       column = "cash_id"       />
+		<result property = "billNo"       column = "bill_no"       />
+		<result property = "billDate"     column = "bill_date"     />
+		<result property = "orgId"        column = "org_id"        />
+		<result property = "voderId"      column = "voder_id"      />
+		<result property = "materialType" column = "material_type" />
+		<result property = "status"       column = "status"        />
+		<result property = "memo"         column = "memo"          />
+		<result property = "createDate"   column = "create_date"   />
+		<result property = "createId"     column = "create_id"     />
+		<result property = "updateDate"   column = "update_date"   />
+		<result property = "updateId"    column = "update_id"     />
+		<result property = "dotype"    column = "dotype"     />
+		<result property = "cashNums"    column = "cash_nums"     />
+	</resultMap>
+	
+	<sql id="CashHead_columns">
+		cash_id, bill_no, bill_date, org_id, voder_id, material_type, status, memo, create_date, create_id, update_date, update_id, cash_nums, dotype
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="CashHead.getCashHeadPageData" resultMap="CashHead.result" parameterClass="map">
+		select <include refid="CashHead_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="CashHead_columns"/>  from jat_cash_head a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+			<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+			<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.bill_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="CashHead.getCashHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_head a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.bill_no = #billno# </isNotEmpty>
+		<isNotEmpty property="orgId" prepend="and"> a.org_id = #orgId# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.create_id = #createId# </isNotEmpty>
+		<isNotEmpty property="verdorId" prepend="and"> a.voder_id = #verdorId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.bill_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.bill_date <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="CashHead.saveCashHead" parameterClass="CashHead">
+    	<selectKey resultClass="string" keyProperty="cashId" type="pre">
+			select JAT_CASH_HEAD_SEQ.nextval as "cashId" from dual
+		</selectKey>
+		insert into jat_cash_head(<include refid="CashHead_columns"/>)
+		 values(
+		 	#cashId#, #billNo#, #billDate#, #orgId#, #voderId#, #materialType#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #cashNums#, #dotype#
+		 )
+    </insert>
+    
+    <select id="CashHead.getCashHead" parameterClass="string" resultMap="CashHead.result">
+		select <include refid="CashHead_columns"/> from jat_cash_head a 
+		where 1=1
+			and a.cash_id = #value#
+	</select>
+	
+	<update id="CashHead.updateCashHead" parameterClass="CashHead">
+		update jat_cash_head a set 
+			a.bill_no       = #billNo#,
+			a.bill_date     = #billDate#,
+			a.org_id        = #orgId#,
+			a.voder_id      = #voderId#,
+			a.material_type = #materialType#,
+			a.status        = #status#,
+			a.memo          = #memo#,
+			a.update_date   = #updateDate#,
+			a.update_id     = #updateId#,
+			a.cash_nums		= #cashNums#,
+			a.dotype		= #dotype#
+		where a.cash_id = #cashId# 
+	</update>
+	
+	<delete id="CashHead.deleteCashHead" parameterClass="string" >
+		delete from jat_cash_head a where a.cash_id = #value# 
+	</delete>
+	
+	<update id="CashHead.updateCashHeadStatus" parameterClass="map">
+		update jat_cash_head a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.cash_id = #cashId# 
+	</update>
+	
+	
+	<select id="CashHead.selectCashList" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select 
+				b.pr_id				as "prId",
+				b.bill_no			as "billNo",
+				b.bill_type			as "billType",
+				b.voder_id			as "voderId",
+				b.item_class_id		as "itemClassId",
+				d.item_class_dsc	as "itemClassName",
+				e.article_type_id	as "articleTypeId",
+				e.article_type_dsc	as "articleTypeName",
+				b.no_nums			as "noNums",
+				b.bill_nums			as "billNums",
+				b.cash_nums			as "cashNums",
+				b.user_nums			as "userNums",
+				a.line_id 			as "lineId",
+				a.cur_nums			as "oldCurNums"
+			from jat_cash_line a 
+			     left join jat_cash_prod_account b on a.pr_id = b.pr_id
+			     left join jas_bd_item_class d on d.item_class_id = b.item_class_id
+			     left join jas_bd_articletype e on e.article_type_id = d.article_type_id
+			where 1=1 
+				and a.cash_id = #cashId# and a.bill_type = #billType#
+				<isNotEmpty property="articleTypeId" prepend="and"> e.article_type_id = #articleTypeId# </isNotEmpty>
+				<isNotEmpty property="billno" prepend="and"> b.bill_no = #billno# </isNotEmpty>
+				<isNotEmpty property="startDate" prepend="and"> b.bill_date >= #"startDate"# </isNotEmpty>
+				<isNotEmpty property="endDate" prepend="and"> <![CDATA[b.bill_date <= #endDate#]]> </isNotEmpty>
+			union 
+			select 
+				c.pr_id				as "prId",
+				c.bill_no			as "billNo",
+				c.bill_type			as "billType",
+				c.voder_id			as "voderId",
+				c.item_class_id		as "itemClassId",
+				f.item_class_dsc	as "itemClassName",
+				g.article_type_id	as "articleTypeId",
+				g.article_type_dsc	as "articleTypeName",
+				c.no_nums			as "noNums",
+				c.bill_nums			as "billNums",
+				c.cash_nums			as "cashNums",
+				c.user_nums			as "userNums",
+				null				as "lineId",
+				0					as "oldCurNums"
+			from jat_cash_prod_account c
+			    left join jas_bd_item_class f on c.item_class_id = f.item_class_id
+			    left join jas_bd_articletype g on f.article_type_id = g.article_type_id
+			where 1=1 
+				and c.status = 2 and c.is_checked = 0 and c.no_nums >0 and (c.no_nums-c.user_nums) >0
+				and c.dotype = #billType#
+				and c.voder_id = #vendorId#
+				and c.org_id = #orgId#
+				<isNotEmpty property="cashId" prepend="and">
+					not exists (select 1 from jat_cash_line h where h.pr_id = c.pr_id and  h.cash_id = #cashId#)
+				</isNotEmpty>
+				<isNotEmpty property="articleTypeId" prepend="and"> g.article_type_id = #articleTypeId# </isNotEmpty>
+				<isNotEmpty property="billno" prepend="and"> c.bill_no = #billno# </isNotEmpty>
+				<isNotEmpty property="startDate" prepend="and"> c.bill_date >= #"startDate"# </isNotEmpty>
+				<isNotEmpty property="endDate" prepend="and"> <![CDATA[c.bill_date <= #endDate#]]> </isNotEmpty>
+				
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<select id="CashHead.selectCashCount" resultClass="int" parameterClass="map">
+		select count(*) from
+			(
+				select 
+					b.pr_id				as "prId",
+					b.bill_no			as "billNo",
+					b.bill_type			as "billType",
+					b.voder_id			as "voderId",
+					b.item_class_id		as "itemClassId",
+					d.item_class_dsc	as "itemClassName",
+					e.article_type_id	as "articleTypeId",
+					e.article_type_dsc	as "articleTypeName",
+					b.no_nums			as "noNums",
+					b.bill_nums			as "billNums",
+					b.cash_nums			as "cashNums",
+					a.line_id 			as "lineId"
+				from jat_cash_line a 
+				     left join jat_cash_prod_account b on a.pr_id = b.pr_id
+				     left join jas_bd_item_class d on d.item_class_id = b.item_class_id
+				     left join jas_bd_articletype e on e.article_type_id = d.article_type_id
+				where 1=1 
+					and a.cash_id = #cashId# and a.bill_type = #billType#
+					<isNotEmpty property="articleTypeId" prepend="and"> e.article_type_id = #articleTypeId# </isNotEmpty>
+					<isNotEmpty property="billno" prepend="and"> b.bill_no = #billno# </isNotEmpty>
+					<isNotEmpty property="startDate" prepend="and"> b.bill_date >= #"startDate"# </isNotEmpty>
+					<isNotEmpty property="endDate" prepend="and"> <![CDATA[b.bill_date <= #endDate#]]> </isNotEmpty>
+				union 
+				select 
+					c.pr_id				as "prId",
+					c.bill_no			as "billNo",
+					c.bill_type			as "billType",
+					c.voder_id			as "voderId",
+					c.item_class_id		as "itemClassId",
+					f.item_class_dsc	as "itemClassName",
+					g.article_type_id	as "articleTypeId",
+					g.article_type_dsc	as "articleTypeName",
+					c.no_nums			as "noNums",
+					c.bill_nums			as "billNums",
+					c.cash_nums			as "cashNums",
+					null				as "lineId"
+				from jat_cash_prod_account c
+				    left join jas_bd_item_class f on c.item_class_id = f.item_class_id
+				    left join jas_bd_articletype g on f.article_type_id = g.article_type_id
+				where 1=1 
+					and c.status = 2 and c.is_checked = 0 and c.no_nums >0 and (c.no_nums-c.user_nums) >0
+					and c.dotype = #billType#
+					and c.voder_id = #vendorId#
+					and c.org_id = #orgId#
+					<isNotEmpty property="cashId" prepend="and">
+						not exists (select 1 from jat_cash_line h where h.pr_id = c.pr_id and  h.cash_id = #cashId#)
+					</isNotEmpty>
+					<isNotEmpty property="articleTypeId" prepend="and"> g.article_type_id = #articleTypeId# </isNotEmpty>
+					<isNotEmpty property="billno" prepend="and"> c.bill_no = #billno# </isNotEmpty>
+					<isNotEmpty property="startDate" prepend="and"> c.bill_date >= #"startDate"# </isNotEmpty>
+					<isNotEmpty property="endDate" prepend="and"> <![CDATA[c.bill_date <= #endDate#]]> </isNotEmpty>
+			)
+	</select>
+	
+	<!-- 在删除单据时 还原 台账状态为2 -->
+	<update id="CashHead.modifyProdAccountValid" parameterClass="map">
+		update jat_cash_prod_account a
+		set 
+			a.status = 2, a.update_date = #updateDate#, a.update_id = #updateId#
+		where 
+			a.pr_id in (select b.pr_id from jat_cash_line b where b.cash_id = #cashId# and b.status = 1)
+	</update>
+	
+	<!-- 根据货品台账id取货品台账 -->
+	<select id="CashHead.getProdAccountById" resultClass="com.jatools.vo.out.CashProdAccount" parameterClass="string">
+		select 
+			c.pr_id            as "prId",
+			c.bill_no          as "billNo",
+			c.bill_type        as "billType",
+			c.dotype		   as "dotype",
+			c.voder_id         as "voderId",
+			c.item_class_id    as "itemClassId",
+			f.item_class_dsc   as "itemClassName",
+			g.article_type_id  as "articleTypeId",
+			g.article_type_dsc as "articleTypeName",
+			c.no_nums          as "noNums",
+			c.bill_nums        as "billNums",
+			c.cash_nums        as "cashNums",
+			c.user_nums        as "userNums"
+		from jat_cash_prod_account c
+			left join jas_bd_item_class f  on c.item_class_id = f.item_class_id
+			left join jas_bd_articletype g   on f.article_type_id = g.article_type_id
+		where 1 = 1
+			and c.status = 2
+			and c.is_checked = 0
+			and c.no_nums >0
+			and c.pr_id = #value#
+	</select>
+	
+	<update id="CashHead.subProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+		   set a.user_nums = a.user_nums -
+	       (
+	       		select t.cur_nums from jat_cash_line t where a.pr_id=t.pr_id  and t.cash_id = #billid#
+	       ) , update_date = #updateDate#, update_id = #updateId#
+		 where exists (
+		 	select 1 from jat_cash_line b where a.pr_id = b.pr_id and b.cash_id = #billid#
+		  )
+	</update>
+</sqlMap>

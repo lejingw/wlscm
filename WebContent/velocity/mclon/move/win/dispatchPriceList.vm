@@ -1,0 +1,66 @@
+<form id="frm" action="dispatchWay.vm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value='priceDispatchReport'/>
+    <table class="control">
+        <tr>
+            <td>
+                <input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()">
+                <input type='button' value='查询' class='btn' id="btnQueryShow" >
+            </td>
+        </tr>
+    </table>
+    <div class="scroll2">
+        <table class='list' style='width:1400px;'>
+            <thead>
+            <tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+                <th width='180px'>组织</th>
+                <th width='120px'>大类</th>
+                <th width='120px'>小类</th>
+                <th width='120px'>分析范围</th>
+                <th width='120px'>价位带起始</th>
+                <th width='120px'>价位带截止</th>
+                <th width='90px'>铺货量最小值</th>
+                <th width='90px'>铺货量最大值</th>
+                <th width='60px'>有效库存</th>
+                <th width='120px'>最小值与库存差异</th>
+                <th width='120px'>最大值与库存差异</th>
+            </tr>
+            </thead>
+            <tbody id="tbl">
+                #foreach($item in $form.pager.pageData)
+                <tr>
+                    <td><input type='checkbox' name='chk' value='$!{item.billId}'/>
+                        $velocityCounter
+                    </td>
+                    <td>$!BdCommon.getOrgName($!item.orgId)</td>
+                    <td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+                    <td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+                    <td>$!item.analysisName</td>
+                    <td>$!item.priceStart</td>
+                    <td>$!item.priceEnd</td>
+                    <td>$!item.dispMin</td>
+                    <td>$!item.dispMax</td>
+                    <td>$!item.stockNum</td>
+                    <td>$!item.dispMinDiff</td>
+                    <td>$!item.dispMaxDiff</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+    <script>
+        createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+    </script>
+</form>
+<script>
+    function exportListToExcel(){
+        jQuery("#user_action").val("priceDispatchReportExcel");
+        jQuery("#frm").submit();
+        jQuery("#user_action").val("priceDispatchReport");
+    }
+
+    jQuery(function(){
+        checkTable('tbl', 'chkall', 'chk', true, null, null);
+        initQuery2('DispatchPrice01', "frm", 'btnQueryShow');
+    });
+</script>

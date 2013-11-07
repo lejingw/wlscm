@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Dict">
+	<typeAlias alias="Dict" type="com.jatools.vo.sys.Dict" />
+	<resultMap id="result" class="Dict">
+		<result property="entryCode" column="entry_code"/>
+		<result property="entryName" column="entry_name"/>
+		<result property="entryType" column="entry_type"/>
+		<result property="itemKey" column="item_key"/>
+		<result property="itemValue" column="item_value"/>
+		<result property="itemOrder" column="item_order"/>
+	</resultMap>
+	<select id="Dict.getAllDictItem" resultMap="result">
+		select a.entry_code, a.entry_name, a.entry_type, b.item_key, b.item_value, b.item_order from jat_sys_dict_entry a, jat_sys_dict_item b
+			where a.entry_code = b.entry_code and a.status = 1 and b.status = 1
+		order by a.entry_type, a.entry_code, b.item_order, b.item_key
+	</select>
+	<!-- 
+	<resultMap id="result2" class="Dict">
+		<result property="entryCode" column="entry_code"/>
+		<result property="entryName" column="entry_name"/>
+	</resultMap>
+
+	
+	<select id="Dict.getDictByEntryType" resultClass="java.util.HashMap" parameterClass="string">
+		select a.entry_code, a.entry_name from jat_sys_dict_entry a where a.entry_type = #value# order by a.entry_code, a.entry_name
+	</select>
+	<select id="Dict.getDictByEntryCode" resultMap="result2" parameterClass="string">
+		select a.entry_code, a.entry_name from jat_sys_dict_entry a where a.entry_code = #value#
+	</select>
+	 -->
+	
+	<resultMap id="dictEntryResult" class="com.jatools.vo.sys.DictEntry">
+		<result property="entryCode" 	column="entry_code"/>
+		<result property="entryName" 	column="entry_name"/>
+		<result property="entryType" 	column="entry_type"/>
+		<result property="memo" 		column="memo"/>
+		<result property="createId" 	column="create_id"/>
+		<result property="createDate" 	column="create_date"/>
+		<result property="updateId" 	column="update_id"/>
+		<result property="updateDate" 	column="update_date"/>
+		<result property="status" 		column="status"/>
+	</resultMap>
+	<resultMap id="dictItemResult" class="com.jatools.vo.sys.DictItem">
+		<result property="entryCode" 	column="entry_code"/>
+		<result property="itemKey" 		column="item_key"/>
+		<result property="itemValue" 	column="item_value"/>
+		<result property="itemOrder" 	column="item_order"/>
+		<result property="createId" 	column="create_id"/>
+		<result property="createDate" 	column="create_date"/>
+		<result property="updateId" 	column="update_id"/>
+		<result property="updateDate" 	column="update_date"/>
+		<result property="status" 		column="status"/>
+	</resultMap>
+	<sql id="DictEntry.columnall">
+		entry_code, entry_name, entry_type, memo, create_id, create_date, update_id, update_date, status
+    </sql>
+
+    <sql id="Dict.getDictCondition">
+        where a.entry_type = #entryType#
+        <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+        and a.status = 1
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="Dict.getDictEntryPageData" resultMap="dictEntryResult" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="DictEntry.columnall"/>
+			from jat_sys_dict_entry a
+        <include refid="Dict.getDictCondition" />
+         order by a.entry_code, a.entry_name
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="Dict.getDictEntryTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_sys_dict_entry a
+        <include refid="Dict.getDictCondition" />
+    </select>
+    
+    <select id="Dict.getDictEntry" resultMap="dictEntryResult" parameterClass="string">
+    	select <include refid="DictEntry.columnall"/> from jat_sys_dict_entry a where a.entry_code = #entryCode# order by a.entry_code
+    </select>
+    <select id="Dict.getDictItemByEntryCode" resultMap="dictItemResult" parameterClass="string">
+    	select entry_code, item_key, item_value, item_order, create_id, create_date, update_id, update_date, status
+    	from jat_sys_dict_item a where a.entry_code = #entryCode# and a.status = 1 order by a.item_order, a.item_key
+    </select>
+    <insert id="Dict.saveDictEntry" parameterClass="com.jatools.vo.sys.DictEntry">
+    	insert into jat_sys_dict_entry(entry_code,entry_name, entry_type, memo, create_id, create_date, update_id, update_date, status)
+    	values(#entryCode#,#entryName#,#entryType#,#memo#,#createId#,#createDate#,#updateId#,#updateDate#,#status#)
+    </insert>
+    <update id="Dict.updateDictEntry" parameterClass="com.jatools.vo.sys.DictEntry">
+    	update jat_sys_dict_entry a set a.entry_name = #entryName#, a.memo = #memo#, update_id = #updateId#, update_date = #updateDate#, status = #status#
+    	where a.entry_code = #entryCode#
+    </update>
+    <insert id="Dict.saveDictItem" parameterClass="com.jatools.vo.sys.DictItem">
+    	insert into jat_sys_dict_item(entry_code,item_key,item_value,item_order,create_id,create_date,update_id,update_date,status)
+    	values(#entryCode#, #itemKey#, #itemValue#, #itemOrder#, #createId#, #createDate#, #updateId#, #updateDate#, #status#)
+    </insert>
+    <update id="Dict.updateDictItem" parameterClass="com.jatools.vo.sys.DictItem">
+    	update jat_sys_dict_item a set a.item_value = #itemValue#, a.item_order = #itemOrder#, a.update_id = #updateId#, a.update_date = #updateDate#, a.status = #status#
+    	where a.entry_code = #entryCode# and a.item_key = #itemKey# and a.status = 1
+    </update>
+    <delete id="Dict.deleteInvalidDictItem" parameterClass="string">
+    	delete jat_sys_dict_item a where a.entry_code = #value# and a.status = 0
+    </delete>
+</sqlMap>

@@ -1,0 +1,171 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/GatherOrderDwr.js"])
+#set($modelCode='08090201')
+<form id="frm" action="gatherOrder.vm" method="post">
+    <input type='hidden' id='user_action' name='user_action' value='list'/>
+    <table class="title">
+    	<tr><td>推式订单列表#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查看总单' id='btnViewGatherOrder' onclick="viewGatherOrder()" $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='修改明细' id='btnUpdateDetail' onclick="editGatherOrder()" $RightUtil.able($session, $modelCode,'2')>
+				<input type='button' value='撤销' id='btnCalcel' onclick="cancelGatherOrder()" $RightUtil.able($session, $modelCode,'3')>
+				<input type='button' value='强制关闭/开启' id='btnCloseOrOpen' onclick="closeOrOpenGatherOrder()" $RightUtil.able($session, $modelCode,'4')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, $modelCode,'5')>
+				<input type='button' value='查询' class='btn' id='btnQueryShow' >
+				<input type="checkbox" name='showAllFlag' #if("1" == "$!{form.condition.showAllFlag}") checked #end value='1' onclick="jQuery('#frm').submit();">显示所有单据
+			</td>
+		</tr>
+    </table>
+	<div class="scroll">
+        <table class='list' style="width:1900px;">
+        	<thead>
+    			<tr>
+                    <th width='45px'><input type='checkbox' id='chkall'/></th>
+            		<th width='90px'>状态</th>
+                    <th width='120px'>总单编号</th>
+            		<th width='180px'>区域</th>
+                    <th width='60px'>情侣款</th>
+    				<th width='90px'>周期类型</th>
+    				<th width='180px'>商品类别</th>
+    				<th width='90px'>购物开始日期</th>
+    				<th width='90px'>购物结束日期</th>
+    				<th width='90px'>销售开始日期</th>
+    				<th width='90px'>销售结束日期</th>
+    				<th width='90px'>最后到货日期</th>
+            		<th width='180px'>组织</th>
+            		<th width='90px'>创建人</th>
+            		<th width='120px'>创建时间</th>
+            		<th width='90px'>修改人</th>
+            		<th width='120px'>修改时间</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+    		#foreach($item in $form.pager.pageData)
+    			<tr>
+    				<td><input type='checkbox' name='chk' value="$!{item.headid}"/>$velocityCounter</td>
+					<td><input type="hidden" name="status" value="$!item.status"/>
+						$!DictUtil.getValue('status', $!item.status)</td>
+    				<td><a href='javascript:toViewPage($!{item.headid});'>$!item.billNo</a></td>
+    				<td>$!item.regionName</td>
+                    <td>$!DictUtil.getValue('yesorno', $!item.isLoveStyle)</td>
+    				<td>$!item.cycleTypeName</td>
+    				<td><input type='text' readonly class='none' value="$!item.articleTypeNames"></td>
+    				<td>$!item.purDateStart</td>
+    				<td>$!item.purDateEnd</td>
+    				<td>$!item.saleDateStart</td>
+    				<td>$!item.saleDateEnd</td>
+    				<td>$!item.purArriveDateEnd</td>
+    				<td>$!BdCommon.getOrgName($!item.orgId)</td>
+    				<td>$!BdCommon.getUserName($!item.createId)</td>
+    				<td>$!item.createDate</td>
+    				<td>$!BdCommon.getUserName($!item.updateId)</td>
+    				<td>$!item.updateDate</td>
+    			</tr>
+    		#end
+        	</tbody>
+        </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+function viewGatherOrder(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要查看的记录");
+		return ;
+	}
+	toViewPage($n("chk")[index].value);
+}
+function editGatherOrder(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要修改明细的记录");
+		return ;
+	}
+	window.location = "gatherOrder.vm?user_action=edit&headid=" + $n("chk")[index].value;
+}
+function cancelGatherOrder(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择要撤销的记录");
+		return ;
+	}
+	confirm("确定撤销?", function(){
+    	GatherOrderDwr.cancelGatherOrder($n("chk")[index].value, function(data2){
+    		alert(data2?data2:"撤销成功", function(){
+    			if(!data2){
+    				jQuery("#frm").submit();
+    			}
+    		});
+    	});
+	});
+}
+/**
+* 强制开启/关闭
+*/
+function closeOrOpenGatherOrder(){
+	var index = getSelectIndex('chk');
+	if(index<0){
+		alert("请先选择强制开启/关闭的记录");
+		return ;
+	}
+	var headid = $n("chk")[index].value;
+	var status = $n("status")[index].value;
+	if("8" != status){
+		GatherOrderDwr.checkCloseGatherOrder(headid, function(data){
+			alert(data);
+        	confirm("确定强制关闭?<br>"+(data?data:""), function(){
+            	GatherOrderDwr.closeGatherOrder(headid, function(data2){
+            		alert(data2?data2:"强制关闭成功", function(){
+            			if(!data2){
+            				jQuery("#frm").submit();
+            			}
+            		});
+            	});
+        	});
+		});
+	}else{
+    	confirm("确定强制开启?", function(){
+        	GatherOrderDwr.reopenGatherOrder(headid, function(data2){
+        		alert(data2?data2:"强制开启成功", function(){
+        			if(!data2){
+        				jQuery("#frm").submit();
+        			}
+        		});
+        	});
+    	});
+	}
+}
+function toViewPage(headid){
+	window.location = "gatherOrder.vm?user_action=view&headid=" + headid;
+}
+function changeButtons(checked, index){
+	jQuery("#btnViewGatherOrder").attr("disabled", true);
+	jQuery("#btnUpdateDetail").attr("disabled", true);
+	jQuery("#btnCalcel").attr("disabled", true);
+	jQuery("#btnCloseOrOpen").attr("disabled", true);
+	if(checked){
+    	jQuery("#btnViewGatherOrder").attr("disabled", false);
+    	jQuery("#btnUpdateDetail").attr("disabled", false);
+    	jQuery("#btnCalcel").attr("disabled", false);
+    	jQuery("#btnCloseOrOpen").attr("disabled", false);
+	}
+}
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, changeButtons, function(index){
+		toViewPage($n("chk")[index].value);
+	});
+	initQuery2('PGATHERORDER01', "frm", 'btnQueryShow');
+	changeButtons(false);
+});
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("list");
+}
+</script>

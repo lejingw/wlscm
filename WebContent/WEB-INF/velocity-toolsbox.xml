@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<toolbox>   
+	<tool>
+    	<key>date</key>
+    	<scope>application</scope>
+    	<class>org.apache.velocity.tools.generic.DateTool</class>
+	</tool>
+	
+	<tool>   
+    	<key>escape</key>
+    	<scope>application</scope>
+    	<class>org.apache.velocity.tools.generic.EscapeTool</class>
+	</tool>
+
+
+	<tool>
+     	<key>math</key>
+     	<scope>application</scope>
+     	<class>org.apache.velocity.tools.generic.MathTool</class>
+	</tool>
+
+	<tool>
+     	<key>cookie</key>
+     	<scope>request</scope>
+     	<class>org.apache.velocity.tools.view.tools.CookieTool</class>
+	</tool>
+	<!-- 自定义页面控制工具 类  -->
+	<tool>
+     	<key>EnumUtil</key>
+     	<scope>application</scope>
+     	<class>com.jatools.web.util.EnumUtil</class>
+	</tool>
+	
+	<tool>
+    	<key>DateUtil</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.DateUtil</class>
+	</tool>
+	
+	<tool>
+    	<key>StringUtil</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.StringUtil</class>
+	</tool>
+	<!-- 数据字典实用类 -->
+	<tool>
+    	<key>DictUtil</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.DictUtil</class>
+	</tool>
+	<!-- 基础数据实用类 -->
+	<tool>
+    	<key>BdCommon</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.BdCommon</class>
+	</tool>
+	<!-- 权限判断实用类 -->
+	<tool>
+    	<key>RightUtil</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.RightUtil</class>
+	</tool>
+	<!-- HTML实用类 -->
+	<tool>
+    	<key>HtmlUtil</key>
+    	<scope>application</scope>
+    	<class>com.jatools.web.util.HtmlUtil</class>
+	</tool>
+</toolbox>

@@ -1,0 +1,250 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>资金台账#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    		#set($cond = $form.condition)
+    		#set($billno = $!cond.get('billno'))
+    		#set($orgId = $!cond.get('orgId'))
+    		#set($startDate = $!cond.get('startDate'))
+    		#set($endDate = $!cond.get('endDate'))
+			#set($verdorId = $!cond.get('verdorId'))
+			#set($status = $!cond.get('status'))
+			#set($dotype = $!cond.get('dotype'))
+			#set($createId = $!cond.get('createId'))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch' $RightUtil.able($session, '0802090701','1')>
+				<input type='button' value='高级查询' class='btn' id='btnSearch2' $RightUtil.able($session, '0802090701','1')>
+				<input type='checkbox' id='allBill' name="allBill" onchange="showAllBill(this)" #if("$!status" == "all")checked#end/>显示所有单据
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '0802090701','2')>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+    		<tr>
+    			<td class="body1">单据编号</td>
+    			<td class='body2'>
+    				<input type='text' id="billno" name='billno' value="$!billno" >
+    			</td>
+    			<td class="body1">业务类型</td>
+    			<td class='body2'>
+					<select id="dotype" name='dotype'  value="$!{dotype}" >
+						<option value="">全部</option>
+						<option value="-1">应收账款</option>
+						<option value="1">应付账款</option>
+					</select>
+    				<input type='hidden' id="orgId" name='orgId' value="$!{orgId}">
+    			</td>
+    		</tr>
+			<tr>
+				<td class="body1">供应商</td>
+    			<td class='body2'>
+    				<select id="verdorId" name='verdorId'  value="$!{verdorId}" >$StringUtil.emptyOption()</select>
+    			</td>
+				<td class="body1">状态</td>
+    			<td class='body2'>
+    				<select id="status" name='status'  value="$!{status}" >
+						$StringUtil.emptyOption()
+						<option value="all">所有单据</option>
+						<option value="2">记账</option>
+						<option value="8">关闭</option>
+					</select>
+    			</td>
+			</tr>
+			<tr>
+				<td class="body1">创建人</td>
+    			<td class='body2'>
+    				<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+    			</td>
+				<td class="body1"></td>
+    			<td class='body2'></td>
+			</tr>
+			<tr>
+    			<td class="body1">业务时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">业务时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+	<div class="scroll">
+    <table class='list' style="width:1300px;">
+    	<thead>
+			<tr>
+				<th width='35px'>序号</th>
+				<th width="60px">状态</th>
+                <th width="120px">来源单据编号</th>
+				<th width="90px">来源单据类型</th>
+        		<th width="60px">业务类型</th>
+        		<th width="180px">供应商</th>
+				<th width="90px">业务时间</th>
+        		<th width="60px">付款金额</th>
+				<th width="60px">余额</th>
+        		<th width="90px">创建人</th>
+        		<th width="120px">创建时间</th>
+				<th width="90px">修改人</th>
+        		<th width="120px">修改时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.mrId}'/>$velocityCounter</td>
+				<td style="color:blue;">$!DictUtil.getValue('status', "$!map.status")</td>
+				<td><a href='javascript:toEditPage($!{map.mrId});'></a>
+                    <a href="javascript:toViewPage('$!{map.billType}','$!map.wwId','$!map.jjId','$!map.dgId','$!map.dxId','$!map.fkId');">
+					$!map.billNo</a></td>
+				<td>$!DictUtil.getValue('billcode', $!map.billType)</td>
+				<td>#if("$!map.dotype"=="-1")应收账款#else应付账款#end</td>
+				<td><input type='text' readonly class='none' value="$!BdCommon.getVendorName("$!map.voderId")" style='width:180px;'></td>
+				<td>$!map.billDate</td>
+				<td>$!map.moneys</td>
+				<td>$!map.lossMoney</td>
+				#set($createId = $!map.createId)
+				<td>$!BdCommon.getUserName("$!createId")</td>
+				<td>$!map.createDate
+					<input type="hidden" name="status_list" value="$!map.status"/>
+					<input type="hidden" name="payId" value="$!map.payId"/>
+				</td>
+				<td>$!BdCommon.getUserName("$!map.updateId")</td>
+				<td>$!map.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table></div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+
+//显示组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#orgId").val(idArr.join(","));
+			jQuery("#orgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#orgId").val());
+}
+
+function setValues(){
+	jQuery("#orgId").val("$!orgId");
+	jQuery("#status").val("$!status");
+	jQuery("#dotype").val("$!dotype");
+	BdCommonDwr.getAllVendor(function(data){
+		addOptions("verdorId",  data, null, null, true, true, "$!verdorId");
+	});
+}
+
+function disableDeleteBtn(checked, index){
+	jQuery("#btnDelete").attr("disabled", true);
+	if(checked ){
+		if($n("status_list")[index].value==="1"){
+			jQuery("#btnDelete").attr("disabled", false);
+		}
+	}
+}
+
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	setValues();
+	checkTable('tbl', 'chkall', 'chk', false, disableDeleteBtn, function(index){
+		//window.location = "payMoney.vm?user_action=toEdit&payId=" + $n("chk")[index].value;
+	});
+	initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("ZJTZ01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "payMoney.vm?user_action=toEdit";
+	});
+
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnQueryReset").click(function(){
+		jQuery("#billno").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#verdorId").val("");
+		jQuery("#status").val("");
+		jQuery("#createName").val("");
+		jQuery("#createId").val("");
+		jQuery("#dotype").val("");
+	});
+});
+
+
+function toEditPage(payId){
+	window.location = "payMoney.vm?user_action=toEdit&payId=" + payId;
+}
+function deletePayMoney(payId){
+	confirm("确定删除?", function(){
+		window.location = "payMoney.vm?user_action=delete&payId=" + payId;
+	})
+}
+function showAllBill(obj) {
+	if(obj.checked){
+		jQuery("#status").val("all");
+	} else {
+		jQuery("#status").val("");
+	}
+	jQuery("#frm").submit();
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+//来源单
+function toViewPage(type,wwId,jjId,dgId,dxId,fkId){
+	var options = {
+		title : '来源单据',
+		contentType : 'iframe',
+		iframeId : "purchaseWindowId",
+		width : 800,
+		height : 400,
+		okBtnName : '确定',
+		closeable:true,
+		boxid:'winDiv',
+		onok : function(box) {box.close();},
+		oncancel : function(box) {box.close();}
+	};
+	var url = "";
+	if(type=="WW")
+		url = ctxPath+ "/out/outVendor.vm?user_action=toEditEntrustout&headid=" + wwId + "&reviewflag=1";
+	if(type=="JJ")
+		url = ctxPath+ "/pur/handover.vm?user_action=toEdit&billid=" + jjId + "&reviewflag=1";
+	if(type=="DG")
+		url = ctxPath+ "/out/outVendor.vm?user_action=toEditPubsale&headid=" + dgId + "&reviewflag=1";
+	if(type=="DX")
+		url = ctxPath+ "/out/outVendor.vm?user_action=toEditPsale&headid=" + dxId + "&reviewflag=1";
+	if(type=="FK")
+		url = ctxPath+ "/pur/cash/payMoney.vm?user_action=toEdit&payId=" + fkId + "&reviewflag=1";
+	if(url!="")		
+		printWin= jQuery.weeboxs.open(url, options);
+}
+</script>

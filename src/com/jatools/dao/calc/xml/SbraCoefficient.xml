@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SbraCoefficient">
+	<typeAlias alias="SbraCoefficient" type="com.jatools.vo.calc.SbraCoefficient"/>
+	<typeAlias alias="Quality" type="com.jatools.vo.bd.Quality"/>
+	<resultMap class="SbraCoefficient" id="result">
+		<result property="id" column="id"/>
+		<result property="itemClassId" column="ITEM_CLASS_ID"/>
+		<result property="qualityId" column="QUALITY_ID"/>
+		<result property="coefficient" column="COEFFICIENT"/>
+		<result property="startWeight" column="START_WEIGHT"/>
+		<result property="endWeight" column="END_WEIGHT"/>
+		<result property="createDate" column="createdate"/>
+		<result property="createUserId" column="CREATEUSERID"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="updateUserId" column="UPDATEUSERID"/>
+	</resultMap>
+	<resultMap class="Quality" id="qualityResultI">
+		<result property="qualityId" column="QUALITY_ID"/>
+		<result property="qualityName" column="QUALITY_DSC"/>
+	</resultMap>
+	<sql id="Quality.column.itemClassId">
+    	q.QUALITY_ID,q.QUALITY_DSC
+    </sql>
+	<sql id="SbraCoefficient.Columns.all">
+		id,ITEM_CLASS_ID,quality_id,coefficient,start_weight,end_weight,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<sql id="SbraCoefficient.Columns.allM">
+		id,ITEM_CLASS_ID,quality_id,max(coefficient),start_weight,end_weight,
+		createdate,CREATEUSERID,updatedate,UPDATEUSERID
+	</sql>
+	<!-- 分页查询 -->
+	<select id="SbraCoefficient.getSbraCoefficientAllPageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="SbraCoefficient.Columns.all"/> from jat_calc_sbra_coefficient a where 1=1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.item_class_id , a.quality_id
+		) AA )where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="SbraCoefficient.getSbraCoefficientToalCount" resultClass="int">
+		select count(1) from jat_calc_sbra_coefficient a where 1=1 
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+	</select>
+	<!-- findById -->
+	<select id="SbraCoefficient.getSbraCoefficientById" resultClass="SbraCoefficient" parameterClass="string" resultMap="result">
+		select <include refid="SbraCoefficient.Columns.all"/> from jat_calc_sbra_coefficient a where a.id = #value#
+	</select>
+	<!-- 保存数据 -->
+	<insert id="SbraCoefficient.saveSbraCoefficient" parameterClass="SbraCoefficient">
+		<selectKey keyProperty="id" type="pre">
+			select JAT_CALC_SBRA_COEFFICIENT_SEQ.nextval as id from dual
+		</selectKey>
+		insert into jat_calc_sbra_coefficient(
+			id,ITEM_CLASS_ID,QUALITY_ID,COEFFICIENT,START_WEIGHT,END_WEIGHT,CREATEDATE,CREATEUSERID,UPDATEDATE,UPDATEUSERID)
+			values(#id#,#itemClassId#,#qualityId#,#coefficient#,#startWeight#,
+			#endWeight#,#createDate#,#createUserId#,#updateDate#,#updateUserId#)
+	</insert>
+	<!-- 修改数据 -->
+	<update id="SbraCoefficient.updateSbraCoefficient" parameterClass="SbraCoefficient">
+		update jat_calc_sbra_coefficient a set 
+			a.ITEM_CLASS_ID = #itemClassId#,
+			a.QUALITY_ID = #qualityId#,
+			a.COEFFICIENT = #coefficient#,
+			a.START_WEIGHT = #startWeight#,
+			a.END_WEIGHT = #endWeight#,
+			a.createdate = #createDate#,
+			a.CREATEUSERID = #createUserId#,
+			a.updatedate = #updateDate#,
+			a.updateuserid = #updateUserId# where a.id = #id#
+	</update>
+	<!-- 删除 -->
+	<delete id="SbraCoefficient.deleteSbraCoefficient" parameterClass="string">
+		delete jat_calc_sbra_coefficient a where a.id = #value#
+	</delete>
+	<!-- 材质找系数 -->
+	<select id="SbraCoefficient.getSbraCoefficientByQualityId" resultClass="com.jatools.vo.calc.SbraCoefficient" parameterClass="map" >
+		select max(a.coefficient) "coefficient" from jat_calc_sbra_coefficient a where a.quality_id = #qid# and
+			a.ITEM_CLASS_ID=#itemClassId# and 
+			<![CDATA[a.start_weight<=#num# and a.end_weight>#num#]]>
+			<isNotEmpty prepend="and" property="id"> a.id!=#id# </isNotEmpty>
+	</select>
+	<!-- 大类下的材质 -->
+	<select id="SbraCoefficient.getQualityByItemClassId" resultClass="Quality" parameterClass="string" resultMap="qualityResultI">
+		select <include refid="Quality.column.itemClassId"/> from JAS_BD_QUALITY q left join JAS_BD_ITEMCLASS_QUALITY iq 
+	       on iq.quality_id = q.quality_id where iq.item_class_id= #value#
+	</select>
+</sqlMap>

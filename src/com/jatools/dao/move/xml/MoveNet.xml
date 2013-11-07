@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MoveNet">
+	<select id="MoveNet.getMoveNetPageData" parameterClass="map" resultClass="com.jatools.vo.move.MoveNet">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.net_id as "netId", a.out_org_id as "outOrgId", a.in_org_id as "inOrgId", a.create_id as "createId", a.create_date as "createDate", a.update_id as "updateId", a.update_date as "updateDate", a.status as "status"
+			from jat_move_net a left join jas_sm_org b on a.out_org_id = b.org_id left join jas_sm_org c on a.in_org_id = c.org_id
+			where a.status = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by b.org_name, c.org_name, a.out_org_id , a.in_org_id, a.net_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="MoveNet.getMoveNetTotalCount" resultClass="int">
+		select count(1) from jat_move_net a where a.status = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+    
+    <select id="MoveNet.getOrgs" resultClass="com.jatools.vo.util.SelectorOption" parameterClass="map">
+    	<isEqual property="outflag" compareValue="1">
+	    	select a.org_id as "value", a.org_name as "text" from jas_sm_org a where exists(
+				select 1 from jat_move_net b where b.out_org_id = #orgid# and b.in_org_id = a.org_id
+			) order by a.parent_id, a.sort
+    	</isEqual>
+    	<isNotEqual property="outflag" compareValue="1">
+	    	select a.org_id as "value", a.org_name as "text" from jas_sm_org a where exists(
+				select 1 from jat_move_net b where b.in_org_id = #orgid# and b.out_org_id = a.org_id
+			) order by a.parent_id, a.sort
+    	</isNotEqual>
+    </select>
+    <!-- 保存调拨网络 -->
+    <insert id="MoveNet.saveMoveNet" parameterClass="com.jatools.vo.move.MoveNet">
+    	<selectKey keyProperty="netId" type="pre" resultClass="string">
+    		select jat_move_net_seq.nextval as netId from dual
+    	</selectKey>
+    	insert into jat_move_net(net_id, out_org_id, in_org_id, status, create_date, create_id, update_date, update_id)
+		values(#netId#, #outOrgId#, #inOrgId#, #status#, #createDate#, #createId#, #updateDate#, #updateId#)
+    </insert>
+    <!-- 删除调拨网络 -->
+    <delete id="MoveNet.deleteMoveNet" parameterClass="string">
+    	delete jat_move_net a where a.net_id = #value#
+    </delete>
+    <!-- 根据调入组织删除调拨网络 -->
+    <delete id="MoveNet.deleteMoveNetByOrgid" parameterClass="map">
+    	delete jat_move_net a where
+    	<isEqual property="outflag" compareValue="1">a.out_org_id = #orgid#</isEqual>
+    	<isNotEqual property="outflag" compareValue="1">a.in_org_id = #orgid#</isNotEqual>
+    </delete>
+    <select id="MoveNet.getInOrgByMoveNet" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+    	select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       decode(a.isfranchise,
+		       		  1,
+		       		  1,
+		       		  decode((select count(1)
+			                from jat_move_net b
+			               where b.out_org_id = #value#
+			                 and b.status = 1
+			                 and b.in_org_id = a.org_id),
+			              0,
+			              1,
+			              0)) as "nocheck"
+		  from jas_sm_org a
+			 start with a.parent_id = 0
+			        and a.org_type = 1
+			        and a.archiveflag = '0'
+			connect by prior a.org_id = a.parent_id
+			       and a.org_type = 1
+			       and a.archiveflag = '0'
+			 order by level, a.sort
+    </select>
+    <select id="MoveNet.getInJmOrgByMoveNet" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+    	select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       a.isfranchise as "jmFlag",
+		       decode(a.isfranchise,
+		              0,
+		              1,
+		              decode((select count(1)
+		                       from jat_move_net b
+		                      where b.out_org_id = #value#
+		                        and b.status = 1
+		                        and b.in_org_id = a.org_id),
+		                     0,
+		                     1,
+		                     0)) as "nocheck"
+		  from jas_sm_org a
+		 start with a.parent_id = 0
+		        and a.org_type = 1
+		        and a.archiveflag = '0'
+		connect by prior a.org_id = a.parent_id
+		       and a.org_type = 1
+		       and a.archiveflag = '0'
+		 order by level, a.sort
+    </select>
+    <select id="MoveNet.getInJmOrgFromPack" parameterClass="string" resultClass="com.jatools.vo.bd.Org">
+    	select a.org_id as "orgId",
+		       a.parent_id as "parentId",
+		       a.org_name as "orgName",
+		       a.isfranchise as "jmFlag",
+		       decode(a.isfranchise,
+		              0,
+		              decode((select count(1)
+		                       from jat_sys_dict_item b
+		                      where b.entry_code = 'hqorgs'
+		                        and a.org_id = b.item_key
+		                        and b.status = 1),
+		                     0,
+		                     1,
+		                     0),
+		              decode((select count(1)
+		                       from jat_move_net b
+		                      where b.out_org_id = #value#
+		                        and b.status = 1
+		                        and b.in_org_id = a.org_id),
+		                     0,
+		                     1,
+		                     0)) as "nocheck"
+		  from jas_sm_org a
+		 start with a.parent_id = 0
+		        and a.org_type = 1
+		        and a.archiveflag = '0'
+		connect by prior a.org_id = a.parent_id
+		       and a.org_type = 1
+		       and a.archiveflag = '0'
+		 order by level, a.sort
+    </select>
+    <select id="MoveNet.isHqOrg" parameterClass="string" resultClass="int">
+    	select count(1) from jat_sys_dict_item b where b.entry_code = 'hqorgs' and #value# = b.item_key and b.status = 1
+    </select>
+</sqlMap>

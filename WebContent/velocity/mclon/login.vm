@@ -1,0 +1,82 @@
+#set($layout = "layout/noLoginLayout.vm")
+	<form name="" action="login.vm" method="post" onsubmit="return checkSubmit();">
+		<input type="hidden" name="user_action" value="doLogin">
+		<table>
+			<tr >
+				<td >
+					用户名：
+                </td>
+				<td >
+					<input type='text' name='username' value="000003">
+                </td>
+            </tr>
+			<tr >
+				<td >
+					密码：
+                </td>
+				<td >
+					<input type='password' name='password' value="1">
+                </td>
+            </tr>
+			<tr >
+				<td >
+					组织
+                </td>
+				<td >
+                    <select name='orgid' style='width:120px;'>
+						<option value='49901'>浙江曼卡龙</option>
+						<option value='51106'>瑞安加盟店</option>
+						<option value='50681'>宁波天一国购店</option>
+						<option value='51001'>加盟店测试1</option>
+						<option value='49906'>萧山店</option>
+						<option value='49946'>嘉兴店</option>
+						<option value='49996'>萧山银隆专柜</option>
+						<option value='50021'>慈溪店</option>
+						<option value='50026'>余姚店</option>
+						<option value='50851'>慈溪银泰专柜</option>
+						<option value='49916'>富阳店</option>
+						<option value='49986'>富阳银泰专柜</option>
+						<option value='49926'>湖州店</option>
+						<option value='49936'>桐乡店</option>
+						<option value='50581'>上虞店</option>
+						<option value='50041'>宁波水晶街店</option>
+						<option value='50636'>金华福华银泰专柜</option>
+						<option value='50751'>杭州武林银泰专柜</option>
+						<option value='49976'>杭州西湖银泰专柜</option>
+						<option value='50496'>上海百联中环广场专柜</option>
+						<option value='50651'>临平银泰专柜</option>
+					</select>
+                </td>
+            </tr>
+			<tr>
+				<td>
+					#if($!loginForm.message)
+                        <font color='red'>$!loginForm.message</font>
+    				#end
+				</td>
+				<td><input type='submit' value="提交"></td>
+            </tr>
+        </table>
+    </form>
+<script language="javascript">
+function checkSubmit(){
+	var username = jQuery("username").val();
+	var password = jQuery("password").val();
+	if("" == username){
+		alert("请输入密码");
+		return false;
+	}
+	if("" == password){
+		alert("请输入密码");
+		return false;
+	}
+	//var url = "login.vm?user_action=doLogin&username=" + username + "&password=" + password;
+	//window.open(url, "_self");
+	return true;
+}
+jQuery(document).ready(function(){
+	if(window != top){
+		top.location = "$!StringUtil.getContextPath()/login.vm/isLogin=false";
+	}
+});
+</script>

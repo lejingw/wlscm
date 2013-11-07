@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LabelTagImportLine">
+	<typeAlias alias="LabelTagImportLine" type="com.jatools.vo.tag.LabelTagImportLine" />
+	
+	<sql id="LabelTagImportLine_columns">
+		lineid, headid, orna_code, new_orna_name, new_basic_price, new_amount, new_special_work_price, update_reason, group_no,
+		create_id, create_date, update_id, update_date
+	</sql>
+	
+	<sql id="LabelTagImportLine_columns_2">
+		"lineid", "headid", "ornaCode", "newOrnaName", "newBasicPrice", "newAmount", "newSpecialWorkPrice", "updateReason", "groupNo",
+		"createId", "createDate", "updateId", "updateDate"
+	</sql>
+	
+	<sql id="LabelTagImportLine_columns_3">
+		lineid                 as "lineid",
+		headid                 as "headid",
+		orna_code              as "ornaCode",
+		new_orna_name          as "newOrnaName",
+		new_basic_price        as "newBasicPrice",
+		new_amount             as "newAmount",
+		new_special_work_price as "newSpecialWorkPrice",
+		update_reason          as "updateReason",
+		group_no               as "groupNo",
+		create_id			   as "createId",
+		create_date			   as "createDate",
+		update_id			   as "updateId",
+		update_date			   as "updateDate"
+	</sql>
+	
+	<select id="LabelTagImportLine.getLabelTagImportLinePageData" resultClass="LabelTagImportLine" parameterClass="map">
+		select <include refid="LabelTagImportLine_columns_2"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="LabelTagImportLine_columns_3"/>
+			from jat_lable_tag_import_line a  where 1 = 1 and headid = #headid#
+			<isNotEmpty property="searchOrnaCode" prepend="and"> a.orna_code like '%$searchOrnaCode$%' </isNotEmpty>
+			order by a.create_date DESC, a.lineid
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="LabelTagImportLine.getLabelTagImportLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_lable_tag_import_line a where 1 = 1 and headid = #headid#
+		<isNotEmpty property="searchOrnaCode" prepend="and"> a.orna_code like '%$searchOrnaCode$%' </isNotEmpty>
+	</select>
+	
+	
+	<insert id="LabelTagImportLine.saveLabelTagImportLine" parameterClass="LabelTagImportLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_LABLE_TAG_IMPORT_LINE_SEQ.nextval as "lineid" from dual
+		</selectKey>
+		insert into jat_lable_tag_import_line(<include refid="LabelTagImportLine_columns"/>)
+		 values(
+		 	#lineid#, #headid#, #ornaCode#, #newOrnaName#, #newBasicPrice#, #newAmount#, #newSpecialWorkPrice#, #updateReason#, #groupNo#,
+		 	#createId#, #createDate#, #updateId#, #updateDate#
+		 )
+    </insert>
+    
+    <select id="LabelTagImportLine.getLabelTagImportLine" parameterClass="string" resultClass="LabelTagImportLine">
+		select <include refid="LabelTagImportLine_columns_3"/> from jat_lable_tag_import_line a 
+		where 1=1
+			and a.lineid = #value#
+	</select>
+	
+	<select id="LabelTagImportLine.getLabelTagImportLineList" parameterClass="string" resultClass="LabelTagImportLine">
+		select <include refid="LabelTagImportLine_columns_3"/> from jat_lable_tag_import_line a 
+		where 1=1
+			and a.headid = #value#
+		order by a.create_date desc, a.lineid
+	</select>
+	
+	<update id="LabelTagImportLine.updateLabelTagImportLine" parameterClass="LabelTagImportLine">
+		update jat_lable_tag_import_line a 
+		set 
+			a.orna_code              = #ornaCode#,
+			a.new_orna_name          = #newOrnaName#,
+			a.new_basic_price        = #newBasicPrice#,
+			a.new_amount             = #newAmount#,
+			a.new_special_work_price = #newSpecialWorkPrice#,
+			a.update_reason          = #updateReason#,
+			a.group_no               = #groupNo#,
+			a.update_id				 = #updateId#,
+			a.update_date			 = #updateDate#
+		where a.lineid = #lineid# 
+	</update>
+	
+	<delete id="LabelTagImportLine.deleteLabelTagImportLine" parameterClass="string" >
+		delete from jat_lable_tag_import_line a where a.lineid = #value# 
+	</delete>
+	
+	<delete id="LabelTagImportLine.deleteLabelTagImportLineByHeadid" parameterClass="string" >
+		delete from jat_lable_tag_import_line a where a.headid = #value# 
+	</delete>
+	
+	
+	<select id="LabelTagImportLine.getValidOrnaCode" parameterClass="string" resultClass="string">
+		select a.orna_code from ic_mater_active a 
+		where instr(',$value$,', ','||a.orna_code||',')>0
+	</select>
+	
+	<select id="LabelTagImportLine.getExistsOrnaCode" parameterClass="string" resultClass="string">
+		select a.orna_code from jat_lable_tag_import_temp a
+		 where a.seq_id = #value#
+		   and exists (
+			   select 1 from jat_lable_tag_import_line b
+	          left join jat_lable_tag_import_head c on c.headid = b.headid 
+	          where <![CDATA[c.status <> 8]]> and a.orna_code = b.orna_code
+	       )
+	</select>
+	
+	
+	<select id="LabeltagImportLine.getLineTempSeq" resultClass="string">
+		select JAT_LABLE_TAG_IMPORT_TEMP_SEQ.nextval from dual
+	</select>
+	
+	<insert id="LabelTagImportLine.saveTempLine" parameterClass="LabelTagImportLine">
+		insert into JAT_LABLE_TAG_IMPORT_TEMP (SEQ_ID, ORNA_CODE, NEW_ORNA_DSC, NEW_BASIC_PRICE, NEW_POS_AMOUNT, NEW_SPECAL_WORK_PRICE, UPDATE_REASON, GROUP_NO)
+		values (#seqId#, #ornaCode#, #newOrnaName#, #newBasicPrice#, #newAmount#, #newSpecialWorkPrice#, #updateReason#, #groupNo#)
+	</insert>
+	
+	<select id="LabelTagImportLine.getInValidOrnaCode" parameterClass="string" resultClass="string">
+		select a.orna_code from jat_lable_tag_import_temp a 
+		where a.seq_id = #value#
+			and not exists (
+				select 1 from ic_mater_active b where a.orna_code = b.orna_code
+			)
+	</select>
+	
+	<update id="LabelTagImportLine.deleteTempLineBySeqId" parameterClass="string">
+		delete from jat_lable_tag_import_temp a where a.seq_id = #value#
+	</update>
+	
+	<insert id="LabelTagImportLine.insertLineFromTemp" parameterClass="map">
+		insert into jat_lable_tag_import_line (
+			lineid, 
+			headid, orna_code, new_orna_name, new_basic_price, new_amount, 
+			new_special_work_price, update_reason, group_no,
+			create_id, create_date, update_id, update_date
+		)
+		select 
+			jat_lable_tag_import_line_seq.nextval, 
+			#headid#, t.orna_code, t.new_orna_dsc, t.new_basic_price, t.new_pos_amount,
+			t.new_specal_work_price, t.update_reason, t.group_no,
+			#userId#, #updateDate#, #userId#, #updateDate#
+		from jat_lable_tag_import_temp t
+		where t.seq_id= #seqId#
+	</insert>
+</sqlMap>

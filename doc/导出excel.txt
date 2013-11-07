@@ -1,0 +1,49 @@
+例子见：调拨模块->调拨单
+一、vm文件修改（见：moveBill_list.vm）
+1、在列表上添加导出Excel按钮
+	<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()">
+2、添加js方法
+function exportListToExcel(){
+	//window.location = "moveBill.vm?user_action=exportExcel&billType=" + jQuery("#billType").val();
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	//user_action改回之前的值，否则之后的任何提交如果不重新设置user_action，则都将是导出excel，比如上下翻页
+	jQuery("#user_action").val("");
+}
+注意：之所以用submit，是为了配合查询条件按使用（列表默认导出当前页），提交查询条件，和start、limit参数信息
+
+二、controller类文件修改（见：com.jatools.web.view.move.MoveBillController）
+	public ModelAndView exportExcel(HttpServletRequest req, HttpServletResponse res) {
+//		List<Map<String, String>> dataList = new ArrayList<Map<String,String>>();
+//		dataList.add(new HashMap<String, String>(){{put("billno", "NO0001");put("outOrgId", "49901");put("inOrgId", "49906");put("status", "1");}});
+//		dataList.add(new HashMap<String, String>(){{put("billno", "NO0002");put("outOrgId", "49901");put("inOrgId", "49905");put("status", "2");}});
+//		dataList.add(new HashMap<String, String>(){{put("billno", "NO0003");put("outOrgId", "49901");put("inOrgId", "49906");put("status", "4");}});
+//		dataList.add(new HashMap<String, String>(){{put("billno", "NO0004");put("outOrgId", "49901");put("inOrgId", "49907");put("status", "5");}});
+		
+		String billType = CommonUtil.getParameterEmpty(req, "billType");
+		Map<String, String> condition = CommonUtil.getConditionForPage(req, "showAllFlag");
+		Pager pager = moveBillManager.getMoveBillPageData(condition, billType, CommonUtil.getSessionOrgId(req));
+		//----------------------------------------------------------导出excel开始---------------------------------------
+		//excel数据对象
+		ExcelData excelData = new ExcelData();
+		excelData.setTitle("调拨单");
+//		excelData.setDataList(dataList);//手工重新查找数据
+		excelData.setPager(pager);//直接利用分页pager对象
+		excelData.addColumnWidth(new String[]{"outOrgId", "inOrgId", "createDate", "updateDate"}, new Integer[]{4, 4, 3, 3});//宽度默认值为2
+		//添加列标题
+		excelData.setColumnTitle(new String[]{"单据编号", "调拨类型", "来源单据", "来源单据号", "调出组织", "调出仓库", "调入组织", "调入仓库", "创建时间", "创建人", "修改时间", "修改人", "状态"});
+		//添加列name
+		excelData.setColumnName(new String[]{"billno", "moveType", "srcBillCode", "srcBillNo", "outOrgId", "outStockId", "inOrgId", "inStockId", "createDate", "createId", "updateDate", "updateId", "status"});
+		//设置对应的缓冲数据
+		excelData.addSingletonDisplayColumns(new String[]{"outOrgId", "inOrgId", "createId", "updateId"},
+					new CacheSingletonIntf[]{OrgCache.getInstance(), OrgCache.getInstance(), UserCache.getInstance(), UserCache.getInstance()});
+		//设置对应的数据字典
+		excelData.addDictDisplayColumns(new String[]{"moveType", "srcBillCode", "outStockId", "inStockId", "status"},
+					new String[]{DictConstant.MOVE_TYPE, DictConstant.BILL_CODE, DictConstant.INVCODE, DictConstant.INVCODE, DictConstant.BILL_STATUS});
+		
+		ExportExcelUtil util = new ExportExcelUtil();
+		util.setExcelData(excelData);//传入excel数据对象
+		util.export(res);//需要传入HttpServletResponse，以便下载excel
+		//----------------------------------------------------------导出excel结束---------------------------------------
+		return null;//返回null，不跳转至任何页面
+	}

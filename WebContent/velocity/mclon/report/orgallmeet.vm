@@ -1,0 +1,102 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+    <table class="title">
+    	<tr><td>报表管理【总部满足率查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset'>
+				<input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()">
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+		<tr>
+	
+			<td class='body1'>到货结束时间起</td>
+			<td class='body2'>
+				<input type='text' id="startDate" name='startDate' value="$!{startDate}">
+			</td>
+				<td class='body1'>到货结束时间止</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="$!{endDate}">
+			</td>
+			<td class='body1'>周期类型</td>
+			<td class='body2'>
+				<select id="CycleTypeId" name='CycleTypeId'  value="$!{CycleTypeId}" >$StringUtil.emptyOption()</select></td>
+		</tr>
+
+
+		
+    </table>
+
+    <table class='list'>
+    	<thead>
+			<tr>
+				<th>下单日期</th>
+				<th>最后到货日期</th>
+				<th>下单数量</th>
+				<th>到货数量</th>
+				<th>满足率</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>			
+				<td>$!map.DEMAND_DATE</td>
+				<td>$!map.ORDER_END_DATE</td>
+				<td>$!map.DEMAND_NUMS</td>
+				<td>$!map.GET_NUMS</td>
+				<td>$!map.MEETS</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+</form>
+<script>
+//显示库存组织选择窗口
+function showSelectOrgWin(){
+	selectOrg(function(idArr, nameArr){
+			jQuery("#OrgId").val(idArr.join(","));
+			jQuery("#OrgName").val(nameArr.join(","));
+		}, null, null, false, jQuery("#OrgId").val());
+}
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		jQuery("#frm").submit();
+	});
+	
+	altRowCSS("tbl");
+
+	newCalendar();
+});
+</script>

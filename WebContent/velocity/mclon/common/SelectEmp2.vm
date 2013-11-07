@@ -1,0 +1,198 @@
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js",
+	"$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js",
+	"$StringUtil.getContextPath()/dwr/interface/BdCommonDwr.js"])
+##$form.multiFlag
+<script>
+var start=1;
+var limit=10;
+var totalCount=0;
+var SELECTED_ORG_ID = null;
+
+function countToolbar(){
+	jQuery("#_start").val(start);
+	jQuery("#_limit").val(limit);
+	jQuery("#_pageindex").val(Math.ceil(start / limit));
+	jQuery("#_totalPageCount").val(Math.ceil(totalCount / limit));
+	jQuery("#_pageCount").val(limit);
+	jQuery("#_totalCount").val(totalCount);
+	
+	if(parseInt(jQuery("#_pageindex").val())<=1){
+		jQuery("#_btnPre").attr('disabled', true);
+		jQuery("#_btnFirst").attr("disabled", true);
+	}else{
+		jQuery("#_btnPre").removeAttr("disabled");
+		jQuery("#_btnFirst").removeAttr("disabled");
+	}
+	if(parseInt(jQuery("#_pageindex").val())>=parseInt(jQuery("#_totalPageCount").val())){
+		jQuery("#_btnNext").attr('disabled', true);
+		jQuery("#_btnLast").attr("disabled", true);
+	}else{
+		jQuery("#_btnNext").removeAttr("disabled");
+		jQuery("#_btnLast").removeAttr("disabled");
+	}
+}
+function createToolbar(){
+	document.write("<input type='hidden' id='_start' name='_start' value=''/>");
+	document.write("<input type='hidden' id='_limit' name='_limit' value=''/>");
+	document.write("当前第<input type='text' id='_pageindex' style='width:25px;text-align:center;' value=''>页,");
+	document.write("共<input type='text' id='_totalPageCount' style='width:25px;text-align:center;' value='' readonly>页,");
+	document.write("每页<input type='text' id='_pageCount' style='width:25px;text-align:center;' value=''>条,");
+	document.write("共<input type='text' id='_totalCount' style='width:25px;text-align:center;' value='' readonly>条,");
+	document.write("<input type='button' id='_btnFirst' class='pageToolbarBtn' value='首页'>");
+	document.write("<input type='button' id='_btnPre' class='pageToolbarBtn' value='上一页'>");
+	document.write("<input type='button' id='_btnNext' class='pageToolbarBtn' value='下一页'>");
+	document.write("<input type='button' id='_btnLast' class='pageToolbarBtn' value='尾页'>");
+    
+	/**
+	* 改变页数
+	*/
+	jQuery("#_pageindex").change(function(){
+		if(isNumeric(jQuery("#_pageindex").val())){
+	       	jQuery("#_start").val((parseInt(jQuery("#_pageindex").val()) - 1) * parseInt(jQuery("#_pageCount").val()) + 1);
+	       	loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+		}else{
+			jQuery("#_pageindex").val("");
+		}
+		
+	});
+	/**
+	* 改变每页显示条数
+	*/
+	jQuery("#_pageCount").change(function(){
+		if(isNumeric(jQuery("#_pageCount").val())){
+	    	jQuery("#_start").val("1");
+	    	jQuery("#_limit").val(jQuery("#_pageCount").val());
+	    	loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+		}else{
+			jQuery("#_pageCount").val("");
+		}
+	});
+	jQuery("#_totalPageCount").focus(function(){
+		jQuery(this).blur();
+	});
+	jQuery("#_totalCount").focus(function(){
+		jQuery(this).blur();
+	});
+	jQuery("#_btnFirst").click(function(){
+		jQuery("#_start").val("1");
+		loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+	});
+	jQuery("#_btnPre").click(function(){
+		if(parseInt(jQuery("#_start").val()) - parseInt(jQuery("#_limit").val()) - 1 >= 0){
+	    	jQuery("#_start").val(parseInt(jQuery("#_start").val()) - parseInt(jQuery("#_limit").val()));
+	    	loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+		}
+	});
+	jQuery("#_btnLast").click(function(){
+		jQuery("#_start").val((Math.ceil(totalCount / limit)-1)*parseInt(jQuery("#_pageCount").val()) + 1);
+		loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+	});
+	jQuery("#_btnNext").click(function(){
+		if(parseInt(jQuery("#_start").val()) + parseInt(jQuery("#_limit").val()) - 1 <= totalCount){
+	    	jQuery("#_start").val(parseInt(jQuery("#_start").val()) + parseInt(jQuery("#_limit").val()));
+	    	loadStylePage(jQuery("#_start").val(),jQuery("#_limit").val());
+		}
+	});
+}
+</script>
+<table style="width:100%;height:100%;" border="1">
+	<tr>
+		<td valign="top" style='width:220px;' rowspan="2">
+			<div id="myZTree" class="ztree" style="height:330px;width:210px;overflow-y:auto;"></div>
+		</td>
+		<td valign="top">
+			<table class='list'>
+                <thead>
+					<th width='30px;'><input type='checkbox' id='chkall'/></th>
+					<th>名称</th>
+				</thead>
+				<tbody id="tb11">
+                </tbody>
+			</table>
+		</td>
+	</tr>
+	<tr height='10px;'>
+		<td height='10px;'><script>createToolbar();</script></td>
+	</tr>
+</table>
+<script>
+function loadStylePage(s, l){
+	for(var i=$("tb11").rows.length-1;i>=0;i--){
+		$("tb11").deleteRow(i);
+	}
+	BdCommonDwr.getExeOrgEmp(SELECTED_ORG_ID, s, l, function(datas){
+		var data = datas.pager.pageData;
+    	for(var i=0;i<data.length;i++){
+    		var f1 = "<input type='hidden' name='empId' value='" + data[i].value + "'/><input type='checkbox' name='chk' " + (isChecked(data[i].value)?"checked":"") + ">";
+			var f2 = "<input type='hidden' name='empName' value='" + data[i].text + "'/>" + data[i].text;
+    		insertRow("tb11", [f1, f2], false);
+    	}
+		checkTable("tb11", 'chkall', 'chk', true)
+    	start = datas.pager.start;
+    	limit = datas.pager.limit;
+    	totalCount = datas.pager.totalCount;
+		countToolbar();
+	});
+}
+function isChecked(empid){
+	var selectedValues = "$!form.selectedValues".split(",");
+	for(var i=0;i<selectedValues.length;i++){
+		if(selectedValues[i] == empid){
+			return true;
+		}
+	}
+	return false;
+}
+function loadExeOrgEmp(orgid){
+	SELECTED_ORG_ID = orgid;
+	start = 1;
+	limit = 10;
+	loadStylePage(start, limit);
+}
+//供外部调用的取值方法
+function getValues(){
+	var idArr = [], nameArr = [], objArr = [];
+	for(var i=0;i<$n("chk").length;i++){
+		if($n("chk")[i].checked){
+			idArr.push($n("empId")[i].value);
+			nameArr.push($n("empName")[i].value);
+    		objArr.push({empId:$n("empId")[i].value, empName:$n("empName")[i].value});
+		}
+	}
+	return [idArr, nameArr, objArr];
+}
+jQuery(document).ready(function(){
+    var setting = {
+    	view: {selectedMulti: false},
+		check: {enable:false},
+    	data: {simpleData: {enable: true}},
+		callback: {//当单据树节点时，选中或取消勾选状态
+			"onClick": function(event, treeId, treeNode){
+				loadExeOrgEmp(treeNode.id);
+			}
+		}
+    };
+	//静态数据
+    var nodeDataArr =[
+    	#foreach($param in ${form.dataMap.keySet()})
+    		{id:$param, pId:${form.dataMap.get($param).parentId}, name:'${form.dataMap.get($param).orgName}' #if(0 == ${form.dataMap.get($param).parentId}), open: true #end},
+        #end
+		null
+    ];
+	nodeDataArr.pop();
+	//初始化tree
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, nodeDataArr);
+	
+	//勾选上次已经选择的数据
+	var selectedValues = "$!form.selectedValues".split(",");
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	for(var i=0;i<selectedValues.length;i++){
+		if(selectedValues[i]){
+    		var node = zTree.getNodeByParam("id", selectedValues[i]);
+			zTree.checkNode(node, true);
+		}
+	}
+});
+</script>

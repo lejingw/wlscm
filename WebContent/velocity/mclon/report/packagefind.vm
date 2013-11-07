@@ -1,0 +1,163 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js"])
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+    <table class="title">
+    	<tr><td>报表管理【装箱单查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='查询' class='btn' id='btnSearch'>
+				<input type='reset' value='重置' class='btn' id='btnReset'>	
+  	        	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08051601','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08051601','2')>
+			</td>
+		</tr>
+	</table>
+	<table class='content'>
+
+		<tr>
+		
+			<td class='body1'>开始日期</td>
+			<td class='body2'><input type='hidden' id="Finds" name='Finds' value="0">
+				<input type='text' id="startDate" name='startDate' value="">
+			</td>
+				<td class='body1'>结束日期</td>
+			<td class='body2'>
+				<input type='text' id="endDate" name='endDate' value="">
+			</td>
+			<td class='body1'>发送方式</td>
+			<td class='body2'>
+					<select id="expressMode" name='expressMode'  value="" >	</select>	</td>
+				<td class='body1'>单据类型</td>
+			<td class='body2'>
+					<select id="doType" name='doType'  value="" >
+				<option value=''>所有</option>
+				<option value='1'>饰品装箱</option>
+				<option value='2'>维修装箱</option>
+				<option value='3'>交接装箱</option>
+				</select>	</td>
+		</tr>
+
+
+		<tr>
+		
+			<td class='body1'>快递单号</td>
+			<td class='body2'>
+				<input type='text' id="expressNo" name='expressNo' value="">
+			</td>
+			
+		</tr>
+
+    </table>
+
+   	<div class='scroll2'>
+        <table class='list' style='width:1500px;'>
+    	<thead>
+			<tr>               
+				<th>调出组织</th>
+				<th>调入组织</th>
+				<th>单据编号</th>
+				<th>快递单号</th>
+				<th>总成本</th>
+				<th>总件数</th>
+				<th>创建人</th>
+				<th>创建日期</th>
+				<th>接收人</th>
+				<th>接收日期</th>
+				<th>状态</th>
+				<th>发运方式</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.list)
+			<tr>
+                <td>$!map.OUTORG_NAME</td>
+				<td>$!map.INORG_NAME</td>
+				<td>$!map.BILLNO</td>
+				<td>$!map.EXPRESS_NO</td>
+				<td>$!map.SUM_COST</td>
+				<td>$!map.SUM_COUNT</td>
+				<td>$!map.CEMPNAME</td>
+				<td>$!map.CREATE_DATE</td>
+				<td>$!map.REMPNAME</td>
+				<td>$!map.RECEIVE_DATE</td>
+				<td>$!map.STATUS</td>			
+				<td>$!map.EXPRESS_MODE</td>		
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+
+
+function newCalendar(){
+    new Calendar({
+          inputField: "startDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "startDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+	
+	 new Calendar({
+          inputField: "endDate",
+          dateFormat: "%Y-%m-%d",
+          trigger: "endDate",
+          bottomBar: true,
+          showTime:false,
+          onSelect: function() {
+            this.hide();
+          }
+    });
+}
+
+function setValues(){
+    altRowCSS("tbl");
+	jQuery("#startDate").val("$!form.condition.startDate");
+	jQuery("#endDate").val("$!form.condition.endDate");
+	jQuery("#doType").val("$!form.condition.doType");
+	jQuery("#expressNo").val("$!form.condition.expressNo");
+	
+}
+jQuery(function(){
+	jQuery("#btnSearch").click(function(){
+		if(""!=jQuery("#startDate").val()&&""!=jQuery("#endDate").val()){
+			var dateTime = new Date();
+			var d1 = (jQuery("#startDate").val()+"").split('-');
+			var d2 = (jQuery("#endDate").val()+"").split('-');
+			var date1 = dateTime.setFullYear(d1[0],d1[1],d1[2]);
+			var date2 = dateTime.setFullYear(d2[0],d2[1],d2[2]);
+			if(date1>date2){
+    			alert('结束时间止必须大于开始时间');
+    			return;
+			}
+    	}
+		jQuery("#frm").submit();
+	});
+
+
+	DictDwr.getDictsForSlt("movepackexpressmode", function(data){
+		addOptions("expressMode", data, null, null, true, true, "$!{form.condition.expressMode}");
+	});
+	newCalendar();
+	setValues();
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

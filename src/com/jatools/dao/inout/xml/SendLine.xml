@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SendLine">
+	<typeAlias alias="SendLine" type="com.jatools.vo.inout.SendLine" />
+	
+	<resultMap class="SendLine" id="SendLine.result">
+		<result property = "lineid"     column = "lineid"      />
+		<result property = "billid"     column = "billid"      />
+		<result property = "outNo"      column = "out_no"      />
+		<result property = "saleMoney"  column = "sale_money"  />
+		<result property = "billMoney"  column = "bill_money"  />
+		<result property = "status"     column = "status"      />
+		<result property = "createDate" column = "create_date" />
+		<result property = "createId"   column = "create_id"   />
+		<result property = "updateDate" column = "update_date" />
+		<result property = "updateId"   column = "update_id"   />
+	</resultMap>
+	
+	<sql id="SendLine_columns">
+		lineid, billid, out_no, sale_money, bill_money, status, create_date, create_id, update_date, update_id
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="SendLine.getSendLinePageData" resultMap="SendLine.result" parameterClass="map">
+		select <include refid="SendLine_columns"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="SendLine_columns"/>  from jat_bill_send_line a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+			order by a.create_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="SendLine.getSendLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_bill_send_line a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+	</select>
+	
+	<insert id="SendLine.saveSendLine" parameterClass="SendLine">
+    	<selectKey resultClass="string" keyProperty="lineid" type="pre">
+			select JAT_BILL_SEND_LINE_SEQ.nextval as "lineid" from dual
+		</selectKey>
+		insert into jat_bill_send_line(<include refid="SendLine_columns"/>)
+		 values(
+		 	#lineid#,  #billid#,  #outNo#,  #saleMoney#,  #billMoney#,  #status#,  #createDate#,  #createId#,  #updateDate#,  #updateId#
+		 )
+    </insert>
+    
+    <select id="SendLine.getSendLine" parameterClass="string" resultMap="SendLine.result">
+		select <include refid="SendLine_columns"/> from jat_bill_send_line a 
+		where 1=1
+			and a.lineid = #value#
+	</select>
+	
+	<select id="SendLine.getSendLineListByBillid" parameterClass="string" resultMap="SendLine.result">
+		select <include refid="SendLine_columns"/> from jat_bill_send_line a 
+		where 1=1
+			and a.billid = #value#
+	</select>
+	
+	<update id="SendLine.updateSendLine" parameterClass="SendLine">
+		update jat_bill_send_line a set 
+			a.out_no      = #outNo#, 
+			a.sale_money  = #saleMoney#, 
+			a.bill_money  = #billMoney#, 
+			a.status      = #status#, 
+			a.update_date = #updateDate#, 
+			a.update_id   = #updateId#
+		where a.lineid = #lineid# 
+	</update>
+	
+	<delete id="SendLine.deleteSendLine" parameterClass="string">
+		delete from jat_bill_send_line a where a.lineid = #value# 
+	</delete>
+	
+	<delete id="SendLine.deleteSendLineByBillid" parameterClass="string">
+		delete from jat_bill_send_line a where a.billid = #value# 
+	</delete>
+	
+	<update id="SendLine.updateSendLineStatus" parameterClass="map">
+		update jat_bill_send_line a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.lineid = #lineId# 
+	</update>
+	
+</sqlMap>

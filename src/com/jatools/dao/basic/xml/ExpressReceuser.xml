@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ExpressReceuser">
+    <!-- 获取分页数据 -->
+	<select id="ExpressReceuser.getExpressReceuserPageData" resultClass="com.jatools.vo.basic.ExpressReceuser" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.rece_id as "receId", a.org_id as "orgId", a.rece_user as "receUser", a.create_date as "createDate", a.create_id as "createId", a.update_date as "updateDate", a.update_id as "updateId", a.status as "status"
+  			from jat_basic_express_receuser a left join jas_sm_org c on a.org_id = c.org_id where a.status = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+  				and exists (select 1 from jas_bd_emp b where a.rece_user = b.empid and b.archiveflag = '0')
+			order by c.org_name, a.org_id, a.rece_user, a.rece_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ExpressReceuser.getExpressReceuserTotalCount" resultClass="int">
+		select count(1) from jat_basic_express_receuser a where a.status = 1 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			and exists (select 1 from jas_bd_emp b where a.rece_user = b.empid and b.archiveflag = '0')
+    </select>
+	<delete id="ExpressReceuser.deleteExpressReceuser" parameterClass="string">
+		delete jat_basic_express_receuser a where a.rece_id = #value#
+	</delete>
+	<select id="ExpressReceuser.getExpressReceuserByOrgId" parameterClass="string" resultClass="com.jatools.vo.basic.ExpressReceuser">
+		select a.rece_id as "receId", a.rece_user as "receUser", a.create_date as "createDate", a.create_id as "createId", a.update_date as "updateDate", a.update_id as "updateId", a.status as "status"
+  			from jat_basic_express_receuser a where a.status = 1
+  			and exists (select 1 from jas_bd_emp b where a.rece_user = b.empid and b.archiveflag = '0')
+			and a.org_id = #value# order by a.rece_user, a.rece_id
+	</select>
+	<insert id="ExpressReceuser.saveExpressReceuser" parameterClass="map">
+		<selectKey keyProperty="receId" type="pre" resultClass="string">
+			select jat_basic_express_receuser_seq.nextval from dual
+		</selectKey>
+		insert into jat_basic_express_receuser(rece_id, org_id, rece_user, status, memo, create_date, create_id, update_date, update_id)
+		values(#receId#, #orgId#, #receUser#, 1, null, #date#, #userid#, #date#, #userid#)
+	</insert>
+</sqlMap>

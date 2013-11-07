@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OutVendor">
+	<!--  -->
+	<!-- ===============VendorHead===================== -->
+	<typeAlias alias="OutVendorHead" type="com.jatools.vo.out.OutVendorHead" />
+	<resultMap id="outVendorHeadResult" class="OutVendorHead">
+		<result property="headId" column="BILLID"/>
+		<result property="billNo" column="BILLNO"/>
+		<result property="doDate" column="DODATE"/>
+		<result property="orgId" column="ORG_ID"/>
+		<result property="stockId" column="STOCK_ID"/>
+		<result property="vendorId" column="VENDOR_ID"/>
+		<result property="doType" column="DOTYPE"/>
+		<result property="materialType" column="MATERIAL_TYPE"/>
+    	<result property="itemClassId" column="item_class_id"/>
+		<result property="saleMoney" column="SALE_MONEY"/>
+		<result property="invalid" column="INVALID"/>
+		<result property="sumCount" column="SUM_COUNT"/>
+		<result property="sumWeight" column="SUM_WEIGHT"/>
+		<result property="sumGrains" column="SUM_GRAINS"/>
+		<result property="sumCost" column="SUM_COST"/>
+		<result property="sumMoney" column="SUM_MONEY"/>
+		<result property="status" column="STATUS"/>
+		<result property="isCheck" column="IS_CHECK"/>
+		<result property="isFlag" column="IS_FLAG"/>
+		<result property="isBill" column="IS_BILL"/>
+		<result property="memo" column="MEMO"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateId" column="UPDATE_ID"/>
+		<result property="checkDate" column="CHECK_DATE"/>
+		<result property="checkId" column="CHECK_ID"/>
+		<result property="cancelDate" column="CANCEL_DATE"/>
+		<result property="cancelId" column="CANCEL_ID"/>
+		<result property="purBillNo" column="PUR_BILLNO"/>
+	</resultMap>
+    <resultMap id="outVendorLineResult" class="com.jatools.vo.out.OutVendorLine">
+    	<result property="lineId" column="LINEID"/>
+		<result property="headId" column="BILLID"/>
+    	<result property="ornaCode" column="orna_code"/>
+    	<result property="ornaBarCode" column="ORNA_BARCODE"/>
+    	<result property="ornaDsc" column="orna_dsc"/>
+    	<result property="unitId" column="unit_id"/>
+    	<result property="styleId" column="style_id"/>
+    	<result property="styleName" column="stylename"/>
+    	<result property="alaysisCode" column="analysis_arange_code"/>
+    	<result property="mainWeight" column="main_weight"/>
+    	<result property="partWeight" column="part_weight"/>
+	    <result column="IS_PSALE" property="isPSale" />
+    	<result property="itemClassId" column="item_class_id"/>
+    	<result property="ornaClassId" column="orna_class_id"/>
+    	<result property="styleItemClass" column="styleitemclass"/>
+    	<result property="styleMiddleClass" column="stylemiddleclass"/>
+    	<result property="styleOrnaClass" column="styleornaclass"/>
+    	<result property="alaysisId" column="alaysis_id"/>
+    	<result property="status" column="status"/>
+    	<result property="nowQty" column="now_qty"/>
+    	<result property="allQty" column="all_qty"/>
+    	<result property="posCost" column="POS_COST"/>
+    	<result property="posMoney" column="POS_MONEY"/>
+    	<result property="isMutiPart" column="IS_MUTI_PART"/>
+    	<result property="isDblLabel" column="IS_DBL_LABEL"/>
+    	<result property="grains" column="GRAINS"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="createId" column="CREATE_ID"/>
+    	<result property="colorId" column="MAIN_COLOR_GRADE_ID"/>
+    	<result property="cleanId" column="CLEAN_ID"/>
+    	<result property="bigGraph" column="ISBIGGRAPH"/>
+    </resultMap>
+    <resultMap id="outOrnaResult" class="com.jatools.vo.out.OutOrna">
+    	<result property="ornaCode" column="orna_code"/>
+    	<result property="ornaBarCode" column="ORNA_BARCODE"/>
+    	<result property="ornaDsc" column="orna_dsc"/>
+    	<result property="unitId" column="sale_unit_id"/>
+    	<result property="styleId" column="style_id"/>
+    	<result property="vendorId" column="SUPPLIER_ID"/>
+    	<result property="styleName" column="stylename"/>
+    	<result property="mainWeight" column="main_weight"/>
+    	<result property="partWeight" column="part_weight"/>
+    	<result property="itemClassId" column="item_class_id"/>
+    	<result property="ornaClassId" column="orna_class_id"/>
+    	<result property="styleItemClass" column="styleitemclass"/>
+    	<result property="styleMiddleClass" column="stylemiddleclass"/>
+    	<result property="styleOrnaClass" column="styleornaclass"/>
+    	<result property="isPSale" column="IS_CONSIGN"/>
+    	<result property="alaysisId" column="alaysis_id"/>
+    	<result property="alaysisCode" column="analysis_arange_code"/>
+    	<result property="status" column="state"/>
+    	<result property="nowQty" column="now_qty"/>
+    	<result property="allQty" column="all_qty"/>
+    	<result property="realTotalCost" column="real_total_cost"/>
+    	<result property="orgId" column="org_id"/>
+    	<result property="posAmount" column="POS_AMOUNT"/>
+    	<result property="isMutiPart" column="IS_MUTI_PART"/>
+    	<result property="isDblLabel" column="IS_DBL_LABEL"/>
+    	<result property="grains" column="STONE_NOW_NUM"/>
+    	<result property="colorId" column="MAIN_COLOR_GRADE_ID"/>
+    	<result property="cleanId" column="CLEAN_ID"/>
+    	<result property="stockId" column="STOCK_ID"/>
+    	<result property="bigGraph" column="isbiggraph"/>
+    </resultMap>
+      <sql id="OutVendor.listCond">
+    	<isNotEmpty property="billno" prepend="and">
+			a.BILLNO =	#billno#
+		</isNotEmpty>
+		<isNotEmpty property="stockId" prepend="and">
+			a.STOCK_ID =	#stockId#
+		</isNotEmpty>
+		<isNotEmpty property="status" prepend="and">
+			a.STATUS =	#status#
+		</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and">
+			<![CDATA[a.create_date >= #startDate#]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and">
+			<![CDATA[a.create_date <= #endDate#]]>
+		</isNotEmpty>
+    </sql>
+    <!-- 获取所有Vendor数据 -->
+	<select id="OutVendor.getVendorHeadPage" resultMap="outVendorHeadResult">
+		select * from (select rownum rownum_ , AA.* from (
+			select * from jat_out_vendor_head a where exists (select 1 from jas_bd_emp_org b where a.org_id = b.orgid and b.empid = #userId#)
+			<isEqual property="showAll" compareValue="0" prepend="and"> a.STATUS != 8 and a.STATUS != 0</isEqual>
+			<isNotEmpty property="doType" prepend="and"> a.DOTYPE = #doType#</isNotEmpty>
+			<include refid="OutVendor.listCond"/>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+			order by a.CREATE_DATE desc	
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="OutVendor.getReportSaleVendorHeadPage" resultMap="outVendorHeadResult">
+		select * from (select rownum rownum_ , AA.* from (
+			select * from jat_out_vendor_head a where a.status = 8 and a.dotype = 0 and nvl(a.is_check, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="OutVendor.getReportOutVendorHeadPage" resultMap="outVendorHeadResult">
+		select * from (select rownum rownum_ , AA.* from (
+			select * from jat_out_vendor_head a where a.status = 8 and a.dotype = 0  and nvl(a.is_bill, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="OutVendor.getReportSendVendorHeadPage" resultMap="outVendorHeadResult">
+		select * from (select rownum rownum_ , AA.* from (
+			select * from jat_out_vendor_head a where a.status = 8 and a.dotype = 2 and nvl(a.is_check, 0) = 0
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="OutVendor.getTotalCount" resultClass="int">
+		select count(1) from jat_out_vendor_head a where exists (select 1 from jas_bd_emp_org b where a.org_id = b.orgid and b.empid = #userId#)
+		<isEqual property="showAll" compareValue="0" prepend="and"> a.STATUS != 8 and a.STATUS != 0</isEqual>
+		<isNotEmpty property="doType" prepend="and"> a.DOTYPE = #doType#</isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>	
+		<include refid="OutVendor.listCond"/>
+    </select>
+    <select id="OutVendor.getReportSaleVendorHeadTotalCount" resultClass="int">
+		select count(1) from jat_out_vendor_head a where a.status = 8 and a.dotype = 0 and nvl(a.is_check, 0) = 0
+    </select>
+    <select id="OutVendor.getReportOutVendorHeadTotalCount" resultClass="int">
+		select count(1) from jat_out_vendor_head a where a.status = 8 and a.dotype = 0  and nvl(a.is_bill, 0) = 0
+    </select>
+    <select id="OutVendor.getReportSendVendorHeadTotalCount" resultClass="int">
+		select count(1) from jat_out_vendor_head a where a.status = 8 and a.dotype = 2 and nvl(a.is_check, 0) = 0
+    </select>
+	    <!-- 根据饰品编码获取饰品信息 -->
+    <select id="OutVendor.getOutOrna" resultMap="outOrnaResult" parameterClass="map">
+   	select a.*,s.stylename,aa.analysis_arange_code,s.styleitemclass,s.stylemiddleclass,s.styleornaclass, s.isbiggraph
+      from ic_mater_active a 
+      left join jas_bd_style s on s.styleid=a.style_id
+      left join jas_bd_analysis_arange aa on aa.analysis_arange_id=a.alaysis_id
+      where <isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+    		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+    </select>
+	    <!-- 获取头信息 -->
+    <select id="OutVendor.getVendorHead" resultMap="outVendorHeadResult" parameterClass="string">
+    	select * from jat_out_vendor_head a where a.billid = #value#
+    </select>
+	    <!-- 获取头信息 -->
+    <select id="OutVendor.getVendorHeadByBillno" resultMap="outVendorHeadResult" parameterClass="string">
+    	select * from jat_out_vendor_head a where a.billno = #value#
+    </select>
+	    <!-- 获取财务核算类型 -->
+    <select id="OutVendor.getFinaceType" resultClass="string" parameterClass="string">
+    	select finance from JAT_BASIC_BILLNO_RULE  WHERE BILL_CODE=#value#
+    </select>
+	    <!-- 根据发料类型获取大类-->
+    <select id="OutVendor.getItemClassByMaterial" resultClass="string" parameterClass="string">
+    	select wm_concat(t.item_class_id) item_class_id from jat_basic_material_item t where t.material_type=#value#
+    </select>
+	    <!-- 根据大类、发料类型获取单位-->
+    <select id="OutVendor.getUnitFromMaterial" resultClass="string" parameterClass="map">
+    	select t.pur_unit from jat_basic_material_item t where t.material_type=#materialType# and t.item_class_id=#itemClass#
+    </select>
+	    <!-- 根据头id获取所有行信息 -->
+    <select id="OutVendor.getVendorLines" resultMap="outVendorLineResult" parameterClass="string">
+    	select a.*,s.stylename,s.ISBIGGRAPH ,aa.analysis_arange_code from jat_out_vendor_line a  
+      left join jas_bd_style s on s.styleid=a.style_id
+      left join jas_bd_analysis_arange aa on aa.analysis_arange_id=a.alaysis_id
+      where a.billid=#value#
+    </select>
+	    <!-- 根据供应商获取余额 -->
+    <select id="OutVendor.getLossMoney" resultClass="string" parameterClass="map">
+   		 select nvl(max(LOSS_MONEY), 0) + #payMoney# money
+          from jat_cash_money_account t
+         where t.voder_id = #voderId#
+           and exists (select voder_id
+                  from (select voder_id, max(mr_id) mr_id
+                          from jat_cash_money_account
+                         group by voder_id) tt
+                 where t.mr_id = tt.mr_id
+                   and t.voder_id = tt.voder_id)
+    </select>
+    <!-- 供应商下的未关闭采购单 -->
+    <select id="OutVendor.getPurchaseByVendorId" resultClass="com.jatools.vo.pur.PurchaseHead" parameterClass="string">
+		 select ph.headid "headid", ph.billno "billno"
+		  from jat_pur_purchase_head ph
+		 where ph.vendor_id = #voderId#
+		   <![CDATA[ and ph.status <> 8 ]]>
+    </select>
+    <!-- 发料单行表打印数据  找非现有量-->
+    <select id="OutVendor.getPrintLineByNoMater" resultClass="com.jatools.vo.stock.MaterNoActive" parameterClass="string">
+    	select aa.ANALYSIS_ARANGE_CODE "alaysisId",m.orna_dsc "ornaDsc",m.orna_code "ornaCode",
+	       m.STONE_NOW_NUM "nowQty",m.all_qty "allQty",
+	       m.color_grade_grade_id "colorGradeGradeId",
+	       m.clean_grade_id "cleanGradeId",
+	       m.main_shape_id "mainShapeId",m.color_id "colorId",m.quality_id "qualityId",
+	       m.ags_cert "agsCert",m.hrd_cert "hrdCert",m.igi_cert "igiCert",m.gia_cert "giaCert",
+	       m.ident_id "identId"  from ic_mater_noactive m 
+	       inner join jas_bd_analysis_arange aa on aa.analysis_arange_id=m.alaysis_id
+	       inner join jat_out_vendor_line bb on bb.orna_code = m.orna_code
+	       where bb.billid=#value#
+	       order by bb.lineid
+    </select>
+    <!-- 发料单行表打印数据  找现有量-->
+    <select id="OutVendor.getPrintLineByMater" resultClass="com.jatools.vo.stock.MaterActive" parameterClass="string">
+	    select aa.ANALYSIS_ARANGE_CODE "alaysisId",m.orna_dsc "ornaDsc",m.orna_code "ornaCode",
+	       m.STONE_NOW_NUM "nowQty",m.all_qty "allQty",
+	       m.color_grade_grade_id "colorGradeGradeId",
+	       m.clean_grade_id "cleanGradeId",
+	       m.main_shape_id "mainShapeId",m.color_id "colorId",m.quality_id "qualityId",
+	       m.ags_cert "agsCert",m.hrd_cert "hrdCert",m.igi_cert "igiCert",m.gia_cert "giaCert",
+	       m.ident_id "identId"  from ic_mater_active m 
+	       inner join jas_bd_analysis_arange aa on aa.analysis_arange_id=m.alaysis_id
+	       inner join jat_out_vendor_line bb on bb.orna_code = m.orna_code
+	       where bb.billid=#value#
+	       order by bb.lineid
+	     
+    </select>
+    <!-- 插入头信息 -->
+    <insert id="OutVendor.insertHead" parameterClass="OutVendorHead">
+    	<selectKey resultClass="string" keyProperty="headId" type="pre">
+			select Jat_Out_Vendor_head_seq.nextval as headId from dual
+		</selectKey>
+		insert into jat_out_vendor_head(billid,billno,org_id,vendor_id,sale_money,sum_count,sum_weight,sum_grains,sum_money,sum_cost,status,create_id,create_date,memo,update_date,update_id,stock_id,dotype,doDate,MATERIAL_TYPE,PUR_BILLNO)
+		values(#headId#,#billNo#,#orgId#,#vendorId#,#saleMoney#,#sumCount#,#sumWeight#,#sumGrains#,#sumMoney#,#sumCost#,#status#,#createId#,#createDate#,#memo#,#updateDate#,#updateId#,#stockId#,#doType#,#doDate#,#materialType#,#purBillNo#)
+	</insert>
+		
+	<update id="OutVendor.updateBillHeadStatus"  parameterClass="java.util.Map">
+    	update jat_out_vendor_head a set a.update_date = #date#, a.update_id = #userid#, a.status = #status#
+		where a.billid = #headid#
+	</update>
+    <!-- 修改头表 -->
+	<update id="OutVendor.updateHead" parameterClass="OutVendorHead">
+		update jat_out_vendor_head
+		set billno=#billNo#,org_id=#orgId#,vendor_id=#vendorId#,sale_money=#saleMoney#,sum_count=#sumCount#,sum_weight=#sumWeight#,sum_grains=#sumGrains#,sum_money=#sumMoney#,
+		sum_cost=#sumCost#,status=#status#,memo=#memo#,update_date=#updateDate#,update_id=#updateId#,stock_id=#stockId#,doDate=#doDate#,PUR_BILLNO=#purBillNo# 
+		where billid = #headId#
+	</update>
+    <!-- 插入行信息 -->
+    <insert id="OutVendor.insertLine" parameterClass="com.jatools.vo.out.OutVendorLine">
+    	<selectKey resultClass="string" keyProperty="lineId" type="pre">
+			select Jat_Out_Vendor_Line_seq.nextval as lineId from dual
+		</selectKey>
+		insert into jat_out_vendor_line(lineid,billid,item_class_id,orna_class_id,styleitemclass,stylemiddleclass,styleornaclass,style_id,alaysis_id,orna_code
+				,orna_barcode,orna_dsc,unit_id,now_qty,all_qty,grains,main_weight,part_weight,is_muti_part,is_dbl_label
+				,pos_cost,pos_money,status,memo,create_date,create_id,update_date,update_id,MAIN_COLOR_GRADE_ID,CLEAN_ID,IS_PSALE)
+		values(#lineId#,#headId#,#itemClassId#,#ornaClassId#,#styleItemClass#,#styleMiddleClass#,#styleOrnaClass#,#styleId#,#alaysisId#,#ornaCode#,#ornaBarCode#,#ornaDsc#,
+			#unitId#,#nowQty#,#allQty#,#grains#,#mainWeight#,#partWeight#,#isMutiPart#,#isDblLabel#,
+			#posCost#,#posMoney#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#,#colorId#,#cleanId#,#isPSale#)
+	</insert>
+    <!-- 从现有量->非现有量 -->
+    <insert id="OutVendor.copyOrnaToNo" parameterClass="string">
+	    insert into ic_mater_noactive 
+		select * from ic_mater_active a where a.orna_code=#value#
+		and a.state=901
+	</insert>
+	
+    <!-- 非现有量->现有量 -->
+    <insert id="OutVendor.copyOrnaNoToActive" parameterClass="string">
+	    insert into ic_mater_active(ID,ORNA_CODE,ORNA_BARCODE,ORNA_DSC,STOCK_ORG_ID,STOCK_ID,GROUPS,STYLE_ID,NOW_QTY,ALL_QTY,ITEM_CLASS_ID,ORNA_CLASS_ID,ALAYSIS_ID,STYLE_NO_ID,QUALITY_ID,TAG_TYPE,SALE_UNIT_ID,BUY_UNIT_ID,PRIC_UNIT_ID,PRICE_ATTR_GROUP,STATE,BASIC_PRICE,REBATE,REBATE_TYPE,STORE_UNIT_COST,REAL_UNIT_COST,POS_AMOUNT,REAL_TOTAL_COST,STORE_TOTAL_COST,PRODUCTDATE,OLD_RESPONSIBLE,STORE_COLOR,COM_STORE,STORAGEDATE,TOSHOPDATE,NUCLEAR_BILL_ID,MAIN_SHAPE_ID,COLOR_ID,MAIN_WEIGHT,PART_WEIGHT,PART_CONTENT,CLEAN_ID,MAIN_COLOR_GRADE_ID,QLTY_ID,STONE_TOTAL_NUM,STONE_NOW_NUM,SPECIAL_WORK_PRICE,STRING_WORK_PRICE,SUMMARY_ID,IS_CONSIGN,IS_CUSTOM,HANDOVER_BILL_ID,MANUFACTURER_ID,SUPPLIER_ID,ZODIAC,IDENT_ID,FACTORY_STYLE_ID,STORAGE_PRIC_ATTR_GROUP,REBATE_AMOUNT,SPECIAL_WEIGHT,CUT_ID,CUT_WIDE_SCALE,CUT_DEEP_SCALE,SYMMETRY_ID,POLISHINE_ID,FLUORESCENCE_ID,WAISTLINE_ID,VERTEX_ID,HRD_CERT,GIA_CERT,IGI_CERT,BRACKETCOLOR_ID,UPDATEDATE,WEAR_ID,STYLE_TYPE_ID,IS_MUTI_PART,CURRENCY_PRICE,CURRENCY_MONEY,CURRENCY_TAX,TAX,TOTAL_CURRENCY_TAX,SIZE_ID,MAIN_NUM,PART_NUM,MATERIAL_ID,ORG_ID,USE_QTY_TEMP,AGS_CERT,REAL_COST,CUSTOMIZE_NO,IS_DBL_LABEL,BILL_CODE,BILL_NO,IS_MATERIAL,MATERIAL_TYPE,COLOR_GRADE_GRADE_ID,CLEAN_GRADE_ID)
+		select ID,ORNA_CODE,ORNA_BARCODE,ORNA_DSC,STOCK_ORG_ID,STOCK_ID,GROUPS,STYLE_ID,NOW_QTY,ALL_QTY,ITEM_CLASS_ID,ORNA_CLASS_ID,ALAYSIS_ID,STYLE_NO_ID,QUALITY_ID,TAG_TYPE,SALE_UNIT_ID,BUY_UNIT_ID,PRIC_UNIT_ID,PRICE_ATTR_GROUP,900,BASIC_PRICE,REBATE,REBATE_TYPE,STORE_UNIT_COST,REAL_UNIT_COST,POS_AMOUNT,REAL_TOTAL_COST,STORE_TOTAL_COST,PRODUCTDATE,OLD_RESPONSIBLE,STORE_COLOR,COM_STORE,STORAGEDATE,TOSHOPDATE,NUCLEAR_BILL_ID,MAIN_SHAPE_ID,COLOR_ID,MAIN_WEIGHT,PART_WEIGHT,PART_CONTENT,CLEAN_ID,MAIN_COLOR_GRADE_ID,QLTY_ID,STONE_TOTAL_NUM,STONE_NOW_NUM,SPECIAL_WORK_PRICE,STRING_WORK_PRICE,SUMMARY_ID,IS_CONSIGN,IS_CUSTOM,HANDOVER_BILL_ID,MANUFACTURER_ID,SUPPLIER_ID,ZODIAC,IDENT_ID,FACTORY_STYLE_ID,STORAGE_PRIC_ATTR_GROUP,REBATE_AMOUNT,SPECIAL_WEIGHT,CUT_ID,CUT_WIDE_SCALE,CUT_DEEP_SCALE,SYMMETRY_ID,POLISHINE_ID,FLUORESCENCE_ID,WAISTLINE_ID,VERTEX_ID,HRD_CERT,GIA_CERT,IGI_CERT,BRACKETCOLOR_ID,UPDATEDATE,WEAR_ID,STYLE_TYPE_ID,IS_MUTI_PART,CURRENCY_PRICE,CURRENCY_MONEY,CURRENCY_TAX,TAX,TOTAL_CURRENCY_TAX,SIZE_ID,MAIN_NUM,PART_NUM,MATERIAL_ID,ORG_ID,USE_QTY_TEMP,AGS_CERT,REAL_COST,CUSTOMIZE_NO,IS_DBL_LABEL,'','',IS_MATERIAL,MATERIAL_TYPE,COLOR_GRADE_GRADE_ID,CLEAN_GRADE_ID
+		from ic_mater_noactive a where a.orna_code=#value#
+	</insert>
+	
+    <!-- 修改头行信息 -->
+	<update id="OutVendor.updateLine" parameterClass="com.jatools.vo.out.OutVendorLine">
+		update jat_out_vendor_line set 
+		billid=#headId#,item_class_id=#itemClassId#,orna_class_id=#ornaClassId#,style_id=#styleId#,alaysis_id=#alaysisId#,orna_code=#ornaCode#,
+		orna_barcode=#ornaBarCode#,orna_dsc=#ornaDsc#,unit_id=#unitId#,now_qty=#nowQty#,all_qty=#allQty#,grains=#grains#,main_weight=#mainWeight#,part_weight=#partWeight#,
+		is_muti_part=#isMutiPart#,is_dbl_label=#isDblLabel#,pos_cost=#posCost#,pos_money=#posMoney#,status=#status#,memo=#memo#,
+		update_date=#updateDate#,update_id=#updateId#,IS_PSALE=#isPSale#
+		where lineid=#lineId#
+	</update>
+	<!-- 根据头id删除所有行信息 -->
+	<delete id="OutVendor.deleteLinesByHeadId" parameterClass="string">
+		delete jat_out_vendor_line l where l.billid=#value#
+	</delete>
+	<!-- 删除头表 -->
+	<delete id="OutVendor.deleteHead" parameterClass="string">
+		delete jat_out_vendor_head h where h.billid=#value#
+	</delete>
+	 
+	<!-- 删除现有量信息-->
+	<delete id="OutVendor.deleteOrna" parameterClass="string">
+		delete ic_mater_active a where a.orna_code=#value#
+	</delete>
+	<!-- 删除非现有量信息-->
+	<delete id="OutVendor.deleteOrnaNo" parameterClass="string">
+		delete ic_mater_noactive a where a.orna_code=#value#
+	</delete>
+	
+    <!-- 改变头表状态 -->
+	<update id="OutVendor.changeHeadStatus" parameterClass="OutVendorHead">
+		update jat_out_vendor_head
+		set status=#status#,update_date=#updateDate#,update_id=#updateId#
+		<isEqual property="status" compareValue="5">,CHECK_DATE = #checkDate#,CHECK_ID=#checkId#</isEqual>
+		<isEqual property="status" compareValue="0">,CANCEL_DATE = #cancelDate#,CANCEL_ID=#cancelId#</isEqual>
+		where billid = #headId#
+	</update>
+	<update id="OutVendor.changeMaterStatus" parameterClass="map">
+		update ic_mater_active a set a.state=#state#,a.BILL_CODE=#billType#,a.BILL_NO=#billNo#  where a.orna_code=#ornaCode#
+	</update>
+	<update id="OutVendor.changeProdChecked" parameterClass="string">
+		update JAT_CASH_PROD_ACCOUNT a set a.is_checked=1 where a.bill_no=#value#
+	</update>
+    <!--出入库日志-->
+    <insert id="OutVendor.saveMaterTrans" parameterClass="com.jatools.vo.out.OutVendorLine">
+	   insert into jat_mater_trans(trans_id,org_id,stock_id,item_class_id,orna_class_id,styleitemclass,stylemiddleclass,styleornaclass,style_id,alaysis_id,orna_code,orna_barcode
+		,orna_dsc,unit_id,now_qty,all_qty,grains,pos_cost,pos_money,trans_flag,trans_source_bill,trans_source_no,trans_body,trans_date,trans_finance
+		,trans_cost,trans_money,trans_qty,is_psale,create_date,create_id)
+		values(jat_mater_trans_seq.nextval,#orgId#,#stockId#,#itemClassId#,#ornaClassId#,#styleItemClass#,#styleMiddleClass#,#styleOrnaClass#,#styleId#,#alaysisId#,#ornaCode#,#ornaBarCode#,#ornaDsc#,
+			#unitId#,#nowQty#,#allQty#,#grains#,#posCost#,#posMoney#,-1,#billType#,#billNo#,#memo#,#createDate#,#finaceType#,#transCost#,
+			#transMoney#,#transQty#,#isPSale#,#updateDate#,#updateId#)
+	</insert>
+    <!--资金台帐 2012.06.12修改dotype为1(应付)-->
+    <insert id="OutVendor.saveCashMoneyAccount" parameterClass="OutVendorHead">
+			insert into JAT_CASH_MONEY_ACCOUNT(MR_ID,BILL_TYPE,BILL_NO,BILL_DATE,dotype,ORG_ID,VODER_ID,MONEYS
+			,STATUS,MEMO,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,LOSS_MONEY)
+			values(JAT_CASH_MONEY_ACCOUNT_SEQ.nextval,#billType#,#billNo#,#doDate#,#doType#,#orgId#,#vendorId#,#saleMoney#,1,#memo#,#updateDate#,#updateId#,#updateDate#,#updateId#,#lossMoney#)
+			
+	</insert> 
+    <!--货品台帐-->
+    <insert id="OutVendor.saveCashProdAccount" parameterClass="map">
+			insert into JAT_CASH_PROD_ACCOUNT(Pr_Id,Bill_Type,Bill_No,Bill_Date,Org_Id,doType,Voder_Id
+			,Material_Type,Item_Class_Id,Bill_Nums,NO_NUMS,Status,CREATE_DATE,CREATE_ID,UPDATE_DATE,UPDATE_ID,memo,cash_unit)
+			values(JAT_CASH_PROD_ACCOUNT_SEQ.nextval,#billType#,#billNo#,#doDate#,#orgId#,1,#vendorId#,#materialType#,#itemClassId#,
+			#sumWeight#,#sumWeight#,2,#updateDate#,#updateId#,#updateDate#,#updateId#,#ornaCode#,#cashUnit#)
+			
+	</insert>
+	
+	<update id="OutVendor.cashCharge" parameterClass="OutVendorHead">
+		update jat_out_vendor_head
+		set 
+			sale_money=#saleMoney#, 
+			is_check = 1,
+			update_date=#updateDate#,
+			update_id=#updateId# 
+		where billid = #headId#
+	</update>
+</sqlMap>

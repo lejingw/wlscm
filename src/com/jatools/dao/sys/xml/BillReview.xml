@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BillReview">
+	<!-- 保存审批信息 -->
+	<insert id="BillReview.saveReviewLog" parameterClass="com.jatools.vo.util.ReviewLog">
+		<selectKey keyProperty="logid" type="pre" resultClass="string">
+		select JAT_SYS_REVIEW_LOG_SEQ.nextval as logid from dual
+		</selectKey>
+		insert into jat_sys_review_log(logid, bill_code, bill_name, bill_id, bill_no, page_url, finish_flag, bean_name, create_id, create_date, update_id, update_date, remote_flag)
+		values(#logid#, #billCode#, #billName#, #billId#, #billNo#, #pageUrl#, #finishFlag#, #beanName#, #createId#, #createDate#, #updateId#, #updateDate#, #remoteFlag#)
+	</insert>
+	
+	<select id="BillReview.getBillReviewPageData" parameterClass="map" resultClass="com.jatools.vo.util.ReviewLog">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.logid     as "logid",
+			       a.bill_code as "billCode",
+			       a.bill_name as "billName",
+			       a.bill_id   as "billId",
+			       a.bill_no   as "billNo",
+			       a.page_url  as "pageUrl"
+			  from jat_sys_review_log a
+			 where a.finish_flag = 0
+			   and nvl(a.remote_flag, 0) = 0
+			 order by a.logid desc
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 审批单据分页数据 -->
+    <select id="BillReview.getBillReviewTotalCount" resultClass="int">
+		select count(1) from jat_sys_review_log a where a.finish_flag = 0
+    </select>
+    <select id="BillReview.getReviewLog" parameterClass="string" resultClass="com.jatools.vo.util.ReviewLog">
+    	select a.logid as "logid", a.bill_code as "billCode", a.bill_name as "billName", a.bill_id as "billId", a.bill_no as "billNo", a.page_url as "pageUrl", a.bean_name as "beanName" from jat_sys_review_log a where a.logid = #value#
+    </select>
+    <update id="BillReview.reviewSuccess" parameterClass="map">
+    	update jat_sys_review_log a set a.finish_flag = #finishFlag#, a.update_id = #updateId#, a.update_date = #updateDate# where a.logid = #logid#
+    </update>
+    <select id="BillReview.getReviewLogByBillCodeAndId" parameterClass="map" resultClass="com.jatools.vo.util.ReviewLog">
+    	select a.logid as "logid", a.bill_code as "billCode", a.bill_name as "billName", a.bill_id as "billId", a.bill_no as "billNo", a.page_url as "pageUrl", a.bean_name as "beanName" from jat_sys_review_log a where a.bill_code = #billCode# and a.bill_id = #billId# and a.finish_flag = 0
+    </select>
+    <!-- 根据单据编码获取模块编码 -->
+    <select id="BillReview.getModelCodeByBillCode" parameterClass="string" resultClass="string">
+    	select a.model_code from jat_sys_right_mapping a where a.review_bill_code = #value#
+    </select>
+    <!-- 根据模块编码获取单据编码 -->
+    <select id="BillReview.getBillCodeByModelCode" parameterClass="string" resultClass="string">
+    	select a.review_bill_code from jat_sys_right_mapping a where a.model_code = #value#
+    </select>
+    <select id="BillReview.getReviewLog2" parameterClass="map" resultClass="java.util.HashMap">
+    	select to_char(rownum) as "sort", aa.*
+		  from (select case
+		                 when a.finish_flag = 0 then
+		                  '审批中'
+		                 when a.finish_flag = 1 then
+		                  '审批同意'
+		                 when a.finish_flag = 2 then
+		                  '审批不同意'
+		               end as "stateName",
+		               '或' as "reviewType",
+		               b.empname as "reviewEmp",
+		               a.update_date as "reveiwDate",
+		               '' as "advice",
+		               '0' as "insertFlag"
+		          from jat_sys_review_log a
+		          left join jas_bd_emp b
+		            on a.update_id = b.empid
+		         where a.bill_code = #billCode#
+		           and a.bill_id = #billId#
+		         order by a.logid desc) aa
+    </select>
+</sqlMap>

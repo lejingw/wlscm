@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="PurchaseCust">
+	<select id="PurchaseCust.getPurchaseCustPageData" parameterClass="map" resultClass="com.jatools.vo.pur.PurchaseCust">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.id as "custid", a.no as "billno", a.item_class_id as "itemClassId",
+			       a.orna_class_id as "ornaClassId", a.DOOM_NUM as "doomNum", a.REQUEST_DATE as "requestDate",
+				   a.org_id as "orgId", a.customize_class as "customizeClass", a.createuserid as "createId", a.createdate as "createDate",
+				   a.updateuserid as "updateId", a.updatedate as "updateDate", a.state as "status"
+			from jms_cm_customize_bill a where
+			<!-- 24已收款,35已生成采购单,8关闭 -->
+			 <isEqual property="jmFlag" compareValue="1">
+			 	a.state in (24, 35, 8) and a.jm_flag = 1
+			 </isEqual>
+			<!-- 45采购岗审批同意,69已生成采购单,8关闭 -->
+			 <isNotEqual property="jmFlag" compareValue="1">
+				a.state in (45, 69, 8) and a.jm_flag = 0
+			 </isNotEqual>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.state <> 8]]></isNotEqual>
+			order by a.id desc
+		 ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="PurchaseCust.getPurchaseCustTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jms_cm_customize_bill a where
+			<!-- 24已收款,35已生成采购单,8关闭 -->
+			 <isEqual property="jmFlag" compareValue="1">
+			 	a.state in (24, 35, 8) and a.jm_flag = 1
+			 </isEqual>
+			<!-- 45采购岗审批同意,69已生成采购单,8关闭 -->
+			 <isNotEqual property="jmFlag" compareValue="1">
+				a.state in (45, 69, 8) and a.jm_flag = 0
+			 </isNotEqual>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+		<isNotEqual property="showAllFlag" compareValue="1"><![CDATA[and a.state <> 8]]></isNotEqual>
+	</select>
+	<select id="PurchaseCust.getCustReceiveListPageData" parameterClass="map" resultClass="com.jatools.vo.pur.PurchaseCust">
+		select * from (select rownum rownum_ , AA.* from (
+				select a.id              as "custid",
+				       a.no              as "billno",
+				       a.org_id          as "orgId",
+				       a.item_class_id   as "itemClassId",
+				       a.orna_class_id   as "ornaClassId",
+				       a.doom_num        as "doomNum",
+				       a.request_date    as "requestDate",
+	                   a.customize_class as "customizeClass",
+				       a.createuserid    as "createId",
+				       a.createdate      as "createDate",
+				       a.updateuserid    as "updateId",
+				       a.updatedate      as "updateDate",
+				       a.state           as "status"
+				  from jms_cm_customize_bill a
+			 <isEqual property="jmFlag" compareValue="1">
+				 where a.state = 36<!-- 已估价 -->
+			 	   and a.jm_flag = 1
+			 </isEqual>
+			 <isNotEqual property="jmFlag" compareValue="1">
+				 where a.state = 44<!-- 计划岗审批同意 -->
+			 	   and a.jm_flag = 0
+			 </isNotEqual>
+				   and exists (select 1
+				          from jat_basic_puremp_articletype b
+				         where a.article_type_id = b.article_type_id
+				           and b.pur_emp_id = #userid#)
+				 <isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+				 order by a.id desc
+		 ) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<select id="PurchaseCust.getCustReceiveListTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jms_cm_customize_bill a
+		 <isEqual property="jmFlag" compareValue="1">
+			 where a.state = 36<!-- 已估价 -->
+			   and a.jm_flag = 1
+		 </isEqual>
+		 <isNotEqual property="jmFlag" compareValue="1">
+			 where a.state = 44<!-- 计划岗审批同意 -->
+			   and a.jm_flag = 0
+		 </isNotEqual>
+			   and exists (select 1
+			          from jat_basic_puremp_articletype b
+			         where a.article_type_id = b.article_type_id
+			           and b.pur_emp_id = #userid#)
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	<select id="PurchaseCust.getPurchaseCust" parameterClass="map" resultClass="com.jatools.vo.pur.PurchaseCust">
+		select a.id as "custid", a.no as "billno", a.org_id as "orgId", a.request_date as "requestDate", a.customer_name as "customerName", a.customer_mobule as "customerTel", a.note as "memo", a.article_type_id as "articleTypeId", a.item_class_id as "itemClassId", a.orna_class_id as "ornaClassId", a.analysis_id as "analysisId", b.summarydescription as "analysisName", a.style_item_id as "styleItemClassId", a.style_middle_id as "styleMiddleClassId", a.style_orna_id as "styleOrnaClassId", a.style_id as "styleId", d.stylename as "styleName", d.isbiggraph as "stylePicPath", a.quality_id as "qualityId", a.unit_id as "unitId", a.size_id as "sizeId", c.size_name as "sizeName", a.color_grade_id as "colorGradeId", a.clean_basic_id as "cleanId", a.doom_num as "doomNum",　a.domm_weight as "doomWeight", cgg.grade_id as "colorGradeGradeId", cg.grade_id as "cleanGradeId", a.createuserid as "createId", a.createdate as "createDate", a.updateuserid as "updateId", a.updatedate as "updateDate", a.state as "status", a.appview_reason as "appviewReason", a.pic_address as "bigGraph", a.customize_class as "customizeClass"
+		from jms_cm_customize_bill a left join jas_bd_analysis_arange b on a.analysis_id = b.analysis_arange_id left join jas_bd_size c on a.size_id = c.size_id left join jas_bd_style d on a.style_id = d.styleid left join jat_basic_color_grade_grade cgg on cgg.color_grade_id = a.color_grade_id left join jat_basic_clean_grade cg on cg.clean_id = a.clean_basic_id
+		where a.id = #custid# and a.jm_flag = #jmFlag#
+	</select>
+	<select id="PurchaseCust.getPurchaseCustVendorList" parameterClass="map" resultClass="com.jatools.vo.pur.PurchaseHead">
+		select a.headid as "headid", a.vendor_id as "vendorId", d.style_id as "styleId", e.stylename as "styleName",
+			(select sum(b.num_order) from jat_pur_purchase_line b where a.headid = b.headid) as "numOrder",
+			a.dodate as "dodate", a.pur_empids as "purEmpids", a.biz_type as "bizType", a.memo as "memo", a.billno as "purchaseBillno",
+			(select nvl(sum(c.num_enter),0) from jat_pur_purchase_enter c, jat_pur_purchase_line b where b.headid = a.headid and b.lineid = c.lineid and c.enter_type = 1) as "numArrive",
+			(select nvl(sum(c.num_enter),0) from jat_pur_purchase_enter c, jat_pur_purchase_line b where b.headid = a.headid and b.lineid = c.lineid and c.enter_type = 2) as "numUncheck"
+		from jat_pur_purchase_head a, jat_pur_purchase_line d left join jas_bd_style e on d.style_id = e.styleid
+		where a.headid = d.headid
+		 <isEqual property="jmFlag" compareValue="1">
+			 and a.src_bill_code = 'customizeBill' and a.src_bill_id = #custid#
+		 </isEqual>
+		 <isNotEqual property="jmFlag" compareValue="1">
+			 and a.src_bill_code = 'DZ' and a.src_bill_id = #custid#
+		 </isNotEqual>
+		order by a.headid
+	</select>
+	<parameterMap class="map" id="PurchaseCust.updatePurchaseCustStatusPM">
+		<parameter property="custid"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="status"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="userid"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="memo"			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="result"		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+	</parameterMap>
+	<procedure id="PurchaseCust.updatePurchaseCustStatus" parameterMap="PurchaseCust.updatePurchaseCustStatusPM">
+		<![CDATA[{call wl_scm.purcustom_update(?,?,?,?,?)}]]>
+	</procedure>
+	<procedure id="PurchaseCust.updateJmPurchaseCustStatus" parameterMap="PurchaseCust.updatePurchaseCustStatusPM">
+		<![CDATA[{call wl_jmt.jmcustom_receive(?,?,?,?,?)}]]>
+	</procedure>
+</sqlMap>

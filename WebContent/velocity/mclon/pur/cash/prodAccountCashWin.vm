@@ -1,0 +1,38 @@
+<form id="frm" name="frm" method="post" >
+	#*<table class="title">
+    	<tr><td>单据结算列表#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>*#
+#set($cashList = $form.cashList)
+<table class='list'>
+	<thead>
+		<tr>
+			<th>来源单号</th>
+			<th>来源类型</th>
+			<th>原料类型</th>
+			<th>商品类别</th>
+			<th>大类</th>
+    		<th>结算单号</th>
+			<th>结算数量</th>
+			<th>结算时间 </th>
+        </tr>
+    </thead>
+	<tbody id="tbl_cash">
+		#foreach($map in $cashList)
+			<tr>
+				<td>$!map.srcBillNo</td>
+				<td>$!DictUtil.getValue('billcode', $!map.srcBillType)</td>
+				<td>$!map.materialTypeName</td>
+				<td>$!map.articleTypeDsc</td>
+				<td>$!BdCommon.getItemClassDesc($!map.itemClassId)</td>
+				<td>$!map.cashBillNo</td>
+				<td>$!map.cashNums</td>
+				<td>$!map.cashDate</td>
+			</tr>
+		#end
+    </tbody>
+</table>
+</form>
+	
+<script >
+altRowCSS("tbl_cash");
+</script>

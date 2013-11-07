@@ -1,0 +1,292 @@
+#set($jsfiles = ["$!StringUtil.getContextPath()/dwr/interface/GatherOrderDwr.js"])
+<form id='frm' action="gatherOrder.vm" method="post">
+	<input type="hidden" name="user_action" value="edit"/>
+	<input type="hidden" id="headid" name="headid" value="$!{form.head.headid}"/>
+    <table class="title">
+    	<tr><td>总单内容</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='返回列表' class='btn' id="" onclick="window.location = 'gatherOrder.vm?user_action=list';">
+		</td></tr>
+    </table>
+	<table class="content">
+		<tr>
+			<td class='body1'>总单号</td><td class='body2'>$!{form.head.billNo}</td>
+			<td class='body1'>区域</td><td class='body2'>$!{form.head.regionName}</td>
+			<td class='body1'>周期类型</td><td class='body2'>$!{form.head.cycleTypeName}</td>
+			<td class='body1'>商品类别</td><td class='body2'>$!{form.head.articleTypeNames}</td>
+		</tr>
+	</table>
+	<table class="list">
+		<thead>
+			<tr>
+				<th style="width:13%;">大类</th>
+				<th style="width:13%;">小类</th>
+				<th style="width:13%;">分析范围</th>
+				<th style="width:13%;">款式大类</th>
+				<th style="width:13%;">款式中类</th>
+				<th style="width:13%;">款式小类</th>
+				<th style="width:13%;">明细款式</th>
+				<th style="width:13%;">是否畅销款</th>
+				<th></th>
+			</tr>
+        </thead>
+		<tbody>
+			<tr>
+				<td><select id="itemClassId" name="itemClassId" onchange="changeItemClass()"><option value=''>--请选择--</option></select></td>
+				<td><select id="ornaClassId" name="ornaClassId" onchange="changeOrnaClass()"><option value=''>--请选择--</option></select></td>
+				<td><select id="analysisId" name="analysisId" onchange="changeAnalysis()"><option value=''>--请选择--</option></select></td>
+				<td><select id="styleItemClassId" name="styleItemClassId" onchange="changeStyleItemClass()"><option value=''>--请选择--</option></select></td>
+				<td><select id="styleMiddleClassId" name="styleMiddleClassId" onchange="changeStyleMiddleClass()"><option value=''>--请选择--</option></select></td>
+				<td><select id="styleOrnaClassId" name="styleOrnaClassId" onchange="changeStyleOrnaClass()"><option value=''>--请选择--</option></select></td>
+				<td><select id="styleId" name="styleId"><option value=''>--请选择--</option></select></td>
+				<td><select id='salableFlag' name='salableFlag'><option value="">--</option><option value="1">是</option><option value="0">否</option></select></td>
+				<td><input type="button" value="筛选" id="btnQuery" class='btn'/> </td>
+			</tr>
+        </tbody>
+	</table>
+	<table class="list">
+		<thead>
+			<tr>
+				<th>大类</th>
+				<th>小类</th>
+				<th>分析范围</th>
+				<th>款式大类</th>
+				<th>款式中类</th>
+				<th>款式小类</th>
+				<th>款式</th>
+				<th>商品材质</th>
+				<th>托架颜色</th>
+				<th>计量单位</th>
+				<th>尺寸$!StringUtil.star()</th>
+				<th>色级</th>
+				<th>净度</th>
+				<th>品质</th>
+                <th>下单数量$!StringUtil.star()</th>
+			</tr>
+        </thead>
+		<tbody id='tbl'>
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+				<td>$!item.analysisName</td>
+				<td>$!BdCommon.getStyleItemClassNames($!item.styleItemClassId)</td>
+				<td>$!BdCommon.getStyleMiddleClassNames($!item.styleMiddleClassId)</td>
+				<td>$!BdCommon.getStyleOrnaClassNames($!item.styleOrnaClassId)</td>
+				<td>$!HtmlUtil.printStyle($!item.styleId, $!item.styleName, $!item.bigGraph)</td>
+    			<td>$!BdCommon.getQualityName($!item.qualityId)</td>
+    			<td>$!DictUtil.getValue('bracketcolor',$!item.bracketColorId)</td>
+				<td>$!BdCommon.getUnitName($!item.unitId)</td>
+				<td><a href='javascript:editSize("$!item.lineid", "$!item.itemClassId", "$!item.ornaClassId", "$!item.sizeId")'>$!item.sizeName</a></td>
+    			<td>$!DictUtil.getValue('diacolorgrade',$!item.colorGradeId)</td>
+    			<td>$!DictUtil.getValue('diaclean',$!item.cleanId)</td>
+    			<td>$!{DictUtil.getValue('gradelevel',$!item.colorGradeGradeId)}$!{DictUtil.getValue('gradelevel',$!item.cleanGradeId)}</td>
+    			<td><a href='javascript:editNum("$!item.lineid", "$!item.orderNum")'>$!item.orderNum</a></td>
+			</tr>
+		#end
+    	</tbody>
+	</table>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<div id="orderNumDiv" title="修改下单数量" style="display:none;">
+	<input type='hidden' id='orderNumLineId'>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' onclick="saveNewOrderNum()"/>
+				<input type='button' value='取消' class='btn' onclick="jQuery('#orderNumDiv').dialog('close');"/>
+			</td>
+		 </tr>
+	</table>
+    <table class="content">
+    	<tr>
+			<td class="body1">新下单数量</td>
+			<td class="body2"><input type='text' id='newOrderNum' value=''/></td>
+		</tr>
+    </table>
+</div>
+<div id="orderSizeDiv" title="修改尺寸" style="display:none;">
+	<input type='hidden' id='sizeLineId'>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='保存' class='btn' onclick='saveNewSize()'/>
+				<input type='button' value='取消' class='btn' onclick="jQuery('#orderSizeDiv').dialog('close');"/>
+			</td>
+		 </tr>
+	</table>
+    <table class="content">
+    	<tr>
+			<td class="body1">新下单尺寸</td>
+			<td class="body2"><select id='newSizeId'></select></td>
+		</tr>
+    </table>
+</div>
+<script>
+/**
+* 改变大类
+*/
+function changeItemClass(){
+	GatherOrderDwr.getOrnaClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), function(data){
+		addOptions("ornaClassId", data, null, null, true, true);
+		changeOrnaClass();
+	});
+}
+/**
+* 改变小类
+*/
+function changeOrnaClass(){
+	GatherOrderDwr.getAnalysisForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+		addOptions("analysisId", data, null, null, true, true);
+		changeAnalysis();
+	});
+}
+/**
+* 改变分析范围
+*/
+function changeAnalysis(){
+	GatherOrderDwr.getStyleItemClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), function(data){
+		addOptions("styleItemClassId", data, null, null, true, true);
+		changeStyleItemClass();
+	});
+}
+/**
+* 改变款式大类
+*/
+function changeStyleItemClass(){
+	GatherOrderDwr.getStyleMiddleClassForSlt(jQuery("#headid").val(),  null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), function(data){
+		addOptions("styleMiddleClassId", data, null, null, true, true);
+		changeStyleMiddleClass();
+	});
+}
+/**
+* 改变款式中类
+*/
+function changeStyleMiddleClass(){
+	GatherOrderDwr.getStyleOrnaClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+		addOptions("styleOrnaClassId", data, null, null, true, true);
+		changeStyleOrnaClass();
+	});
+}
+/**
+* 改变款式小类
+*/
+function changeStyleOrnaClass(){
+	GatherOrderDwr.getStyleIdForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+		addOptions("styleId", data, null, null, true, true);
+	});
+}
+function saveNewOrderNum(){
+	if(!isInteger(jQuery("#newOrderNum").val()) || parseFloat(jQuery("#newOrderNum").val())<0){
+		alert("请输入新下单数量,且必须为大于等于0的整数");
+		return ;
+	}
+	confirm("确定保存?", function(){
+    	GatherOrderDwr.saveNewOrderNum(jQuery("#orderNumLineId").val(), jQuery("#newOrderNum").val(), function(data2){
+    		alert(data2?data2:"保存成功", function(){
+    			if(!data2){
+    				jQuery("#frm").submit();
+    			}
+    		});
+    	});
+	});
+}
+function editNum(lineid, orderNum){
+	jQuery("#orderNumDiv").dialog({
+			width:300, 
+			height:150,
+			modal:true,
+			open: function(event, ui) {
+				jQuery("#orderNumLineId").val(lineid);
+				jQuery("#newOrderNum").val(orderNum);
+			},
+			beforeClose: function(event, ui) {
+				return true;
+			}
+		});
+}
+function saveNewSize(){
+	if(isNull(jQuery("#newSizeId").val())){
+		alert("请先选择新尺寸");
+		return ;
+	}
+	confirm("确定保存?", function(){
+    	GatherOrderDwr.saveNewSize(jQuery("#sizeLineId").val(), jQuery("#newSizeId").val(), function(data2){
+    		alert(data2?data2:"保存成功", function(){
+    			if(!data2){
+    				jQuery("#frm").submit();
+    			}
+    		});
+    	});
+	});
+}
+function editSize(lineid, it, or, sizeId){
+	jQuery("#orderSizeDiv").dialog({
+			width:300, 
+			height:150,
+			modal:true,
+			open: function(event, ui) {
+				jQuery("#sizeLineId").val(lineid);
+            	//获取尺寸
+            	BdCommonDwr.getSizeByItemIdAndOrnaId(it, or, function(data){
+            		addOptions("newSizeId", data, null, null, true, true, sizeId);
+            	});
+			},
+			beforeClose: function(event, ui) {
+				return true;
+			}
+		});
+}
+jQuery(function(){
+	altRowCSS('tbl');
+	//checkTable('tbl', 'chkall', 'chk', false);
+	jQuery("#btnQuery").click(function(){
+		jQuery("#frm").submit();
+	});
+    	selectOption("salableFlag", "$!form.condition.salableFlag");
+	//请求大类数据
+	GatherOrderDwr.getItemClassForSlt(jQuery("#headid").val(), null, null, function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!form.condition.itemClassId");
+		if("$!form.condition.itemClassId"){
+			//请求小类数据
+			GatherOrderDwr.getOrnaClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), function(data){
+    			addOptions("ornaClassId", data, null, null, true, true, "$!form.condition.ornaClassId");
+				if("$!form.condition.ornaClassId"){
+        			//请求分析范围数据
+        			GatherOrderDwr.getAnalysisForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), function(data){
+                		addOptions("analysisId", data, null, null, true, true, "$!form.condition.analysisId");
+                		if("$!form.condition.analysisId"){
+                			//请求款式大类数据
+							GatherOrderDwr.getStyleItemClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), function(data){
+                        		addOptions("styleItemClassId", data, null, null, true, true, "$!form.condition.styleItemClassId");
+                        		if("$!form.condition.styleItemClassId"){
+                        			//请求款式中类数据
+        							GatherOrderDwr.getStyleMiddleClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), function(data){
+                                		addOptions("styleMiddleClassId", data, null, null, true, true, "$!form.condition.styleMiddleClassId");
+                                		if("$!form.condition.styleMiddleClassId"){
+                                			//请求款式小类数据
+                							GatherOrderDwr.getStyleOrnaClassForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), function(data){
+                                        		addOptions("styleOrnaClassId", data, null, null, true, true, "$!form.condition.styleOrnaClassId");
+                                        		if("$!form.condition.styleOrnaClassId"){
+                                        			//请求款式数据
+                									GatherOrderDwr.getStyleIdForSlt(jQuery("#headid").val(), null, null, jQuery("#itemClassId").val(), jQuery("#ornaClassId").val(), jQuery("#analysisId").val(), jQuery("#styleItemClassId").val(), jQuery("#styleMiddleClassId").val(), jQuery("#styleOrnaClassId").val(), function(data){
+                                                		addOptions("styleId", data, null, null, true, true, "$!form.condition.styleId");
+                                                	});
+                								}
+                                        	});
+										}
+									});
+								}
+							});
+						}
+                	});
+				}
+    		});
+		}
+	});
+});
+</script>

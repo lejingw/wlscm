@@ -1,0 +1,432 @@
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js",
+	"$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js",
+	"$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.exedit-3.0.js",
+	"$StringUtil.getContextPath()/dwr/interface/BdCommonDwr.js",
+	"$StringUtil.getContextPath()/js/basic/selectStyle.js",
+	"$StringUtil.getContextPath()/dwr/interface/PriceHeadDwr.js"])
+#set($iniv = $form.iniv)
+#if($form.multiFlag)
+#end
+<script>
+var start=1;
+var limit=15;
+var totalCount=0;
+var tn;
+</script>
+<table style='width:100%;height:100%;' border="1">
+	<tr>
+		<td valign="top" style='width:220px;' rowspan="2">
+			<div id="myZTree" class="ztree" style="height:455px;overflow-y:auto;"></div>
+		</td>
+		<td valign="top">
+			<table class='list'>
+                <thead>
+					<th>款式列表</th>
+				</thead>
+				<tbody id="tb11">
+                </tbody>
+			</table>
+		</td>
+	</tr>
+    <tr>
+		<td colspan="2">
+			<script>
+            	createToolbar( start, limit, totalCount);
+            </script>
+		</td>
+	</tr>
+</table>
+<script>
+//商品类别、大类、小类、款式大类、款式中类、款式小类
+function onExpand(event, treeId, treeNode) {
+	//info(treeNode.id);
+	//showLog("[ "+getTime()+" onExpand ]&nbsp;&nbsp;&nbsp;&nbsp;" + treeNode.name);
+	if(treeNode.queryFlag)	return;
+	treeNode.queryFlag = true;
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	if(0 == treeNode.type){
+		#if("$iniv"=="2")
+			PriceHeadDwr.getHandoerItemClassByHeadId("$form.handoverBillId","$form.allowInivType",treeNode.id,"2",function(datas){//交接单下的大类
+        		if("$form.itemClassId"==""){
+    				for(var i=0;i<datas.length;i++){
+    					zTree.addNodes(treeNode, {
+            				id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+            				isParent:true,
+            				name:datas[i].text,
+        					type:1,
+            				queryFlag : false
+            			});
+					}
+        		}else{
+					for(var i=0;i<datas.length;i++){
+						if("$form.itemClassId"==datas[i].value){
+        					zTree.addNodes(treeNode, {
+                				id:treeNode.id + "," + datas[i].value,
+            					pId:treeNode.id,
+                				isParent:true,
+                				name:datas[i].text,
+            					type:1,
+                				queryFlag : false
+                			});
+						}
+					}
+				}
+        	});
+		#else
+			BdCommonDwr.getItemClassForSlt(treeNode.id, function(datas){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:1,
+    					queryFlag : false
+    				});
+        		}
+        	});
+		#end
+		
+	}else if(1 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getOrnaClassByItemClassIdForSlt(tmp[1], function(datas){
+    		if("$form.ornaClassId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:2,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.ornaClassId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:2,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    	});
+	}else if(2 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleItemClassForSlt(tmp[1], tmp[2], function(datas){
+    		if("$form.styleItemId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:3,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+    				if("$form.styleItemId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:3,
+        					queryFlag : false
+        				});
+            		}
+				}
+    		}
+    	});
+	}else if(3 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleMiddleClassForSlt(tmp[1], tmp[2], tmp[3], function(datas){
+			if("$form.styleMiddleId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:true,
+    					name:datas[i].text,
+    					type:4,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.styleMiddleId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:true,
+        					name:datas[i].text,
+        					type:4,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    		
+    	});
+	}else if(4 == treeNode.type){
+		var tmp = treeNode.id.split(",");
+    	BdCommonDwr.getStyleOrnaClassForSlt(tmp[1], tmp[2], tmp[3], tmp[4], function(datas){
+			if("$form.styleOrnaId"==""){
+        		for(var i=0;i<datas.length;i++){
+            		zTree.addNodes(treeNode, {
+    					id:treeNode.id + "," + datas[i].value,
+    					pId:treeNode.id,
+    					isParent:false,
+    					name:datas[i].text,
+    					type:5,
+    					queryFlag : false
+    				});
+        		}
+    		}else{
+    			for(var i=0;i<datas.length;i++){
+					if("$form.styleOrnaId"==datas[i].value){
+                		zTree.addNodes(treeNode, {
+        					id:treeNode.id + "," + datas[i].value,
+        					pId:treeNode.id,
+        					isParent:false,
+        					name:datas[i].text,
+        					type:5,
+        					queryFlag : false
+        				});
+					}
+        		}
+    		}
+    	});
+	}
+}
+function onClick(event, treeId, treeNode){
+	start=1;
+	limit=15;
+	totalCount=0;
+	tn = treeNode;
+	#if("$iniv"=="2")
+    	loadStylePage(start,limit);
+	#end
+}
+function loadStylePage(s,l){
+	var values = tn.id.split(",");
+		showLayer(true);
+	PriceHeadDwr.getStyleByCalcWin("$form.itemClassId"==""?values[1]:"$form.itemClassId",
+			"$form.ornaClassId"==""?values[2]:"$form.ornaClassId",values[3],
+    		values[4],values[5],"$form.vender","$form.handoverBillId","$form.allowInivType",
+    		s,l,function(datas){//加载款式
+			showLayer(false);
+			var styleLines = $n("delline");
+			for ( var i = (styleLines.length-1); i >=0 ; i--) {
+				$("tb11").deleteRow(i);
+			}
+			if(datas!=null&&datas.pager!=null){
+				var data = datas.pager.pageData;
+				var picUrl = datas.stylePicUrl;
+				for(var i=0;i<data.length;){
+					var f1="<table><tr><input type='hidden' name='delline'/>";
+					for(var j=i;j<(i+5);j++){
+						if(j==data.length)
+							break;
+						f1+="<td><table>"+
+        						"<tr><td><input type='radio' value='"+data[j].styleId+"' name='chk' onclick='clickRow(this)'/><a href='javascript:viewStyle("+data[j].styleId+")'>"+data[j].styleName+"</a></td></tr>"+
+            					"<tr><td><img src='"+picUrl+data[j].issmallgraph+"' width='120' height='80'/></td></tr>"+
+    						"</table></td>";
+					}
+					f1+="</tr></table>";
+        			insertRow("tb11",[f1],false);
+					i+=5;
+    			}
+				start = datas.pager.start;
+				limit = datas.pager.limit;
+				totalCount = datas.pager.totalCount;
+				countToolbar();
+			}
+    	});
+}
+function clickRow(i){
+	var style = i;
+	parent.loadStyleData(style.value,"$form.vender","1");
+	parent.closePrintWin();
+}
+/*
+""
+*/
+jQuery(function(){
+	//checkTable('tb11', 'check11', 'chk11', false,clickRow);
+	var setting = {
+		view: {
+			selectedMulti: false
+		},
+		edit: {
+			enable: true,
+			showRemoveBtn: false,
+			showRenameBtn: false
+		},
+		data: {
+			keep: {
+				parent:true,
+				leaf:true
+			},
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			//beforeClick: beforeClick,
+			//beforeCollapse: beforeCollapse,
+			//beforeExpand: beforeExpand,
+			//onCollapse: onCollapse,
+			onExpand: onExpand,
+			onClick: onClick
+		}
+	};
+	var zNodes =[];
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, zNodes);
+	var zTree = jQuery.fn.zTree.getZTreeObj("myZTree");
+	
+	#if("$iniv"=="2")
+    	PriceHeadDwr.getArticleTypeClassByHeadId("$form.handoverBillId","$form.allowInivType","$form.itemClassId","2",function(datas){
+    		startSync();
+			for(var i=0;i<datas.length;i++){
+        		zTree.addNodes(null, {
+    				id:datas[i].value,
+    				pId:0,
+					open:true,
+    				isParent:true,
+    				name:datas[i].text,
+    				type:0,
+    				queryFlag : false
+    			});
+				if("$form.itemClassId"!=""){
+					PriceHeadDwr.getHandoerItemClassByHeadId("$form.handoverBillId","$form.allowInivType",datas[i].value,"2",function(itemData){//交接单下的大类
+            			for(var j=0;j<itemData.length;j++){
+    						if("$form.itemClassId"==itemData[j].value){
+            					zTree.addNodes(zTree.getNodeByParam("id",datas[i].value,0), {
+                    				id:datas[i].value + "," + itemData[j].value,
+                					pId:datas[i].value,
+                    				isParent:true,
+									open:true,
+                    				name:itemData[j].text,
+                					type:1,
+                    				queryFlag : false
+                    			});
+								if("$form.ornaClassId"!=""){
+        							BdCommonDwr.getOrnaClassByItemClassIdForSlt("$form.itemClassId", function(ornaData){
+                            			for(var h=0;h<ornaData.length;h++){
+                        					if("$form.ornaClassId"==ornaData[h].value){
+                                        		zTree.addNodes(zTree.getNodeByParam("id",datas[i].value + "," + "$form.itemClassId"), {
+                                					id:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId",
+                                					pId:datas[i].value + "," + "$form.itemClassId",
+                                					isParent:true,
+                                					name:ornaData[h].text,
+													open:true,
+                                					type:2,
+                                					queryFlag : false
+                                				});
+                                            	if("$form.styleItemId"!=""){
+													BdCommonDwr.getStyleItemClassForSlt("$form.itemClassId", "$form.ornaClassId", function(styleItemData){
+                                            			for(var t=0;t<styleItemData.length;t++){
+                                            				if("$form.styleItemId"==styleItemData[t].value){
+                                                        		zTree.addNodes(zTree.getNodeByParam("id",datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId"), {
+                                                					id:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId",
+                                                					pId:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId",
+                                                					isParent:true,
+                                                					name:styleItemData[t].text,
+																	open:true,
+                                                					type:3,
+                                                					queryFlag : false
+                                                				});
+                                                        		if("$form.styleMiddleId"!=""){
+																	BdCommonDwr.getStyleMiddleClassForSlt("$form.itemClassId", "$form.ornaClassId", "$form.styleItemId", function(styleMiddleData){
+                                                            			for(var l=0;l<styleMiddleData.length;l++){
+                                                        					if("$form.styleMiddleId"==styleMiddleData[l].value){
+                                                                        		zTree.addNodes(zTree.getNodeByParam("id",datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId"), {
+                                                                					id:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId" + "," + "$form.styleMiddleId",
+                                                                					pId:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId",
+                                                                					isParent:true,
+                                                                					name:styleMiddleData[l].text,
+																					open:true,
+                                                                					type:4,
+                                                                					queryFlag : false
+                                                                				});
+                                                                        		if("$form.styleOrnaId"!=""){
+																					BdCommonDwr.getStyleOrnaClassForSlt("$form.itemClassId", "$form.ornaClassId", "$form.styleItemId", "$form.styleMiddleId", function(styleOrnaData){
+                                                                            			for(var m=0;m<styleOrnaData.length;m++){
+                                                                        					if("$form.styleOrnaId"==styleOrnaData[m].value){
+                                                                                        		zTree.addNodes(zTree.getNodeByParam("id",datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId" + "," + "$form.styleMiddleId"), {
+                                                                                					id:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId" + "," + "$form.styleMiddleId" + "," + "$form.styleOrnaId",
+                                                                                					pId:datas[i].value + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId" + "," + "$form.styleMiddleId",
+                                                                                					isParent:false,
+                                                                                					name:styleOrnaData[m].text,
+																									open:true,
+                                                                                					type:5,
+                                                                                					queryFlag : false
+                                                                                				});
+                                                                        					}
+                                                                                		}
+                                                                            		});
+                                                                            	}
+                                                        					}
+                                                                		}
+                                                            		});
+                                                            	}
+                                                    		}
+                                        				}
+                                            		});
+                                            	}
+                        					}
+                                		}
+                            		});
+                            	}
+    						}
+    					}
+            		});
+    			}
+    		}
+			endSync();
+			start=1;
+        	limit=15;
+        	totalCount=0;
+        	tn = {id:"$form.articleTypeId" + "," + "$form.itemClassId" + "," + "$form.ornaClassId" + "," + "$form.styleItemId" + "," + "$form.styleMiddleId" + "," + "$form.styleOrnaId"};
+        	#if("$iniv"=="2")
+            	loadStylePage(start,limit);
+        	#end
+    	});
+	#else
+		BdCommonDwr.getArticleTypeForSlt(function(datas){
+    		for(var i=0;i<datas.length;i++){
+        		zTree.addNodes(null, {
+    				id:datas[i].value,
+    				pId:0,
+    				isParent:true,
+    				name:datas[i].text,
+    				type:0,
+    				queryFlag : false
+    			});
+    		}
+    	});
+	#end
+});
+function checkSubNodes(tree, node, flag){
+	tree.checkNode(node, flag);
+	var childs = node.childs;
+	if(!childs)	return ;
+	for(var i=0;i<childs.length;i++){
+		 checkSubNodes(tree, childs[i], flag);
+	}
+}
+function checkAllNodes(flag){
+	
+}
+</script>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ExcludeOrna">
+	<sql id="ExcludeOrna.getExcludeOrnaPageDataCD">
+		where a.orna_code = b.orna_code
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="ExcludeOrna.getExcludeOrnaPageData" parameterClass="map" resultClass="com.jatools.vo.push.ExcludeOrna">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.orna_code            as "ornaCode",
+			       b.orna_dsc             as "ornaDsc",
+			       b.state                as "state",
+			       b.org_id               as "orgId",
+			       b.item_class_id        as "itemClassId",
+			       b.orna_class_id        as "ornaClassId",
+			       b.alaysis_id           as "analysisId",
+			       c.summarydescription   as "analysisName",
+			       b.style_id             as "styleId",
+			       d.stylename            as "styleName",
+			       b.main_color_grade_id  as "colorGradeId",
+			       b.clean_id             as "cleanId",
+			       b.color_grade_grade_id as "colorGradeGradeId",
+			       b.clean_grade_id       as "cleanGradeId",
+			       b.size_id              as "sizeId",
+			       e.size_name            as "sizeName",
+			       b.quality_id           as "qualityId",
+			       b.bracketcolor_id      as "bracketColorId",
+			       b.sale_unit_id         as "unitId",
+			       a.create_id            as "createId",
+			       a.create_date          as "createDate",
+			       a.status               as "status"
+			  from jat_pl_basic_exclude_orna a, ic_mater_active b
+			  left join jas_bd_analysis_arange c
+			    on b.alaysis_id = c.analysis_arange_id
+			  left join jas_bd_style d
+			    on b.style_id = d.styleid
+			  left join jas_bd_size e
+			    on b.size_id = e.size_id
+			 <include refid="ExcludeOrna.getExcludeOrnaPageDataCD"/>
+			 order by b.org_id,
+			          b.item_class_id,
+			          b.orna_class_id,
+			          c.summarydescription,
+			          d.stylename,
+			          b.main_color_grade_id,
+			          b.clean_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="ExcludeOrna.getExcludeOrnaTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_exclude_orna a, ic_mater_active b
+			  left join jas_bd_analysis_arange c
+			    on b.alaysis_id = c.analysis_arange_id
+			  left join jas_bd_style d
+			    on b.style_id = d.styleid
+			  left join jas_bd_size e
+			    on b.size_id = e.size_id
+			 <include refid="ExcludeOrna.getExcludeOrnaPageDataCD"/>
+	</select>
+	<insert id="ExcludeOrna.saveExcludeOrna" parameterClass="com.jatools.vo.push.ExcludeOrna">
+		insert into jat_pl_basic_exclude_orna (orna_code, create_id, create_date,  status)
+		values (#ornaCode#, #createId#, #createDate#, #status#)
+	</insert>
+	<delete id="ExcludeOrna.deleteExcludeOrna" parameterClass="string">
+		delete jat_pl_basic_exclude_orna where orna_code = #value#
+	</delete>
+	<select id="ExcludeOrna.checkExcludeOrnaRepeat" parameterClass="string" resultClass="int">
+		select count(1) from jat_pl_basic_exclude_orna where orna_code = #value#
+	</select>
+	<select id="ExcludeOrna.getMaterActiveByCode" parameterClass="map" resultClass="com.jatools.vo.push.ExcludeOrna">
+		select a.orna_code as "ornaCode", a.orna_barcode as "barCode", a.orna_dsc as "ornaDsc", a.org_id as "orgId", b.org_name as "orgName", a.state as "state", c.item_value as "stateName" from ic_mater_active a left join jas_sm_org b on a.org_id = b.org_id left join jat_sys_dict_item c on c.entry_code = 'status' and c.item_key = a.state
+		where
+		<isEqual property="ornaFlag" compareValue="1">a.orna_code = #code#</isEqual>
+		<isNotEqual property="ornaFlag" compareValue="1">a.orna_barcode = #code#</isNotEqual>
+	</select>
+	
+	
+	<sql id="ExcludeOrna.queryColumns">
+       a.orna_code as "ornaCode",
+       a.orna_dsc as "ornaDsc",
+       a.org_id as "orgId",
+       a.item_class_id as "itemClassId",
+       a.orna_class_id as "ornaClassId",
+       a.alaysis_id as "analysisId",
+       b.summarydescription as "analysisName",
+       c.styleitemclass as "styleItemClassId",
+       c.stylemiddleclass as "styleMiddleClassId",
+       c.styleornaclass as "styleOrnaClassId",
+       a.style_id as "styleId",
+       c.stylename as "styleName",
+       c.isbiggraph as "bigGraph",
+       a.sale_unit_id as "unitId",
+       a.now_qty as "nowQty",
+       a.all_qty as "allQty",
+       a.stone_total_num as "stoneTotalNum",
+       a.pos_amount as "posAmount",
+       a.main_weight as "mainWeight",
+       a.part_weight as "partWeight",
+       a.state as "status"
+	</sql>
+	<sql id="ExcludeOrna.queryExcludeOrnaPageDataCD">
+		where not exists(select 1 from jat_pl_basic_exclude_orna aa where aa.orna_code = a.orna_code)
+			<isNotEmpty property="orgId" prepend="and">  a.org_id in($orgId$) </isNotEmpty>
+			<isNotEmpty property="itemClassId" prepend="and">  a.item_class_id = #itemClassId# </isNotEmpty>
+			<isNotEmpty property="ornaClassId" prepend="and">  a.orna_class_id = #ornaClassId# </isNotEmpty>
+			<isNotEmpty property="analysisId" prepend="and">  a.alaysis_id = #analysisId# </isNotEmpty>
+   			<isNotEmpty property="styleItemClassId" prepend="and">  c.STYLEITEMCLASS = #styleItemClassId# </isNotEmpty>
+   			<isNotEmpty property="styleOrnaClassId" prepend="and">  c.STYLEORNACLASS = #styleOrnaClassId# </isNotEmpty>
+   			<isNotEmpty property="styleMiddleClassId" prepend="and">  c.STYLEMIDDLECLASS = #styleMiddleClassId# </isNotEmpty>
+			<isNotEmpty property="styleId" prepend="and">  a.style_id = #styleId# </isNotEmpty>
+			<isNotEmpty property="posAmountStart" prepend="and"> <![CDATA[a.pos_amount >= #posAmountStart#]]></isNotEmpty>
+			<isNotEmpty property="posAmountEnd" prepend="and"> <![CDATA[a.pos_amount <= #posAmountEnd#]]></isNotEmpty>
+			<isNotEmpty property="barCode" prepend="and"> <![CDATA[a.orna_barcode <= #barCode#]]></isNotEmpty>
+			<isNotEmpty property="ornaCode" prepend="and"> <![CDATA[a.orna_code <= #ornaCode#]]></isNotEmpty>
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="ExcludeOrna.queryExcludeOrnaPageData" resultClass="com.jatools.vo.push.ExcludeOrna" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="ExcludeOrna.queryColumns"/>
+			from ic_mater_active a left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+				left join jas_bd_style c on a.style_id = c.STYLEID
+			<include refid="ExcludeOrna.queryExcludeOrnaPageDataCD"/>
+			order by a.orna_code
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+		
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="ExcludeOrna.queryExcludeOrnaTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from ic_mater_active a left join jas_bd_analysis_arange b on a.alaysis_id = b.ANALYSIS_ARANGE_ID
+				left join jas_bd_style c on a.style_id = c.STYLEID
+		<include refid="ExcludeOrna.queryExcludeOrnaPageDataCD"/>
+	</select>
+</sqlMap>

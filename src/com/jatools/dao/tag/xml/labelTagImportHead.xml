@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LabelTagImportHead">
+	<typeAlias alias="LabelTagImportHead" type="com.jatools.vo.tag.LabelTagImportHead" />
+	
+	<sql id="LabelTagImportHead_columns">
+		headid, billno, org_id, print_type, memo, createid, createdate, updateid, updatedate, status, counts
+	</sql>
+	
+	<sql id="LabelTagImportHead_columns_2">
+		"headid", "billno", "orgId", "printType", "memo", "createid", "createdate", "updateid", "updatedate", "status", "counts"
+	</sql>
+	
+	<sql id="LabelTagImportHead_columns_3">
+		headid     as "headid",    
+		billno     as "billno",    
+		org_id     as "orgId",    
+		print_type as "printType",
+		memo	   as "memo",      
+		createid   as "createid",  
+		createdate as "createdate",
+		updateid   as "updateid",  
+		updatedate as "updatedate",
+		status	   as "status",
+		counts	   as "counts"
+	</sql>
+	
+	<!-- 获取分页数据 -->
+	<select id="LabelTagImportHead.getLabelTagImportHeadPageData" resultClass="LabelTagImportHead" parameterClass="map">
+		select <include refid="LabelTagImportHead_columns_2"/> from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="LabelTagImportHead_columns_3"/>
+			from jat_lable_tag_import_head a  where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isEmpty property="orgId" prepend="and">
+				 exists (select 1 from jas_bd_emp_org t where a.org_id = t.orgid and t.empid = #userId#) 
+			</isEmpty>
+			<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+			<isNotEmpty property="createId" prepend="and"> a.createid = #createId# </isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.createdate DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="LabelTagImportHead.getLabelTagImportHeadTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_lable_tag_import_head a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isEmpty property="orgId" prepend="and">
+			 exists (select 1 from jas_bd_emp_org t where a.org_id = t.orgid and t.empid = #userId#) 
+		</isEmpty>
+		<isNotEmpty property="billno" prepend="and"> a.billno = #billno# </isNotEmpty>
+		<isNotEmpty property="createId" prepend="and"> a.createid = #createId# </isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.createdate >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.createdate <= #endDate#]]> </isNotEmpty>
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</select>
+	
+	<insert id="LabelTagImportHead.saveLabelTagImportHead" parameterClass="LabelTagImportHead">
+    	<selectKey resultClass="string" keyProperty="headid" type="pre">
+			select JAT_LABLE_TAG_IMPORT_HEAD_SEQ.nextval as "headid" from dual
+		</selectKey>
+		insert into jat_lable_tag_import_head(<include refid="LabelTagImportHead_columns"/>)
+		 values(
+		 	#headid#, #billno#, #orgId#, #printType#, #memo#, #createid#, #createdate#, #updateid#, #updatedate#, #status#, #counts#
+		 )
+    </insert>
+    
+    <select id="LabelTagImportHead.getLabelTagImportHead" parameterClass="string" resultClass="LabelTagImportHead">
+		select <include refid="LabelTagImportHead_columns_3"/>
+		from jat_lable_tag_import_head a 
+		where 1=1
+			and a.headid = #value#
+	</select>
+	
+	<update id="LabelTagImportHead.updateLabelTagImportHead" parameterClass="LabelTagImportHead">
+		update jat_lable_tag_import_head a 
+		set 
+			a.org_id     = #orgId#,    
+			a.print_type = #printType#,
+			a.memo	     = #memo#,      
+			a.updateid   = #updateid#,  
+			a.updatedate = #updatedate#,
+			a.status	 = #status#,
+			a.counts	 = #counts#
+		where a.headid = #headid# 
+	</update>
+	
+	<delete id="LabelTagImportHead.deleteLabelTagImportHead" parameterClass="string" >
+		delete from jat_lable_tag_import_head a where a.headid = #value# 
+	</delete>
+	
+	<update id="LabelTagImportHead.updateLabelTagImportHeadStatus" parameterClass="map">
+		update jat_lable_tag_import_head a set 
+		a.status = #status# , a.updatedate = #updateDate# 
+		where a.headid = #headid# 
+	</update>
+	
+	<update id="LabelTagImportHead.modifyLabelImportCount" parameterClass="string">
+		update jat_lable_tag_import_head a set 
+		a.counts = (select count(1) from jat_lable_tag_import_line b where a.headid=b.headid)
+		where a.headid = #value#
+	</update>
+	
+	<select id="LabelTagImportHead.getOrgGroupNo" parameterClass="string" resultClass="com.jatools.vo.tag.LabelImportOrgGroupNo">
+		select distinct *
+		from (select b.group_no as "groupNo", a.headid as "srcHeadid",
+		      <![CDATA[case
+		               when c.state <> 900 and c.bill_code = 'DP' then
+                       (select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jas_pl_headquarter_gather_head gh on aa.gather_head_id = gh.HEADQUARTER_GATHER_HEAD_ID
+                         where gh.HEADQUARTER_GATHER_NO = c.bill_no and c.orna_code = aa.orna_code)
+                      when c.state <> 900 and c.bill_code='PU' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_gather_set_head sh on aa.gather_head_id = sh.headid
+                          where sh.bill_no = c.bill_no and aa.orna_code=c.orna_code
+                        )
+                      when c.state <> 900 and c.bill_code='SD' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_standard_dispatch sd on aa.gather_head_id = sd.headid
+                          where sd.billno = c.bill_no and aa.orna_code=c.orna_code
+                        )
+		               when c.state <> 900 and (c.bill_code = 'TB' or c.bill_code='DB')  then
+		                (select bb.in_org_id
+		                   from jat_move_head bb
+		                  where bb.billno = c.bill_no)
+		               else
+		                c.org_id
+		             end as "orgId"]]>
+		        from jat_lable_tag_import_head a,
+		             jat_lable_tag_import_line b,
+		             ic_mater_active           c
+		       where a.headid = b.headid
+		         and b.orna_code = c.orna_code
+		         and a.headid = #value#) aa
+	</select>
+	
+	<insert id="LabelTagImportHead.createLabelTagApplyPrint" parameterClass="com.jatools.vo.tag.LabelImportOrgGroupNo">
+    	<selectKey resultClass="string" keyProperty="printId" type="pre">
+			select JAT_LABLE_TAG_PRINT_SEQ.nextval as "printId" from dual
+		</selectKey>
+		insert into jat_lable_tag_print(
+			id, no, createdate, createuserid, org_id, num_total, receive_num, cancel_num, updateuserid, updatedate, state, print_type
+		)
+		 values(
+		 	#printId#, #billno#, #updateDate#, #userId#, #orgId#, 0, 0, 0, #userId#, #updateDate#, 1, #printType#
+		 )
+    </insert>
+    
+    <insert id="LabelTagImportHead.createLabelTagPrintLine" parameterClass="com.jatools.vo.tag.LabelImportOrgGroupNo">
+    	insert into jat_lable_tag_print_line
+		(
+			id, 
+			head_id, orna_name, old_orna_name, unit_id, num, weight, old_amount, oid_size, old_native_cert, old_gia_cert, old_hrd_cert, 
+			old_igi_cert, old_zodiac, is_dbl_label, old_basic_price, item_class_id, orna_class_id, old_special_work_price, orna_code, 
+			new_orna_name, new_basic_price, new_amount, new_special_work_price, update_reason, updatedate, state
+		)
+		select 
+		  	jat_lable_tag_print_line_seq.nextval,
+		    #printId#, orna_name, old_orna_name, unit_id, num, weight, old_amount, oid_size, old_native_cert, old_gia_cert, old_hrd_cert, 
+			old_igi_cert, old_zodiac, is_dbl_label, old_basic_price, item_class_id, orna_class_id, old_special_work_price, orna_code, 
+			new_orna_name, new_basic_price, new_amount, new_special_work_price, update_reason, #updateDate#, 1
+	    from (select c.orna_dsc               as orna_name,
+	                 c.orna_dsc               as old_orna_name,
+	                 c.sale_unit_id           as unit_id,
+	                 c.now_qty                as num,
+	                 c.all_qty                as weight,
+	                 c.pos_amount             as old_amount,
+	                 c.size_id                as oid_size,
+	                 c.ident_id               as old_native_cert,
+	                 c.gia_cert               as old_gia_cert,
+	                 c.hrd_cert               as old_hrd_cert,
+	                 c.igi_cert               as old_igi_cert,
+	                 c.zodiac                 as old_zodiac,
+	                 c.is_dbl_label           as is_dbl_label,
+	                 c.basic_price            as old_basic_price,
+	                 c.item_class_id,
+	                 c.orna_class_id,
+	                 c.special_work_price     as old_special_work_price,
+	                 b.orna_code,
+	                 b.new_orna_name,
+	                 b.new_basic_price,
+	                 b.new_amount,
+	                 b.new_special_work_price,
+	                 b.update_reason,
+	                 b.group_no,
+	        <![CDATA[case
+			            when c.state <> 900 and c.bill_code = 'DP' then
+                       (select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jas_pl_headquarter_gather_head gh on aa.gather_head_id = gh.HEADQUARTER_GATHER_HEAD_ID
+                         where gh.HEADQUARTER_GATHER_NO = c.bill_no and c.orna_code = aa.orna_code)
+                      when c.state <> 900 and c.bill_code='PU' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_gather_set_head sh on aa.gather_head_id = sh.headid
+                          where sh.bill_no = c.bill_no and aa.orna_code=c.orna_code
+                        )
+                      when c.state <> 900 and c.bill_code='SD' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_standard_dispatch sd on aa.gather_head_id = sd.headid
+                          where sd.billno = c.bill_no and aa.orna_code=c.orna_code
+                        )
+		               when c.state <> 900 and (c.bill_code = 'TB' or c.bill_code='DB')  then
+		                (select bb.in_org_id
+		                   from jat_move_head bb
+		                  where bb.billno = c.bill_no)
+			            else
+			             c.org_id
+			          end as org_id]]>
+	            from jat_lable_tag_import_head a,
+	                 jat_lable_tag_import_line b,
+	                 ic_mater_active           c
+	           where a.headid = b.headid
+	             and b.orna_code = c.orna_code
+	             and a.headid = #srcHeadid#) aa
+	   	where aa.org_id = #orgId# and aa.group_no = #groupNo#
+    </insert>
+    
+    <update id="LabelTagImportHead.modifyLabelPrintNumCount" parameterClass="map">
+    	update jat_lable_tag_print a
+		set 
+		   a.num_total = (select count(*) from jat_lable_tag_print_line b where a.id=b.head_id),
+		   a.updatedate = #updateDate#, a.updateuserid = #updateId#
+		where a.id=#id#
+    </update>
+    
+    
+    
+    <!-- ================================================ -->
+    <insert id="LabelTagImportHead.insertPrintLine" parameterClass="map">
+    	insert into jat_lable_tag_print_line
+		(
+			id, 
+			head_id, orna_name, old_orna_name, unit_id, num, weight, old_amount, oid_size, old_native_cert, old_gia_cert, old_hrd_cert, 
+			old_igi_cert, old_zodiac, is_dbl_label, old_basic_price, item_class_id, orna_class_id, old_special_work_price, orna_code, 
+			new_orna_name, new_basic_price, new_amount, new_special_work_price, update_reason, updatedate, state, group_no, org_id,
+			label_kind
+		)
+		select 
+		  	jat_lable_tag_print_line_seq.nextval,
+		    -1, orna_name, old_orna_name, unit_id, num, weight, old_amount, oid_size, old_native_cert, old_gia_cert, old_hrd_cert, 
+	      old_igi_cert, old_zodiac, is_dbl_label, old_basic_price, item_class_id, orna_class_id, old_special_work_price, orna_code, 
+	      new_orna_name, new_basic_price, new_amount, new_special_work_price, update_reason, #updateDate#, -1, aa.group_no, org_id,
+	      decode(aa.is_dbl_label, 1, '011', '100')
+      from (select c.orna_dsc               as orna_name,
+                   c.orna_dsc               as old_orna_name,
+                   c.sale_unit_id           as unit_id,
+                   c.now_qty                as num,
+                   c.all_qty                as weight,
+                   c.pos_amount             as old_amount,
+                   c.size_id                as oid_size,
+                   c.ident_id               as old_native_cert,
+                   c.gia_cert               as old_gia_cert,
+                   c.hrd_cert               as old_hrd_cert,
+                   c.igi_cert               as old_igi_cert,
+                   c.zodiac                 as old_zodiac,
+                   c.is_dbl_label           as is_dbl_label,
+                   c.basic_price            as old_basic_price,
+                   c.item_class_id,
+                   c.orna_class_id,
+                   c.special_work_price     as old_special_work_price,
+                   b.orna_code,
+                   b.new_orna_name,
+                   b.new_basic_price,
+                   b.new_amount,
+                   b.new_special_work_price,
+                   b.update_reason,
+                   b.group_no,
+         <![CDATA[ case
+                  when c.state <> 900 and c.bill_code = 'DP' then
+                       (select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jas_pl_headquarter_gather_head gh on aa.gather_head_id = gh.HEADQUARTER_GATHER_HEAD_ID
+                         where gh.HEADQUARTER_GATHER_NO = c.bill_no and c.orna_code = aa.orna_code)
+                      when c.state <> 900 and c.bill_code='PU' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_gather_set_head sh on aa.gather_head_id = sh.headid
+                          where sh.bill_no = c.bill_no and aa.orna_code=c.orna_code
+                        )
+                      when c.state <> 900 and c.bill_code='SD' then
+                        (
+                           select aa.org_id
+                          from jat_pl_dispatch_orna_log aa
+                          left join jat_pl_standard_dispatch sd on aa.gather_head_id = sd.headid
+                          where sd.billno = c.bill_no and aa.orna_code=c.orna_code
+                        )
+		               when c.state <> 900 and (c.bill_code = 'TB' or c.bill_code='DB')  then
+		                (select bb.in_org_id
+		                   from jat_move_head bb
+		                  where bb.billno = c.bill_no)
+                  else
+                   c.org_id
+                end as org_id]]>
+              from jat_lable_tag_import_head a,
+                   jat_lable_tag_import_line b,
+                   ic_mater_active           c
+             where a.headid = b.headid
+               and b.orna_code = c.orna_code
+               and a.headid = #headid#) aa
+    </insert>
+    
+    <insert id="LabelTagImportHead.insertPrinthead" parameterClass="map">
+    	insert into jat_lable_tag_print(
+		  id, no, org_id, num_total, receive_num, 
+		  cancel_num, createdate, createuserid, updateuserid, updatedate, 
+		  state, print_type, group_no
+		)
+		select 
+			jat_lable_tag_print_seq.nextval, '-1', a.org_id, cnt, 0,
+			0, #updateDate#, #userId#, #userId#, #updateDate#, 
+			-1, '公司创建', a.group_no
+		from (
+			select org_id, group_no, count(*) as cnt 
+			from jat_lable_tag_print_line where head_id = -1
+		     and state = -1
+		   group by org_id, group_no 
+		) a
+    </insert>
+    
+    <update id="LabelTagImportHead.updatePrintLineHeadId" >
+    	update jat_lable_tag_print_line a 
+		set a.head_id = (select b.id from jat_lable_tag_print b where b.group_no=a.group_no and b.org_id=a.org_id and b.state=-1),
+		a.state=1
+		where a.state=-1 and a.head_id=-1
+    </update>
+    
+    <select id="LabelTagImportHead.getOrgGroupNo2" parameterClass="string" resultClass="com.jatools.vo.tag.LabelImportOrgGroupNo">
+    	select 
+    		a.group_no 	as "groupNo", 
+    		a.org_id 	as "orgId", 
+    		a.id 		as "printId"
+    	from jat_lable_tag_print a where a.state=-1 and a.no='-1'
+	</select>
+	
+	 <update id="LabelTagImportHead.modifyLabelPrintBillNo" parameterClass="com.jatools.vo.tag.LabelImportOrgGroupNo">
+    	update jat_lable_tag_print a
+		set 
+		   a.no = #billno#,
+		   a.updatedate = #updateDate#, a.updateuserid = #userId#,
+		   a.state = 15, a.src_bill_no = (
+		   		select b.billno from jat_lable_tag_import_head b where b.headid = #importId#
+		   )
+		where a.id=#printId#
+    </update>
+</sqlMap>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="UnsaleOrna">
+	<typeAlias alias="UnsaleOrna" type="com.jatools.vo.basic.UnsaleOrna" />
+	
+	<sql id="UnsaleOrna_columns_1">
+		unsale_id, item_class_id, money_str, money_end, flow_cycle, unfash_cycle, unfash_uncycle, create_id, create_date, update_id, update_date, status, memo
+    </sql>
+    
+    <sql id="UnsaleOrna_columns_2">
+    	unsale_id as "unsaleId", item_class_id as "itemClassId", money_str as "moneyStr", money_end as "moneyEnd", 
+    	flow_cycle as "flowCycle", unfash_cycle as "unfashCycle", unfash_uncycle as "unfashUncycle", create_id as "createId", 
+    	create_date as "createDate", update_id as "updateId", update_date as "updateDate", status as "status", memo as "memo"
+    </sql>
+    
+    <sql id="UnsaleOrna_columns_3">
+    	"unsaleId", "itemClassId", "moneyStr", "moneyEnd", "flowCycle", "unfashCycle", "unfashUncycle", "createId", "createDate", "updateId", "updateDate", "status", "memo"
+    </sql>
+    
+    <sql id="UnsaleOrna_columns_4">
+    	#unsaleId#, #itemClassId#, #moneyStr#, #moneyEnd#, #flowCycle#, #unfashCycle#, #unfashUncycle#, #createId#, #createDate#, #updateId#, #updateDate#, #status#, #memo#
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="UnsaleOrna.getUnsaleOrnaPageData" resultClass="UnsaleOrna" parameterClass="map">
+		select <include refid="UnsaleOrna_columns_3"/> from (select rownum rownum_ , AA.* from (
+			select <include refid="UnsaleOrna_columns_2"/> from jat_basic_unsale_orna a
+			<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+			order by a.item_class_id
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="UnsaleOrna.getUnsaleOrnaTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_basic_unsale_orna a where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+    </select>
+    
+    
+    <!-- 保存数据 -->
+    <insert id="UnsaleOrna.saveUnsaleOrna" parameterClass="UnsaleOrna">
+    	<selectKey resultClass="string" keyProperty="unsaleId" type="pre">
+			select JAT_BASIC_UNSALE_ORNA_SEQ.nextval as unsaleId from dual
+		</selectKey>
+		insert into jat_basic_unsale_orna(<include refid="UnsaleOrna_columns_1"/>)
+		values(<include refid="UnsaleOrna_columns_4"/>)
+    </insert>
+    
+    <!-- 根据id获取记录对象 -->
+    <select id="UnsaleOrna.getUnsaleOrna" resultClass="UnsaleOrna"  parameterClass="string">
+    	select <include refid="UnsaleOrna_columns_2"/> from jat_basic_unsale_orna a where a.unsale_id = #value#
+    </select>
+    
+    <!-- 修改信息 -->
+    <update id="UnsaleOrna.updateUnsaleOrna" parameterClass="UnsaleOrna">
+		update jat_basic_unsale_orna a set 
+			a.item_class_id   = #itemClassId#,
+			a.money_str       = #moneyStr#,
+			a.money_end       = #moneyEnd#,
+			a.flow_cycle      = #flowCycle#,
+			a.unfash_cycle    = #unfashCycle#,
+			a.unfash_uncycle  = #unfashUncycle#,
+			a.update_id       = #updateId#,
+			a.update_date     = #updateDate#,
+			a.status          = #status#,
+			a.memo			  = #memo#
+		where a.unsale_id = #unsaleId#
+	</update>
+	
+	<delete id="UnsaleOrna.deleteUnsaleOrna" parameterClass="string">
+		delete jat_basic_unsale_orna a where a.unsale_id = #value#
+	</delete>
+	
+	
+	<select id="UnsaleOrna.isExistsUnsaleOrna" parameterClass="UnsaleOrna" resultClass="int">
+		select  count(*) from jat_basic_unsale_orna a
+		where a.item_class_id = #itemClassId#
+		and (
+			(<![CDATA[a.money_str <= #moneyStr#]]> and a.money_end > #moneyStr#) 
+			or 
+			(<![CDATA[a.money_str < #moneyEnd#]]> and a.money_end >= #moneyEnd#)
+		)
+		<isNotEmpty prepend="and" property="unsaleId"> <![CDATA[a.unsale_id <> #unsaleId#]]> </isNotEmpty>
+	</select>
+	
+</sqlMap>

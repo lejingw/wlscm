@@ -1,0 +1,89 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/MoveCostcoefDwr.js"])
+
+<form id="frm" method="post">
+    <table class="title">
+    	<tr><td>调拨成本系数#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd'>
+				<input type='button' value='删除' class='btn' id='btnDelete'>
+				<input type='button' value='查询' class='btn' id="btnQueryShow">
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list' style="width:1200px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width='120px'>大类</th>
+        		<th width='120px'>小类</th>
+                <th width='120px'>方式</th>
+                <th width='120px'>系数</th>
+        		<th width='120px'>创建时间</th>
+        		<th width='120px'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='120px'>修改人</th>
+        		<th width='60px'>状态</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{map.coefId}'/>$velocityCounter</td>
+				<td><a href='javascript:toEditPage($!{map.coefId});'>$BdCommon.getItemClassDesc($!map.itemClassId)</a></td>
+				<td>$BdCommon.getOrnaClassDesc($!map.ornaClassId)</td>
+				<td>$!DictUtil.getValue('movecoefway', $!map.coefWay)</td>
+				<td>$!StringUtil.formatDouble($!{map.coef}, 2)</td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', true);
+	
+	jQuery("#btnAdd").click(function(){
+		window.location = "moveCostcoef.vm?user_action=toEdit";
+	});
+	jQuery("#btnDelete").click(deleteMoveCostcoef);
+	initQuery2('03', "frm", 'btnQueryShow');
+});
+function toEditPage(coefId){
+	window.location = "moveCostcoef.vm?user_action=toEdit&coefId=" + coefId;
+}
+function deleteMoveCostcoef(coefId){
+	var indexs = getSelectIndexs('chk');
+	if(indexs.length<1){
+		alert("请选择要删除的记录");
+		return ;
+	}
+	var coefIdArr = [];
+	for(var i=0;i<indexs.length;i++){
+		coefIdArr.push($n("chk")[indexs[i]].value);
+	}
+	confirm("确定删除?", function(){
+		MoveCostcoefDwr.deleteMoveCostcoef(coefIdArr, function(errMsg){
+			if(errMsg){
+				alert(errMsg);
+			}else{
+				alert("删除成功", function(){
+        			window.location = "moveCostcoef.vm";
+				});
+			}
+		});
+	});
+}
+</script>

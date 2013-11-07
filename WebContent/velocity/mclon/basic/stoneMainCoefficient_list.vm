@@ -1,0 +1,183 @@
+#set($cssfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/calendar/calendar.js", "$StringUtil.getContextPath()/dwr/interface/StoneMainCoefficientDwr.js"])
+<form id="frm" name="frm" method="post">
+	<input type="hidden" id="user_action" name="user_action" value=""/>
+    <table class="title">
+    	<tr><td>钻石石头系数#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	#set($cond = $form.condition)
+	#set($orgId = $!cond.get('orgId'))
+	#set($createId = $!cond.get('createId'))
+	#set($startDate = $!cond.get('startDate'))
+	#set($endDate = $!cond.get('endDate'))
+	#set($itemClassId = $!cond.get('itemClassId'))
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='新增' class='btn' id='btnAdd' $RightUtil.able($session, '08011401','1')>
+				<input type='button' value='删除' class='btn' id='btnDelete' $RightUtil.able($session, '08011401','2')>
+				<input type='button' value='查询' class='btn' id='btnSearch2' $RightUtil.able($session, '08011401','3')>
+				<input type='button' value='导出Excel' class='btn' id='exportToExcel' onclick="exportListToExcel()" $RightUtil.able($session, '08011401','4')/>
+			</td>
+		</tr>
+    </table>
+	<div id="queryDiv">
+		<table class="control"><!-- 控制按钮 -->
+    		<tr>
+    			<td>
+    				<input type='button' value='确定' id='btnQueryOk'>
+    				<input type='button' value='重置' id='btnQueryReset'>
+    				<input type='button' value='取消' id='btnQueryCancel'>
+    			</td>
+    		</tr>
+    	</table>
+    	<table class='content'>
+			<tr>
+    			<td class="body1">大类</td>
+    			<td class='body2'>
+    				<select id="itemClassId" name='itemClassId'  value="$!itemClassId" >$StringUtil.emptyOption()</select>
+    			</td>
+                <td class="body1">创建人</td>
+				<td class='body2'>
+					<input type='hidden' id='orgId' value="$!{orgId}">
+					<input type='hidden' id='createId' name="createId" value="$!{createId}">
+					<input type='text' id='createName' value="$!BdCommon.getUserName($!createId)" readonly class="target" ondblclick="showSelectUserWin()" >
+				</td>
+            </tr>
+			<tr>
+    			<td class="body1">创建时间始</td>
+    			<td class='body2'>
+    				<input type='text' id="startDate" name='startDate' value="$!startDate" >
+    			</td>
+    			<td class="body1">创建时间止</td>
+    			<td class='body2'>
+    				<input type='text' id="endDate" name='endDate' value="$!endDate" >
+    			</td>
+            </tr>
+        </table>
+	</div>
+	    <div class="scroll">
+	    <table class='list' style="width:1150px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+				<th style='width:60px;'>状态</th>
+        		<th style='width:90px;'>大类</th>
+        		<th style='width:90px;'>重量始</th>
+				<th style='width:90px;'>重量止</th>
+				<th style='width:90px;'>系数</th>
+				<th style='width:120px;'>备注</th>
+        		<th style='width:180px;'>创建时间</th>
+        		<th style='width:90px;'>创建人</th>
+        		<th width='120px'>修改时间</th>
+        		<th width='90px'>修改人</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($map in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value="$!{map.id}"/>$velocityCounter</td>
+				<td>$!DictUtil.getValue('status', $!map.status)</td>
+				<td><a href='javascript:toEditPage($!{map.id});'>
+						$!BdCommon.getItemClassDesc($!map.itemClassId)
+					</a>
+				</td>
+				<td>$!map.weightStr</td>
+				<td>$!map.weightEnd</td>
+				<td>$!map.coefficient</td>
+				<td><input type='text' readonly class='none' value="$!map.memo" style='width:180px;'></td>
+				<td>$!map.createDate</td>
+				<td>$!BdCommon.getUserName($!map.createId)
+					<input type='hidden' name='id' value="$!map.id" >
+					<input type="hidden" name="status_list" value="$!map.status"/>
+				</td>
+				<td>$!map.updateDate</td>
+				<td>$!BdCommon.getUserName($!map.updateId)</td> 
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	initCalendarArr(["startDate", "endDate"]);
+	checkTable('tbl', 'chkall', 'chk', true, null, function(index){
+		window.location = "stoneMainCoefficient.vm?user_action=toEdit&id=" + $n("chk")[index].value;
+	});
+	setValues();
+	//initQuery("btnSearch", "btnQueryCancel");
+	initQuery2("ZSST01", "frm", "btnSearch2");
+	jQuery("#btnAdd").click(function(){
+		window.location = "stoneMainCoefficient.vm?user_action=toEdit";
+	});
+	jQuery("#btnQueryOk").click(function(){
+		jQuery("#frm").submit();
+	});
+	jQuery("#btnDelete").click(deleteRow);
+});
+
+function setValues(){
+	BdCommonDwr.getAllItemClassForSlt(function(data){
+		addOptions("itemClassId", data, null, null, true, true, "$!itemClassId");
+	});
+	var dw = jQuery(document).width();
+	if(dw > 1000){
+		jQuery(".list").css("width", dw+"px");
+	}
+}
+
+jQuery("#btnQueryReset").click(function(){
+		jQuery("#itemClassId").val("");
+		jQuery("#startDate").val("");
+		jQuery("#endDate").val("");
+		jQuery("#createName").val("");
+		jQuery("#createId").val("");
+	});
+	
+function toEditPage(id){
+	window.location = "stoneMainCoefficient.vm?user_action=toEdit&id=" + id;
+}
+
+function deleteRow(){
+	//var idx = getSelectIndex("chk");
+	var idx = getSelectIndexs("chk");
+	if(idx !=''){
+		confirm("确定删除?", function(){
+			var ids = ""; 
+			var array = (idx+"").split(',');
+			for(var t=0;t<array.length;t++){
+				ids+=$n("chk")[array[t]].value+",";
+			}
+			showLayer(true);
+			StoneMainCoefficientDwr.deleteStoneMainCoefficient(ids, function(msg){
+				showLayer(false);
+				if(msg){
+					alert(msg);
+				} else {
+					alert("删除成功", function(){
+						jQuery("#frm").submit();
+					});
+				}
+			});
+    	});
+	} else {
+		alert("尚未选择要删除的行");	
+	}
+}
+function showSelectUserWin(){
+	selectEmp(function(idArr, nameArr){
+			jQuery("#createId").val(idArr);
+			jQuery("#createName").val(nameArr);
+		}, 
+		null, null, false, jQuery("#createId").val(), "getEmpByOrgId", {orgId:jQuery("#orgId").val()});
+}
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+</script>

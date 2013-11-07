@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="User">
+	<typeAlias alias="User" type="com.jatools.vo.sys.User" />
+	<resultMap id="userResult" class="User">
+		<result property="userid" column="empid" columnIndex="1" />
+		<result property="usercode" column="empcode" columnIndex="2" />
+		<result property="username" column="empname" columnIndex="3" />
+		<result property="password" column="emppassword" columnIndex="4" />
+	</resultMap>
+
+	<select id="User.getUserInfo" resultMap="userResult" parameterClass="java.lang.String">
+		select a.empid, a.empcode, a.empname, a.emppassword from jas_bd_emp a where a.empcode = #value#
+	</select>
+
+	<select id="User.getAllUser" resultMap="userResult">
+		select a.empid, a.empcode, a.empname, a.emppassword from jas_bd_emp a
+	</select>
+</sqlMap>

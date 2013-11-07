@@ -1,0 +1,86 @@
+#if("1" == "$!{form.jmFlag}")
+	#set($modelCode = '09070101')
+	#set($queryCode = '08')
+#else
+	#set($modelCode = '08020801')
+	#set($queryCode = '05')
+#end
+<form id="frm" method="post">
+    <input type='hidden' id='jmFlag' name='jmFlag' value='$!{form.jmFlag}'/>
+    <table class="title">
+    	<tr><td>订做单列表#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+    <table class="control">
+    	<tr>
+			<td>
+				<input type='button' value='接收/拒绝' class='btn' id='btnView' $RightUtil.able($session, $modelCode,'1')>
+				<input type='button' value='查询' class='btn' id="btnQueryShow">
+			</td>
+		</tr>
+    </table>
+	<div class='scroll'>
+    <table class='list' style="width:1340px;">
+    	<thead>
+			<tr>
+                <th width='45px'><input type='checkbox' id='chkall'/></th>
+        		<th width='90px;'>状态</th>
+                <th width='120px;'>定做单号</th>
+        		<th width='180px;'>组织</th>
+        		<th width='90px;'>大类</th>
+        		<th width='90px;'>小类</th>
+        		<th width='90px;'>预订数量</th>
+        		<th width='90px;'>要求到货时间</th>
+        		<th width='90px;'>定做类别</th>
+        		<th width='90px;'>创建人</th>
+        		<th width='120px;'>创建时间</th>
+        		<th width='90px;'>更新人</th>
+        		<th width='120px;'>更新时间</th>
+            </tr>
+        </thead>
+        <tbody id="tbl">
+		#foreach($item in $form.pager.pageData)
+			<tr>
+				<td><input type='checkbox' name='chk' value='$!{item.custid}'/></td>
+				#if("1" == "$!{form.jmFlag}")
+				<td>$!DictUtil.getValue('status', $!item.status)</td>
+				#else
+				<td>$!DictUtil.getValue('planstatus', $!item.status)</td>
+				#end
+				<td><a href='javascript:toViewPage($!{item.custid});'>$!item.billno</a></td>
+				<td>$!BdCommon.getOrgName($!item.orgId)</td>
+				<td>$!BdCommon.getItemClassDesc($!item.itemClassId)</td>
+				<td>$!BdCommon.getOrnaClassDesc($!item.ornaClassId)</td>
+				<td>$!item.doomNum</td>
+				<td>$!item.requestDate</td>
+				<td>$!item.customizeClass</td>
+				<td>$!BdCommon.getUserName($!item.createId)</td>
+				<td>$!item.createDate</td>
+				<td>$!BdCommon.getUserName($!item.updateId)</td>
+				<td>$!item.updateDate</td>
+			</tr>
+		#end
+    	</tbody>
+    </table>
+	</div>
+<script>
+createPagingToolbar('frm', $!form.pager.start, $!form.pager.limit, $!form.pager.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	checkTable('tbl', 'chkall', 'chk', false, null, function(index){
+		toViewPage($n("chk")[index].value);
+	});
+	jQuery("#btnView").click(function(){
+		if(-1 == getSelectIndex("chk")){
+			alert("请选择要接收/拒绝的记录");
+			return ;
+		}
+		toViewPage($n("chk")[getSelectIndex('chk')].value);
+	});
+	initQuery2('${queryCode}', "frm", 'btnQueryShow');
+});
+function toViewPage(custid){
+	window.location = "purchaseCust.vm?user_action=toReview&custid=" + custid + "&jmFlag=" + jQuery("#jmFlag").val();
+}
+</script>

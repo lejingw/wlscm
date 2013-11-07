@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CashLine">
+	<typeAlias alias="CashLine" type="com.jatools.vo.pur.cash.CashLine" />
+	
+	<resultMap class="CashLine" id="CashLine.result">
+		<result property = "lineId"      column = "line_id"     />
+		<result property = "cashId"      column = "cash_id"     />
+		<result property = "prId"        column = "pr_id"       />
+		<result property = "billType"    column = "bill_type"   />
+		<result property = "lessNums"    column = "less_nums"   />
+		<result property = "curNums"     column = "cur_nums"    />
+		<result property = "status"      column = "status"      />
+		<result property = "memo"        column = "memo"        />
+		<result property = "createDate"  column = "create_date"  />
+		<result property = "createId"    column = "create_id"   />
+		<result property = "updateDate"  column = "update_date" />
+		<result property = "updateId"    column = "update_id"   />
+		<result property = "billNo"    		column = "bill_no"   />
+		<result property = "itemClassId"    column = "item_class_id"   />
+		<result property = "articleId"    column = "article_id"   />
+	</resultMap>
+	
+	<sql id="CashLine_columns">
+		line_id, cash_id, pr_id, bill_type, less_nums, cur_nums, status, memo, create_date, create_id, update_date, update_id, item_class_id, article_id
+	</sql>
+	<sql id="CashLine_prod_billNo">
+		(select bill_no from jat_cash_prod_account where pr_id = a.pr_id) as bill_no
+	</sql>
+	<!-- 获取分页数据 -->
+	<select id="CashLine.getCashLinePageData" resultMap="CashLine.result" parameterClass="map">
+		select <include refid="CashLine_columns"/>, bill_no from (select rownum rownum_ , AA.* from (
+		
+			select <include refid="CashLine_columns"/>, <include refid="CashLine_prod_billNo"/>  from jat_cash_line a 
+			where 1 = 1 
+			<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+			<isNotEmpty property="status">
+				<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+				<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+			<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+			order by a.create_date DESC
+		
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	
+	<!-- 获取总条数 -->
+    <select id="CashLine.getCashLineTotalCount" resultClass="int" parameterClass="map">
+		select count(1) from jat_cash_line a where 1 = 1 
+		<isEmpty property="status" prepend="and"> <![CDATA[a.status <> 8]]></isEmpty>
+		<isNotEmpty property="status">
+			<isEqual property="status" compareValue="all" prepend="and"> a.status is not null </isEqual>
+			<isNotEqual property="status" compareValue="all" prepend="and"> a.status = #status#</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="startDate" prepend="and"> a.create_date >= #startDate# </isNotEmpty>
+		<isNotEmpty property="endDate" prepend="and"> <![CDATA[a.create_date <= #endDate#]]> </isNotEmpty>
+	</select>
+	
+	<insert id="CashLine.saveCashLine" parameterClass="CashLine">
+    	<selectKey resultClass="string" keyProperty="lineId" type="pre">
+			select JAT_CASH_LINE_SEQ.nextval as "lineId" from dual
+		</selectKey>
+		insert into jat_cash_line(<include refid="CashLine_columns"/>)
+		 values(
+		 	#lineId#, #cashId#, #prId#, #billType#, #lessNums#, #curNums#, #status#, #memo#, #createDate#, #createId#, #updateDate#, #updateId#, #itemClassId#, #articleId#
+		 )
+    </insert>
+    
+    <select id="CashLine.getCashLine" parameterClass="string" resultMap="CashLine.result">
+		select <include refid="CashLine_columns"/>, <include refid="CashLine_prod_billNo"/> from jat_cash_line a 
+		where 1=1
+			and a.line_id = #value#
+	</select>
+	
+	<select id="CashLine.getCashLineListByCashId" parameterClass="string" resultMap="CashLine.result">
+		select <include refid="CashLine_columns"/>, <include refid="CashLine_prod_billNo"/> from jat_cash_line a 
+		where 1=1
+			and a.cash_id = #value#
+	</select>
+	
+	<update id="CashLine.updateCashLine" parameterClass="CashLine">
+		update jat_cash_line a set 
+			a.pr_id       = #prId#,
+			a.bill_type   = #billType#,
+			a.less_nums   = #lessNums#,
+			a.cur_nums    = #curNums#,
+			a.status      = #status#,
+			a.memo        = #memo#,
+			a.update_date = #updateDate#,
+			a.update_id   = #updateId#,
+			a.item_class_id = #itemClassId#,
+			a.article_id	= #articleId#
+		where a.line_id = #lineId# 
+	</update>
+	
+	<delete id="CashLine.deleteCashLine" parameterClass="string">
+		delete from jat_cash_line a where a.line_id = #value# 
+	</delete>
+	
+	<delete id="CashLine.deleteCashLineByCashId" parameterClass="string">
+		delete from jat_cash_line a where a.cash_id = #value# 
+	</delete>
+	
+	<update id="CashLine.updateCashLineStatus" parameterClass="map">
+		update jat_cash_line a set 
+		a.status = #status# , a.update_id = #updateId# , a.update_date = #updateDate# 
+		where a.line_id = #lineId# 
+	</update>
+	
+	<!-- 修改台账记录的已核销数量和未核销数量 -->
+	<update id="CashLine.modifyProdAccount" parameterClass="map">
+		update jat_cash_prod_account a
+		set (a.cash_nums, a.no_nums, a.user_nums) = 
+		(
+			select a.cash_nums + t.cur_nums, a.no_nums - t.cur_nums , a.user_nums - t.cur_nums
+			from jat_cash_line t where t.line_id = #lineId#
+		), update_date = #updateDate#, update_id = #updateId#
+		where a.pr_id = (select b.pr_id from jat_cash_line b where b.line_id = #lineId#)
+	</update>
+	
+	<!-- 如果台账的未核销数量为0 则改成已核销完成 -->
+	<update id="CashLine.modifyProdAccountChecked" parameterClass="map">
+		update jat_cash_prod_account a
+		set 
+			a.is_checked = 1, update_date = #updateDate#, update_id = #updateId#
+		where 1=1
+			and a.pr_id = (select b.pr_id from jat_cash_line b where b.line_id = #lineId#) and a.no_nums = 0
+	</update>
+	
+	
+	<update id="CashLine.subProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+		set a.user_nums = a.user_nums - 
+		(
+			select t.cur_nums from jat_cash_line t where t.line_id = #lineId#
+		), update_date = #updateDate#, update_id = #updateId#
+		where a.pr_id = (select b.pr_id from jat_cash_line b where b.line_id = #lineId#)
+	</update>
+	
+	<update id="CashLine.addProdAccountUserNums" parameterClass="map">
+		update jat_cash_prod_account a
+		set a.user_nums = a.user_nums + 
+		(
+			select t.cur_nums from jat_cash_line t where t.line_id = #lineId#
+		), update_date = #updateDate#, update_id = #updateId#
+		where a.pr_id = (select b.pr_id from jat_cash_line b where b.line_id = #lineId#)
+	</update>
+</sqlMap>

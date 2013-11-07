@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="PushSize">
+	<sql id="PushSize.getPushSizePageDataCD">
+		where 1 = 1
+		<isNotEmpty property="_q_sql">$_q_sql$</isNotEmpty>
+	</sql>
+	<select id="PushSize.getPushSizePageData" parameterClass="map" resultClass="com.jatools.vo.push.PushSize">
+		select * from (select rownum rownum_ , AA.* from (
+			select a.billid as "billId",
+			       a.item_class_id as "itemClassId",
+			       a.orna_class_id as "ornaClassId",
+			       a.style_item_class_id as "styleItemClassId",
+			       a.start_size_id || ',' || b.size_num as "startSizeId",
+			       a.end_size_id || ',' || c.size_num as "endSizeId",
+			       a.size_id || ',' || d.size_num as "sizeId",
+			       b.size_name as "startSizeName",
+			       c.size_name as "endSizeName",
+			       d.size_name as "sizeName",
+			       a.rate as "rate",
+			       a.create_id as "createId",
+			       a.create_date as "createDate",
+			       a.update_id as "updateId",
+			       a.update_date as "updateDate",
+			       a.status as "status"
+			  from jat_pl_basic_size a
+			  left join jas_bd_size b
+			    on a.start_size_id = b.size_id
+			  left join jas_bd_size c
+			    on a.end_size_id = c.size_id
+			  left join jas_bd_size d
+			    on a.size_id = d.size_id
+			  <include refid="PushSize.getPushSizePageDataCD"/>
+			 order by a.item_class_id, a.orna_class_id, b.size_num, c.size_num
+
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="PushSize.getPushSizeTotalCount" parameterClass="map" resultClass="int">
+		select count(1) from jat_pl_basic_size a
+			  left join jas_bd_size b
+			    on a.start_size_id = b.size_id
+			  left join jas_bd_size c
+			    on a.end_size_id = c.size_id
+			  left join jas_bd_size d
+			    on a.size_id = d.size_id
+			  <include refid="PushSize.getPushSizePageDataCD"/>
+	</select>
+	<insert id="PushSize.savePushSize" parameterClass="com.jatools.vo.push.PushSize">
+		<selectKey keyProperty="billId" resultClass="string">select jat_pl_basic_size_seq.nextval from dual</selectKey>
+		insert into jat_pl_basic_size (billid, item_class_id, orna_class_id, style_item_class_id,start_size_id, end_size_id, size_id, rate,
+			create_id, create_date, update_id, update_date, status)
+		values (#billId#, #itemClassId#, #ornaClassId#, #styleItemClassId#, #startSizeId#, #endSizeId#, #sizeId#, #rate#,
+			#createId#, #createDate#, #updateId#, #updateDate#, #status#)
+	</insert>
+	<update id="PushSize.updatePushSize" parameterClass="com.jatools.vo.push.PushSize">
+		update jat_pl_basic_size
+		set item_class_id = #itemClassId#, orna_class_id = #ornaClassId#, style_item_class_id = #styleItemClassId#,
+			start_size_id = #startSizeId#, end_size_id = #endSizeId#,
+			size_id = #sizeId#, rate = #rate#, update_id = #updateId#, update_date = #updateDate#
+		where billid = #billId#
+	</update>
+	<select id="PushSize.checkPushSizeRepeat" parameterClass="com.jatools.vo.push.PushSize" resultClass="com.jatools.vo.push.PushSize">
+		select start_size_id as "startSizeId",
+		       end_size_id   as "endSizeId",
+		       b.size_name   as "startSizeName",
+		       c.size_name   as "endSizeName",
+		       b.size_num    as "startSizeNum",
+		       c.size_num    as "endSizeNum",
+		       rate          as "rate"
+		  from jat_pl_basic_size a
+		  left join jas_bd_size b
+		    on a.start_size_id = b.size_id
+		  left join jas_bd_size c
+		    on a.end_size_id = c.size_id
+		 where a.item_class_id = #itemClassId#
+		   and a.orna_class_id = #ornaClassId#
+		   and a.style_item_class_id = #styleItemClassId#
+		<isNotEmpty property="billId"><![CDATA[and a.billid <> #billId#]]></isNotEmpty>
+	</select>
+	<delete id="PushSize.deletePushSize" parameterClass="string">
+		delete jat_pl_basic_size where billid = #value#
+	</delete>
+</sqlMap>

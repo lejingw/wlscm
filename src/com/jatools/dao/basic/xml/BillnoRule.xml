@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BillnoRule">
+	<typeAlias alias="BillnoRule" type="com.jatools.vo.basic.BillnoRule" />
+	
+	<resultMap id="result" class="BillnoRule">
+		<result property="billCode" column="bill_code"/>
+		<result property="billName" column="bill_name"/>
+		<result property="billnoRule" column="billno_rule"/>
+		<result property="finance" column="finance"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateId" column="update_id"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	<sql id="columns.all">
+		bill_code, bill_name, billno_rule, finance, memo,
+		create_date, create_id, update_date, update_id, status
+    </sql>
+    <!-- 获取分页数据 -->
+	<select id="BillnoRule.getBillnoRulePageData" resultMap="result" parameterClass="map">
+		select * from (select rownum rownum_ , AA.* from (
+			select <include refid="columns.all"/> from jat_basic_billno_rule a where 1 = 1
+			<isNotEmpty property="billName" prepend="and"> a.bill_name like '%$billName$%'</isNotEmpty>
+			<isNotEmpty property="billnoRule" prepend="and"> a.billno_rule like '%$billnoRule$%'</isNotEmpty>
+			order by a.bill_code
+		) AA ) where <![CDATA[rownum_ >= $start$]]> and <![CDATA[rownum <= $limit$]]>
+	</select>
+	<!-- 获取总条数 -->
+    <select id="BillnoRule.getBillnoRuleTotalCount" resultClass="int">
+		select count(1) from jat_basic_billno_rule a where 1 = 1
+		<isNotEmpty property="billName" prepend="and"> a.bill_name like '%$billName$%'</isNotEmpty>
+		<isNotEmpty property="billnoRule" prepend="and"> a.billno_rule like '%$billnoRule$%'</isNotEmpty>
+    </select>
+    <select id="BillnoRule.getBillnoCodeForSlt" parameterClass="string" resultClass="com.jatools.vo.util.SelectorOption">
+    	select a.item_key as "value", '[' || a.item_key || ']' || a.item_value as "text"
+		  from jat_sys_dict_item a
+		 where a.entry_code = 'billcode' and a.status = 1
+		   and not exists (select 1 from jat_basic_billno_rule b where b.bill_code = a.item_key
+			    <isNotEmpty property="value"><![CDATA[and b.bill_code <> #value#]]></isNotEmpty>)
+		 order by a.entry_code
+    </select>
+    <!-- 保存数据 -->
+    <insert id="BillnoRule.saveBillnoRule" parameterClass="BillnoRule">
+		insert into jat_basic_billno_rule(bill_code, bill_name, billno_rule, finance, status, memo, create_date, create_id, update_date, update_id)
+		 values(#billCode#,#billName#,#billnoRule#,#finance#,#status#,#memo#,#createDate#,#createId#,#updateDate#,#updateId#)
+    </insert>
+    <!-- 根据id获取记录对象 -->
+    <select id="BillnoRule.getBillnoRule" resultClass="BillnoRule" resultMap="result" parameterClass="string">
+    	select <include refid="columns.all"/> from jat_basic_billno_rule a where a.bill_code = #value#
+    </select>
+    <!-- 修改信息 -->
+    <update id="BillnoRule.updateBillnoRule" parameterClass="Billnorule">
+		update jat_basic_billno_rule a set a.bill_name = #billName#,
+			a.billno_rule = #billnoRule#, a.finance = #finance#, a.memo = #memo#,
+			a.update_date = #updateDate#, a.update_id = #updateId# 
+		where a.bill_code = #billCode#
+	</update>
+	<delete id="BillnoRule.deleteBillnoRule" parameterClass="string">
+		delete jat_basic_billno_rule a where a.bill_code = #value#
+	</delete>
+	<select id="BillnoRule.checkBillCode" resultClass="int" parameterClass="string">
+		select count(1) from jat_basic_billno_rule a where a.bill_code = #value#
+	</select>
+</sqlMap>

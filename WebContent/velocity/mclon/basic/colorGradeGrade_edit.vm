@@ -1,0 +1,53 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/js/basic/colorGradeGrade.js", "$StringUtil.getContextPath()/dwr/interface/ColorGradeGradeDwr.js"])
+
+<form id='frm' action="" method="post">
+	<input type="hidden" id="id" value="$!{form.c.id}"/>
+    <table class="title">
+    	<tr><td>色级品质</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave' $RightUtil.able($session, '08011501','1')>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>色级</td>	<td class='body2'>
+				<select id='colorGradeId' dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+			<td class='body1'>品质</td><td class='body2'>
+				<select id='gradeId' dataType="Require" msg="不能为空">$StringUtil.emptyOption()</select>$StringUtil.star()</td>
+		</tr>
+		<tr>
+			<td class='body1'>备注</td>	<td class='body2'>
+				<input type='text' id='memo' value="$!{form.c.memo}"></td>
+				<!--<input type='text' id='vendorId' dataType="Require" msg="不能为空" value="$!{form.sv.vendorId}"></td>-->
+			<td class='body1'>状态</td><td class='body2'>
+				<input type='text' id='statusName' readonly  value="$!DictUtil.getValue('status', $!form.c.status)"></td>
+				<input type='hidden' id='status' readonly  value="$!{form.c.status}"></td>
+		</tr>
+    </table>
+</form>
+
+<script>
+jQuery(function(){
+	jQuery("#btnSave").click(function(){
+    	saveColorGradeGrade();
+	});
+	jQuery("#btnToList").click(function(){
+		window.location = "colorGradeGrade.vm";
+	});
+	if(!"$!form.c.id"){
+		jQuery("#statusName").val("保存");
+	}
+	//色级
+	DictDwr.getDictsForSlt("diacolorgrade", function(data){
+		addOptions("colorGradeId", data, null, null, true, true,"$!form.c.colorGradeId");
+	});
+	DictDwr.getDictsForSlt("gradelevel", function(data2){
+		addOptions("gradeId", data2, null, null, true, true,"$!form.c.gradeId");
+	});
+});
+
+
+</script>
