@@ -78,7 +78,7 @@ public class PriceHead {
 	private Double	secondZsPrice; //配石证书价格
 	private Double	mainStoneXqFee; //主石镶嵌工费总额
 	private Double	secondStoneXqDee; //配石镶嵌工费总额
-	private String	wlCode; //万隆编码
+	private String	wlCode; //编码
 	private String	outGoodsBillNo; //出货单编号
 	private Double	accWithoutTax; //辅料不含税价
 	private Double	accWithTax; //辅料含税价

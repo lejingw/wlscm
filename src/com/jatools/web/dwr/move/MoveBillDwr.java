@@ -25,49 +25,16 @@ public class MoveBillDwr {
 	
 	/**
 	 * 获取饰品信息
-	 * @param code
-	 * @param ornaFlag
+	 * @param ornaCode
 	 * @param orgId
 	 * @return
 	 */
-	public MoveBillLine getMaterActiveInfo(String code, boolean ornaFlag, String orgId, String billType, String jmFlag, String inOrgId){
+	public MoveBillLine getMaterActiveInfo(String ornaCode, String orgId){
 		try {
-			MoveBillLine line = moveBillManager.getMaterActiveInfo(code, ornaFlag, orgId, billType, jmFlag, inOrgId);
-			line.setCurrentDate(DateUtil.getCurrentDate10());
-			checkMaterActiveStatus(line);
-			line.setNames();
+			MoveBillLine line = moveBillManager.getMaterActiveInfo(ornaCode, orgId);
 			return line;
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
-		}
-	}
-	
-	public MoveBillLine getMaterActiveInfo2(String code, String orgId, String billType, String inOrgId){
-		MoveBillLine line = moveBillManager.getMaterActiveInfo(code, true, orgId, billType, null, inOrgId);
-		if(null == line){
-			throw new RuntimeException("不能获取饰品信息");
-		}
-		if(!orgId.equals(line.getOrgId())){
-			throw new RuntimeException("饰品所在网点不为当前选择的调出组织");
-		}
-		line.setCurrentDate(DateUtil.getCurrentDate10());
-		line.setNames();
-		return line;
-	}
-	
-	/**
-	 * 检查饰品是否可以调拨
-	 * @param materActive
-	 */
-	private void checkMaterActiveStatus(MoveBillLine info){
-		if(DictConstant.BILL_STATUS_MATER_ACTIVE_USED.equals(info.getStatus())){
-			throw new RuntimeException("该饰品为保留状态，不能调拨");
-		}
-		if(DictConstant.BILL_STATUS_MATER_ACTIVE_ONWAY.equals(info.getStatus())){
-			throw new RuntimeException("该饰品为在途状态，不能调拨");
-		}
-		if(!DictConstant.BILL_STATUS_MATER_ACTIVE_VALID.equals(info.getStatus())){
-			throw new RuntimeException("该饰品不为有效状态，不能调拨");
 		}
 	}
 	/**
@@ -83,10 +50,6 @@ public class MoveBillDwr {
 			return tmpList;
 		return null;
 	}
-	public String getSumCostLimit(){
-		String sumCostLimit = ParameterCache.getInstance().getValue(ParameterConstant.MOVE_BILL_SUMCOST_LIMIT);
-		return sumCostLimit;
-	}
 	/**
 	 * 保存或修改调拨单
 	 * @param moveHead
@@ -94,17 +57,42 @@ public class MoveBillDwr {
 	 * @param deleteOrnaCodeList 删除的行记录
 	 * @return
 	 */
-	public String saveMoveBill(MoveBillHead moveHead, List<String> newOrnaCodeList, List<String> deleteOrnaCodeList, double sumCost, HttpSession session){
-		double sumCostLimit = Double.parseDouble(ParameterCache.getInstance().getValue(ParameterConstant.MOVE_BILL_SUMCOST_LIMIT));
-		if(sumCostLimit<sumCost){
-			return "调拨单总成本已经超上限[" + sumCostLimit + "]";
-		}
+	public String saveMoveBill(MoveBillHead moveHead, List<String> newOrnaCodeList, List<String> deleteOrnaCodeList, HttpSession session){
 		try {
 			moveBillManager.saveMoveBill(moveHead, newOrnaCodeList, deleteOrnaCodeList, CommonUtil.getSessionUserId(session));
 		} catch (Exception e) {
 			return e.getMessage();
 		}
 		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//	public MoveBillLine getMaterActiveInfo2(String code, String orgId, String billType, String inOrgId){
+//		MoveBillLine line = moveBillManager.getMaterActiveInfo(code, true, orgId, billType, null, inOrgId);
+//		if(null == line){
+//			throw new RuntimeException("不能获取饰品信息");
+//		}
+//		if(!orgId.equals(line.getOrgId())){
+//			throw new RuntimeException("饰品所在网点不为当前选择的调出组织");
+//		}
+//		line.setCurrentDate(DateUtil.getCurrentDate10());
+//		line.setNames();
+//		return line;
+//	}
+	public String getSumCostLimit(){
+		String sumCostLimit = ParameterCache.getInstance().getValue(ParameterConstant.MOVE_BILL_SUMCOST_LIMIT);
+		return sumCostLimit;
 	}
 	/**
 	 * 删除调拨单

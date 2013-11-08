@@ -15,15 +15,22 @@ public interface MoveBillManager {
 	 * @param condition
 	 * @return
 	 */
-	public Pager getMoveBillPageData(Map<String, String> condition, String billType, String jmFlag, String orgId, String userid);
+	public Pager getMoveBillPageData(Map<String, String> condition, String orgId, String userid);
 
 	/**
 	 * 获取现有量表信息
-	 * @param code
+	 * @param ornaCode
 	 * @param ornaFlag
 	 * @return
 	 */
-	public MoveBillLine getMaterActiveInfo(String code, boolean ornaFlag, String orgId, String billType, String jmFlag, String inOrgId);
+	public MoveBillLine getMaterActiveInfo(String ornaCode, String orgId);
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * 检查饰品状态是否有效
 	 * @param ornaCodeList

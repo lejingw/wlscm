@@ -1,0 +1,65 @@
+#set($layout = "layout/noLoginLayout.vm")
+	<form name="" action="login.vm" method="post" onsubmit="return checkSubmit();">
+		<input type="hidden" name="user_action" value="doLogin">
+		<table>
+			<tr >
+				<td >
+					用户名：
+                </td>
+				<td >
+					<input type='text' name='username' value="admin">
+                </td>
+            </tr>
+			<tr >
+				<td >
+					密码：
+                </td>
+				<td >
+					<input type='password' name='password' value="1">
+                </td>
+            </tr>
+			<tr >
+				<td >
+					组织
+                </td>
+				<td >
+                    <select name='orgid' style='width:120px;'>
+						<option value='1'>org1</option>
+						<option value='2'>org2</option>
+						<option value='3'>org3</option>
+						<option value='4'>org4</option>
+					</select>
+                </td>
+            </tr>
+			<tr>
+				<td>
+					#if($!loginForm.message)
+                        <font color='red'>$!loginForm.message</font>
+    				#end
+				</td>
+				<td><input type='submit' value="提交"></td>
+            </tr>
+        </table>
+    </form>
+<script language="javascript">
+function checkSubmit(){
+	var username = jQuery("username").val();
+	var password = jQuery("password").val();
+	if("" == username){
+		alert("请输入密码");
+		return false;
+	}
+	if("" == password){
+		alert("请输入密码");
+		return false;
+	}
+	//var url = "login.vm?user_action=doLogin&username=" + username + "&password=" + password;
+	//window.open(url, "_self");
+	return true;
+}
+jQuery(document).ready(function(){
+	if(window != top){
+		top.location = "$!StringUtil.getContextPath()/login.vm/isLogin=false";
+	}
+});
+</script>

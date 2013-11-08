@@ -40,7 +40,7 @@
         		<!-- 下面四个配置项时velocity的页面渲染缓存配置  -->
         		<prop key="resource.loader">file</prop>
         		<!-- 下面四个配置项时velocity的页面渲染路径  -->
-        		<prop key="file.resource.loader.path">/velocity/mclon/</prop>
+        		<prop key="file.resource.loader.path">/velocity/</prop>
         		<!-- 页面资源文件加载器  -->
 				<prop key="file.resource.loader.class">org.apache.velocity.tools.view.servlet.WebappLoader</prop>
 				<!-- 以下三个参数：确保velocity文件被修改都立即重新扫描，关键的参数 -->
@@ -91,144 +91,21 @@
                 
                 
                 <!--  **********************************************基础单据basic****************************************** -->
-                <prop key="/util/common.vm">commonController</prop><!--  -->
-                <prop key="/basic/billnoRule.vm">billnoRuleController</prop><!-- 单号编码规则 -->
-                <prop key="/basic/orgGroup.vm">orgGroupController</prop><!-- 单位柜组 -->
-                <prop key="/basic/charge.vm">chargeController</prop><!-- 工费标准 -->
-                <prop key="/basic/ptCharge.vm">ptChargeController</prop><!-- PT工费标准 -->
-                <prop key="/basic/orgItem.vm">orgItemController</prop><!-- 采购组织与大类 -->
-                <prop key="/basic/expressReceuser.vm">expressReceuserController</prop><!-- 组织快递接收人 -->
-                <prop key="/basic/priceLock.vm">priceLockController</prop><!-- 价格锁定 -->
-                <prop key="/basic/materialItem.vm">materialItemController</prop>
-                <prop key="/basic/stoneMainCoefficient.vm">stoneMainCoefficientController</prop>
-                <prop key="/basic/colorGradeGrade.vm">colorGradeGradeController</prop><!-- 颜色品质 -->
-                <prop key="/basic/cleanGrade.vm">cleanGradeController</prop><!-- 净度品质 -->
-                <prop key="/basic/createOldbarCode.vm">createOldbarCodeController</prop><!-- 生成旧品、维修件条码 -->
-                <prop key="/basic/purEmpArticleType.vm">purEmpArticleTypeController</prop>
-                <prop key="/basic/safeStock.vm">safeStockController</prop><!-- 总部安全库存 -->
-                <prop key="/basic/ornaDesc.vm">ornaDescController</prop>
-                <prop key="/basic/labelType.vm">labelTypeController</prop>
-                <prop key="/basic/vendorCoef.vm">vendorCoefController</prop>
-                <prop key="/basic/saleChangeLabel.vm">saleChangeLabelController</prop>
-                <prop key="/basic/unsaleOrna.vm">unsaleOrnaController</prop>
-                <prop key="/basic/verdorCharge.vm">verdorChargeController</prop>
-                <prop key="/basic/goldSpecialCharge.vm">goldSpecialChargeController</prop>
-                <prop key="/basic/fashionGoldPrice.vm">fashionGoldPriceController</prop>
-
-                
-                <!--  **********************************************采购管理pur****************************************** -->
-                <prop key="/pur/purGather.vm">purGatherController</prop><!-- 采购总单管理 -->
-                <prop key="/pur/purchase.vm">purchaseController</prop><!-- 采购单 -->
-                <prop key="/pur/purchaseArrive.vm">purchaseArriveController</prop><!-- 采购单到货记录 -->
-                <prop key="/pur/purchaseCust.vm">purchaseCustController</prop><!-- 定做单生成采购单 -->
-                <prop key="/pur/handover.vm">handoverController</prop>
-                <prop key="/pur/cash/payMoney.vm">cashPayMoneyController</prop>
-                <prop key="/pur/cash/moneyAccount.vm">moneyAccountController</prop>
-                <prop key="/pur/cash/prodAccount.vm">prodAccountController</prop>
-                <prop key="/pur/cash/cashHead.vm">cashHeadController</prop>
-                <prop key="/pur/cash/prodProd.vm">prodProdController</prop>
-                <prop key="/pur/cash/prodChange.vm">prodChangeController</prop>
-                <prop key="/pur/cash/payChange.vm">payChangeController</prop>
-                
+                <!--  <prop key="/util/common.vm">commonController</prop>-->
+                <!--  <prop key="/basic/billnoRule.vm">billnoRuleController</prop>单号编码规则 -->
                 
                 <!--  **********************************************调拨管理move******************************************* -->
-                <prop key="/move/moveCostcoef.vm">moveCostcoefController</prop><!-- 调拨成本系数 -->
-                <prop key="/move/moveSalecoef.vm">moveSalecoefController</prop><!-- 调拨销价系数 -->
-                <prop key="/move/moveNet.vm">moveNetController</prop>
                 <prop key="/move/moveBill.vm">moveBillController</prop><!-- 调拨单 -->
-                <prop key="/move/movePack.vm">movePackController</prop><!-- 装箱单 -->
-                <prop key="/move/moveReceive.vm">moveReceiveController</prop><!-- 调拨单接收 -->
-                <prop key="/move/moveCmd.vm">moveCmdController</prop>
-                <prop key="/move/specialDiam.vm">specialDiamController</prop>
-                <prop key="/move/dispatchWay.vm">dispatchWayController</prop>
-                <prop key="/move/standardDispatch.vm">standardDispatchController</prop>
-                <prop key="/move/moveDeleteApply.vm">moveDeleteApplyController</prop>
-
-                
-                <!-- ***********************************************库存管理stock****************************************** -->
-                <prop key="/stock/dispatchOrna.vm">dispatchOrnaController</prop><!-- 订单配货 -->
-                <prop key="/stock/procPackage.vm">procPackageController</prop>
-                <prop key="/stock/procExit.vm">procExitController</prop>
-                <prop key="/stock/procExitCondtion.vm">procExitConditionController</prop>
-                <prop key="/stock/procChange.vm">procChangeController</prop>
-                <prop key="/stock/procPurify.vm">procPurifyController</prop>
-                <prop key="/stock/procDismantle.vm">procDismantleController</prop>
-                <prop key="/stock/cargoManager.vm">cargoManagerController</prop>
-                <prop key="/stock/procInventory.vm">procInventoryController</prop>
-                <prop key="/stock/handover.vm">otherHandoverController</prop>
-                <prop key="/stock/materIniv.vm">materInivController</prop>
-                <prop key="/stock/plSale.vm">plSaleController</prop>
-                <prop key="/stock/jmSale.vm">jmSaleController</prop>
-                
-                
-                <!--  **********************************************核价管理calc******************************************* -->
-                <prop key="/calc/coefficient.vm">coefficientController</prop><!-- 总系数 -->
-                <prop key="/calc/coefficientWW.vm">coefficientWWController</prop><!-- 总系数 -->
-                <prop key="/calc/sbraCoefficient.vm">sbraCoefficientController</prop><!-- 托架系数 -->
-                <prop key="/calc/accessory.vm">accessoryController</prop><!-- 辅料 -->
-                <prop key="/calc/stoneCoefficient.vm">stoneCoefficientController</prop><!-- 石头系数 -->
-                <prop key="/calc/sbraPrice.vm">sbraPriceController</prop><!-- 托架市场价 -->
-                <prop key="/calc/stonePrice.vm">stonePriceController</prop><!-- 主石市场价 -->
-                <prop key="/calc/sbraType.vm">sbraTypeController</prop><!-- 配件类型 -->
-                <prop key="/calc/priceHead.vm">priceHeadController</prop><!-- 配件类型 -->
-                <prop key="/calc/fashionCoefficient.vm">fashionCoefficientController</prop><!-- 黄金系数 -->
-                <prop key="/calc/materAttrUpdate.vm">materAttrUpdateController</prop><!--  -->
-                <prop key="/calc/basicPriceJade.vm">basicPriceJadeController</prop><!--  -->
-                <prop key="/calc/basicPriceOne.vm">basicPriceOneController</prop><!--  -->
-                <prop key="/calc/basicPriceTwo.vm">basicPriceTwoController</prop><!--  -->
-                <prop key="/calc/specialCharge.vm">specialChargeController</prop><!--  -->
-                
-                
-                <!--  **********************************************出库管理out******************************************* -->
-                <prop key="/out/outVendor.vm">outVendorController</prop><!-- 对公销售 、代销退货 、委外退料管理 -->
-                <prop key="/out/outBack.vm">outBackController</prop><!-- 对公销售 、代销退货 、委外退料管理 -->
-                <prop key="/out/loseOutStock.vm">loseOutStockController</prop><!-- 丢失出库管理 -->
-                <prop key="/out/scrapOutStock.vm">scrapOutStockController</prop><!-- 报销出库管理 -->
-                <prop key="/out/giftOutStock.vm">giftOutStockController</prop><!-- 礼品出库管理 -->
-                <prop key="/out/marketOutStock.vm">marketOutStockController</prop><!-- 营销出库管理 -->
-                <prop key="/out/leftGoldOutStock.vm">leftGoldOutStockController</prop><!-- 余金领用管理 -->
-                <prop key="/out/consum.vm">consumeController</prop><!-- 余金领用管理 -->
                 
                 
                 <!--  **********************************************公用页面common******************************************* -->
                 <prop key="/common/SelectCommon.vm">selectCommonController</prop><!-- 通用选择 -->
                 <prop key="/common/SelectOrg.vm">selectOrgController</prop><!-- 选择组织 -->
-                <prop key="/common/SelectStyleClass.vm">selectStyleClassController</prop><!-- 选择款式大类 -->
-                <prop key="/common/SelectEmp.vm">selectEmpController</prop><!-- 选择人员 -->
-                <prop key="/common/SelectStyle.vm">selectStyleController</prop><!-- 选择款式 -->
                 
                 
                 <!--  **********************************************报表管理report******************************************* -->
-                <prop key="/report/report.vm">reportController</prop><!-- 报表管理 -->
-                <prop key="/report/unsaleReport.vm">unsaleReportController</prop>
+                <!-- <prop key="/report/report.vm">reportController</prop>报表管理 -->
                 
-                
-                <!--  **********************************************收票出票inout******************************************* -->
-                <prop key="/inout/receive.vm">receiveController</prop>
-                <prop key="/inout/send.vm">sendController</prop>
-                
-                
-                <!--  **********************************************标签相关 tag******************************************* -->
-                <prop key="/tag/labelTagApply.vm">labelTagApplyController</prop>
-                <prop key="/tag/labelTagApplyPrint.vm">labelTagApplyPrintController</prop>
-                <prop key="/tag/labelTagApplyReceive.vm">labelTagApplyReceiveController</prop>
-                <prop key="/tag/labelTagImport.vm">labelTagImportController</prop>
-                
-                
-                <!--  **********************************************推式下单push******************************************* -->
-                <prop key="/push/excludeOrna.vm">excludeOrnaController</prop><!-- 推式品质 -->
-                <prop key="/push/pushGrade.vm">pushGradeController</prop><!-- 推式品质 -->
-                <prop key="/push/pushSize.vm">pushSizeController</prop><!-- 推式尺寸 -->
-                <prop key="/push/distributeNum.vm">distributeNumController</prop><!-- 铺货量 -->
-                <prop key="/push/turnoverNum.vm">turnoverNumController</prop><!-- 周转量 -->
-                <prop key="/push/salableRate.vm">salableRateController</prop><!-- 畅销款比例 -->
-                <prop key="/push/gatherSet.vm">gatherSetController</prop><!-- 下单设置 -->
-                <prop key="/push/gatherOrder.vm">gatherOrderController</prop><!-- 推式下单 -->
-                <prop key="/push/pushDispatch.vm">pushDispatchController</prop><!-- 推式配货 -->
-                <prop key="/push/wearSize.vm">wearSizeController</prop><!-- 推式配货 -->
-                <prop key="/push/displayStandard.vm">displayStandardController</prop><!-- 推式配货 -->
-                <prop key="/push/salable.vm">salableController</prop><!-- 推式配货 -->
-                <prop key="/push/pushStyle.vm">pushStyleController</prop><!-- 推式配货 -->
 
             </props> 
 		</property>

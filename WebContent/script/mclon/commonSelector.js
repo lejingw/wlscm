@@ -5,7 +5,7 @@
  * @param cancelfunc 取消调用的方法 function(idArr, nameArr, objArr){}
  * @param multiFlag 是否多选true多选false单选
  * @param selectedValues 已经选择的ids，一般取idArr.join(",")
- * @param userAction getFinanceOrgTree,getExecuteOrgTree
+ * @param userAction getOrgTree
  */
 function selectOrg(okfunc, cancelfunc, checkFunc, multiFlag, selectedValues, userAction, params) {
 	var _iframeId = "selectOrgFrm";
@@ -33,7 +33,7 @@ function selectOrg(okfunc, cancelfunc, checkFunc, multiFlag, selectedValues, use
 			box.close();// 增加事件方法后需手动关闭弹窗
 		}
 	};
-	userAction = userAction || "getFinanceOrgTree";
+	userAction = userAction || "getOrgTree";
 	var url = ctxPath + '/common/SelectOrg.vm?user_action='+userAction+'&multiFlag=' + (multiFlag?true:false) + '&selectedValues=' + selectedValues;
 	if(params){
 		for(var p in params){

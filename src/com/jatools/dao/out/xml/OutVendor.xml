@@ -179,7 +179,7 @@
     <select id="OutVendor.getVendorHeadByBillno" resultMap="outVendorHeadResult" parameterClass="string">
     	select * from jat_out_vendor_head a where a.billno = #value#
     </select>
-	    <!-- 获取财务核算类型 -->
+	    <!-- 获取核算类型 -->
     <select id="OutVendor.getFinaceType" resultClass="string" parameterClass="string">
     	select finance from JAT_BASIC_BILLNO_RULE  WHERE BILL_CODE=#value#
     </select>

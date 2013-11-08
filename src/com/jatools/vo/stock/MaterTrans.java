@@ -27,7 +27,7 @@ public class MaterTrans {
 	private String transSourceNo	;  //(50)	y			事务来源单号
 	private String transBody	;  //(200)	y			事务处理说明
 	private String transSourceType	;  //	y			0采购入库1委外入库
-	private String transFinance	;  //(50)	y			财务核算类型
+	private String transFinance	;  //(50)	y			核算类型
 	private String transDate	;  //(20)	y			事务时间
 	private String transCost	;  //	y			事务成本
 	private String transMoney	;  //	y			事务金额

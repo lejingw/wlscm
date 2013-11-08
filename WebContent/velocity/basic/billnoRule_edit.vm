@@ -1,0 +1,72 @@
+#set($jsfiles = ["$StringUtil.getContextPath()/dwr/interface/BillnoRuleDwr.js"])
+
+<form id='frm' action="billnoRule.vm" method="post">
+    <table class="title">
+    	<tr><td>单号编码规则</td></tr>
+    </table>
+    <table class="control">
+    	<tr><td>
+				<input type='button' value='保存' class='btn' id='btnSave'>
+				<input type='button' value='返回列表' class='btn' id="btnToList">
+		</td></tr>
+    </table>
+    <table class='content'>
+    	<tr>
+			<td class='body1'>单据编码</td>
+			<td class='body2'>
+				<select id="billCode" dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select>
+				##<input type="text" id="billCode" name="billCode"  value="$!{form.rule.billCode}"/>
+			</td>
+			<td class='body1'>单据名称</td><td class='body2'><input type='text' id='billName' dataType="Require" msg="不能为空" value="$!{form.rule.billName}"></td>
+			<td class='body1'>编码规则</td><td class='body2'><input type='text' id='billnoRule' maxlength="2" dataType="Limit" msg="不能为空，且必须为两位字符" min='2' max='2' value="$!{form.rule.billnoRule}"></td>
+			<td class='body1'>对应关系</td>
+			<td class='body2'>
+				<select id='finance' dataType="Require" msg="不能为空">$!StringUtil.emptyOption()</select>
+			</td>
+		</tr>
+    	<tr>
+			<td class='body1'>说明</td><td class='body2' colspan="3"><input type="text" id="memo" style="width:90%;" value='$!{form.rule.memo}'/></td>
+			<td class='body1'>状态</td><td class='body2'><input type='text' readonly value="保存"></td>
+		</tr>
+    </table>
+</form>
+<script>
+function saveForm(){
+	if(!Validator.Validate($("frm"),3))
+		return;
+	confirm("确定保存?", function(){
+    	BillnoRuleDwr.saveBillCode(
+    		jQuery("#billCode").val(),
+    		jQuery("#billName").val(),
+    		jQuery("#billnoRule").val(),
+    		jQuery("#finance").val(),
+    		jQuery("#memo").val(), function(data){
+    		alert(data?data:"保存成功", function(){
+    			if(!data){
+                	window.location = "billnoRule.vm";
+    			}
+    		});
+    	});
+	});
+}
+jQuery(function(){
+	jQuery("#btnSave").click(saveForm);
+	jQuery("#btnToList").click(function(){
+		window.location = "billnoRule.vm";
+	});
+	jQuery("#billCode").change(function(){
+		if(!isNull(jQuery("#billCode").val()) && isNull(jQuery("#billnoRule").val())){
+			jQuery("#billnoRule").val(jQuery("#billCode").val());
+		}
+	});
+	DictDwr.getDictsForSlt("finance", function(data){
+		addOptions("finance", data, null, null, true, true, "$!form.rule.finance");
+	});
+	BillnoRuleDwr.getBillCodeForSlt("$!form.rule.billCode", function(data){
+		addOptions("billCode", data, null, null, true, true, "$!form.rule.billCode");
+	});
+	if(!isNull("$!form.rule.billCode")){
+		jQuery("#billCode").attr("disabled", true);
+	}
+});
+</script>

@@ -44,7 +44,7 @@ public class OutBackLine {
     private String backBody;
 	private String styleName;// 款式名称
 	private String alaysisCode;// 分析范围id
-	private String finaceType;//财务核算类型
+	private String finaceType;//核算类型
 	private String stockId;
 	private String bigGraph;
 	

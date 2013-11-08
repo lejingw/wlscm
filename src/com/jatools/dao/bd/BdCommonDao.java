@@ -53,7 +53,7 @@ public interface BdCommonDao {
 	 * 根据组织类型获取组织树
 	 * @return
 	 */
-	List<Org> getOrgTreeByType(String orgType);
+	List<Org> getOrgTree();
 	/**
 	 * 获取所有大类小类对应关系数据
 	 * @return
@@ -292,7 +292,7 @@ public interface BdCommonDao {
 	String getStyleThemeName(String styleId);
 	Pager getStyleByCalc(Map<String, String> condition );
 	/**
-	 * 根据行政组织获取人员
+	 * 根据获取人员
 	 */
 	Pager getExeOrgEmp(String orgId, String start, String limit);
 	/**

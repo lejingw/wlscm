@@ -53,11 +53,11 @@ public interface BdCommonManager {
 	List<OrnaClass> getAllOrnaClass();
 
 	/**
-	 * 根据组织类型，获取财务组织、行政组织树
+	 * 根据组织类型，获取组织、树
 	 * @param orgType
 	 * @return
 	 */
-	List<Org> getOrgTreeByType(String orgType);
+	List<Org> getOrgTree();
 
 	/**
 	 * 获取所有大类小类对应关系数据
@@ -297,7 +297,7 @@ public interface BdCommonManager {
 	String getStyleThemeName(String styleId);
 	Pager getStyleByCalc(Map<String, String> condition );
 	/**
-	 * 根据行政组织获取人员
+	 * 根据获取人员
 	 */
 	Pager getExeOrgEmp(String orgId, String start, String limit);
 	/**

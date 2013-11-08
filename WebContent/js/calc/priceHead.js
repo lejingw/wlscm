@@ -1106,7 +1106,7 @@ function getPriceHead(){
 			lpFee:returnNull(jQuery("#lpFee_h").val()), //拉/喷沙工费
 			mainStoneXqFee:returnNull(jQuery("#mainStoneXqFee_h").val()), //主石镶嵌工费总额
 			secondStoneXqDee:returnNull(jQuery("#mainStoneXqFee_h").val()), //配石镶嵌工费总额
-			wlCode:returnNull(jQuery("#wlCode").val()), //万隆编码
+			wlCode:returnNull(jQuery("#wlCode").val()), //编码
 			outGoodsBillNo:returnNull(jQuery("#outGoodsBillNo_h").val()), //出货单编号
 			accWithoutTax:returnNull(jQuery("#accWithoutTax_h").val()), //辅料不含税价
 			accWithTax:returnNull(jQuery("#accWithTax_h").val()), //辅料含税价
@@ -1171,7 +1171,7 @@ function getPriceHead(){
 			createDate:returnNull(jQuery("#createDate").val()), //制单日期
 			caclType:returnNull(jQuery("#caclType").val()), //核价类型
 			factoryFeeType:returnNull(jQuery("#factoryFeeType_h").val()), //工厂公费方式
-			wlCode:returnNull(jQuery("#wlCode").val()), //万隆编码
+			wlCode:returnNull(jQuery("#wlCode").val()), //编码
 			sbraColorId:returnNull(jQuery("#sbraColorId_h").val()), //托架颜色
 			isDoubleLabel:jQuery("#isDoubleLabel_h")[0].checked==false?'0':'1', //是否双标签
 			labelId:returnNull(jQuery("#labelId_h option:selected").text()=="--请选择--"?"":jQuery("#labelId_h  option:selected").text()), //标签名称id
@@ -1214,7 +1214,7 @@ function getPriceHead(){
 			mainWeight:returnNull(jQuery("#mainWeight_h").val()), //主石重量
 			secondNumber:returnNull(jQuery("#secondNumber_h").val()), //配石粒数
 			secondWeight:returnNull(jQuery("#secondWeight_h").val()), //配石重量
-			wlCode:returnNull(jQuery("#wlCode").val()), //万隆编码
+			wlCode:returnNull(jQuery("#wlCode").val()), //编码
 			outGoodsBillNo:returnNull(jQuery("#outGoodsBillNo_h").val()), //出货单编号
 			sbraColorId:returnNull(jQuery("#sbraColorId_h").val()), //托架颜色
 			isDoubleLabel:jQuery("#isDoubleLabel_h")[0].checked==false?'0':'1', //是否双标签
@@ -1364,7 +1364,7 @@ function cleanLabelData(){
 	var head = null;
 	jQuery("#id").val("");
 	jQuery("#no").val("");
-	jQuery("#wlCode").val("自动生成");//, //万隆编码
+	jQuery("#wlCode").val("自动生成");//, //编码
 	jQuery("#ornaBarCode").val("自动生成");//, //条码
 	jQuery("#allWeight_h").val(""); // 饰品总重
 	jQuery("#analysisArangeId_h").val(""); //分析范围

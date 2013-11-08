@@ -65,7 +65,7 @@ public class CommonDaoImpl extends BaseDao implements CommonDao {
 	}
 	
 	/**
-	 * 根据单据编码获取对应财务关系
+	 * 根据单据编码获取对应关系
 	 * @param billCode
 	 * @return
 	 */

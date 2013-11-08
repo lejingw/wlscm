@@ -50,42 +50,12 @@ public class SelectOrgController extends BaseMultiActionController{
 		return null;
 	}
 	/**
-	 * 获取财务组织数据
+	 * 获取组织数据
 	 */
-	public ModelAndView getFinanceOrgTree(HttpServletRequest req, HttpServletResponse res) {
+	public ModelAndView getOrgTree(HttpServletRequest req, HttpServletResponse res) {
 		String multiFlag = CommonUtil.getParameterEmpty(req, "multiFlag");
 		String selectedValues = CommonUtil.getParameterEmpty(req, "selectedValues");
-		Map<String, Org> dataMap = OrgCache.getInstance().getFinanceOrgTree();
-		SelectorForm form = new SelectorForm("true".equals(multiFlag), selectedValues);
-		form.setDataMap(dataMap);
-		return new ModelAndView("common/SelectOrg", "form", form);
-	}
-	/**
-	 * 获取加盟组织数据
-	public ModelAndView getJmOrgTree(HttpServletRequest req, HttpServletResponse res) {
-		String multiFlag = CommonUtil.getParameterEmpty(req, "multiFlag");
-		String selectedValues = CommonUtil.getParameterEmpty(req, "selectedValues");
-		Map<String, Org> dataMap = OrgCache.getInstance().getFinanceOrgTree();
-		for(String key : dataMap.keySet()){
-			Org org = dataMap.get(key);
-			if(DictConstant.YES_OR_NO_YES.equals(org.getJmFlag())){
-				org.setNocheck("0");
-			}else{
-				org.setNocheck("1");
-			}
-		}
-		SelectorForm form = new SelectorForm("true".equals(multiFlag), selectedValues);
-		form.setDataMap(dataMap);
-		return new ModelAndView("common/SelectOrg", "form", form);
-	}
-	 */
-	/**
-	 * 获取行政组织数据
-	 */
-	public ModelAndView getExecuteOrgTree(HttpServletRequest req, HttpServletResponse res) {
-		String multiFlag = CommonUtil.getParameterEmpty(req, "multiFlag");
-		String selectedValues = CommonUtil.getParameterEmpty(req, "selectedValues");
-		Map<String, Org> dataMap = OrgCache.getInstance().getExecuteOrgTree();
+		Map<String, Org> dataMap = OrgCache.getInstance().getOrgTree();
 		SelectorForm form = new SelectorForm("true".equals(multiFlag), selectedValues);
 		form.setDataMap(dataMap);
 		return new ModelAndView("common/SelectOrg", "form", form);

@@ -13,7 +13,7 @@ public interface CommonManager {
 	 */
 	public String getBillno(String billCode);
 	/**
-	 * 根据单据编码获取对应财务关系
+	 * 根据单据编码获取对应关系
 	 */
 	public String getBillFinance(String billCode);
 	

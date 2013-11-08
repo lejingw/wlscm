@@ -31,7 +31,7 @@ public class HandoverHead implements ReviewBill {
 	private String packNo	; //(20)	y			装箱单号
 	private String isPsale	; //	y			0否 1是
 	private String status	; //	y	0		状态
-	private String isCheck	; //	y	0		财务复核标志
+	private String isCheck	; //	y	0		复核标志
 	private String isFlag	; //	y	0		核算接口标志
 	private String memo	; //(1000)	y			备注
 	private String createDate	; //(20)	y			创建时间

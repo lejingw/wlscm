@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML xmlns="http://www.w3.org/1999/xhtml">
+<HEAD>
+<META HTTP-EQUIV="content-type" content="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+<title>SCM</title>
+
+#foreach($item in $!cssfiles)
+<link href="$item" type="text/css" rel="stylesheet" />
+#end
+
+#foreach($item in $!jsfiles)
+<script language="javascript" type="text/javascript" src='$item' charset="UTF-8"></script>
+#end
+<script>
+var ctxPath = "$!StringUtil.getContextPath()";
+</script>
+</HEAD>
+<BODY>
+	$screen_content
+</BODY>
+</HTML>

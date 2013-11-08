@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<HEAD>
+<META HTTP-EQUIV="content-type" content="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+
+<title>SCM</title>
+
+<link href="$StringUtil.getContextPath()/script/mclon/tablecloth/tablecloth.css" type="text/css" rel="stylesheet" />
+
+<script language="javascript" type="text/javascript" src="$StringUtil.getContextPath()/script/mclon/tablecloth/tablecloth.js" charset="UTF-8"></script>
+<script language="javascript" type="text/javascript" src="$!{BdCommon.getParameterValue('print_btw_path')}printLabelJson.js" charset="UTF-8"></script>
+
+<OBJECT id="PrintCtrl" align="CENTER" WIDTH=300 HEIGHT=20 classid="CLSID:0201B4C8-2EA4-4973-BB2C-1D6672AAD90D"></OBJECT>
+
+</HEAD>
+<body>
+		$screen_content
+</BODY>
+</HTML>

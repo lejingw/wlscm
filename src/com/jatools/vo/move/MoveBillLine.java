@@ -6,8 +6,14 @@ public class MoveBillLine {
 	private String lineid;
 	private String headid;
 	private String ornaCode;
-	private String barCode;
 	private String ornaDsc;
+	private String orgId;
+	private Double weight;
+	private String status;
+	
+	
+	
+	private String barCode;
 	private String itemClassId;
 	private String ornaClassId;
 	private String styleItemClassId;
@@ -33,7 +39,6 @@ public class MoveBillLine {
 	private Double newPosCost;
 	private String newPosMoney;
 	private Double salepriceCoef;
-	private String status;
 	private String memo;
 	private String createDate;
 	private String createId;
@@ -45,7 +50,6 @@ public class MoveBillLine {
 	private String analysisName;
 	private String printLabel;
 
-	private String orgId;
 	private String stockId;
 
 	private String itemClassName;
@@ -94,6 +98,14 @@ public class MoveBillLine {
 
 	public String getItemClassName() {
 		return itemClassName;
+	}
+
+	public Double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(Double weight) {
+		this.weight = weight;
 	}
 
 	public void setItemClassName(String itemClassName) {

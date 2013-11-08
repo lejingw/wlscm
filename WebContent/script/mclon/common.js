@@ -805,30 +805,30 @@ function floatDiv(arg1, arg2) {
 	}
 	return floatMul(Number(arg1.replace(".", "")) / Number(arg2.replace(".", "")), Math.pow(10, r2 - r1));
 }
-/**
- * 检查单据页面是否审批
- */
-function checkReview(){
-	var params = parseURLParam();
-	if(params['reviewflag'] == '1'){
-		jQuery(".control").hide();
-		//按钮失效
-		jQuery("input[type='button']").each(function(){
-			jQuery(this).attr("disabled", true);
-		});
-		//文本框只读
-		jQuery("input[type='text']").each(function(){
-			jQuery(this).attr("readonly", true);
-		});
-		jQuery("input[type='checkbox']").each(function(){
-			jQuery(this).attr("disabled", true);
-		});
-		//下拉框失效
-		jQuery("select").each(function(){
-			jQuery(this).attr("disabled", true);
-		});
-	}
-}
+///**
+// * 检查单据页面是否审批
+// */
+//function checkReview(){
+//	var params = parseURLParam();
+//	if(params['reviewflag'] == '1'){
+//		jQuery(".control").hide();
+//		//按钮失效
+//		jQuery("input[type='button']").each(function(){
+//			jQuery(this).attr("disabled", true);
+//		});
+//		//文本框只读
+//		jQuery("input[type='text']").each(function(){
+//			jQuery(this).attr("readonly", true);
+//		});
+//		jQuery("input[type='checkbox']").each(function(){
+//			jQuery(this).attr("disabled", true);
+//		});
+//		//下拉框失效
+//		jQuery("select").each(function(){
+//			jQuery(this).attr("disabled", true);
+//		});
+//	}
+//}
 /**
  * 根据页面连接获取参数信息对象
  */

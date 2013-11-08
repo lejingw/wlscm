@@ -1,0 +1,48 @@
+#set($layout = "layout/homeLayout.vm")
+##使用ztree
+#set($cssfiles = ["$StringUtil.getContextPath()/css/mclon/ztree/zTreeStyle.css"])
+#set($jsfiles = ["$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.core-3.0.js", "$StringUtil.getContextPath()/script/mclon/ztree/jquery.ztree.excheck-3.0.js"])
+
+<div id="myZTree" class="ztree"></div>
+<script>
+function beforeClick(treeId, treeNode, clickFlag) {
+	if(treeNode.tabUrl)
+		return true;
+	return false;
+}
+function onClick(event, treeId, treeNode, clickFlag) {
+	addTab(treeNode.name,treeNode.tabUrl)
+}
+jQuery(document).ready(function(){
+    var setting = {
+			data: {
+				simpleData: {enable: true}
+			},
+			callback: {
+				beforeClick: beforeClick,
+				onClick: onClick
+			}
+		};
+	//静态数据
+    var nodeDataArr =[
+    		{id:'01', pId:'0', name:'系统管理', tabname:'sys', open:false, isParent:true},
+				{id:'0101', pId:'01', name:'系统数据字典', tabname:'dict', tabUrl:'$!StringUtil.getContextPath()/sys/dict.vm?entryType=1'},
+				{id:'0102', pId:'01', name:'业务数据字典', tabname:'bizDict', tabUrl:'$!StringUtil.getContextPath()/sys/dict.vm?entryType=2'},
+				{id:'0103', pId:'01', name:'刷新缓存', tabname:'dict', tabUrl:'$!StringUtil.getContextPath()/sys/refreshCache.vm'},
+				{id:'0104', pId:'01', name:'单据审批', tabname:'dict', tabUrl:'$!StringUtil.getContextPath()/sys/billReview.vm'},
+				{id:'0105', pId:'01', name:'系统参数-任', tabname:'dict', tabUrl:'$!StringUtil.getContextPath()/sys/parameter.vm'},
+				{id:'0106', pId:'01', name:'查询条件配置', tabname:'dict', tabUrl:'$!StringUtil.getContextPath()/sys/queryCondition.vm'},
+    			{id:'0107', pId:'01', name:'数据字典管理', tabname:'dict', open:false, isParent:true},
+					{id:'010701', pId:'0107', name:'数据字典采购员', tabname:'dictPurEmp', tabUrl:'$!StringUtil.getContextPath()/sys/dictEntry.vm?entryCode=purchaseEmp'},
+    		{id:'02', pId:'0', name:'基础数据', tabname:'bd', open:false, isParent:true},
+				{id:'0201', pId:'02', name:'单号编码规则', tabname:'billnoRule', tabUrl:'$!StringUtil.getContextPath()/basic/billnoRule.vm'},
+			{id:'05', pId:'0', name:'调拨模块', tabname:'move', open:false, isParent:true},
+				{id:'0504', pId:'05', name:'调拔单', tabname:'moveBill', tabUrl:'$!StringUtil.getContextPath()/move/moveBill.vm'},
+			{id:'98', pId:'0', name:'报表管理', tabname:'report', open:false, isParent:true},
+				{id:'9801', pId:'98', name:'库存汇总查询', tabname:'testreport', tabUrl:'$!StringUtil.getContextPath()/report/report.vm?reportType=1'},
+			{id:'99', pId:'0', name:'退出', tabname:'', open:true, tabUrl:'$!StringUtil.getContextPath()/logOff.vm'}
+    	];
+	//初始化tree
+	jQuery.fn.zTree.init(jQuery("#myZTree"), setting, nodeDataArr);
+});
+</script>

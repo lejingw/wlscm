@@ -109,16 +109,16 @@ public class ReportController extends BaseMultiActionController {
 				return orderinway(req, form);
 			}else if("30".equals(reportType)){   //手工调配在途量
 				return zhaitulist(req, form);
-			}else if("31".equals(reportType)){   //财务销售查询
+			}else if("31".equals(reportType)){   //销售查询
 				return caiWuXiaoShou(req, form);
-			}else if("33".equals(reportType)){   //财务销售查询
+			}else if("33".equals(reportType)){   //销售查询
 				return purchaseAnalysis(req, form);
 			}else if("34".equals(reportType)){   //委外代销查询
 				return weiWaiDaiXiao(req, form);
 			}else if("35".equals(reportType)){   //
 				return saleconsicb(req, form);
 			}else if("37".equals(reportType)){   //
-				return caiWuWeiJieShuan(req, form);//财务未结算单据查询
+				return caiWuWeiJieShuan(req, form);//未结算单据查询
 			}else if("38".equals(reportType)){   //
                 return orgmeet_pu(req, form);//推式 满足率查询
             }else if("39".equals(reportType)){   //推式下单在途库存查询
@@ -205,17 +205,17 @@ public class ReportController extends BaseMultiActionController {
 				orderinwayToExcel(req,res, form);
 			}else if("30".equals(reportType)){   //手工调配在途量
 				zhaitulisToExcel(req, res, form);
-			}else if("31".equals(reportType)){   //财务销售查询
+			}else if("31".equals(reportType)){   //销售查询
 				caiWuXiaoShouToExcel(req, res, form);
-			}else if("33".equals(reportType)){   //财务销售查询
+			}else if("33".equals(reportType)){   //销售查询
 				purchaseAnalysisToExcel(req, res, form);
 			}else if("34".equals(reportType)){   //委外代销查询
 				weiWaiDaiXiaoToExcel(req, res, form);
 			}else if("35".equals(reportType)){   //
 				saleconsiToExcelcb(req, res, form);
-			}else if("37".equals(reportType)){   //财务未结算单据查询
+			}else if("37".equals(reportType)){   //未结算单据查询
 				caiWuWeiJieShuanToExcel(req, res, form);
-			}else if("38".equals(reportType)){   //财务未结算单据查询
+			}else if("38".equals(reportType)){   //未结算单据查询
 				orgmeetToExcel_pu(req, res, form);
 			}else if("39".equals(reportType)){   //推式下单在途库存查询
                 orderinwayToExcel(req, res, form);
@@ -808,7 +808,7 @@ public class ReportController extends BaseMultiActionController {
 		return sql;
 	}
 	
-	//财务销售查询
+	//销售查询
 	public ModelAndView caiWuXiaoShou(HttpServletRequest req, ReportForm form) throws Exception{
 		
 		if("".equals(CommonUtil.getParameterEmpty(req, "firstFlag"))){
@@ -831,7 +831,7 @@ public class ReportController extends BaseMultiActionController {
 		String tofrom = "report/caiWuXiaoShou";
 		return new ModelAndView(tofrom, "form", form);
 	}
-	//财务销售查询导出excel
+	//销售查询导出excel
 	private void caiWuXiaoShouToExcel(HttpServletRequest req, HttpServletResponse res, ReportForm form) throws Exception{
 
 		Map<String, String> condition = CommonUtil.getConditionForPage(req, "");
@@ -845,7 +845,7 @@ public class ReportController extends BaseMultiActionController {
 		//----------------------------------------------------------导出excel开始---------------------------------------
 		//excel数据对象
 		ExcelData excelData = new ExcelData();
-		excelData.setTitle("财务销售查询");		
+		excelData.setTitle("销售查询");		
 		excelData.setPager(pager);//直接利用分页pager对象
 	
 	   //添加列标题
@@ -3492,7 +3492,7 @@ public class ReportController extends BaseMultiActionController {
 		//----------------------------------------------------------导出excel开始---------------------------------------
 		//excel数据对象
 		ExcelData excelData = new ExcelData();
-		excelData.setTitle("财务未结算单据查询");		
+		excelData.setTitle("未结算单据查询");		
 		excelData.setPager(pager);//直接利用分页pager对象
 	
 	   //添加列标题

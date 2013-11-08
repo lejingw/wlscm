@@ -1,0 +1,2 @@
+insert into jat_basic_billno_rule (BILL_NAME, BILLNO_RULE, FINANCE, STATUS, MEMO, CREATE_DATE, CREATE_ID, UPDATE_DATE, UPDATE_ID, BILL_CODE)
+values ('µ÷°Îµ¥', 'TB', '2', 1, '', '2012-01-01 00:00:00', 2029, '2012-01-01 00:00:00', 2029, 'TB');

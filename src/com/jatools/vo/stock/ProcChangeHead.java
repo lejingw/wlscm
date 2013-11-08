@@ -24,7 +24,7 @@ public class ProcChangeHead implements ReviewBill{
 	private String sumCost		;//			总成本
 	private String sumMoney		;//			总金额
 	private String status			;//		状态
-	private String isCheck		;//			财务复核标志
+	private String isCheck		;//			复核标志
 	private String isFlag			;//		核算接口标志
 	private String memo				;//	备注
 	private String createDate	;//				创建时间

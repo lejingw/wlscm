@@ -20,7 +20,7 @@ public class ProcDismantleHead {
 	private String sumCost	; //	y			总成本
 	private String sumMoney	; //	y			总金额
 	private String status	; //	y	0		状态
-	private String isCheck	; //	y	0		财务复核标志
+	private String isCheck	; //	y	0		复核标志
 	private String isFlag	; //	y	0		核算接口标志
 	private String memo	; //(1000)	y			备注
 	private String createDate	; //(20)	y			创建时间

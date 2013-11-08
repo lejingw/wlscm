@@ -66,8 +66,8 @@ public class BdCommonDaoImpl extends BaseDao implements BdCommonDao {
 	 * 根据组织类型获取组织树
 	 * @return
 	 */
-	public List<Org> getOrgTreeByType(String orgType){
-		return executeQueryForList("BdCommon.getOrgTreeByType", orgType);
+	public List<Org> getOrgTree(){
+		return executeQueryForList("BdCommon.getOrgTree", null);
 	}
 
 	/**
@@ -413,7 +413,7 @@ public class BdCommonDaoImpl extends BaseDao implements BdCommonDao {
 	
 
 	/**
-	 * 根据行政组织获取人员
+	 * 根据获取人员
 	 */
 	public Pager getExeOrgEmp(String orgId, String start, String limit){
 		Map<String, String> condition  = new HashMap<String, String>();

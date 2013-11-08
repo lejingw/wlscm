@@ -21,8 +21,7 @@ import com.jatools.web.util.StringUtil;
 public class OrgCache implements CacheSingletonIntf {
 	private static Logger logger = Logger.getLogger(OrgCache.class);
 	private static OrgCache orgCache = null;
-	private static Map<String, Org> financeOrgMap = null;
-	private static Map<String, Org> executeOrgMap = null;
+	private static Map<String, Org> orgMap= null;
 	private static Date refreshTime = null;
 
 	private OrgCache() {
@@ -37,8 +36,7 @@ public class OrgCache implements CacheSingletonIntf {
 
 	public synchronized static void refresh(){
 		orgCache = null;
-		financeOrgMap = null;
-		executeOrgMap = null;
+		orgMap = null;
 		init();
 	}
 	private synchronized static void init() {
@@ -47,18 +45,11 @@ public class OrgCache implements CacheSingletonIntf {
 			try {
 				BdCommonManager bdCommonManager = (BdCommonManager) Global.springContext.getBean("bdCommonManager");
 				if (null != bdCommonManager) {
-					logger.debug("初始化财务组织缓存数据...");
-					OrgCache.financeOrgMap = new LinkedHashMap<String, Org>();
-					List<Org> financeOrgList = bdCommonManager.getOrgTreeByType(GlobalConstant.ORG_TYPE_FINANCE);
+					logger.debug("初始化组织缓存数据...");
+					OrgCache.orgMap = new LinkedHashMap<String, Org>();
+					List<Org> financeOrgList = bdCommonManager.getOrgTree();
 					for (Org org : financeOrgList) {
-						OrgCache.financeOrgMap.put(org.getOrgId(), org);
-					}
-
-					logger.debug("初始化行政组织缓存数据...");
-					OrgCache.executeOrgMap = new LinkedHashMap<String, Org>();
-					List<Org> executeOrgList = bdCommonManager.getOrgTreeByType(GlobalConstant.ORG_TYPE_EXECUTE);
-					for (Org org : executeOrgList) {
-						OrgCache.executeOrgMap.put(org.getOrgId(), org);
+						OrgCache.orgMap.put(org.getOrgId(), org);
 					}
 				}
 				orgCache = new OrgCache();
@@ -74,31 +65,21 @@ public class OrgCache implements CacheSingletonIntf {
 		if (null != OrgCache.orgCache) {
 			OrgCache.orgCache = null;
 		}
-		if (null != OrgCache.financeOrgMap) {
-			OrgCache.financeOrgMap.clear();
-		}
-		if (null != OrgCache.executeOrgMap) {
-			OrgCache.executeOrgMap.clear();
+		if (null != OrgCache.orgMap) {
+			OrgCache.orgMap.clear();
 		}
 	}
 
 	/**
-	 * 获取财务组织树数据
+	 * 获取组织树数据
 	 * @return
 	 */
-	public Map<String, Org> getFinanceOrgTree(){
-		return OrgCache.financeOrgMap;
-	}
-	/**
-	 * 获取行政组织树数据
-	 * @return
-	 */
-	public Map<String, Org> getExecuteOrgTree(){
-		return OrgCache.executeOrgMap;
+	public Map<String, Org> getOrgTree(){
+		return OrgCache.orgMap;
 	}
 
 	/**
-	 * 根据组织id获取组织名称，不区分财务、行政组织
+	 * 根据组织id获取组织名称，不区分、
 	 * @param orgId
 	 * @return
 	 */
@@ -106,11 +87,7 @@ public class OrgCache implements CacheSingletonIntf {
 		if(StringUtil.isEmpty(orgId)){
 			return null;
 		}
-		Org org = financeOrgMap.get(orgId);
-		if(null != org){
-			return org.getOrgName();
-		}
-		org = executeOrgMap.get(orgId);
+		Org org = orgMap.get(orgId);
 		if(null != org){
 			return org.getOrgName();
 		}
@@ -118,7 +95,7 @@ public class OrgCache implements CacheSingletonIntf {
 	}
 
 	/**
-	 * 根据组织id获取组织名称，不区分财务、行政组织
+	 * 根据组织id获取组织名称，不区分组织
 	 * @param orgId
 	 * @return
 	 */
@@ -126,11 +103,7 @@ public class OrgCache implements CacheSingletonIntf {
 		if(StringUtil.isEmpty(orgId)){
 			return null;
 		}
-		Org org = financeOrgMap.get(orgId);
-		if(null != org){
-			return org;
-		}
-		return executeOrgMap.get(orgId);
+		return orgMap.get(orgId);
 	}
 	public String getNameById(String id){
 		return getOrgName(id);

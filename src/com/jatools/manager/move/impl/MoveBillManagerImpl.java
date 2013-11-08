@@ -65,30 +65,23 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public Pager getMoveBillPageData(Map<String, String> condition, String billType, String jmFlag, String orgId, String userid) {
-		return moveBillDao.getMoveBillPageData(condition, billType, jmFlag, orgId, userid);
+	public Pager getMoveBillPageData(Map<String, String> condition, String orgId, String userid) {
+		return moveBillDao.getMoveBillPageData(condition, orgId, userid);
 	}
 	/**
 	 * 获取现有量表信息
 	 * 
-	 * @param code
+	 * @param ornaCode
 	 * @param ornaFlag
 	 * @return
 	 */
-	public MoveBillLine getMaterActiveInfo(String code, boolean ornaFlag, String orgId, String billType, String jmFlag, String inOrgId) {
-		MoveBillLine line = moveBillDao.getMaterActiveInfo(code, ornaFlag, billType, jmFlag, inOrgId);
+	public MoveBillLine getMaterActiveInfo(String ornaCode, String orgId) {
+		MoveBillLine line = moveBillDao.getMaterActiveInfo(ornaCode);
 		if(null == line){
 			throw new RuntimeException("不能获取饰品信息");
 		}
 		if(!orgId.equals(line.getOrgId())){
 			throw new RuntimeException("饰品所在网点不为当前选择的调出组织");
-		}
-		//加盟退货单，需要获取 是否免费换货（以当前时间为准），免费换货剩余天数（以当前时间为准）、创建时间
-		if(DictConstant.YES_OR_NO_YES.equals(jmFlag) && DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType)){
-			int freeLeftDays = moveBillDao.getFreeReturnLeftDays(line.getOrnaCode());
-			line.setFreeReturnFlag(freeLeftDays>=0?DictConstant.YES_OR_NO_YES:DictConstant.YES_OR_NO_NO);
-			line.setFreeLeftDays(""+freeLeftDays);
-			line.setCreateDate(DateUtil.getCurrentDate10());
 		}
 		return line;
 	}
@@ -111,17 +104,10 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 	 */
 	public void saveMoveBill(MoveBillHead moveHead, List<String> newOrnaCodeList, List<String> deleteOrnaCodeList, String userid) {
 		try {
-			String billCode = getBillCodeByBillType(moveHead.getBillType(), moveHead.getJmFlag());
 			String headid = moveHead.getHeadid();
 			if (StringUtil.isEmpty(headid)) {
-				moveHead.setBillno(commonDao.getBillno(billCode));
-				moveHead.setMoveType(DictConstant.MOVE_TYPE_MANUAL);
+				moveHead.setBillno(commonDao.getBillno(GlobalConstant.BILL_CODE_DIAOBODAN));
 				headid = moveBillDao.saveMoveBillHead(moveHead, userid);
-				moveHead.setHeadid(headid);
-				if(com.jatools.web.util.StringUtil.isNotBlank(moveHead.getSrcBillId()) && GlobalConstant.BILL_CODE_MOVE_CMD.equals(moveHead.getSrcBillCode())){
-					// 调拨指令单生成过来 修改调拨指令单 状态为 已引用
-					this.asertMoveCmd(moveHead.getSrcBillId(), userid);
-				}
 			} else {
 				asertStatus("jat_move_head", "headid", headid, "status", DictConstant.BILL_STATUS_SAVE);
 				moveBillDao.updateMoveBillHead(moveHead, userid);
@@ -130,33 +116,32 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 				for(String ornaCode : deleteOrnaCodeList){
 					materActiveDao.markMaterActiveValid(ornaCode);
 				}
-				if(com.jatools.web.util.StringUtil.isNotBlank(moveHead.getSrcBillId()) && GlobalConstant.BILL_CODE_MOVE_CMD.equals(moveHead.getSrcBillCode())){
-					// 调拨指令单生成过来 修改调拨指令单 状态为 已引用
-					if(com.jatools.web.util.StringUtil.isNotBlank(moveHead.getOldSrcBillId()) ){
-						if(!moveHead.getOldSrcBillId().equals(moveHead.getSrcBillId())){
-							this.moveCmdDao.updateMoveCmdStatus(moveHead.getOldSrcBillId(), userid, DictConstant.BILL_STATUS_REVIEWED);
-							this.asertMoveCmd(moveHead.getSrcBillId(), userid);
-						}
-					} else {
-						this.asertMoveCmd(moveHead.getSrcBillId(), userid);
-					}
-				}
 			}
 			//现有量状态改为保留
 			for(String ornaCode : newOrnaCodeList){
-				materActiveDao.markMaterActiveUsed(ornaCode, billCode, moveHead.getBillno());
+				materActiveDao.markMaterActiveUsed(ornaCode, moveHead.getInOrgId());
 			}
 			moveBillDao.saveMoveBillLine(newOrnaCodeList, headid, moveHead.getBillType(), moveHead.getJmFlag(), moveHead.getInOrgId(), userid);
 			moveBillDao.updateMoveBillSumNum(headid, userid);
-			moveBillDao.updateNorececount(headid, null, userid);
 			
-			if(DictConstant.BILL_STATUS_REVIEWING.equals(moveHead.getStatus())){
-				workflowService.enterReview(moveHead, userid);
-			}
+//			if(DictConstant.BILL_STATUS_REVIEWING.equals(moveHead.getStatus())){
+//				workflowService.enterReview(moveHead, userid);
+//			}
 		} catch (Exception e) {
 			throw new RuntimeException("保存失败");
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	private void asertMoveCmd(String moveCmdId, String userid){
 		try{
@@ -164,38 +149,38 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 		} catch(Exception e){
 			throw new RuntimeException("调拨指令单状态必须为审批完成");
 		}
-		this.moveCmdDao.updateMoveCmdStatus(moveCmdId, userid, DictConstant.BILL_STATUS_CLOSED);
+		this.moveCmdDao.updateMoveCmdStatus(moveCmdId, userid, DictConstant.BILL_STATUS_CLOSED_PART);
 	}
 	
 	private String getBillCodeByBillType(String billType, String jmFlag) {
 		String billCode = null;
-		if(DictConstant.YES_OR_NO_YES.equals(jmFlag)){
-			if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_DIAOBODAN_JM;
-			else if(DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_TUIHUODAN_JM;
-			else if(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_TUICANDAN_JM;
-			else if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_YIKUDAN_JM;
-			else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_GUIZUDIAOBODAN_JM;
-			else
-				throw new RuntimeException("单据类别错误");
-		}else{
-			if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_DIAOBODAN;
-			else if(DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_TUIHUODAN;
-			else if(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_TUICANDAN;
-			else if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_YIKUDAN;
-			else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(billType))
-				billCode = GlobalConstant.BILL_CODE_GUIZUDIAOBODAN;
-			else
-				throw new RuntimeException("单据类别错误");
-		}
+//		if(DictConstant.YES_OR_NO_YES.equals(jmFlag)){
+//			if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_DIAOBODAN_JM;
+//			else if(DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_TUIHUODAN_JM;
+//			else if(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_TUICANDAN_JM;
+//			else if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_YIKUDAN_JM;
+//			else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_GUIZUDIAOBODAN_JM;
+//			else
+//				throw new RuntimeException("单据类别错误");
+//		}else{
+//			if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_DIAOBODAN;
+//			else if(DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_TUIHUODAN;
+//			else if(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_TUICANDAN;
+//			else if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_YIKUDAN;
+//			else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(billType))
+//				billCode = GlobalConstant.BILL_CODE_GUIZUDIAOBODAN;
+//			else
+//				throw new RuntimeException("单据类别错误");
+//		}
 		return billCode;
 	}
 	/**
@@ -211,7 +196,7 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 				if(com.jatools.web.util.StringUtil.isNotBlank(head.getSrcBillId()) && GlobalConstant.BILL_CODE_MOVE_CMD.equals(head.getSrcBillCode())){
 					// 调拨指令单生成过来 修改调拨指令单 状态为 审批完成
 					try{
-						asertStatus("jat_move_cmd_head", "headid", head.getSrcBillId(), "status", DictConstant.BILL_STATUS_CLOSED);
+//						asertStatus("jat_move_cmd_head", "headid", head.getSrcBillId(), "status", DictConstant.BILL_STATUS_CLOSED);
 					} catch(Exception e){
 						throw new RuntimeException("调拨指令单状态必须为已引用");
 					}
@@ -237,18 +222,18 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
         synchronized (this) {
             if(null != headidList && headidList.size()>0){
                 for(String headid : headidList){
-                    asertStatus("jat_move_head", "headid", headid, "status", DictConstant.BILL_STATUS_NO_ESTIMATE);
-                    if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType)){
-                        String result = moveBillDao.generateSaleEstimate(headid, userid);
-                        if(!DictConstant.CALL_PROCEDURE_SUCCESS_FLAG.equals(result)){
-                            throw new RuntimeException("调用加盟系统接口,生成加盟销售结算单失败<br>["+result+"]");
-                        }
-                    }else{
-                        String result = moveBillDao.generateReturnEstimate(headid, billType, userid);
-                        if(!DictConstant.CALL_PROCEDURE_SUCCESS_FLAG.equals(result)){
-                            throw new RuntimeException(result);
-                        }
-                    }
+//                    asertStatus("jat_move_head", "headid", headid, "status", DictConstant.BILL_STATUS_NO_ESTIMATE);
+//                    if(DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(billType)){
+//                        String result = moveBillDao.generateSaleEstimate(headid, userid);
+//                        if(!DictConstant.CALL_PROCEDURE_SUCCESS_FLAG.equals(result)){
+//                            throw new RuntimeException("调用加盟系统接口,生成加盟销售结算单失败<br>["+result+"]");
+//                        }
+//                    }else{
+//                        String result = moveBillDao.generateReturnEstimate(headid, billType, userid);
+//                        if(!DictConstant.CALL_PROCEDURE_SUCCESS_FLAG.equals(result)){
+//                            throw new RuntimeException(result);
+//                        }
+//                    }
 
                 }
             }
@@ -262,8 +247,8 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 	public void cancelMoveBill(List<String> headidList, String userid){
 		if(null != headidList && headidList.size()>0){
 			for(String headid : headidList){
-				asertStatus("jat_move_head", "headid", headid, "status", DictConstant.BILL_STATUS_NO_ESTIMATE);
-				moveBillDao.updateMoveBillStatus(headid, userid, DictConstant.BILL_STATUS_SAVE);
+//				asertStatus("jat_move_head", "headid", headid, "status", DictConstant.BILL_STATUS_NO_ESTIMATE);
+//				moveBillDao.updateMoveBillStatus(headid, userid, DictConstant.BILL_STATUS_SAVE);
 			}
 		}
 	}
@@ -302,21 +287,21 @@ public class MoveBillManagerImpl extends BaseManager implements MoveBillManager 
 		MoveBillHead head = moveBillDao.getMoveBillHead(headid);
 		moveBillDao.receiveMoveBillHead(headid, userid);//头改为关闭状态，设置接收人、接收时间
 		moveBillDao.receiveMoveBillLine(headid, userid);//行改为已接收状态
-		if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(head.getBillType())){
-			String billCode = DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) ? GlobalConstant.BILL_CODE_YIKUDAN_JM
-					: GlobalConstant.BILL_CODE_YIKUDAN;
-			//写事物处理表，出库
-			materTransDao.insertFromMoveBill(billCode, headid, userid, true);
-			//写事物处理表，入库
-			materTransDao.insertFromMoveBill(billCode, headid, userid, false);
-			//改现有量仓库
-			materActiveDao.updateStockFromMoveBill(head.getInStockId(), headid, userid);
-		}else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(head.getBillType())){
-			//改现有量柜组
-			materActiveDao.updateGroupsFromMoveBill(head.getInGroup(), headid, userid);
-		}else{
-			throw new RuntimeException("单据类别错误");
-		}
+//		if(DictConstant.MOVE_BILL_TYPE_YIKUDAN.equals(head.getBillType())){
+//			String billCode = DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) ? GlobalConstant.BILL_CODE_YIKUDAN_JM
+//					: GlobalConstant.BILL_CODE_YIKUDAN;
+//			//写事物处理表，出库
+//			materTransDao.insertFromMoveBill(billCode, headid, userid, true);
+//			//写事物处理表，入库
+//			materTransDao.insertFromMoveBill(billCode, headid, userid, false);
+//			//改现有量仓库
+//			materActiveDao.updateStockFromMoveBill(head.getInStockId(), headid, userid);
+//		}else if(DictConstant.MOVE_BILL_TYPE_GUIZUDIAOBODAN.equals(head.getBillType())){
+//			//改现有量柜组
+//			materActiveDao.updateGroupsFromMoveBill(head.getInGroup(), headid, userid);
+//		}else{
+//			throw new RuntimeException("单据类别错误");
+//		}
 	}
 	/**
 	 * 获取调拨统计数据

@@ -672,7 +672,7 @@ public class BdCommonDwr {
 	}
 	
 	/**
-	 * 根据行政组织获取人员
+	 * 根据获取人员
 	 */
 	public BaseForm getExeOrgEmp(String orgId, String start, String limit){
 		BaseForm form = new BaseForm();

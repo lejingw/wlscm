@@ -49,7 +49,7 @@ public class CargoManagerDwr {
 	/**
 	 * 根据条码获取饰品现有量<br>
 	 * @param barCode 条码
-	 * @param orgId 财务组织id
+	 * @param orgId 组织id
 	 */
 	public Map<String, Object> getMaterByBarCode(String ornaBarCode, HttpServletRequest req) {
 		PackageMaterActive materActive = this.cargoManager.getMaterByOrnaBarCode(ornaBarCode);

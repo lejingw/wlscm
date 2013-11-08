@@ -9,6 +9,22 @@ import com.jatools.web.cache.OrgCache;
 public class MoveBillHead implements ReviewBill {
 	private String headid;
 	private String billno;
+	private String dodate;
+	private String outOrgId;
+	private String inOrgId;
+	private String sumCount;//件数合计
+	private String sumWeight;//重量合计
+	private String memo;
+	private String createDate;
+	private String createId;
+	private String updateDate;
+	private String updateId;
+	private String status;
+	
+	
+	
+	
+	
 	private String srcBillCode;
 	private String srcBillId;
 	private String srcBillNo;
@@ -16,15 +32,10 @@ public class MoveBillHead implements ReviewBill {
 	private String redEstimateId;
 	private String estimateNo;
 	private String redEstimateNo;
-	private String dodate;
-	private String outOrgId;
 	private String outStockId;
-	private String inOrgId;
 	private String inStockId;
 	private String receiveDate;
 	private String receiveEmpId;
-	private String sumCount;//件数合计
-	private String sumWeight;//重量合计
 	private String sumGrains;//粒数合计
 	private String sumCost;//成本合计
 	private String sumMoney;//金额合计
@@ -34,14 +45,8 @@ public class MoveBillHead implements ReviewBill {
 	private String discardCount;
 	private String noreceCount;
 	private String printLable;
-	private String status;
 	private String isCheck;
 	private String isFlag;
-	private String memo;
-	private String createDate;
-	private String createId;
-	private String updateDate;
-	private String updateId;
 	private String checkDate;
 	private String checkId;
 	private String billType;

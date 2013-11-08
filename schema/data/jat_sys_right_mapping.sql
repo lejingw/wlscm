@@ -467,7 +467,7 @@ insert into jat_sys_right_mapping (TOOLBAR_CODE, TOOLBAR_NAME, ITEM_CODE, ITEM_N
 values ('0802090302', '±‡º≠“≥√Ê', '2', '…Û∫À', '0802090302', '1274', '', 1);
 
 insert into jat_sys_right_mapping (TOOLBAR_CODE, TOOLBAR_NAME, ITEM_CODE, ITEM_NAME, MODEL_CODE, FUNC_ID, REVIEW_BILL_CODE, SORT)
-values ('0802090302', '±‡º≠“≥√Ê', '3', '≤∆ŒÒ…Û∫À', '0802090302', '1156', '', 2);
+values ('0802090302', '±‡º≠“≥√Ê', '3', '…Û∫À', '0802090302', '1156', '', 2);
 
 insert into jat_sys_right_mapping (TOOLBAR_CODE, TOOLBAR_NAME, ITEM_CODE, ITEM_NAME, MODEL_CODE, FUNC_ID, REVIEW_BILL_CODE, SORT)
 values ('0802090302', '±‡º≠“≥√Ê', '4', '¥Ú”°', '0802090302', '1275', '', 3);

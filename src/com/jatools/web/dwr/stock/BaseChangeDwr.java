@@ -44,7 +44,7 @@ public class BaseChangeDwr {
 	/**
 	 * 根据条码获取饰品现有量<br>
 	 * @param barCode 条码
-	 * @param orgId 财务组织id
+	 * @param orgId 组织id
 	 */
 	public Map<String, Object> getMaterActiveByBarCode(String barCode, String orgId, String stockId) {
 		PackageMaterActive materActive = this.materActiveManager.getChangeMAByBarCode(barCode, orgId, stockId);

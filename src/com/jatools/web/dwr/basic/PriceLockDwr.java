@@ -32,7 +32,7 @@ public class PriceLockDwr {
 			throw new RuntimeException("不能获取饰品信息");
 		}
 		if(!CommonUtil.getSessionOrgId(session).equals(line.getOrgId())){
-			throw new RuntimeException("饰品所在网点不为当前登录的财务组织");
+			throw new RuntimeException("饰品所在网点不为当前登录的组织");
 		}
 		checkMaterActiveStatus(line);
 		line.setNames();

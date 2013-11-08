@@ -28,7 +28,7 @@
 	<update id="Common.increaseIndex" parameterClass="map">
 		update jat_biz_index a set a.biz_index = a.biz_index + 1 where a.biz_type = #bizType# and a.biz_code = #bizCode# and a.biz_date = #bizDate#
 	</update>
-	<!-- 获取财务对应关系 -->
+	<!-- 获取对应关系 -->
 	<select id="Common.getBillFinance" resultClass="string" parameterClass="string">
 		select a.finance from jat_basic_billno_rule a where a.bill_code = #value#
 	</select>

@@ -26,31 +26,19 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public Pager getMoveBillPageData(Map<String, String> condition, String billType, String jmFlag, String orgId, String userid){
-		condition.put("billType", billType);
-		condition.put("jmFlag", jmFlag);
+	public Pager getMoveBillPageData(Map<String, String> condition, String orgId, String userid){
 		condition.put("orgId", orgId);
 		condition.put("userId", userid);
 		return executeQueryForPager("MoveBill.getMoveBillPageData", "MoveBill.getMoveBillTotalCount", condition);
 	}
 	/**
 	 * 获取现有量表信息
-	 * @param code
+	 * @param ornaCode
 	 * @param ornaFlag
 	 * @return
 	 */
-	public MoveBillLine getMaterActiveInfo(String code, boolean ornaFlag, String billType, String jmFlag, String inOrgId){
-		Map<String, String> condition = new HashMap<String, String>();
-		condition.put("code", code);
-		condition.put("ornaFlag", ornaFlag?"1":"0");
-		condition.put("billType", billType);
-		condition.put("jmFlag", jmFlag);
-		condition.put("inOrgId", inOrgId);
-		MoveBillLine line = (MoveBillLine)executeQueryForObject("MoveBill.getMaterActiveInfo", condition);
-		if(!(""+line.getPosAmount()).equals(""+line.getNewPosCost())){
-			line.setPrintLabel(DictConstant.YES_OR_NO_YES);
-		}
-		return line;
+	public MoveBillLine getMaterActiveInfo(String ornaCode){
+		return (MoveBillLine)executeQueryForObject("MoveBill.getMaterActiveInfo", ornaCode);
 	}
 	/**
 	 * 检查饰品状态是否有效
@@ -60,16 +48,6 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 	public List<String> checkOrnaStatusAvail(List<String> ornaCodeList){
 		String tmp = listToStr(ornaCodeList);
 		return executeQueryForList("MoveBill.checkOrnaStatusAvail", tmp.substring(2));
-	}
-	private String listToStr(List<String> ornaCodeList) {
-		String tmp = "$";
-		for(String str :ornaCodeList){
-			tmp += ",'" + str + "'";
-		}
-		if("$".equals(tmp)){
-			return null;
-		}
-		return tmp;
 	}
 	/**
 	 * 保存调拨单头
@@ -83,6 +61,24 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 		moveHead.setUpdateDate(DateUtil.getCurrentDate18());
 		moveHead.setUpdateId(userid);
 		return (String) executeInsert("MoveBill.saveMoveBillHead", moveHead);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	private String listToStr(List<String> ornaCodeList) {
+		String tmp = "$";
+		for(String str :ornaCodeList){
+			tmp += ",'" + str + "'";
+		}
+		if("$".equals(tmp)){
+			return null;
+		}
+		return tmp;
 	}
 	/**
 	 * 修改调拨单头
@@ -112,12 +108,7 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 			map.put("jmFlag", jmFlag);
 			map.put("userid", userid);
 			map.put("date", DateUtil.getCurrentDate18());
-			//加盟退货单，需要获取 是否免费换货（以当前时间为准），免费换货剩余天数（以当前时间为准）、创建时间
-			if(DictConstant.YES_OR_NO_YES.equals(jmFlag) && DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType)){
-				int freeLeftDays = getFreeReturnLeftDays(ornaCode);
-				map.put("freeReturnFlag", freeLeftDays>=0?DictConstant.YES_OR_NO_YES:DictConstant.YES_OR_NO_NO);
-				map.put("freeLeftDays", ""+freeLeftDays);
-			}
+			
 			parameterList.add(map);
 		}
 		executeBatchInsert("MoveBill.saveMoveBillLine", parameterList);
@@ -204,16 +195,16 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 		if (successFlag) {
 			//加盟调拨单要生成加盟销售结算单，状态改为已生成结算单之后，才可以继续流程
 			//加盟的、调拨类型、调出组织不是加盟店
-			if (DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) && DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(head.getBillType())
-					&& !DictConstant.YES_OR_NO_YES.equals(OrgCache.getInstance().getOrgById(head.getOutOrgId()).getJmFlag())) {
-				status = DictConstant.BILL_STATUS_NO_ESTIMATE;
-			} else {
-				status = DictConstant.BILL_STATUS_REVIEWED;
-			}
+//			if (DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) && DictConstant.MOVE_BILL_TYPE_DIAOBODAN.equals(head.getBillType())
+//					&& !DictConstant.YES_OR_NO_YES.equals(OrgCache.getInstance().getOrgById(head.getOutOrgId()).getJmFlag())) {
+//				status = DictConstant.BILL_STATUS_NO_ESTIMATE;
+//			} else {
+//				status = DictConstant.BILL_STATUS_REVIEWED;
+//			}
 			//当加盟退货单审批通过完成后，把退货单头表的创建时间更新为当前时间
-			if(DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) && DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(head.getBillType())){
-				createDate = DateUtil.getCurrentDate18();
-			}
+//			if(DictConstant.YES_OR_NO_YES.equals(head.getJmFlag()) && DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(head.getBillType())){
+//				createDate = DateUtil.getCurrentDate18();
+//			}
 		} else {
 			status = DictConstant.BILL_STATUS_SAVE;
 		}
@@ -242,7 +233,7 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 	public void receiveMoveBillByPackId(String packHeadId, String jmFlag, String userid){
 		Map<String, String> condition = new HashMap<String, String>();
 		condition.put("packHeadId", packHeadId);
-		condition.put("status", DictConstant.BILL_STATUS_RECEIVING);
+//		condition.put("status", DictConstant.BILL_STATUS_RECEIVING);
 		condition.put("jmFlag", jmFlag);
 		condition.put("userid", userid);
 		condition.put("date", DateUtil.getCurrentDate18());
@@ -268,7 +259,7 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 	public void receiveMoveBillHead(String headid, String userid){
 		Map<String, String> condition = new HashMap<String, String>();
 		condition.put("headid", headid);
-		condition.put("status", DictConstant.BILL_STATUS_CLOSED);
+//		condition.put("status", DictConstant.BILL_STATUS_CLOSED);
 		condition.put("userid", userid);
 		condition.put("date", DateUtil.getCurrentDate18());
 		executeUpdate("MoveBill.receiveMoveBillHead", condition);
@@ -281,7 +272,7 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 	public void receiveMoveBillLine(String headid, String userid){
 		Map<String, String> condition = new HashMap<String, String>();
 		condition.put("headid", headid);
-		condition.put("status", DictConstant.BILL_STATUS_RECEIVED);
+//		condition.put("status", DictConstant.BILL_STATUS_RECEIVED);
 		condition.put("userid", userid);
 		condition.put("date", DateUtil.getCurrentDate18());
 		executeUpdate("MoveBill.receiveMoveBillLine", condition);
@@ -363,7 +354,7 @@ public class MoveBillDaoImpl extends BaseDao implements MoveBillDao, ReviewActio
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("p_sourceid", headid);
 		//来源单据类型1退货单2退残单
-		params.put("p_typeid", DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType)?"1":(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType)?"2":null));
+//		params.put("p_typeid", DictConstant.MOVE_BILL_TYPE_TUIHUODAN.equals(billType)?"1":(DictConstant.MOVE_BILL_TYPE_TUICANDAN.equals(billType)?"2":null));
 		params.put("p_userid", userid);
 		params.put("p_date", DateUtil.getCurrentDate18());
 		params.put("p_result", null);

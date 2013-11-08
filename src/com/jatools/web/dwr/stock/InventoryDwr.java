@@ -78,7 +78,7 @@ public class InventoryDwr {
 	 * 根据条码获取饰品现有量<br>
 	 * 允许不属于本组织的饰品盘点 2012-2-1 10:06
 	 * @param barCode 条码
-	 * @param orgId 财务组织id
+	 * @param orgId 组织id
 	 */
 	public Map<String, Object> getMaterActiveByBarCode(String barCode, String orgId, String stockId) {
 		PackageMaterActive materActive = this.materActiveManager.getMAByBarCode(barCode, null, stockId);

@@ -78,7 +78,7 @@ public class LoginController extends BaseMultiActionController {
 		}
 		loginForm.setSuccessfulFlag(true);
 		
-		CommonUtil.addSessionToken(req.getSession(), user.getUserid(),user.getUsername(), orgid);
+		CommonUtil.addSessionToken(req.getSession(), user.getUserid(), user.getUsername(), orgid);
 		
 		return new ModelAndView(new RedirectView(Global.CONTEXT + "/home.vm"));
 	}

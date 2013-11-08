@@ -4,17 +4,17 @@
 <sqlMap namespace="User">
 	<typeAlias alias="User" type="com.jatools.vo.sys.User" />
 	<resultMap id="userResult" class="User">
-		<result property="userid" column="empid" columnIndex="1" />
-		<result property="usercode" column="empcode" columnIndex="2" />
-		<result property="username" column="empname" columnIndex="3" />
-		<result property="password" column="emppassword" columnIndex="4" />
+		<result property="userid" column="userid" />
+		<result property="usercode" column="usercode" />
+		<result property="username" column="username" />
+		<result property="password" column="password" />
 	</resultMap>
 
 	<select id="User.getUserInfo" resultMap="userResult" parameterClass="java.lang.String">
-		select a.empid, a.empcode, a.empname, a.emppassword from jas_bd_emp a where a.empcode = #value#
+		select a.userid, a.usercode, a.username, a.password from jat_bd_user a where a.usercode = #value#
 	</select>
 
 	<select id="User.getAllUser" resultMap="userResult">
-		select a.empid, a.empcode, a.empname, a.emppassword from jas_bd_emp a
+		select a.userid, a.usercode, a.username, a.password from jat_bd_user a
 	</select>
 </sqlMap>

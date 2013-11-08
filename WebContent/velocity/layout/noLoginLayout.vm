@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<HEAD>
+<META HTTP-EQUIV="content-type" content="text/html; charset=utf-8">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+
+<title>SCM</title>
+
+<link  href="$!StringUtil.getContextPath()/css/zheshang/Login.css" rel="stylesheet" rev="stylesheet" type="text/css" media="all" >
+<script language="javascript" type="text/javascript" src="$!StringUtil.getContextPath()/script/mclon/jquery-1.4.2.js" charset="UTF-8"></script>
+
+</script>
+</HEAD>
+<body>
+	<div class="login-main">
+		$screen_content
+	</div>
+	<!--页脚-->
+	<div class="login-footer">
+    	<ul>copyright@ 2011 www.baidu.cn All Rights Reserved &nbsp;&nbsp;&nbsp; 版权所有@ 2011 XXXX有限公司<br /> 
+    业务经营许可证： 浙xx-xxxxxxxx</ul>
+    </div>
+</BODY>
+</HTML>

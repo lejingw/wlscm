@@ -69,9 +69,9 @@ public class ProcPackageHead implements ReviewBill {
 	 */
 	private String status;	// number	y	0		状态
 	/**
-	 * 财务复核标志
+	 * 复核标志
 	 */
-	private String isCheck;//	number	y	0		财务复核标志
+	private String isCheck;//	number	y	0		复核标志
 	/**
 	 * 核算接口标志
 	 */

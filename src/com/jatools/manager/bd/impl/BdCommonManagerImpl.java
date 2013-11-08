@@ -71,8 +71,8 @@ public class BdCommonManagerImpl implements BdCommonManager {
 	 * 根据组织类型获取组织树
 	 * @return
 	 */
-	public List<Org> getOrgTreeByType(String orgType){
-		return bdCommonDao.getOrgTreeByType(orgType);
+	public List<Org> getOrgTree(){
+		return bdCommonDao.getOrgTree();
 	}
 
 	/**
@@ -369,7 +369,7 @@ public class BdCommonManagerImpl implements BdCommonManager {
 		return this.bdCommonDao.getStyleByCalc(condition);
 	}
 	/**
-	 * 根据行政组织获取人员
+	 * 根据获取人员
 	 */
 	public Pager getExeOrgEmp(String orgId, String start, String limit){
 		return this.bdCommonDao.getExeOrgEmp(orgId, start, limit);

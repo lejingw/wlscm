@@ -1,0 +1,68 @@
+<form id="frm" method="post">
+	<input type="hidden" name="reportType" value="$!form.reportType"/>
+	<input type='hidden' id='user_action' name='user_action'/>
+	<input type='hidden' name='firstFlag' value="1"/>
+    <table class="title">
+    	<tr><td>报表管理【销售查询】#if($!form.message)[<font color='red'>$!form.message</font>]#end</td></tr>
+    </table>
+	<table class='control'>
+		<tr>
+			<td>
+				<input type='button' value='高级查询' class='btn' id='btnSearch1'>
+		       	<input type='button' value='导出Excel' class='btn' id='exportToExcel'  $RightUtil.able($session, '08053101','1')>		
+			    <input type='button' value='打印' class='btn' id='btnPrint' onclick="window.print()" $RightUtil.able($session, '08053101','2')>
+                &nbsp;&nbsp;[<label style="color: red; ">数据截止到昨天</label>]
+			</td>
+		</tr>
+	</table>
+	<div class='scroll2'>
+        <table class='list' style='width:1300px;'>
+        	<thead>
+    			<tr>
+					<th>饰品编码</th>
+					<th>销售组织</th>
+    				<th>大类</th>
+    				<th>小类</th>
+    				<th>销售日期</th>
+					<th>数量</th>
+    				<th>计量单位</th>
+    				<th>入库日期</th>
+    				<th>入库成本单价</th>
+    				<th>入库成本金额</th>
+                </tr>
+            </thead>
+            <tbody id="tbl">
+			#foreach($map in $form.list)
+    			<tr>
+					<td>$!map.ORNA_CODE</td>
+					<td>$!map.ORG_NAME</td>		
+    				<td>$!map.ITEM_CLASS_DSC</td>
+    				<td>$!map.ORNA_CLASS_DSC</td>
+    				<td>$!map.TRANS_DATE</td>
+					<td>$!map.TRANS_QTY</td>
+					<td>$!map.UNITNAME</td>
+					<td>$!map.STORAGEDATE</td>
+					<td>$!map.TOTALCOST</td>
+					<td>$!map.REAL_TOTAL_COST</td>
+    			</tr>
+			#end
+			</tbody>
+        </table>
+    </div>
+<script>
+createPagingToolbar('frm', $!form.start, $!form.limit, $!form.totalCount);
+</script>
+</form>
+<script>
+jQuery(function(){
+	initQuery2("CWXS", 'frm', 'btnSearch1');
+	initExportExcel("exportToExcel", exportListToExcel);
+});
+
+function exportListToExcel(){
+	jQuery("#user_action").val("exportExcel");
+	jQuery("#frm").submit();
+	jQuery("#user_action").val("");
+}
+
+</script>

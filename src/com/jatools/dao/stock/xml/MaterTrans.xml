@@ -44,7 +44,7 @@
 			#transSourceType#, <!--事务类型 -->                                  
 			#transSourceNo#,   <!--事务单号 -->                                  
 			#transBody#,        <!--事务说明 -->                                  
-			#transFinance#,     <!--单据与财务对应关系，从单据对应财务类型从取 -->
+			#transFinance#,     <!--单据与对应关系，从单据对应类型从取 -->
 			#transDate#,        <!--事务日期即单据日期 -->                        
 			#transCost#,        <!--事务成本即饰品成本 -->                        
 			#transMoney#,       <!--事务金额即销价 -->                            

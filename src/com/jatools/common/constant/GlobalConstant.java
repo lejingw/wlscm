@@ -1,9 +1,20 @@
 package com.jatools.common.constant;
 
 public class GlobalConstant {
+	public static final String BILL_CODE_DIAOBODAN									= "TB";//调拨单
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**组织类型**/
-	public static final String ORG_TYPE_FINANCE										= "1";//财务组织
-	public static final String ORG_TYPE_EXECUTE										= "2";//行政组织
+	public static final String ORG_TYPE_FINANCE										= "1";//组织
+	public static final String ORG_TYPE_EXECUTE										= "2";//
 	
 	/**单据编码**/
 	public static final String BILL_CODE_PANDIANDAN									= "PD";//盘点单
@@ -32,7 +43,9 @@ public class GlobalConstant {
 	public static final String BILL_CODE_GUIZUDIAOBODAN_JM							= "ZG";//柜组调拨单(加盟)
 	public static final String BILL_CODE_ZHUANGXIANG_ORNA_JM						= "ZM";//饰品装箱单(加盟)
 	
-	public static final String BILL_CODE_DIAOBODAN									= "TB";//调拨单
+	
+	
+	
 	public static final String BILL_CODE_TUIHUODAN									= "TH";//退货单
 	public static final String BILL_CODE_TUICANDAN									= "TC";//退残单
 	public static final String BILL_CODE_YIKUDAN									= "YK";//移库单

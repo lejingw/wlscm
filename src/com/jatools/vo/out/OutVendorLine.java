@@ -40,7 +40,7 @@ public class OutVendorLine {
 	private String transQty;
 	private String styleName;// 款式名称
 	private String alaysisCode;// 分析范围id
-	private String finaceType;//财务核算类型
+	private String finaceType;//核算类型
 	private String colorId;
 	private String cleanId;
 	private String stockId;
